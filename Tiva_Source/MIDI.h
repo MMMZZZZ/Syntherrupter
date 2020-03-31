@@ -82,12 +82,12 @@ private:
     // 4: Staccato (no long notes possible. They're short. Always.
     // 5: Legator (release = prolonged sustain)
     //                                                             Attack Amp/Dur        Decay Amp/Dur         Sustain Amp/Dur        Release Amp/Dur
-    const float MIDI_ADSR_PROGRAMS[MIDI_ADSR_PROGRAM_COUNT][9] = {{2.0f,    7000.0f,     1.0f,   10000.0f,     0.5f,  3000000.0f,     0.0f,    3000.0f},
-                                                                  {1.0f, 4000000.0f,     1.0f,       1.0f,     1.0f,        1.0f,     0.0f, 2000000.0f},
-                                                                  {0.3f,    8000.0f,     1.0f, 4000000.0f,     1.0f,        1.0f,     0.0f, 2000000.0f},
-                                                                  {1.0f, 1500000.0f,     1.0f,       1.0f,     1.0f,        1.0f,     0.0f,  750000.0f},
-                                                                  {3.0f,    7000.0f,     0.5f,   25000.0f,     0.0f,    10000.0f,     0.0f,   10000.0f},
-                                                                  {2.0f,    7000.0f,     1.0f,   10000.0f,     0.5f,  3000000.0f,     0.0f, 3000000.0f},
+    const float MIDI_ADSR_PROGRAMS[MIDI_ADSR_PROGRAM_COUNT][9] = {{1.0f,    7000.0f,     0.5f,   15000.0f,     0.25f,  3000000.0f,     0.0f,    3000.0f},
+                                                                  {1.0f, 4000000.0f,     1.0f,       1.0f,     1.00f,        1.0f,     0.0f, 2000000.0f},
+                                                                  {0.3f,    8000.0f,     1.0f, 4000000.0f,     1.00f,        1.0f,     0.0f, 2000000.0f},
+                                                                  {1.0f, 1500000.0f,     1.0f,       1.0f,     1.00f,        1.0f,     0.0f,  750000.0f},
+                                                                  {1.0f,   10000.0f,     0.2f,   35000.0f,     0.00f,    10000.0f,     0.0f,   10000.0f},
+                                                                  {1.0f,    7000.0f,     0.5f,   10000.0f,     0.25f,  3000000.0f,     0.0f, 3000000.0f},
     };
     System* midiSys;
     bool midiEnabled = false;
