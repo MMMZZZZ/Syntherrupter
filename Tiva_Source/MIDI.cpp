@@ -427,11 +427,8 @@ void MIDI::updateADSR()
 
     ampDiff = targetAmp - lastAmp;
 
-    if ((midiADSROntimeUS < targetAmp && ampDiff >= 0) || (midiADSROntimeUS > targetAmp && ampDiff <= 0))
-    {
-        midiADSROntimeUS += ampDiff * timeDiffUS / durationUS;
-    }
-    else
+    midiADSROntimeUS += ampDiff * timeDiffUS / durationUS;
+    if ((midiADSROntimeUS >= targetAmp && ampDiff >= 0) || (midiADSROntimeUS <= targetAmp && ampDiff <= 0))
     {
         if (midiADSRMode == 'A')
         {
