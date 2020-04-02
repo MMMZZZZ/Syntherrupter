@@ -44,13 +44,13 @@ private:
     static constexpr uint32_t OUTPUT_TIMER_PORT_BASE           = GPIO_PORTD_BASE;
     static constexpr uint32_t OUTPUT_TIMER_PIN                 = GPIO_PIN_2;
     static constexpr uint32_t OUTPUT_TIMER_PIN_CONFIG          = GPIO_PD2_T1CCP0;
-    //static constexpr uint32_t OUTPUT_TIMER_PRESCALE            = 250;
 
     System* outputSys;
     uint32_t outputLoadValue = 0, outputMatchValue = 0, outputLoadValueNew = 0, outputMatchValueNew = 0;
     uint32_t outputMatchValueMax = 1;
     float outputDutyMaxUS = 0.01f;
-    bool outputActive = false;
+    float outputMinFreq = 100.0f;
+    bool outputActive = true;
 };
 
 #endif /* OUTPUT_H_ */

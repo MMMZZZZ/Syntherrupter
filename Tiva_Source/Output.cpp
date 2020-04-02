@@ -29,11 +29,26 @@ void Output::init(System* sys)
     TimerConfigure(OUTPUT_TIMER_BASE, OUTPUT_TIMER_CONFIG);
     TimerClockSourceSet(OUTPUT_TIMER_BASE, TIMER_CLOCK_PIOSC);
 
+    // Invert output which means enable on match, clear on reload.
+    TimerControlLevel(OUTPUT_TIMER_BASE, TIMER_A, true);
+    TimerUpdateMode(OUTPUT_TIMER_BASE, TIMER_A, TIMER_UP_LOAD_TIMEOUT);
+
+    // Make sure output is low before enabling the GPIO Output
+    TimerPrescaleSet(OUTPUT_TIMER_BASE, TIMER_A, 0);
+    TimerLoadSet(OUTPUT_TIMER_BASE, TIMER_A, 65535);
+    TimerPrescaleMatchSet(OUTPUT_TIMER_BASE, TIMER_A, 0xff);
+    TimerMatchSet(OUTPUT_TIMER_BASE, TIMER_A, 0xff);
+    TimerEnable(OUTPUT_TIMER_BASE, TIMER_A);
+    while (GPIOPinRead(OUTPUT_TIMER_PORT_BASE, OUTPUT_TIMER_PIN));
+    TimerDisable(OUTPUT_TIMER_BASE, TIMER_A);
+    outputLoadValue = 0;
+    outputMatchValue = 0;
+    outputActive = false;
+
     GPIOPinConfigure(OUTPUT_TIMER_PIN_CONFIG);
     GPIOPinTypeTimer(OUTPUT_TIMER_PORT_BASE, OUTPUT_TIMER_PIN);
 
-    TimerControlLevel(OUTPUT_TIMER_BASE, TIMER_A, false);
-    TimerUpdateMode(OUTPUT_TIMER_BASE, TIMER_A, TIMER_UP_LOAD_TIMEOUT | TIMER_UP_MATCH_TIMEOUT);
+    outputMinFreq = float(outputSys->getPIOSCFreq()) / float((1 << 24) - 1);
 }
 
 void Output::setMaxDuty(float maxDuty)
@@ -53,12 +68,12 @@ void Output::setMaxOntimeUS(float maxOntimeUS)
 
 void Output::tone(float freq, float ontimeUS)
 {
-    if (freq < 0.5f || ontimeUS < 1.0f)
+    if (freq < outputMinFreq || ontimeUS < 1.0f)
     {
         if (outputActive)
         {
-            TimerPrescaleMatchSet(OUTPUT_TIMER_BASE, TIMER_A, (((outputLoadValueNew - 1) & 0xff0000) >> 16));
-            TimerMatchSet(OUTPUT_TIMER_BASE, TIMER_A, ((outputLoadValueNew - 1) & 0xffff));
+            TimerPrescaleMatchSet(OUTPUT_TIMER_BASE, TIMER_A, 0);
+            TimerMatchSet(OUTPUT_TIMER_BASE, TIMER_A, 100);
             while (GPIOPinRead(OUTPUT_TIMER_PORT_BASE, OUTPUT_TIMER_PIN));
             TimerDisable(OUTPUT_TIMER_BASE, TIMER_A);
             outputLoadValue = 0;
@@ -79,8 +94,6 @@ void Output::tone(float freq, float ontimeUS)
             outputMatchValueNew = outputMatchValueMax;
         }
 
-        // Down-counters are confusing, I know... Try figuring out whether you should add/remove 1 or not in this step!
-        outputMatchValueNew = outputLoadValueNew - outputMatchValueNew;
         if (outputLoadValue != outputLoadValueNew)
         {
             outputLoadValue = outputLoadValueNew;
