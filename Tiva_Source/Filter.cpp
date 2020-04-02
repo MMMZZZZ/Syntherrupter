@@ -18,47 +18,60 @@ Filter::~Filter()
     // TODO Auto-generated destructor stub
 }
 
-void Filter::init(System* sys, float factor, uint32_t factorTimeUS)
+void Filter::init(System* sys, float factor, float constant)
 {
     filterSys = sys;
     filterValue = 0.0f;
     filterFactor = factor;
-    filterFactorTimeUS = factorTimeUS;
-    filterTimeUS = filterSys->getSystemTimeUS();
+    filterConstant = constant;
+    filterMinTimestep = float(filterSys->getSystemTimeResUS()) / 2000000.0f;
 }
 
 void Filter::setTarget(float target)
 {
     if (filterTarget != target)
     {
-        filterTarget = target;
-        if (filterTarget > filterValue)
+        filterTimeUS = filterSys->getSystemTimeUS();
+        filterTargetReached = false;
+        if (target < 0.0f)
         {
-            filterDirFactor = 1 + filterFactor;
+            filterTarget = 0.0f;
         }
         else
         {
-            filterDirFactor = 1 - filterFactor;
+            filterTarget = target;
         }
-        if (filterValue <= 0.0f)
+        if (filterTarget > filterValue)
         {
-            filterValue = 0.01 * filterTarget;
+            filterDir = 1;
+        }
+        else
+        {
+            filterDir = -1;
         }
     }
 }
 
 float Filter::getFiltered()
 {
-    uint32_t currentTimeUS = filterSys->getSystemTimeUS();
-    if (currentTimeUS - filterTimeUS >= filterFactorTimeUS)
+    if (!filterTargetReached)
     {
-        filterTimeUS = currentTimeUS;
-        if ((filterDirFactor > 1 && filterValue < filterTarget) || (filterDirFactor < 1 && filterValue > filterTarget))
+        uint32_t currentTimeUS = filterSys->getSystemTimeUS();
+        float timestep = float(currentTimeUS - filterTimeUS) / 1000000.0f;
+
+        if (timestep > filterMinTimestep)
         {
-            filterValue *= filterDirFactor;
+            filterTimeUS = currentTimeUS;
+            timestep *= filterDir;
+            filterValue = filterValue * powf(filterFactor, timestep) + filterConstant * timestep;
+            if ((filterDir > 0 && filterValue >= filterTarget) || (filterDir < 0 && filterValue <= filterTarget))
+            {
+                filterValue = filterTarget;
+                filterTargetReached = true;
+            }
         }
-        //filterValue = filterTarget * filterFactor + filterValue * (1.0f - filterFactor);
     }
+
     return filterValue;
 }
 

@@ -29,8 +29,8 @@ void GUI::init(System* sys, void (*midiISR)(void))
     guiNxt.init(guiSys, 3, 57600);
     guiMidi.init(guiSys, 0, 115200, midiISR);
     guiOut.init(guiSys);
-    guiFilteredFrequency.init(guiSys, 0.01f, 10000);
-    guiFilteredOntimeUS.init(guiSys, 0.05f, 10000);
+    guiFilteredFrequency.init(guiSys, 1.8f, 5.0f);
+    guiFilteredOntimeUS.init(guiSys, 2.0f, 30.0f);
 
     while (guiNxt.getVal("comOk") != 1)
     {

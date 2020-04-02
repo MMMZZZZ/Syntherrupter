@@ -64,6 +64,11 @@ void System::setSystemTimeResUS(uint32_t us)
     SysTickPeriodSet((sysClockFreq / 1000000) * sysTickResUS);
 }
 
+uint32_t System::getSystemTimeResUS()
+{
+    return sysTickResUS;
+}
+
 void System::systemTimeIncrement()
 {
     sysTime += sysTickResUS;

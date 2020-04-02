@@ -35,6 +35,7 @@ public:
     uint32_t getSystemTimeUS();
     float getExactSystemTimeUS();
     void setSystemTimeResUS(uint32_t us);
+    uint32_t getSystemTimeResUS();
     void delayUS(uint32_t us);
 private:
     uint32_t sysClockFreq = 0;
