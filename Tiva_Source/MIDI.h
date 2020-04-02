@@ -73,7 +73,7 @@ private:
     static constexpr uint32_t MIDI_ADSR_SUSTAIN_DUR_US = 5;
     static constexpr uint32_t MIDI_ADSR_RELEASE_AMP    = 6;
     static constexpr uint32_t MIDI_ADSR_RELEASE_DUR_US = 7;
-    static constexpr uint32_t MIDI_ADSR_PROGRAM_COUNT  = 6;
+    static constexpr uint32_t MIDI_ADSR_PROGRAM_COUNT  = 7;
     // Note Durations cant be 0. To "skip" D/S/R set Duration to 1.0f (any very small value) and Amplitude to exactly the previous one.
     // 0: Normal ("Piano")
     // 1: Slow Pad (Slooow rise, sloow fall)
@@ -88,6 +88,7 @@ private:
                                                                   {1.0f, 1500000.0f,     1.0f,       1.0f,     1.00f,        1.0f,     0.0f,  750000.0f},
                                                                   {1.0f,   10000.0f,     0.2f,   35000.0f,     0.00f,    10000.0f,     0.0f,   10000.0f},
                                                                   {1.0f,    7000.0f,     0.5f,   10000.0f,     0.25f,  3000000.0f,     0.0f, 3000000.0f},
+                                                                  {0.3f,    8000.0f,     1.0f, 4000000.0f,     1.00f,        1.0f,     0.0f,  400000.0f},
     };
     System* midiSys;
     bool midiEnabled = false;
