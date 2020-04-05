@@ -1,5 +1,5 @@
 # Syntherrupter
-MIDI Interrupter and GUI for Tesla Coils based on the TI Tiva TM4C1294XL microcontroller
+Powerful MIDI Interrupter and GUI for Tesla Coils based on the TI Tiva TM4C1294XL microcontroller
 
 # Documentation
 Source code is not yet documented but there's a complete documentation of all features, how to use it and how to build your own. Its pretty simple and cheap.
