@@ -1,0 +1,12 @@
+Normal Blue:
+	Red:    31
+	Green:  95
+	Blue:  160
+Dark Blue:
+	Red:    31
+	Green:  95
+	Blue:  160
+Gray:
+	Red:   127
+	Green: 127
+	Blue:  127
