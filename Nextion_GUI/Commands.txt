@@ -1,0 +1,25 @@
+List of commands send by the Nextion. Dots indicate variable bytes. Bytes are numerated left to right. Bits are numerated from LSB=0 to MSB=7.
+* General: First byte of all commands indicate command type, length and (context sensitive) content. 
+* m..: Mode command. Tells the microcontroller the context of any other commands. 
+  * mex: Mode EXit command. We left the last mode and are in idle now.
+  * msi: Mode SImple command. We entered simple mode
+    * d......: Data command. In this context:
+	  * Byte 1: bit 0-5 indicate which of the outputs 0-5 is affected by this command
+	  * Byte 2: lower byte of the ontime
+	  * Byte 3: upper byte of the ontime
+	  * Byte 4: lower byte of the BPS/interrupt frequency
+	  * Byte 5: upper byte of the BPS/interrupt frequency
+	  * Byte 6: unused in this context. 
+  * mml: Mode Midi Live command. We entered MIDI Live mode in which the microcontroller shall process MIDI commands.
+    * d......: Data command. In this context:
+	  * Byte 1: bit 0-5 indicate which of the outputs 0-5 is affected by this command
+      * Byte 2: lower byte of the maximum ontime in absolute mode
+      * Byte 3: upper byte of the maximum ontime in absolute mode
+      * Byte 4: lower byte of the maximum duty in relative mode
+      * Byte 5: upper byte of the maximum duty in relative mode
+	  * Byte 6: Note at which absolute mode starts. Notes strictly below are played in relative mode. Value ranges from 0 (all absolute) to 128 (all relative)
+	* c...: Channel command. Indicates which MIDI channels this output listens to. 
+	  * Byte 1: Output which is affected by this command. Ranges from 0 to 5
+      * Byte 2: Bits 0-7 correspond to channels 0-7
+      * Byte 3: Bits 0-7 correspond to channels 8-15
+	  
