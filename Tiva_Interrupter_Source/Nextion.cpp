@@ -18,9 +18,11 @@ Nextion::~Nextion()
     // TODO Auto-generated destructor stub
 }
 
-void Nextion::init(System* sys, uint32_t uartNumber, uint32_t baudRate)
+void Nextion::init(System* sys, uint32_t uartNumber, uint32_t baudRate, uint32_t timeoutUS)
 {
     nxtSys = sys;
+    nxtBaudRate = baudRate;
+    nxtTimeoutUS = timeoutUS;
 
     // Nextion UART stdio setup
     nxtUARTNum = uartNumber;
@@ -82,6 +84,26 @@ void Nextion::flushRx()
     UARTFlushRx();
 }
 
+void Nextion::disableStdio()
+{
+    UARTIntDisable(NXT_UART_MAPPING[nxtUARTNum][NXT_UART_BASE], 0xFFFFFFFF);
+}
+
+void Nextion::enableStdio()
+{
+    UARTIntEnable(NXT_UART_MAPPING[nxtUARTNum][NXT_UART_BASE], UART_INT_RX | UART_INT_RT);
+}
+
+uint32_t Nextion::getUARTBase()
+{
+    return NXT_UART_MAPPING[nxtUARTNum][NXT_UART_BASE];
+}
+
+uint32_t Nextion::getBaudRate()
+{
+    return nxtBaudRate;
+}
+
 uint32_t Nextion::charsAvail()
 {
     return UARTRxBytesAvail();
@@ -90,6 +112,11 @@ uint32_t Nextion::charsAvail()
 char Nextion::getChar()
 {
     return UARTgetc();
+}
+
+uint32_t Nextion::peek(const char c)
+{
+    return UARTPeek(c);
 }
 
 void Nextion::printf(const char *pcString, ...)
@@ -158,7 +185,7 @@ uint32_t Nextion::getVal(const char* comp)
 
     if (data[5] == 0xff && data[6] == 0xff && data[7] == 0xff)
     {
-        return ((uint32_t(data[4]) << 24) + (uint32_t(data[3]) << 16) + (uint32_t(data[2]) << 8) + uint32_t(data[1]));
+        return ((((uint32_t) data[4]) << 24) + (((uint32_t) data[3]) << 16) + (((uint32_t) data[2]) << 8) + (uint32_t) data[1]);
     }
     else
     {

@@ -40,13 +40,7 @@ int main(void)
 
     while (42)
     {
-        if (!gui.update())
-        {
-            gui.showError();
-            sys.error();
-        }
-        gui.applyOutput();
-
+        gui.update();
     }
 }
 

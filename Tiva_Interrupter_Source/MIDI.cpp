@@ -42,159 +42,156 @@ void MIDI::init(System* sys, uint32_t uartNum, uint32_t baudRate, void (*ISR)(vo
     IntPrioritySet(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_INT], 0b00000000);
 }
 
-void MIDI::uartISR()
+void MIDI::processNewDataByte(uint32_t c)
 {
-    // Read and clear the asserted interrupts
-    volatile uint32_t uartIntStatus;
-    uartIntStatus = UARTIntStatus(midiUARTBase, true);
-    UARTIntClear(midiUARTBase, uartIntStatus);
-
     // Minimum MIDI Data Processing
-    while (UARTCharsAvail(midiUARTBase))
+    if (c & 0b10000000) // The first byte of a MIDI Command starts with a 1. Following bytes start with a 0.
     {
-        uint32_t c = UARTCharGet(midiUARTBase);
-        if (c & 0b10000000) // The first byte of a MIDI Command starts with a 1. Following bytes start with a 0.
+        // Lower 4 bits are channel.
+        uint32_t channel = c & 0x0f;
+        // Check if coil is listening to this channel. If yes, process following data.
+        if (midiChannels & (1 << channel))
         {
             midiISRData[0] = c;
             midiISRDataIndex = 1;
         }
-        else if (midiISRDataIndex) // Data byte can't be the first byte of the Command.
+    }
+    else if (midiISRDataIndex) // Data byte can't be the first byte of the Command.
+    {
+        midiISRNewData = true;
+        midiISRData[midiISRDataIndex++] = c;
+    }
+    switch (midiISRData[0] & 0xf0)
+    {
+    case 0x80: // Note off
+        if (midiISRDataIndex >= 3)
         {
-            midiISRNewData = true;
-            midiISRData[midiISRDataIndex++] = c;
+            midiISRDataIndex = 0;
+            if (midiISRData[1] == midiISRNoteNum)
+            {
+                if (!midiISRSustainPedal)
+                {
+                    midiISRNoteNum = 0;
+                }
+                midiISRNoteVel = 0;
+                midiISRNoteAfterTouch = 0;
+            }
         }
-        switch (midiISRData[0] & 0xF0)
+        break;
+    case 0x90: // Note on
+        if (midiISRDataIndex >= 3)
         {
-        case 0x80: // Note off
-            if (midiISRDataIndex >= 3)
+            midiISRDataIndex = 0;
+            if (midiISRData[2])
             {
-                midiISRDataIndex = 0;
-                if (midiISRData[1] == midiISRNoteNum)
-                {
-                    if (!midiISRSustainPedal)
-                    {
-                        midiISRNoteNum = 0;
-                    }
-                    midiISRNoteVel = 0;
-                    midiISRNoteAfterTouch = 0;
-                }
+                midiISRNoteNum = midiISRData[1];
+                midiISRNoteVel = midiISRData[2];
+                midiISRNoteNew = true;
             }
-            break;
-        case 0x90: // Note on
-            if (midiISRDataIndex >= 3)
+            else if (midiISRNoteNum == midiISRData[1])
             {
-                midiISRDataIndex = 0;
-                if (midiISRData[2])
+                if (!midiISRSustainPedal)
                 {
-                    midiISRNoteNum = midiISRData[1];
-                    midiISRNoteVel = midiISRData[2];
-                    midiISRNoteNew = true;
+                    midiISRNoteNum = 0;
                 }
-                else if (midiISRNoteNum == midiISRData[1])
-                {
-                    if (!midiISRSustainPedal)
-                    {
-                        midiISRNoteNum = 0;
-                    }
-                    midiISRNoteVel = 0;
-                    midiISRNoteAfterTouch = 0;
-                }
+                midiISRNoteVel = 0;
+                midiISRNoteAfterTouch = 0;
             }
-            break;
-        case 0xA0: // Polyphonic Aftertouch
-            if (midiISRDataIndex >= 3)
+        }
+        break;
+    case 0xA0: // Polyphonic Aftertouch
+        if (midiISRDataIndex >= 3)
+        {
+            midiISRDataIndex = 0;
+            if (midiISRData[1] == midiISRNoteNum)
             {
-                midiISRDataIndex = 0;
-                if (midiISRData[1] == midiISRNoteNum)
-                {
-                    midiISRNoteAfterTouch = midiISRData[2];
-                }
+                midiISRNoteAfterTouch = midiISRData[2];
             }
-            break;
-        case 0xB0: // Control Change / Channel Mode
-            if (midiISRDataIndex >= 3)
+        }
+        break;
+    case 0xB0: // Control Change / Channel Mode
+        if (midiISRDataIndex >= 3)
+        {
+            midiISRDataIndex = 0;
+            switch (midiISRData[1])
             {
-                midiISRDataIndex = 0;
-                switch (midiISRData[1])
-                {
-                case 0x01: // Modulation Wheel
-                    midiISRModWheel = midiISRData[2];
-                    break;
-                case 0x02: // Breath Controller
+            case 0x01: // Modulation Wheel
+                midiISRModWheel = midiISRData[2];
+                break;
+            case 0x02: // Breath Controller
 
-                    break;
-                case 0x07: // Channel Volume
-                    midiISRChnVol = midiISRData[2];
-                    break;
-                case 0x0A: // Pan
+                break;
+            case 0x07: // Channel Volume
+                midiISRChnVol = midiISRData[2];
+                break;
+            case 0x0A: // Pan
 
-                    break;
-                case 0x40: // Sustain Pedal
-                    if (midiISRData[2] >= 64)
-                    {
-                        midiISRSustainPedal = true;
-                    }
-                    else
-                    {
-                        midiISRSustainPedal = false;
-                    }
-                    break;
-                case 0x43: // Damper Pedal
-                    if (midiISRData[2] >= 64)
-                    {
-                        midiISRDamperPedal = true;
-                    }
-                    else
-                    {
-                        midiISRDamperPedal = false;
-                    }
-                    break;
-                case 0x78: // All Sounds off
-                case 0x7B: // All Notes off
-                    midiISRSustainPedal = false;
-                    midiISRNoteVel = 0;
-                    break;
-                case 0x79: // Reset all Controllers
-                    resetAllValues();
-                    break;
-                default:
-                    break;
-                }
-            }
-            break;
-        case 0xE0: // Pitch Bend
-            if (midiISRDataIndex >= 3)
-            {
-                midiISRDataIndex = 0;
-                midiISRPitchBend = int32_t(((midiISRData[2] << 7) + midiISRData[1])) - 8192;
-            }
-            break;
-        case 0xD0: // Channel Aftertouch
-            if (midiISRDataIndex >= 2)
-            {
-                midiISRDataIndex = 0;
-                midiISRAfterTouch = midiISRData[1];
-            }
-            break;
-        case 0xC0: // Program Change
-            if (midiISRDataIndex >= 2)
-            {
-                midiISRDataIndex = 0;
-                if (midiISRData[1] < MIDI_ADSR_PROGRAM_COUNT)
+                break;
+            case 0x40: // Sustain Pedal
+                if (midiISRData[2] >= 64)
                 {
-                    midiISRProgram = midiISRData[1];
-                    midiISRADSREnabled = true;
+                    midiISRSustainPedal = true;
                 }
                 else
                 {
-                    midiISRADSREnabled = false;
+                    midiISRSustainPedal = false;
                 }
+                break;
+            case 0x43: // Damper Pedal
+                if (midiISRData[2] >= 64)
+                {
+                    midiISRDamperPedal = true;
+                }
+                else
+                {
+                    midiISRDamperPedal = false;
+                }
+                break;
+            case 0x78: // All Sounds off
+            case 0x7B: // All Notes off
+                midiISRSustainPedal = false;
+                midiISRNoteVel = 0;
+                break;
+            case 0x79: // Reset all Controllers
+                resetAllValues();
+                break;
+            default:
+                break;
             }
-            break;
-        default:
-            midiISRDataIndex = 0;
-            break;
         }
+        break;
+    case 0xE0: // Pitch Bend
+        if (midiISRDataIndex >= 3)
+        {
+            midiISRDataIndex = 0;
+            midiISRPitchBend = int32_t(((midiISRData[2] << 7) + midiISRData[1])) - 8192;
+        }
+        break;
+    case 0xD0: // Channel Aftertouch
+        if (midiISRDataIndex >= 2)
+        {
+            midiISRDataIndex = 0;
+            midiISRAfterTouch = midiISRData[1];
+        }
+        break;
+    case 0xC0: // Program Change
+        if (midiISRDataIndex >= 2)
+        {
+            midiISRDataIndex = 0;
+            if (midiISRData[1] < MIDI_ADSR_PROGRAM_COUNT)
+            {
+                midiISRProgram = midiISRData[1];
+                midiISRADSREnabled = true;
+            }
+            else
+            {
+                midiISRADSREnabled = false;
+            }
+        }
+        break;
+    default:
+        midiISRDataIndex = 0;
+        break;
     }
 }
 
@@ -229,14 +226,24 @@ void MIDI::stop()
     midiPlaying = false;
 }
 
-void MIDI::setVolumeMax(float maxVol)
+void MIDI::setOntimeUSMax(float ontimeUSMax)
 {
-    midiMaxVol = maxVol;
+    midiOntimeUSMax = ontimeUSMax;
 }
 
-void MIDI::setVolumeMode(uint32_t volMode)
+void MIDI::setDutyPercMax(float dutyMax)
 {
-    midiVolMode = volMode;
+    midiDutyMax = dutyMax / 100.0f;
+}
+
+void MIDI::setRelAbsNote(uint32_t absNote)
+{
+    midiAbsNote = absNote;
+}
+
+void MIDI::setChannels(uint32_t channels)
+{
+    midiChannels = channels;
 }
 
 bool MIDI::isEnabled()
@@ -301,20 +308,16 @@ void MIDI::updateFrequencyOntime()
         midiFrequency = powf(2.0, (note - 69.0) / 12.0) * 440.0;
 
         float vol = (float(midiNoteVelPedal) / 127.0f);
-        if (midiVolMode == MIDI_VOL_ABSOLUTE)
+
+        // Determine if note is played in absolute (= same maxOntime for all notes) mode
+        // or in relative mode (= same maxDuty for all notes)
+        if (midiNoteNum >= midiAbsNote)
         {
-            // midiMaxVol equals maximum Ontime in us.
-            midiOntimeUS = midiMaxVol * vol;
-        }
-        else if (midiVolMode == MIDI_VOL_RELATIVE)
-        {
-            // midiMaxVol equals maximum duty cycle in %
-            midiOntimeUS = (1000000.0f / midiFrequency) * (float(midiMaxVol) / 100.0f) * vol;
+            midiOntimeUS = midiOntimeUSMax * vol;
         }
         else
         {
-            // Erroneous midiVolMode. For safety set ontime to 0
-            midiOntimeUS = 0.0f;
+            midiOntimeUS = (1000000.0f / midiFrequency) * midiDutyMax * vol;
         }
     }
     else if (midiADSREnabled)

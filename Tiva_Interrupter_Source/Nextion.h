@@ -9,6 +9,10 @@
 #define NEXTION_H_
 
 
+#ifndef UART_BUFFERED
+#define UART_BUFFERED                   // Creates buffer for the Nextion UARTstdio // constant predefined
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdarg.h>
@@ -26,16 +30,12 @@
 #include "System.h"
 
 
-#ifndef UART_BUFFERED
-#define UART_BUFFERED                   // creates buffer for the nextion uart // constant predefined
-#endif
-
 class Nextion
 {
 public:
     Nextion();
     virtual ~Nextion();
-    void init(System* sys, uint32_t portNumber, uint32_t baudRate);
+    void init(System* sys, uint32_t portNumber, uint32_t baudRate, uint32_t timeoutUS = 300000);
     void sendCmd(const char* cmd);
     void setTxt(const char* comp, const char* txt);
     void setVal(const char* comp, uint32_t val);
@@ -44,7 +44,12 @@ public:
     void setTimeoutUS(uint32_t us);
     void flushRx();
     void printf(const char *pcString, ...);
+    void disableStdio();
+    void enableStdio();
+    uint32_t getUARTBase();
+    uint32_t getBaudRate();
     uint32_t charsAvail();
+    uint32_t peek(const char c);
     char getChar();
     uint32_t getVal(const char* comp);
     char* getTxt(const char* comp);
@@ -85,6 +90,7 @@ private:
     System* nxtSys;
     uint32_t nxtTimeoutUS = 300000;
     uint32_t nxtUARTNum = 0;
+    uint32_t nxtBaudRate = 0;
     static constexpr uint32_t nxtReadDataSize = 100;
     char nxtReadData[nxtReadDataSize];
 };

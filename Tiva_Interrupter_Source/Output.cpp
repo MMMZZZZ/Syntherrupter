@@ -18,35 +18,39 @@ Output::~Output()
     // TODO Auto-generated destructor stub
 }
 
-void Output::init(System* sys)
+void Output::init(System* sys, uint32_t timerNum)
 {
     outputSys = sys;
+    outputTimerNum = timerNum;
 
-    SysCtlPeripheralEnable(OUTPUT_TIMER_SYSCTL_PERIPH);
-    SysCtlPeripheralEnable(OUTPUT_TIMER_PORT_SYSCTL_PERIPH);
+    // Timer base stored separately for better readability (used very often).
+    outputTimerBase = OUTPUT_MAPPING[outputTimerNum][OUTPUT_TIMER_BASE];
+
+    SysCtlPeripheralEnable(OUTPUT_MAPPING[outputTimerNum][OUTPUT_TIMER_SYSCTL_PERIPH]);
+    SysCtlPeripheralEnable(OUTPUT_MAPPING[outputTimerNum][OUTPUT_PORT_SYSCTL_PERIPH]);
     SysCtlDelay(2);
 
-    TimerConfigure(OUTPUT_TIMER_BASE, OUTPUT_TIMER_CONFIG);
-    TimerClockSourceSet(OUTPUT_TIMER_BASE, TIMER_CLOCK_PIOSC);
+    TimerConfigure(outputTimerBase, OUTPUT_TIMER_CONFIG);
+    TimerClockSourceSet(outputTimerBase, TIMER_CLOCK_PIOSC);
 
     // Invert output which means enable on match, clear on reload.
-    TimerControlLevel(OUTPUT_TIMER_BASE, TIMER_A, true);
-    TimerUpdateMode(OUTPUT_TIMER_BASE, TIMER_A, TIMER_UP_LOAD_TIMEOUT);
+    TimerControlLevel(outputTimerBase, TIMER_A, true);
+    TimerUpdateMode(outputTimerBase, TIMER_A, TIMER_UP_LOAD_TIMEOUT);
 
     // Make sure output is low before enabling the GPIO Output
-    TimerPrescaleSet(OUTPUT_TIMER_BASE, TIMER_A, 0);
-    TimerLoadSet(OUTPUT_TIMER_BASE, TIMER_A, 65535);
-    TimerPrescaleMatchSet(OUTPUT_TIMER_BASE, TIMER_A, 0xff);
-    TimerMatchSet(OUTPUT_TIMER_BASE, TIMER_A, 0xff);
-    TimerEnable(OUTPUT_TIMER_BASE, TIMER_A);
-    while (GPIOPinRead(OUTPUT_TIMER_PORT_BASE, OUTPUT_TIMER_PIN));
-    TimerDisable(OUTPUT_TIMER_BASE, TIMER_A);
+    TimerPrescaleSet(outputTimerBase, TIMER_A, 0);
+    TimerLoadSet(outputTimerBase, TIMER_A, 65535);
+    TimerPrescaleMatchSet(outputTimerBase, TIMER_A, 0xff);
+    TimerMatchSet(outputTimerBase, TIMER_A, 0xff);
+    TimerEnable(outputTimerBase, TIMER_A);
+    while (GPIOPinRead(OUTPUT_MAPPING[outputTimerNum][OUTPUT_PORT_BASE], OUTPUT_MAPPING[outputTimerNum][OUTPUT_PIN]));
+    TimerDisable(outputTimerBase, TIMER_A);
     outputLoadValue = 0;
     outputMatchValue = 0;
     outputActive = false;
 
-    GPIOPinConfigure(OUTPUT_TIMER_PIN_CONFIG);
-    GPIOPinTypeTimer(OUTPUT_TIMER_PORT_BASE, OUTPUT_TIMER_PIN);
+    GPIOPinConfigure(OUTPUT_MAPPING[outputTimerNum][OUTPUT_PIN_CONFIG]);
+    GPIOPinTypeTimer(OUTPUT_MAPPING[outputTimerNum][OUTPUT_PORT_BASE], OUTPUT_MAPPING[outputTimerNum][OUTPUT_PIN]);
 
     outputMinFreq = float(outputSys->getPIOSCFreq()) / float((1 << 24) - 1);
 }
@@ -72,12 +76,7 @@ void Output::tone(float freq, float ontimeUS)
     {
         if (outputActive)
         {
-            TimerPrescaleMatchSet(OUTPUT_TIMER_BASE, TIMER_A, 0);
-            TimerMatchSet(OUTPUT_TIMER_BASE, TIMER_A, 100);
-            while (GPIOPinRead(OUTPUT_TIMER_PORT_BASE, OUTPUT_TIMER_PIN));
-            TimerDisable(OUTPUT_TIMER_BASE, TIMER_A);
-            outputLoadValue = 0;
-            outputMatchValue = 0;
+            disable();
             outputActive = false;
         }
     }
@@ -93,23 +92,40 @@ void Output::tone(float freq, float ontimeUS)
         {
             outputMatchValueNew = outputMatchValueMax;
         }
-
-        if (outputLoadValue != outputLoadValueNew)
+        if (outputLoadValueNew > outputMatchValueNew && outputMatchValueNew > 0)
         {
-            outputLoadValue = outputLoadValueNew;
-            TimerPrescaleSet(OUTPUT_TIMER_BASE, TIMER_A, ((outputLoadValueNew & 0xff0000) >> 16));
-            TimerLoadSet(OUTPUT_TIMER_BASE, TIMER_A, (outputLoadValueNew & 0xffff));
+            if (outputLoadValue != outputLoadValueNew)
+            {
+                outputLoadValue = outputLoadValueNew;
+                TimerPrescaleSet(outputTimerBase, TIMER_A, ((outputLoadValueNew & 0xff0000) >> 16));
+                TimerLoadSet(outputTimerBase, TIMER_A, (outputLoadValueNew & 0xffff));
+            }
+            if (outputMatchValue != outputMatchValueNew)
+            {
+                outputMatchValue = outputMatchValueNew ;
+                TimerPrescaleMatchSet(outputTimerBase, TIMER_A, ((outputMatchValueNew & 0xff0000) >> 16));
+                TimerMatchSet(outputTimerBase, TIMER_A, (outputMatchValueNew & 0xffff));
+            }
+            if (!outputActive)
+            {
+                outputActive = true;
+                TimerEnable(outputTimerBase, TIMER_A);
+            }
         }
-        if (outputMatchValue != outputMatchValueNew)
+        else
         {
-            outputMatchValue = outputMatchValueNew ;
-            TimerPrescaleMatchSet(OUTPUT_TIMER_BASE, TIMER_A, ((outputMatchValueNew & 0xff0000) >> 16));
-            TimerMatchSet(OUTPUT_TIMER_BASE, TIMER_A, (outputMatchValueNew & 0xffff));
-        }
-        if (!outputActive)
-        {
-            outputActive = true;
-            TimerEnable(OUTPUT_TIMER_BASE, TIMER_A);
+            disable();
+            outputActive = false;
         }
     }
+}
+
+void Output::disable()
+{
+    TimerPrescaleMatchSet(outputTimerBase, TIMER_A, 0);
+    TimerMatchSet(outputTimerBase, TIMER_A, 100);
+    while (GPIOPinRead(OUTPUT_MAPPING[outputTimerNum][OUTPUT_PORT_BASE], OUTPUT_MAPPING[outputTimerNum][OUTPUT_PIN]));
+    TimerDisable(outputTimerBase, TIMER_A);
+    outputLoadValue = 0;
+    outputMatchValue = 0;
 }

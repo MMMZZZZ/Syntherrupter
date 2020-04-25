@@ -35,9 +35,11 @@ public:
     void disable();
     void play();
     void stop();
-    void uartISR();
-    void setVolumeMax(float maxVol);
-    void setVolumeMode(uint32_t volMode);
+    void processNewDataByte(uint32_t c);
+    void setOntimeUSMax(float ontimeUSMax);
+    void setDutyPercMax(float ontimeDutyMax);
+    void setRelAbsNote(uint32_t absNote);
+    void setChannels(uint32_t channels);
     bool isEnabled();
     void updateFrequencyOntime();
     float getOntimeUS();
@@ -111,6 +113,7 @@ private:
     volatile uint32_t midiISRNoteNum        = 0;
     volatile uint32_t midiISRNoteVel        = 0;
     volatile uint32_t midiISRProgram        = 0;
+    volatile uint32_t midiChannels          = 0;
 
     bool midiADSREnabled  = false;
     bool midiADSRNextMode = false;
@@ -120,8 +123,9 @@ private:
     uint32_t midiNoteVelPedal      = 0;
     uint32_t midiADSRMode = 'R';
     volatile bool midiPlaying = false;
-    uint32_t midiVolMode = MIDI_VOL_RELATIVE;
-    float midiMaxVol = 0.0f;
+    uint32_t midiAbsNote = MIDI_VOL_RELATIVE;
+    float midiOntimeUSMax = 0.0f;
+    float midiDutyMax = 0.0f;
     uint32_t midiUARTNum;
     volatile uint32_t midiUARTBase;
     uint32_t midiChnVol = 127;
@@ -133,7 +137,7 @@ private:
     int32_t  midiPitchBend         = 0;
     uint32_t midiProgram           = 0;
     bool midiSustainPedal          = false;
-    float midiFrequency                     = 0.0f;
+    float midiFrequency            = 0.0f;
     float midiOntimeUS             = 0.0f;
     float midiLFOPeriodUS          = 200000.0f;
 };

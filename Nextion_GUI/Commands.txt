@@ -22,4 +22,5 @@ List of commands send by the Nextion. Dots indicate variable bytes. Bytes are nu
 	  * Byte 1: Output which is affected by this command. Ranges from 0 to 5
       * Byte 2: Bits 0-7 correspond to channels 0-7
       * Byte 3: Bits 0-7 correspond to channels 8-15
-	  
+  * mnu: Mode Nextion firmware Update. In this mode the Tiva "connects" the Nextion to the USB serial to allow updating the Nextion firmware via USB. It automatically performs a self reset after the update. 
+  * mus: Mode User Select. User has been selected / changed. Load corresponding settings. 
