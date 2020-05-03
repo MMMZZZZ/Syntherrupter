@@ -25,7 +25,7 @@ public:
     Filter   filteredOntimeUS;
     Filter   filteredFrequency;
 
-    uint32_t maxDutyPerc = 1;
+    uint32_t maxDutyPerm = 1;
     uint32_t maxOntimeUS = 1;
     uint32_t ontimeUS = 0;
     uint32_t periodUS = 0;

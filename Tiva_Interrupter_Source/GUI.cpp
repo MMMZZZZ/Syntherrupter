@@ -38,6 +38,7 @@ void GUI::midiUartISR()
 void GUI::init(System* sys, void (*midiISR)(void))
 {
     guiSys = sys;
+    bool cfgInEEPROM = guiCfg.init(guiSys);
     guiNxt.init(guiSys, 3, 115200, guiNxtTimeoutUS);
     for (uint32_t i = 0; i < guiCoilCount; i++)
     {
@@ -49,15 +50,54 @@ void GUI::init(System* sys, void (*midiISR)(void))
         guiCoils[i].filteredOntimeUS.init(guiSys, 2.0f, 30.0f);
     }
 
+    // Try to modify and read a Nextion value. If this works we know the
+    // Nextion is ready.
     while (guiNxt.getVal("comOk") != 1)
     {
         guiNxt.sendCmd("rest");
-        guiSys->delayUS(1000000);
+        guiSys->delayUS(700000);
         guiNxt.setVal("comOk", 1);
-        guiSys->delayUS(5000);
+        guiSys->delayUS(10000);
     }
-    guiNxt.setVal("comOk", 2);
+
+    /*
+     * If there is a valid configuration in the EEPROM, load it and send it to
+     * the Nextion GUI. Note: While the Nextion class has methods for setting
+     * component values without knowing the Nextion command structure, it is
+     * easier here to create the commands directly.
+     * Data format is equal to the microcontroller command format and
+     * documented in a separate file.
+     */
+    if (cfgInEEPROM)
+    {
+        // Settings of the 3 users
+        const char *AllUsersPage = "All_Users";
+        for (uint32_t i = 0; i < 3; i++)
+        {
+            guiNxt.printf("%s.tU%iName.txt=\"%s\"\xff\xff\xff",
+                          AllUsersPage, i, guiCfg.userNames[i]);
+            guiNxt.printf("%s.tU%iCode.txt=\"%s\"\xff\xff\xff",
+                          AllUsersPage, i, guiCfg.userPwds[i]);
+        }
+        // Settings of all coils
+        const char *AllCoilSettings = "TC_All_Stngs";
+        for (uint32_t i = 0; i < guiCoilCount; i++)
+        {
+            guiCoils[i].maxOntimeUS = (guiCfg.coilSettings[i] & 0x00000fff) * 10;
+            uint32_t maxBPS = ((guiCfg.coilSettings[i] & 0x007ff000) >> 12) * 10;
+            guiCoils[i].maxDutyPerm = (guiCfg.coilSettings[i] & 0xff800000) >> 23;
+            guiNxt.printf("%s.coil%iOn.val=%i\xff\xff\xff",
+                          AllCoilSettings, i + 1, guiCoils[i].maxOntimeUS);
+            guiNxt.printf("%s.coil%iBPS.val=%i\xff\xff\xff",
+                          AllCoilSettings, i + 1, maxBPS);
+            guiNxt.printf("%s.coil%iDuty.val=%i\xff\xff\xff",
+                          AllCoilSettings, i + 1, guiCoils[i].maxDutyPerm);
+        }
+    }
     guiNxt.setVal("TC_All_Stngs.maxCoilCount", guiCoilCount);
+
+    // Initialization completed.
+    guiNxt.setVal("comOk", 2);
 }
 
 void GUI::setError(const char* err)
@@ -126,7 +166,7 @@ bool GUI::update()
                 char modeByte1 = guiNxt.getChar();
                 if (modeByte0 == 'e' && modeByte1 == 'x')
                 {
-                    guiMode = idle;
+                    guiMode = exit;
                 }
                 else if (modeByte0 == 's' && modeByte1 == 'i')
                 {
@@ -144,6 +184,10 @@ bool GUI::update()
                 {
                     guiMode = nxtFWUpdate;
                 }
+                else if (modeByte0 == 's' && modeByte1 == 'e')
+                {
+                    guiMode = settings;
+                }
                 break;
             }
             case 'd':
@@ -155,6 +199,7 @@ bool GUI::update()
                     if (guiNxt.charsAvail())
                     {
                         guiCommandData[i++] = guiNxt.getChar();
+                        time = guiSys->getSystemTimeUS();
                     }
                     if (guiSys->getSystemTimeUS() - time > guiNxtTimeoutUS)
                     {
@@ -174,6 +219,7 @@ bool GUI::update()
                     if (guiNxt.charsAvail())
                     {
                         guiCommandData[i++] = guiNxt.getChar();
+                        time = guiSys->getSystemTimeUS();
                     }
                     if (guiSys->getSystemTimeUS() - time > guiNxtTimeoutUS)
                     {
@@ -183,6 +229,39 @@ bool GUI::update()
                     }
                 }
                 break;
+            }
+            case 'u':
+            {
+                // We need at least 1 additional byte.
+                time = guiSys->getSystemTimeUS();
+                while (!guiNxt.charsAvail())
+                {
+                    if (guiSys->getSystemTimeUS() - time > guiNxtTimeoutUS)
+                    {
+                        setError("Data timeout");
+                        showError();
+                        guiSys->error();
+                    }
+                }
+                guiCommandData[0] = guiNxt.getChar();
+
+                // Now we can determine the amount of data that follows and wait for it.
+                uint32_t cmdLength = (guiCommandData[0] & 0x0f) + 1;
+                uint32_t i = 1;
+                while (i < cmdLength)
+                {
+                    if (guiNxt.charsAvail())
+                    {
+                        guiCommandData[i++] = guiNxt.getChar();
+                        time = guiSys->getSystemTimeUS();
+                    }
+                    if (guiSys->getSystemTimeUS() - time > guiNxtTimeoutUS)
+                    {
+                        setError("Data timeout");
+                        showError();
+                        guiSys->error();
+                    }
+                }
             }
             default:
             {
@@ -200,7 +279,7 @@ bool GUI::update()
             uint32_t maxDuty = guiNxt.getVal("All_Variables.maxDuty") / 10;
             for (uint32_t i = 0; i < guiCoilCount; i++)
             {
-                guiCoils[i].maxDutyPerc = maxDuty;
+                guiCoils[i].maxDutyPerm = maxDuty;
                 guiCoils[i].maxOntimeUS = maxOnUS;
                 guiCoils[i].out.setMaxDutyPerc(maxDuty);
                 guiCoils[i].out.setMaxOntimeUS(maxOnUS);
@@ -244,8 +323,11 @@ bool GUI::update()
             if (guiCommand == 'c')
             {
                 uint32_t coil = guiCommandData[0] - 1;
-                uint32_t channels = (guiCommandData[2] << 8) + guiCommandData[1];
-                guiCoils[coil].midi.setChannels(channels);
+                if (coil < guiCoilCount)
+                {
+                    uint32_t channels = (guiCommandData[2] << 8) + guiCommandData[1];
+                    guiCoils[coil].midi.setChannels(channels);
+                }
                 // Data applied; clear command byte.
                 guiCommand = 0;
             }
@@ -281,10 +363,57 @@ bool GUI::update()
             }
             break;
         }
+        case settings:
+        {
+            if (guiCommand == 'd')
+            {
+                // Coil settings changed.
+                // Data format documented in separate file.
+                uint32_t coil = guiCommandData[0] - 1;
+                if (coil < guiCoilCount)
+                {
+                    guiCfg.coilSettings[coil] =   (guiCommandData[4] << 24)
+                                                + (guiCommandData[3] << 16)
+                                                + (guiCommandData[2] << 8)
+                                                +  guiCommandData[1];
+                    guiCoils[coil].maxDutyPerm = guiCfg.coilSettings[coil] & 0x000007ff;
+                    guiCoils[coil].maxOntimeUS = (guiCfg.coilSettings[coil] & 0xff800000) >> 23;
+                }
+                // Data applied; clear command byte.
+                guiCommand = 0;
+            }
+            else if (guiCommand == 'u')
+            {
+                uint32_t length = (guiCommandData[0] & 0b00001111) + 1;
+                uint32_t user   = (guiCommandData[0] & 0b11000000) >> 6;
+                bool     pwd    =  guiCommandData[0] & 0b00100000;
+                if (pwd)
+                {
+                    // Data contains user password
+                    for (uint32_t i = 0; i < length; i++)
+                    {
+                        guiCfg.userPwds[user][i] = guiCommandData[i + 1];
+                    }
+                    guiCfg.userPwds[user][length] = '\0';
+                }
+                else
+                {
+                    // Data contains user name
+                    for (uint32_t i = 0; i < length; i++)
+                    {
+                        guiCfg.userNames[user][i] = guiCommandData[i + 1];
+                    }
+                    guiCfg.userNames[user][length] = '\0';
+                }
+                // Data applied; clear command byte.
+                guiCommand = 0;
+            }
+            break;
+        }
         case nxtFWUpdate:
         {
             // Stop normal operation and pass data between Nextion UART and USB UART
-            // After upload is done (1 sec timeout) the uC performs a reset.
+            // After upload is done (2 sec timeout) the uC performs a reset.
 
             // Stop Nextion UARTstdio operation
             guiNxt.disableStdio();
@@ -307,7 +436,7 @@ bool GUI::update()
             UARTFIFOEnable(nxtUARTBase);
             UARTFIFOEnable(usbUARTBase);
 
-            bool uploadStart = false;
+            bool uploadStarted = false;
             uint32_t timeUS = guiSys->getExactSystemTimeUS();
             while (42)
             {
@@ -318,22 +447,18 @@ bool GUI::update()
                 }
                 if (UARTCharsAvail(usbUARTBase))
                 {
-                    uploadStart = true;
+                    uploadStarted = true;
                     timeUS = guiSys->getSystemTimeUS();
                     unsigned char c = UARTCharGet(usbUARTBase);
                     UARTCharPutNonBlocking(nxtUARTBase, c);
                 }
-                if (uploadStart)
+                if (uploadStarted && (guiSys->getSystemTimeUS() - timeUS) > 2000000)
                 {
-                    if ((guiSys->getSystemTimeUS() - timeUS) > 1000000)
-                    {
-                        SysCtlReset();
-                    }
+                    SysCtlReset();
                 }
             }
-            break;
         }
-        default: // includes idle
+        case exit:
         {
             // Disable all outputs
             for (uint32_t i = 0; i < guiCoilCount; i++)
@@ -341,6 +466,15 @@ bool GUI::update()
                 guiCoils[i].midi.disable();
                 guiCoils[i].out.tone(0.0f, 0.0f);
             }
+
+            // Update EEPROM
+            guiCfg.update();
+
+            // Now we can enter idle
+            guiMode = idle;
+        }
+        default: // includes idle
+        {
             break;
         }
     }

@@ -9,9 +9,11 @@
 #include <Output.h>
 #include "System.h"
 #include "GUI.h"
+#include "Configuration.h"
 
 
 System sys;
+Configuration config;
 GUI gui;
 
 

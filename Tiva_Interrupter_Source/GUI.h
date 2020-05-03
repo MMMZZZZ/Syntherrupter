@@ -15,13 +15,16 @@
 #include "System.h"
 #include "Nextion.h"
 #include "Coil.h"
+#include "Configuration.h"
 
 // Modes
 enum Mode {
+    exit,
     idle,
     simple,
     midiLive,
     userSelect,
+    settings,
     nxtFWUpdate,
 };
 
@@ -42,11 +45,15 @@ private:
 
     System* guiSys;
     Nextion guiNxt;
+    Configuration guiCfg;
     static constexpr uint32_t guiCoilCount = 3;
     Coil guiCoils[guiCoilCount];
 
     uint32_t guiCommand = 0;
-    uint32_t guiCommandData[6] = {0, 0, 0, 0, 0, 0}; // sized to max length of all commands.
+    uint32_t guiCommandData[33] = {0, 0, 0, 0, 0, 0, 0, 0,
+                                   0, 0, 0, 0, 0, 0, 0, 0,
+                                   0, 0, 0, 0, 0, 0, 0, 0,
+                                   0, 0, 0, 0, 0, 0, 0, 0, 0}; // sized to max length of all commands.
     Mode guiMode = idle;
 
     static constexpr uint32_t guiNxtTimeoutUS = 300000;
