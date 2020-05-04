@@ -31,7 +31,7 @@ public:
     void init(System* sys, uint32_t timerNum);
     void tone(float freq, float ontimeUS);
     void setMaxDuty(float maxDuty);
-    void setMaxDutyPerc(uint32_t maxDutyPerc);
+    void setMaxDutyPerm(uint32_t maxDutyPerm);
     void setMaxOntimeUS(float maxOntimeUS);
 private:
     void disable();

@@ -49,6 +49,9 @@ private:
     static constexpr uint32_t guiCoilCount = 3;
     Coil guiCoils[guiCoilCount];
 
+    uint32_t guiUserMaxOntimeUS = 0;
+    uint32_t guiUserMaxBPS = 0;
+    uint32_t guiUserMaxDutyPerm = 0;
     uint32_t guiCommand = 0;
     uint32_t guiCommandData[33] = {0, 0, 0, 0, 0, 0, 0, 0,
                                    0, 0, 0, 0, 0, 0, 0, 0,

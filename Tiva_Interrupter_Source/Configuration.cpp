@@ -58,19 +58,64 @@ bool Configuration::init(System *sys)
     return foundValidConfig;
 }
 
-void Configuration::read()
+uint32_t Configuration::getUsersMaxDutyPerm(uint32_t user)
 {
-    rwuAll(CFG_READ_EEPROM);
+    uint32_t duty = 0;
+    if (user < 3)
+    {
+        duty = (userSettings[user] & 0xff800000) >> 23;
+    }
+    return duty;
 }
 
-void Configuration::write()
+uint32_t Configuration::getUsersMaxBPS(uint32_t user)
 {
-    rwuAll(CFG_WRITE_EEPROM);
+    uint32_t bps = 0;
+    if (user < 3)
+    {
+        bps = ((userSettings[user] & 0x007ff000) >> 12) * 10;
+    }
+    return bps;
 }
 
-void Configuration::update()
+uint32_t Configuration::getUsersMaxOntimeUS(uint32_t user)
 {
-    rwuAll(CFG_WRITE_EEPROM);
+    uint32_t ontimeUS = 0;
+    if (user < 3)
+    {
+        ontimeUS = (userSettings[user] & 0x00000fff) * 10;
+    }
+    return ontimeUS;
+}
+
+uint32_t Configuration::getCoilsMaxDutyPerm(uint32_t coil)
+{
+    uint32_t duty = 0;
+    if (coil < 6)
+    {
+        duty = (coilSettings[coil] & 0xff800000) >> 23;
+    }
+    return duty;
+}
+
+uint32_t Configuration::getCoilsMaxBPS(uint32_t coil)
+{
+    uint32_t bps = 0;
+    if (coil < 6)
+    {
+        bps = ((coilSettings[coil] & 0x007ff000) >> 12) * 10;
+    }
+    return bps;
+}
+
+uint32_t Configuration::getCoilsMaxOntimeUS(uint32_t coil)
+{
+    uint32_t ontimeUS = 0;
+    if (coil < 6)
+    {
+        ontimeUS = (coilSettings[coil] & 0x00000fff) * 10;
+    }
+    return ontimeUS;
 }
 
 bool Configuration::updateBank()
@@ -125,6 +170,22 @@ bool Configuration::updateBank()
     return false;
 }
 
+void Configuration::read()
+{
+    rwuAll(CFG_READ_EEPROM);
+}
+
+void Configuration::write()
+{
+    rwuAll(CFG_WRITE_EEPROM);
+}
+
+void Configuration::update()
+{
+    // TODO Needs more testing!
+    rwuAll(CFG_UPDATE_EEPROM);
+}
+
 void Configuration::rwuAll(uint32_t mode)
 {
 
@@ -143,7 +204,9 @@ void Configuration::rwuAll(uint32_t mode)
     bool EEPROMModified = false;
     EEPROMModified |= rwuSingle(mode, userNames, sizeof(userNames));
     EEPROMModified |= rwuSingle(mode, userPwds,  sizeof(userPwds));
+    EEPROMModified |= rwuSingle(mode, userSettings, sizeof(userSettings));
     EEPROMModified |= rwuSingle(mode, coilSettings, sizeof(coilSettings));
+    EEPROMModified |= rwuSingle(mode, otherSettings, sizeof(coilSettings));
 
     if (EEPROMModified)
     {
@@ -214,9 +277,8 @@ bool Configuration::writeChangedSequence(void *newData, uint32_t byteSize)
      *  block will be rewritten anyways.
      */
     bool dataChanged = false;
-    uint32_t oldData[byteSize];
-    EEPROMRead(oldData, cfgByteAddress, byteSize);
-    for (uint32_t i = 0; i < byteSize; i++)
+    EEPROMRead(tempArray, cfgByteAddress, byteSize);
+    for (uint32_t i = 0; i < (byteSize / 4); i++)
     {
         if (((uint32_t *)newData)[i] != oldData[i])
         {

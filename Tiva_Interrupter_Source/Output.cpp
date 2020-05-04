@@ -60,9 +60,9 @@ void Output::setMaxDuty(float maxDuty)
     outputDutyMaxUS = maxDuty * 1000000.0f;
 }
 
-void Output::setMaxDutyPerc(uint32_t maxDutyPerc)
+void Output::setMaxDutyPerm(uint32_t maxDutyPerm)
 {
-    outputDutyMaxUS = float(maxDutyPerc) * 1000000.0f / 100.0f;
+    outputDutyMaxUS = float(maxDutyPerm) * 1000000.0f / 1000.0f;
 }
 
 void Output::setMaxOntimeUS(float maxOntimeUS)

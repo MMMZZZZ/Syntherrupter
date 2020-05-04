@@ -70,31 +70,83 @@ void GUI::init(System* sys, void (*midiISR)(void))
      */
     if (cfgInEEPROM)
     {
-        // Settings of the 3 users
-        const char *AllUsersPage = "All_Users";
-        for (uint32_t i = 0; i < 3; i++)
-        {
-            guiNxt.printf("%s.tU%iName.txt=\"%s\"\xff\xff\xff",
-                          AllUsersPage, i, guiCfg.userNames[i]);
-            guiNxt.printf("%s.tU%iCode.txt=\"%s\"\xff\xff\xff",
-                          AllUsersPage, i, guiCfg.userPwds[i]);
-        }
+        // User 2 Settings defaults to the max coil settings.
+        uint32_t allCoilsMaxOntimeUS = 0;
+        uint32_t allCoilsMaxBPS      = 0;
+        uint32_t allCoilsMaxDutyPerm = 0;
+
         // Settings of all coils
-        const char *AllCoilSettings = "TC_All_Stngs";
+        const char *AllCoilSettings = "TC_Settings";
         for (uint32_t i = 0; i < guiCoilCount; i++)
         {
-            guiCoils[i].maxOntimeUS = (guiCfg.coilSettings[i] & 0x00000fff) * 10;
-            uint32_t maxBPS = ((guiCfg.coilSettings[i] & 0x007ff000) >> 12) * 10;
-            guiCoils[i].maxDutyPerm = (guiCfg.coilSettings[i] & 0xff800000) >> 23;
+            // Load settings
+            uint32_t maxOntimeUS = guiCfg.getCoilsMaxOntimeUS(i);
+            uint32_t maxBPS      = guiCfg.getCoilsMaxBPS(i);
+            uint32_t maxDutyPerm = guiCfg.getCoilsMaxDutyPerm(i);
+
+            if (maxOntimeUS > allCoilsMaxOntimeUS)
+            {
+                allCoilsMaxOntimeUS = maxOntimeUS;
+            }
+            if (maxBPS > allCoilsMaxBPS)
+            {
+                allCoilsMaxBPS = maxBPS;
+            }
+            if (maxDutyPerm > allCoilsMaxDutyPerm)
+            {
+                allCoilsMaxDutyPerm = maxDutyPerm;
+            }
+
+            // Apply to coil objects
+            guiCoils[i].out.setMaxDutyPerm(maxDutyPerm);
+            guiCoils[i].out.setMaxOntimeUS(maxOntimeUS);
+
+            // Send to Nextion
             guiNxt.printf("%s.coil%iOn.val=%i\xff\xff\xff",
-                          AllCoilSettings, i + 1, guiCoils[i].maxOntimeUS);
+                          AllCoilSettings, i + 1, maxOntimeUS);
             guiNxt.printf("%s.coil%iBPS.val=%i\xff\xff\xff",
                           AllCoilSettings, i + 1, maxBPS);
             guiNxt.printf("%s.coil%iDuty.val=%i\xff\xff\xff",
-                          AllCoilSettings, i + 1, guiCoils[i].maxDutyPerm);
+                          AllCoilSettings, i + 1, maxDutyPerm);
         }
+
+        // Settings of the 3 users
+        const char *AllUsersPage = "User_Settings";
+        for (uint32_t i = 0; i < 3; i++)
+        {
+            uint32_t maxOntimeUS = guiCfg.getUsersMaxOntimeUS(i);
+            uint32_t maxBPS      = guiCfg.getUsersMaxBPS(i);
+            uint32_t maxDutyPerm = guiCfg.getUsersMaxDutyPerm(i);
+
+            if (i == 2)
+            {
+                maxOntimeUS = allCoilsMaxOntimeUS;
+                maxBPS      = allCoilsMaxBPS;
+                maxDutyPerm = allCoilsMaxDutyPerm;
+            }
+
+            guiNxt.printf("%s.u%iName.txt=\"%s\"\xff\xff\xff",
+                          AllUsersPage, i, guiCfg.userNames[i]);
+            guiNxt.printf("%s.u%iCode.txt=\"%s\"\xff\xff\xff",
+                          AllUsersPage, i, guiCfg.userPwds[i]);
+            guiNxt.printf("%s.u%iOntime.val=%i\xff\xff\xff",
+                          AllUsersPage, i, maxOntimeUS);
+            guiNxt.printf("%s.u%iBPS.val=%i\xff\xff\xff",
+                          AllUsersPage, i, maxBPS);
+            guiNxt.printf("%s.u%iDuty.val=%i\xff\xff\xff",
+                          AllUsersPage, i, maxDutyPerm);
+        }
+
+        // Other Settings
+        uint32_t buttonHoldTime = guiCfg.otherSettings[0] & 0xffff;
+        uint32_t sleepDelay     = (guiCfg.otherSettings[0] & 0xffff0000) >> 16;
+        uint32_t dispBrightness = guiCfg.otherSettings[1] & 0xff;
+        guiNxt.printf("Other_Settings.nHoldTime.val=%i\xff\xff\xff",
+                      buttonHoldTime);
+        guiNxt.printf("thsp=%i\xff\xff\xff", sleepDelay);
+        guiNxt.printf("dim=%i\xff\xff\xff", dispBrightness);
     }
-    guiNxt.setVal("TC_All_Stngs.maxCoilCount", guiCoilCount);
+    guiNxt.setVal("TC_Settings.maxCoilCount", guiCoilCount);
 
     // Initialization completed.
     guiNxt.setVal("comOk", 2);
@@ -122,7 +174,6 @@ void GUI::showError()
     guiNxt.setPage("Error");
     guiNxt.setTxt("tInfo", guiErrorTxt);
 }
-
 
 bool GUI::checkValue(uint32_t val)
 {
@@ -194,7 +245,7 @@ bool GUI::update()
             {
                 time = guiSys->getSystemTimeUS();
                 uint32_t i = 0;
-                while (i < 5)
+                while (i < 6)
                 {
                     if (guiNxt.charsAvail())
                     {
@@ -246,9 +297,9 @@ bool GUI::update()
                 guiCommandData[0] = guiNxt.getChar();
 
                 // Now we can determine the amount of data that follows and wait for it.
-                uint32_t cmdLength = (guiCommandData[0] & 0x0f) + 1;
+                uint32_t cmdLength = (guiCommandData[0] & 0b00011111) + 1;
                 uint32_t i = 1;
-                while (i < cmdLength)
+                while (i <= cmdLength)
                 {
                     if (guiNxt.charsAvail())
                     {
@@ -262,6 +313,7 @@ bool GUI::update()
                         guiSys->error();
                     }
                 }
+                break;
             }
             default:
             {
@@ -275,14 +327,17 @@ bool GUI::update()
     {
         case userSelect:
         {
-            uint32_t maxOnUS = guiNxt.getVal("All_Variables.maxOntime");
-            uint32_t maxDuty = guiNxt.getVal("All_Variables.maxDuty") / 10;
-            for (uint32_t i = 0; i < guiCoilCount; i++)
+            if (guiCommand == 'd')
             {
-                guiCoils[i].maxDutyPerm = maxDuty;
-                guiCoils[i].maxOntimeUS = maxOnUS;
-                guiCoils[i].out.setMaxDutyPerc(maxDuty);
-                guiCoils[i].out.setMaxOntimeUS(maxOnUS);
+                uint32_t user = guiCommandData[0];
+                if (user < 2)
+                {
+                    guiUserMaxOntimeUS = guiCfg.getUsersMaxOntimeUS(user);
+                    guiUserMaxBPS      = guiCfg.getUsersMaxBPS(user);
+                    guiUserMaxDutyPerm = guiCfg.getUsersMaxDutyPerm(user);
+                }
+                // Data applied; clear command byte.
+                guiCommand = 0;
             }
             guiMode = idle;
         }
@@ -367,24 +422,40 @@ bool GUI::update()
         {
             if (guiCommand == 'd')
             {
-                // Coil settings changed.
+                // Coil, user or other settings changed.
                 // Data format documented in separate file.
-                uint32_t coil = guiCommandData[0] - 1;
-                if (coil < guiCoilCount)
+                uint32_t settings = (guiCommandData[0] & (0b11 << 6)) >> 6;
+                uint32_t number =    guiCommandData[0] & 0b11111;
+                uint32_t data   =   (guiCommandData[4] << 24)
+                                  + (guiCommandData[3] << 16)
+                                  + (guiCommandData[2] << 8)
+                                  +  guiCommandData[1];
+                if (settings == 1 && (number - 1) < guiCoilCount)
                 {
-                    guiCfg.coilSettings[coil] =   (guiCommandData[4] << 24)
-                                                + (guiCommandData[3] << 16)
-                                                + (guiCommandData[2] << 8)
-                                                +  guiCommandData[1];
-                    guiCoils[coil].maxDutyPerm = guiCfg.coilSettings[coil] & 0x000007ff;
-                    guiCoils[coil].maxOntimeUS = (guiCfg.coilSettings[coil] & 0xff800000) >> 23;
+                    // Coil limits. Number ranges from 1-6 instead of 0-5.
+                    number--;
+                    guiCfg.coilSettings[number] = data;
+                    guiCoils[number].out.setMaxDutyPerm(guiCfg.getCoilsMaxDutyPerm(number));
+                    guiCoils[number].out.setMaxOntimeUS(guiCfg.getCoilsMaxOntimeUS(number));
+                }
+                else if (settings == 0 && number < 3)
+                {
+                    // User limits.
+                    guiCfg.userSettings[number] = data;
+                    guiUserMaxOntimeUS = guiCfg.getUsersMaxOntimeUS(number);
+                    guiUserMaxBPS      = guiCfg.getUsersMaxBPS(number);
+                    guiUserMaxDutyPerm = guiCfg.getUsersMaxDutyPerm(number);
+                }
+                else if (settings == 2 && number < 10)
+                {
+                    guiCfg.otherSettings[number] = data;
                 }
                 // Data applied; clear command byte.
                 guiCommand = 0;
             }
             else if (guiCommand == 'u')
             {
-                uint32_t length = (guiCommandData[0] & 0b00001111) + 1;
+                uint32_t length = (guiCommandData[0] & 0b00011111) + 1;
                 uint32_t user   = (guiCommandData[0] & 0b11000000) >> 6;
                 bool     pwd    =  guiCommandData[0] & 0b00100000;
                 if (pwd)
@@ -413,7 +484,7 @@ bool GUI::update()
         case nxtFWUpdate:
         {
             // Stop normal operation and pass data between Nextion UART and USB UART
-            // After upload is done (2 sec timeout) the uC performs a reset.
+            // After upload is done (1 sec timeout) the uC performs a reset.
 
             // Stop Nextion UARTstdio operation
             guiNxt.disableStdio();
@@ -452,7 +523,7 @@ bool GUI::update()
                     unsigned char c = UARTCharGet(usbUARTBase);
                     UARTCharPutNonBlocking(nxtUARTBase, c);
                 }
-                if (uploadStarted && (guiSys->getSystemTimeUS() - timeUS) > 2000000)
+                if (uploadStarted && (guiSys->getSystemTimeUS() - timeUS) > 1000000)
                 {
                     SysCtlReset();
                 }
@@ -464,6 +535,8 @@ bool GUI::update()
             for (uint32_t i = 0; i < guiCoilCount; i++)
             {
                 guiCoils[i].midi.disable();
+                guiCoils[i].filteredFrequency.setTarget(0.0f);
+                guiCoils[i].filteredOntimeUS.setTarget(0.0f);
                 guiCoils[i].out.tone(0.0f, 0.0f);
             }
 
