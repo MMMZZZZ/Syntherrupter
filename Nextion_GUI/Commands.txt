@@ -1,0 +1,58 @@
+List of commands send by the Nextion. Dots indicate variable bytes. Bytes are numerated left to right. Bits (in a byte) are numerated from LSB=0 to MSB=7.
+* General: First byte of all commands indicate command type, length and (context sensitive) content. 
+* m..: Mode command. Tells the microcontroller the context of any other commands. There are no context sensitive variants of this command. 
+	* mex: Mode EXit command. We left the last mode and are in idle now. It causes the microcontroller to update the configuration stored in its EEPROM. 
+	* msi: Mode SImple command. We entered simple mode
+		* d......: Data command. In this context:
+			* Byte 1: bit 0-5 indicate which of the outputs 0-5 is affected by this command
+			* Byte 2: lower byte of the ontime [us]
+			* Byte 3: upper byte of the ontime [us]
+			* Byte 4: lower byte of the BPS/interrupt frequency [Hz]
+			* Byte 5: upper byte of the BPS/interrupt frequency [Hz]
+			* Byte 6: unused in this context. 
+	* mml: Mode Midi Live command. We entered MIDI Live mode in which the microcontroller shall process MIDI commands.
+		* d......: Data command. In this context:
+			* Byte 1: 
+				* Bit 0-5: Output which is affected by this command. Value ranges from 1-6 corresponding to the outputs 0-5.
+				* Bit 6-7: volume mode. 1 = absolute mode (constant ontime), 2 = relative mode (constant duty), 3 = auto mode (low notes = relative, high notes = absolute. Crossover where ontime is equal for both modes).
+			* Byte 2: lower byte of the maximum ontime [us] in absolute mode
+			* Byte 3: upper byte of the maximum ontime [us] in absolute mode
+			* Byte 4: lower byte of the maximum duty [1/1000] in relative mode
+			* Byte 5: upper byte of the maximum duty [1/1000] in relative mode
+			* Byte 6: unused in this context. 
+		* c...: Channel command. Indicates which MIDI channels this output listens to. 
+			* Byte 1: bit 0-5 indicate which of the outputs 0-5 is affected by this command.
+			* Byte 2: Bits 0-7 correspond to channels 0-7
+			* Byte 3: Bits 0-7 correspond to channels 8-15
+	* mnu: Mode Nextion firmware Update. In this mode the Tiva "connects" the Nextion to the USB serial to allow updating the Nextion firmware via USB. It automatically performs a self reset after the update. 
+	* mus: Mode User Select command. User has been selected / changed. Load corresponding settings. 
+	* mse: Mode SEttings command. 
+		* d......: Data command. In this context:
+			* Byte 1:
+				* bit 6-7: indicates the settings type.
+					0 = User limits
+					1 = Coil limits
+					2 = Other settings
+				* bit 0-5: 
+					* Settings type 0: A value from 1 to 6 indicates which one of the outputs 0-5 is affected by this command. 
+					* Settings type 1: A value from 0 to 2 indicates which user is affected by this command.
+					* Settings type 2: A value from 0 to 9 indicates page number, and thus the meanung of the following bytes.
+			* User and Coil limits
+				* Byte 2-5: form a 32bit bitfield containing the absolute maximum ratings that must not be exceeded for this coil. The microcontroller assures to operate within these limits no matter what values are requested by other commands. Note: in MIDI operation the displayed values can be exceeded for numerous reasons. F.ex. ADSR can be adjusted to exceed a given value for a short time. Therefore the user limits are more "average limits". The limits in this command however cannot be exceeded. Not even for a single pulse. 
+					* Bit  0-11: Maximum allowed ontime [10us]
+					* Bit 12-22: Maximum allowed BPS/interrupt frequency [10Hz] 
+					* Bit 23-31: Maximum allowed duty [1/1000]
+			* Other settings, page 0
+				* Byte 2: Button hold time LSB
+				* Byte 3: Button hold time MSB
+				* Byte 4: Delay until sleep in seconds LSB
+				* Byte 5: Delay until sleep in seconds MSB
+			* Other settings, page 1
+				* Byte 2: Display brightness
+			* Byte 6: can't be used in this context.
+		* u..: User Command. Length is variable from 1 to 32 and indicated in byte 1 by the bits 0-4. The other bits are context sensitive. In this context:	
+			* Byte 1: 
+				* Bit 6-7: User. Can be 0, 1 or 2. 
+				* Bit   5: Indicates content of the following bytes. 0 = Name, 1 = Password
+				* Bit 0-4: Number of following bytes minus one. This means Name or password are at least 1 character and at most 32 characters. 
+			* Byte 2-x: Characters of the username/password without null termination character.
