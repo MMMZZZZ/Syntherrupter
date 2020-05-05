@@ -46,7 +46,7 @@ private:
     System* guiSys;
     Nextion guiNxt;
     Configuration guiCfg;
-    static constexpr uint32_t guiCoilCount = 3;
+    static constexpr uint32_t guiCoilCount = 1;
     Coil guiCoils[guiCoilCount];
 
     uint32_t guiUserMaxOntimeUS = 0;

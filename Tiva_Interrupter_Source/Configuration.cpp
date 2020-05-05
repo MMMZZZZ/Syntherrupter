@@ -277,10 +277,10 @@ bool Configuration::writeChangedSequence(void *newData, uint32_t byteSize)
      *  block will be rewritten anyways.
      */
     bool dataChanged = false;
-    EEPROMRead(tempArray, cfgByteAddress, byteSize);
+    readSequence(tempArray, byteSize);
     for (uint32_t i = 0; i < (byteSize / 4); i++)
     {
-        if (((uint32_t *)newData)[i] != oldData[i])
+        if (((uint32_t *)newData)[i] != tempArray[i])
         {
             dataChanged = true;
             break;
@@ -288,6 +288,7 @@ bool Configuration::writeChangedSequence(void *newData, uint32_t byteSize)
     }
     if (dataChanged)
     {
+        cfgByteAddress -= byteSize;
         writeSequence(newData, byteSize);
     }
     return dataChanged;

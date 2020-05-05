@@ -60,6 +60,8 @@ void GUI::init(System* sys, void (*midiISR)(void))
         guiSys->delayUS(10000);
     }
 
+    //guiMode = nxtFWUpdate;
+
     /*
      * If there is a valid configuration in the EEPROM, load it and send it to
      * the Nextion GUI. Note: While the Nextion class has methods for setting
@@ -108,6 +110,8 @@ void GUI::init(System* sys, void (*midiISR)(void))
                           AllCoilSettings, i + 1, maxBPS);
             guiNxt.printf("%s.coil%iDuty.val=%i\xff\xff\xff",
                           AllCoilSettings, i + 1, maxDutyPerm);
+            // Give time to the UART to send the data
+            guiSys->delayUS(10000);
         }
 
         // Settings of the 3 users
@@ -135,6 +139,8 @@ void GUI::init(System* sys, void (*midiISR)(void))
                           AllUsersPage, i, maxBPS);
             guiNxt.printf("%s.u%iDuty.val=%i\xff\xff\xff",
                           AllUsersPage, i, maxDutyPerm);
+            // Give time to the UART to send the data
+            guiSys->delayUS(10000);
         }
 
         // Other Settings
@@ -149,7 +155,7 @@ void GUI::init(System* sys, void (*midiISR)(void))
     guiNxt.setVal("TC_Settings.maxCoilCount", guiCoilCount);
 
     // Initialization completed.
-    guiNxt.setVal("comOk", 2);
+    guiNxt.sendCmd("vis pStartup,1");
 }
 
 void GUI::setError(const char* err)
@@ -396,9 +402,10 @@ bool GUI::update()
                     {
                         uint32_t ontimeUS  = (guiCommandData[2] << 8) + guiCommandData[1];
                         uint32_t duty = (guiCommandData[4] << 8) + guiCommandData[3];
+                        uint32_t volMode = (guiCommandData[0] & (0b11 << 6)) >> 6;
                         guiCoils[i].midi.setOntimeUSMax(ontimeUS);
-                        guiCoils[i].midi.setDutyPercMax(duty);
-                        guiCoils[i].midi.setRelAbsNote(guiCommandData[5]);
+                        guiCoils[i].midi.setDutyPermMax(duty);
+                        guiCoils[i].midi.setVolMode(volMode);
                     }
                 }
                 // Data applied; clear command byte.
@@ -535,7 +542,6 @@ bool GUI::update()
             for (uint32_t i = 0; i < guiCoilCount; i++)
             {
                 guiCoils[i].midi.disable();
-                guiCoils[i].filteredFrequency.setTarget(0.0f);
                 guiCoils[i].filteredOntimeUS.setTarget(0.0f);
                 guiCoils[i].out.tone(0.0f, 0.0f);
             }

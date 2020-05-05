@@ -231,14 +231,28 @@ void MIDI::setOntimeUSMax(float ontimeUSMax)
     midiOntimeUSMax = ontimeUSMax;
 }
 
-void MIDI::setDutyPercMax(float dutyMax)
+void MIDI::setDutyPermMax(float dutyMax)
 {
-    midiDutyMax = dutyMax / 100.0f;
+    midiDutyMax = dutyMax / 1000.0f;
 }
 
-void MIDI::setRelAbsNote(uint32_t absNote)
+void MIDI::setVolMode(uint32_t volMode)
 {
-    midiAbsNote = absNote;
+    if (volMode == 1)
+    {
+        // Absolute Mode. Change to abs. mode at the very lowest note already.
+        midiAbsFreq = 0;
+    }
+    else if (volMode == 2)
+    {
+        // Relative Mode. Never change to abs. mode (= set crossover higher than highest note).
+        midiAbsFreq = 40000.0f;
+    }
+    else if (volMode == 3)
+    {
+        // Auto Mode. Determine crossover note at which abs. and rel. mode would have equal frequency.
+        midiAbsFreq = midiDutyMax / midiOntimeUSMax * 1000000.0f;
+    }
 }
 
 void MIDI::setChannels(uint32_t channels)
@@ -311,7 +325,7 @@ void MIDI::updateFrequencyOntime()
 
         // Determine if note is played in absolute (= same maxOntime for all notes) mode
         // or in relative mode (= same maxDuty for all notes)
-        if (midiNoteNum >= midiAbsNote)
+        if (midiFrequency >= midiAbsFreq)
         {
             midiOntimeUS = midiOntimeUSMax * vol;
         }
