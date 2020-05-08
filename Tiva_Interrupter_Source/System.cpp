@@ -81,7 +81,7 @@ uint32_t System::getSystemTimeUS()
 
 float System::getExactSystemTimeUS()
 {
-    return float(sysTime) + float(SysTickValueGet()) / float((sysClockFreq / 1000000));
+    return float(sysTime) + float(SysTickPeriodGet() - SysTickValueGet()) / float((sysClockFreq / 1000000));
 }
 
 void System::delayUS(uint32_t us)
