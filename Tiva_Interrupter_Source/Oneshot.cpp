@@ -31,6 +31,10 @@ void Oneshot::init(System *sys, uint32_t timerNum, void (*ISR)(void))
     SysCtlPeripheralEnable(ONESHOT_MAPPING[oneshotTimerNum][ONESHOT_PORT_SYSCTL_PERIPH]);
     SysCtlDelay(2);
 
+    // In case timer was previously configured differently
+    SysCtlPeripheralReset(ONESHOT_MAPPING[oneshotTimerNum][ONESHOT_PORT_SYSCTL_PERIPH]);
+    SysCtlPeripheralReset(ONESHOT_MAPPING[oneshotTimerNum][ONESHOT_TIMER_SYSCTL_PERIPH]);
+
     // Timer A generates the ontime, timer B assures enough offtime until the next pulse
     TimerConfigure(oneshotTimerBase, ONESHOT_TIMER_CONFIG);
     TimerClockSourceSet(oneshotTimerBase, TIMER_CLOCK_PIOSC);

@@ -22,7 +22,10 @@
 #include "driverlib/gpio.h"             // Defines and macros for GPIO API of DriverLib. This includes API functions such as GPIOPinWrite.
 #include "driverlib/interrupt.h"        // Defines and macros for NVIC Controller (Interrupt) API of driverLib. This includes API functions such as IntEnable and IntPrioritySet.
 #include "driverlib/uart.h"             // Defines and macros for UART API of driverLib.
+#include "InterrupterConfig.h"
 #include "System.h"
+#include "Note.h"
+#include "Channel.h"
 
 
 class MIDI
@@ -45,6 +48,9 @@ public:
     float getOntimeUS();
     float getFrequency();
     void setADSR(bool enable);
+    static constexpr uint32_t voiceCount = 4;
+    volatile uint32_t activeNotes[COIL_COUNT];
+    volatile Note notes[COIL_COUNT][voiceCount];
 
 private:
     void resetAllValues();
@@ -93,6 +99,11 @@ private:
                                                                   {3.0f,    3000.0f,     1.0f,   27000.0f,     0.00f,   400000.0f,     0.0f,  400000.0f},
     };
     System* midiSys;
+
+    volatile Note *orderedNotes[COIL_COUNT][voiceCount];
+    volatile Channel channels[16];
+    float midiAbsFreq[COIL_COUNT];
+
     bool midiEnabled = false;
 
     // Values updated inside MIDI ISR
@@ -112,6 +123,8 @@ private:
     volatile uint32_t midiISRNoteVel        = 0;
     volatile uint32_t midiISRProgram        = 0;
     volatile uint32_t midiChannels          = 0xff;
+    volatile uint8_t midiChannelOutputMapping[16] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                                                     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
     bool midiADSREnabled  = false;
     bool midiADSRNextMode = false;
@@ -121,7 +134,6 @@ private:
     uint32_t midiNoteVelPedal      = 0;
     uint32_t midiADSRMode = 'R';
     volatile bool midiPlaying = false;
-    float midiAbsFreq = 0.0f;
     float midiOntimeUSMax = 0.0f;
     float midiDutyMax = 0.0f;
     uint32_t midiUARTNum;

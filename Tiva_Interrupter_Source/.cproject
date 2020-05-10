@@ -124,7 +124,7 @@
 									<listOptionValue builtIn="false" value="PART_TM4C1294NCPDT"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.TMS470_18.1.compilerID.LITTLE_ENDIAN.172707276" name="Little endian code [See 'General' page to edit] (--little_endian, -me)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_18.1.compilerID.LITTLE_ENDIAN" value="true" valueType="boolean"/>
-								<option id="com.ti.ccstudio.buildDefinitions.TMS470_18.1.compilerID.OPT_LEVEL.release.1327061638" name="Optimization level (--opt_level, -O)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_18.1.compilerID.OPT_LEVEL.release" value="com.ti.ccstudio.buildDefinitions.TMS470_18.1.compilerID.OPT_LEVEL.3" valueType="enumerated"/>
+								<option id="com.ti.ccstudio.buildDefinitions.TMS470_18.1.compilerID.OPT_LEVEL.release.1327061638" name="Optimization level (--opt_level, -O)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_18.1.compilerID.OPT_LEVEL.release" value="com.ti.ccstudio.buildDefinitions.TMS470_18.1.compilerID.OPT_LEVEL.4" valueType="enumerated"/>
 								<option id="com.ti.ccstudio.buildDefinitions.TMS470_18.1.compilerID.OPT_FOR_SPEED.285267302" name="Speed vs. size trade-offs (--opt_for_speed, -mf)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_18.1.compilerID.OPT_FOR_SPEED" value="com.ti.ccstudio.buildDefinitions.TMS470_18.1.compilerID.OPT_FOR_SPEED.5" valueType="enumerated"/>
 								<option id="com.ti.ccstudio.buildDefinitions.TMS470_18.1.compilerID.FP_MODE.1033105880" name="Floating Point mode (--fp_mode)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_18.1.compilerID.FP_MODE" value="com.ti.ccstudio.buildDefinitions.TMS470_18.1.compilerID.FP_MODE.relaxed" valueType="enumerated"/>
 								<option id="com.ti.ccstudio.buildDefinitions.TMS470_18.1.compilerID.INCLUDE_PATH.1391003056" name="Add dir to #include search path (--include_path, -I)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_18.1.compilerID.INCLUDE_PATH" valueType="includePath">
@@ -169,7 +169,7 @@
 								<inputType id="com.ti.ccstudio.buildDefinitions.TMS470_18.1.exeLinker.inputType__GEN_CMDS.1632285655" name="Generated Linker Command Files" superClass="com.ti.ccstudio.buildDefinitions.TMS470_18.1.exeLinker.inputType__GEN_CMDS"/>
 							</tool>
 							<tool id="com.ti.ccstudio.buildDefinitions.TMS470_18.1.hex.1238376017" name="ARM Hex Utility" superClass="com.ti.ccstudio.buildDefinitions.TMS470_18.1.hex">
-								<option id="com.ti.ccstudio.buildDefinitions.TMS470_18.1.hex.TOOL_ENABLE.2092270976" superClass="com.ti.ccstudio.buildDefinitions.TMS470_18.1.hex.TOOL_ENABLE" value="false" valueType="boolean"/>
+								<option id="com.ti.ccstudio.buildDefinitions.TMS470_18.1.hex.TOOL_ENABLE.2092270976" name="Enable tool" superClass="com.ti.ccstudio.buildDefinitions.TMS470_18.1.hex.TOOL_ENABLE" value="false" valueType="boolean"/>
 							</tool>
 						</toolChain>
 					</folderInfo>

@@ -10,7 +10,10 @@
 
 
 #include <stdint.h>
+#include <stdbool.h>
+#include "InterrupterConfig.h"
 #include "Output.h"
+#include "Oneshot.h"
 #include "MIDI.h"
 #include "Filter.h"
 
@@ -22,6 +25,7 @@ public:
     virtual ~Coil();
     MIDI     midi;
     Output   out;
+    Oneshot  one;
     Filter   filteredOntimeUS;
     Filter   filteredFrequency;
 

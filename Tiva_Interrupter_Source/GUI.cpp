@@ -28,9 +28,9 @@ void GUI::midiUartISR()
     while (UARTCharsAvail(UART0_BASE))
     {
         uint32_t c = UARTCharGet(UART0_BASE);
-        for (uint32_t i = 0; i < guiCoilCount; i++)
+        for (uint32_t i = 0; i < COIL_COUNT; i++)
         {
-            guiCoils[i].midi.processNewDataByte(c);
+            coils[i].midi.processNewDataByte(c);
         }
     }
 }
@@ -40,14 +40,14 @@ void GUI::init(System* sys, void (*midiISR)(void))
     guiSys = sys;
     bool cfgInEEPROM = guiCfg.init(guiSys);
     guiNxt.init(guiSys, 3, 115200, guiNxtTimeoutUS);
-    for (uint32_t i = 0; i < guiCoilCount; i++)
+    for (uint32_t i = 0; i < COIL_COUNT; i++)
     {
         // As of now all coils share the same init settings. However this is
         // not mandatory.
-        guiCoils[i].midi.init(guiSys, 0, 115200, midiISR);
-        guiCoils[i].out.init(guiSys, i);
-        guiCoils[i].filteredFrequency.init(guiSys, 1.8f, 5.0f);
-        guiCoils[i].filteredOntimeUS.init(guiSys, 2.0f, 30.0f);
+        coils[i].midi.init(guiSys, 0, 115200, midiISR);
+        coils[i].out.init(guiSys, i);
+        coils[i].filteredFrequency.init(guiSys, 1.8f, 5.0f);
+        coils[i].filteredOntimeUS.init(guiSys, 2.0f, 30.0f);
     }
 
     // Try to modify and read a Nextion value. If this works we know the
@@ -79,7 +79,7 @@ void GUI::init(System* sys, void (*midiISR)(void))
 
         // Settings of all coils
         const char *AllCoilSettings = "TC_Settings";
-        for (uint32_t i = 0; i < guiCoilCount; i++)
+        for (uint32_t i = 0; i < COIL_COUNT; i++)
         {
             // Load settings
             uint32_t maxOntimeUS = guiCfg.getCoilsMaxOntimeUS(i);
@@ -100,8 +100,8 @@ void GUI::init(System* sys, void (*midiISR)(void))
             }
 
             // Apply to coil objects
-            guiCoils[i].out.setMaxDutyPerm(maxDutyPerm);
-            guiCoils[i].out.setMaxOntimeUS(maxOntimeUS);
+            coils[i].out.setMaxDutyPerm(maxDutyPerm);
+            coils[i].out.setMaxOntimeUS(maxOntimeUS);
 
             // Send to Nextion
             guiNxt.printf("%s.coil%iOn.val=%i\xff\xff\xff",
@@ -152,7 +152,7 @@ void GUI::init(System* sys, void (*midiISR)(void))
         guiNxt.printf("thsp=%i\xff\xff\xff", sleepDelay);
         guiNxt.printf("dim=%i\xff\xff\xff", dispBrightness);
     }
-    guiNxt.setVal("TC_Settings.maxCoilCount", guiCoilCount);
+    guiNxt.setVal("TC_Settings.maxCoilCount", COIL_COUNT);
 
     // Initialization completed.
     guiNxt.sendCmd("vis pStartup,1");
@@ -353,7 +353,7 @@ bool GUI::update()
             // Apply new data
             if (guiCommand == 'd')
             {
-                for (uint32_t i = 0; i < guiCoilCount; i++)
+                for (uint32_t i = 0; i < COIL_COUNT; i++)
                 {
                     // check if current coil is affected by command. Skip otherwise
                     // Data format documented in separate file
@@ -361,19 +361,19 @@ bool GUI::update()
                     {
                         uint32_t ontimeUS  = (guiCommandData[2] << 8) + guiCommandData[1];
                         uint32_t frequency = (guiCommandData[4] << 8) + guiCommandData[3];
-                        guiCoils[i].filteredOntimeUS.setTarget(ontimeUS);
-                        guiCoils[i].filteredFrequency.setTarget(frequency);
+                        coils[i].filteredOntimeUS.setTarget(ontimeUS);
+                        coils[i].filteredFrequency.setTarget(frequency);
                     }
                 }
                 // Data applied; clear command byte.
                 guiCommand = 0;
             }
             // Apply outputs
-            for (uint32_t i = 0; i < guiCoilCount; i++)
+            for (uint32_t i = 0; i < COIL_COUNT; i++)
             {
-                float f = guiCoils[i].filteredFrequency.getFiltered();
-                float o = guiCoils[i].filteredOntimeUS.getFiltered();
-                guiCoils[i].out.tone(f, o);
+                float f = coils[i].filteredFrequency.getFiltered();
+                float o = coils[i].filteredOntimeUS.getFiltered();
+                coils[i].out.tone(f, o);
             }
             break;
         }
@@ -384,17 +384,17 @@ bool GUI::update()
             if (guiCommand == 'c')
             {
                 uint32_t coil = guiCommandData[0] - 1;
-                if (coil < guiCoilCount)
+                if (coil < COIL_COUNT)
                 {
                     uint32_t channels = (guiCommandData[2] << 8) + guiCommandData[1];
-                    guiCoils[coil].midi.setChannels(channels);
+                    coils[coil].midi.setChannels(channels);
                 }
                 // Data applied; clear command byte.
                 guiCommand = 0;
             }
             else if (guiCommand == 'd')
             {
-                for (uint32_t i = 0; i < guiCoilCount; i++)
+                for (uint32_t i = 0; i < COIL_COUNT; i++)
                 {
                     // check if current coil is affected by command. Skip otherwise
                     // Data format documented in separate file
@@ -403,25 +403,25 @@ bool GUI::update()
                         uint32_t ontimeUS  = (guiCommandData[2] << 8) + guiCommandData[1];
                         uint32_t duty = (guiCommandData[4] << 8) + guiCommandData[3];
                         uint32_t volMode = (guiCommandData[0] & (0b11 << 6)) >> 6;
-                        guiCoils[i].midi.setOntimeUSMax(ontimeUS);
-                        guiCoils[i].midi.setDutyPermMax(duty);
-                        guiCoils[i].midi.setVolMode(volMode);
+                        coils[i].midi.setOntimeUSMax(ontimeUS);
+                        coils[i].midi.setDutyPermMax(duty);
+                        coils[i].midi.setVolMode(volMode);
                     }
                 }
                 // Data applied; clear command byte.
                 guiCommand = 0;
             }
-            for (uint32_t i = 0; i < guiCoilCount; i++)
+            for (uint32_t i = 0; i < COIL_COUNT; i++)
             {
-                if (!guiCoils[i].midi.isEnabled())
+                if (!coils[i].midi.isEnabled())
                 {
-                    guiCoils[i].midi.enable();
-                    guiCoils[i].midi.play();
+                    coils[i].midi.enable();
+                    coils[i].midi.play();
                 }
-                guiCoils[i].midi.updateFrequencyOntime();
-                float f = guiCoils[i].midi.getFrequency();
-                float o = guiCoils[i].midi.getOntimeUS();
-                guiCoils[i].out.tone(f, o);
+                coils[i].midi.updateFrequencyOntime();
+                float f = coils[i].midi.getFrequency();
+                float o = coils[i].midi.getOntimeUS();
+                coils[i].out.tone(f, o);
             }
             break;
         }
@@ -437,13 +437,13 @@ bool GUI::update()
                                   + (guiCommandData[3] << 16)
                                   + (guiCommandData[2] << 8)
                                   +  guiCommandData[1];
-                if (settings == 1 && (number - 1) < guiCoilCount)
+                if (settings == 1 && (number - 1) < COIL_COUNT)
                 {
                     // Coil limits. Number ranges from 1-6 instead of 0-5.
                     number--;
                     guiCfg.coilSettings[number] = data;
-                    guiCoils[number].out.setMaxDutyPerm(guiCfg.getCoilsMaxDutyPerm(number));
-                    guiCoils[number].out.setMaxOntimeUS(guiCfg.getCoilsMaxOntimeUS(number));
+                    coils[number].out.setMaxDutyPerm(guiCfg.getCoilsMaxDutyPerm(number));
+                    coils[number].out.setMaxOntimeUS(guiCfg.getCoilsMaxOntimeUS(number));
                 }
                 else if (settings == 0 && number < 3)
                 {
@@ -497,9 +497,9 @@ bool GUI::update()
             guiNxt.disableStdio();
 
             // Stop all MIDI UARTs
-            for (uint32_t i = 0; i < guiCoilCount; i++)
+            for (uint32_t i = 0; i < COIL_COUNT; i++)
             {
-                guiCoils[i].midi.disable();
+                coils[i].midi.disable();
             }
             // UARTs are supposed to be initialized.
             uint32_t nxtUARTBase = guiNxt.getUARTBase();
@@ -539,11 +539,11 @@ bool GUI::update()
         case exit:
         {
             // Disable all outputs
-            for (uint32_t i = 0; i < guiCoilCount; i++)
+            for (uint32_t i = 0; i < COIL_COUNT; i++)
             {
-                guiCoils[i].midi.disable();
-                guiCoils[i].filteredOntimeUS.setTarget(0.0f);
-                guiCoils[i].out.tone(0.0f, 0.0f);
+                coils[i].midi.disable();
+                coils[i].filteredOntimeUS.setTarget(0.0f);
+                coils[i].out.tone(0.0f, 0.0f);
             }
 
             // Update EEPROM

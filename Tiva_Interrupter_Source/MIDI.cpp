@@ -40,17 +40,39 @@ void MIDI::init(System* sys, uint32_t uartNum, uint32_t baudRate, void (*ISR)(vo
     UARTIntRegister(midiUARTBase, ISR);
     UARTIntEnable(midiUARTBase, UART_INT_RX);
     IntPrioritySet(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_INT], 0b00000000);
+
+    for (uint32_t i = 0; i < COIL_COUNT; i++)
+    {
+        activeNotes[i] = 0;
+        midiAbsFreq[i] = 0.0f;
+
+        // To prevent excessive copy operations when ordering the notes,
+        // orderedNotes only contains the pointers to the actual Note objects.
+        for (uint32_t j = 0; j < voiceCount; j++)
+        {
+            orderedNotes[i][j] = &(notes[i][j]);
+        }
+    }
+
+    // Assign all channels to all coils.
+    uint32_t allCoils = (1 << COIL_COUNT) - 1;
+    for (uint32_t i = 0; i < 16; i++)
+    {
+        channels[i].coils = allCoils;
+    }
 }
 
 void MIDI::processNewDataByte(uint32_t c)
 {
+    uint32_t channel = 0;
+
     // Minimum MIDI Data Processing
     if (c & 0b10000000) // The first byte of a MIDI Command starts with a 1. Following bytes start with a 0.
     {
         // Lower 4 bits are channel.
-        uint32_t channel = c & 0x0f;
-        // Check if coil is listening to this channel. If yes, process following data.
-        if (midiChannels & (1 << channel))
+        channel = c & 0x0f;
+        // Check if any coil is assigned to this channel. If yes, process following data.
+        if (channels[channel].coils)
         {
             midiISRData[0] = c;
             midiISRDataIndex = 1;
@@ -67,14 +89,38 @@ void MIDI::processNewDataByte(uint32_t c)
         if (midiISRDataIndex >= 3)
         {
             midiISRDataIndex = 0;
-            if (midiISRData[1] == midiISRNoteNum)
+            if (!channels[channel].sustainPedal)
             {
-                if (!midiISRSustainPedal)
+                for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
                 {
-                    midiISRNoteNum = 0;
+                    if (channels[channel].coils && (1 << coil))
+                    {
+                        bool noteDeleted = false;
+                        for (uint32_t i = 0; i < voiceCount; i++)
+                        {
+                            if (noteDeleted)
+                            {
+                                orderedNotes[coil][i-1] = orderedNotes[coil][i];
+                            }
+                            else
+                            {
+                                if (midiISRData[1] == orderedNotes[coil][i]->number
+                                        && channel == orderedNotes[coil][i]->channel)
+                                {
+                                    if (!midiISRSustainPedal)
+                                    {
+                                        orderedNotes[coil][i]->number = 0;
+                                        activeNotes[coil]--;
+                                        noteDeleted = true;
+                                    }
+                                    orderedNotes[coil][i]->velocity = 0;
+                                    orderedNotes[coil][i]->afterTouch = 0;
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
-                midiISRNoteVel = 0;
-                midiISRNoteAfterTouch = 0;
             }
         }
         break;
@@ -82,20 +128,73 @@ void MIDI::processNewDataByte(uint32_t c)
         if (midiISRDataIndex >= 3)
         {
             midiISRDataIndex = 0;
-            if (midiISRData[2])
+            if (midiISRData[2]) // Note has a velocity
             {
-                midiISRNoteNum = midiISRData[1];
-                midiISRNoteVel = midiISRData[2];
-                midiISRNoteNew = true;
-            }
-            else if (midiISRNoteNum == midiISRData[1])
-            {
-                if (!midiISRSustainPedal)
+                for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
                 {
-                    midiISRNoteNum = 0;
+                    if (channels[channel].coils && (1 << coil))
+                    {
+                        uint32_t targetNote = activeNotes[coil];
+                        for (uint32_t i = 0; i < targetNote; i++)
+                        {
+                            if (midiISRData[1] == orderedNotes[coil][i]->number
+                                    && channel == orderedNotes[coil][i]->channel)
+                            {
+                                targetNote = i;
+                            }
+                        }
+                        if (targetNote >= voiceCount)
+                        {
+                            targetNote = voiceCount - 1;
+                            for (uint32_t i = 1; i < voiceCount; i++)
+                            {
+                                orderedNotes[coil][i - 1] = orderedNotes[coil][i];
+                            }
+                        }
+                        if (targetNote >= activeNotes[coil])
+                        {
+                            activeNotes[coil] = targetNote + 1;
+                        }
+
+                        orderedNotes[coil][targetNote]->number = midiISRData[1];
+                        orderedNotes[coil][targetNote]->velocity = midiISRData[2];
+                    }
                 }
-                midiISRNoteVel = 0;
-                midiISRNoteAfterTouch = 0;
+            }
+            else // Note has no velocity = note off. Code copy pasted from note off command.
+            {
+                if (!channels[channel].sustainPedal)
+                {
+                    for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+                    {
+                        if (channels[channel].coils && (1 << coil))
+                        {
+                            bool noteDeleted = false;
+                            for (uint32_t i = 0; i < voiceCount; i++)
+                            {
+                                if (noteDeleted)
+                                {
+                                    orderedNotes[coil][i-1] = orderedNotes[coil][i];
+                                }
+                                else
+                                {
+                                    if (midiISRData[1] == orderedNotes[coil][i]->number)
+                                    {
+                                        if (!midiISRSustainPedal)
+                                        {
+                                            orderedNotes[coil][i]->number = 0;
+                                            activeNotes[coil]--;
+                                            noteDeleted = true;
+                                        }
+                                        orderedNotes[coil][i]->velocity = 0;
+                                        orderedNotes[coil][i]->afterTouch = 0;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
         break;
@@ -103,9 +202,19 @@ void MIDI::processNewDataByte(uint32_t c)
         if (midiISRDataIndex >= 3)
         {
             midiISRDataIndex = 0;
-            if (midiISRData[1] == midiISRNoteNum)
+            for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
-                midiISRNoteAfterTouch = midiISRData[2];
+                if (channels[channel].coils && (1 << coil))
+                {
+                    for (uint32_t i = 0; i < voiceCount; i++)
+                    {
+                        if (midiISRData[1] == orderedNotes[coil][i]->number
+                                && channel == orderedNotes[coil][i]->channel)
+                        {
+                            orderedNotes[coil][i]->afterTouch = midiISRData[2];
+                        }
+                    }
+                }
             }
         }
         break;
@@ -116,13 +225,13 @@ void MIDI::processNewDataByte(uint32_t c)
             switch (midiISRData[1])
             {
             case 0x01: // Modulation Wheel
-                midiISRModWheel = midiISRData[2];
+                channels[channel].modulation = midiISRData[2];
                 break;
             case 0x02: // Breath Controller
 
                 break;
             case 0x07: // Channel Volume
-                midiISRChnVol = midiISRData[2];
+                channels[channel].volume = midiISRData[2];
                 break;
             case 0x0A: // Pan
 
@@ -130,27 +239,30 @@ void MIDI::processNewDataByte(uint32_t c)
             case 0x40: // Sustain Pedal
                 if (midiISRData[2] >= 64)
                 {
-                    midiISRSustainPedal = true;
+                    channels[channel].sustainPedal = true;
                 }
                 else
                 {
-                    midiISRSustainPedal = false;
+                    channels[channel].sustainPedal = false;
                 }
                 break;
             case 0x43: // Damper Pedal
                 if (midiISRData[2] >= 64)
                 {
-                    midiISRDamperPedal = true;
+                    channels[channel].damperPedal = true;
                 }
                 else
                 {
-                    midiISRDamperPedal = false;
+                    channels[channel].damperPedal = false;
                 }
                 break;
             case 0x78: // All Sounds off
             case 0x7B: // All Notes off
-                midiISRSustainPedal = false;
-                midiISRNoteVel = 0;
+                channels[channel].damperPedal = false;
+                for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+                {
+                    activeNotes[coil] = 0;
+                }
                 break;
             case 0x79: // Reset all Controllers
                 resetAllValues();
@@ -164,29 +276,21 @@ void MIDI::processNewDataByte(uint32_t c)
         if (midiISRDataIndex >= 3)
         {
             midiISRDataIndex = 0;
-            midiISRPitchBend = int32_t(((midiISRData[2] << 7) + midiISRData[1])) - 8192;
+            channels[channel].pitchBend = int32_t(((midiISRData[2] << 7) + midiISRData[1])) - 8192;
         }
         break;
     case 0xD0: // Channel Aftertouch
         if (midiISRDataIndex >= 2)
         {
             midiISRDataIndex = 0;
-            midiISRAfterTouch = midiISRData[1];
+            channels[channel].channelAfterTouch = midiISRData[1];
         }
         break;
     case 0xC0: // Program Change
         if (midiISRDataIndex >= 2)
         {
             midiISRDataIndex = 0;
-            if (midiISRData[1] < MIDI_ADSR_PROGRAM_COUNT)
-            {
-                midiISRProgram = midiISRData[1];
-                midiISRADSREnabled = true;
-            }
-            else
-            {
-                midiISRADSREnabled = false;
-            }
+            channels[channel].program = midiISRData[1];
         }
         break;
     default:

@@ -1,23 +1,23 @@
 /*
- * EEPROM.cpp
+ * EEPROMSettings.cpp
  *
  *  Created on: 28.04.2020
  *      Author: Max
  */
 
-#include <Configuration.h>
+#include <EEPROMSettings.h>
 
-Configuration::Configuration()
+EEPROMSettings::EEPROMSettings()
 {
 
 }
 
-Configuration::~Configuration()
+EEPROMSettings::~EEPROMSettings()
 {
 
 }
 
-bool Configuration::init(System *sys)
+bool EEPROMSettings::init(System *sys)
 {
     /*
      * Total Configuration cannot be larger than 2040 Bytes.
@@ -58,7 +58,7 @@ bool Configuration::init(System *sys)
     return foundValidConfig;
 }
 
-uint32_t Configuration::getUsersMaxDutyPerm(uint32_t user)
+uint32_t EEPROMSettings::getUsersMaxDutyPerm(uint32_t user)
 {
     uint32_t duty = 0;
     if (user < 3)
@@ -68,7 +68,7 @@ uint32_t Configuration::getUsersMaxDutyPerm(uint32_t user)
     return duty;
 }
 
-uint32_t Configuration::getUsersMaxBPS(uint32_t user)
+uint32_t EEPROMSettings::getUsersMaxBPS(uint32_t user)
 {
     uint32_t bps = 0;
     if (user < 3)
@@ -78,7 +78,7 @@ uint32_t Configuration::getUsersMaxBPS(uint32_t user)
     return bps;
 }
 
-uint32_t Configuration::getUsersMaxOntimeUS(uint32_t user)
+uint32_t EEPROMSettings::getUsersMaxOntimeUS(uint32_t user)
 {
     uint32_t ontimeUS = 0;
     if (user < 3)
@@ -88,7 +88,7 @@ uint32_t Configuration::getUsersMaxOntimeUS(uint32_t user)
     return ontimeUS;
 }
 
-uint32_t Configuration::getCoilsMaxDutyPerm(uint32_t coil)
+uint32_t EEPROMSettings::getCoilsMaxDutyPerm(uint32_t coil)
 {
     uint32_t duty = 0;
     if (coil < 6)
@@ -98,7 +98,7 @@ uint32_t Configuration::getCoilsMaxDutyPerm(uint32_t coil)
     return duty;
 }
 
-uint32_t Configuration::getCoilsMaxBPS(uint32_t coil)
+uint32_t EEPROMSettings::getCoilsMaxBPS(uint32_t coil)
 {
     uint32_t bps = 0;
     if (coil < 6)
@@ -108,7 +108,7 @@ uint32_t Configuration::getCoilsMaxBPS(uint32_t coil)
     return bps;
 }
 
-uint32_t Configuration::getCoilsMaxOntimeUS(uint32_t coil)
+uint32_t EEPROMSettings::getCoilsMaxOntimeUS(uint32_t coil)
 {
     uint32_t ontimeUS = 0;
     if (coil < 6)
@@ -118,7 +118,7 @@ uint32_t Configuration::getCoilsMaxOntimeUS(uint32_t coil)
     return ontimeUS;
 }
 
-bool Configuration::updateBank()
+bool EEPROMSettings::updateBank()
 {
     /*
      * If no bank is selected, return value indicates if a valid configuration
@@ -170,23 +170,23 @@ bool Configuration::updateBank()
     return false;
 }
 
-void Configuration::read()
+void EEPROMSettings::read()
 {
     rwuAll(CFG_READ_EEPROM);
 }
 
-void Configuration::write()
+void EEPROMSettings::write()
 {
     rwuAll(CFG_WRITE_EEPROM);
 }
 
-void Configuration::update()
+void EEPROMSettings::update()
 {
     // TODO Needs more testing!
     rwuAll(CFG_UPDATE_EEPROM);
 }
 
-void Configuration::rwuAll(uint32_t mode)
+void EEPROMSettings::rwuAll(uint32_t mode)
 {
 
     if (cfgBank >= CFG_BANK_COUNT)
@@ -215,7 +215,7 @@ void Configuration::rwuAll(uint32_t mode)
     }
 }
 
-bool Configuration::rwuSingle(uint32_t mode, void *newData, uint32_t byteSize)
+bool EEPROMSettings::rwuSingle(uint32_t mode, void *newData, uint32_t byteSize)
 {
     // Returns if EEPROM has been modified.
 
@@ -237,7 +237,7 @@ bool Configuration::rwuSingle(uint32_t mode, void *newData, uint32_t byteSize)
     return false;
 }
 
-void Configuration::readSequence(void *newData, uint32_t byteSize)
+void EEPROMSettings::readSequence(void *newData, uint32_t byteSize)
 {
     // Make sure byteSize is a multiple of 4
     byteSize = byteSize >> 2;
@@ -246,7 +246,7 @@ void Configuration::readSequence(void *newData, uint32_t byteSize)
     cfgByteAddress += byteSize;
 }
 
-void Configuration::writeSequence(void *newData, uint32_t byteSize)
+void EEPROMSettings::writeSequence(void *newData, uint32_t byteSize)
 {
     // Make sure byteSize is a multiple of 4
     byteSize = byteSize >> 2;
@@ -259,7 +259,7 @@ void Configuration::writeSequence(void *newData, uint32_t byteSize)
     cfgByteAddress += byteSize;
 }
 
-bool Configuration::writeChangedSequence(void *newData, uint32_t byteSize)
+bool EEPROMSettings::writeChangedSequence(void *newData, uint32_t byteSize)
 {
     // Checks if data has changed and only then updates the EEPROM.
     // Takes a bit more time but EEPROM operations are slow anyway.

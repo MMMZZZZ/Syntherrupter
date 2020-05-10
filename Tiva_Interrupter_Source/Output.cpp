@@ -30,6 +30,10 @@ void Output::init(System* sys, uint32_t timerNum)
     SysCtlPeripheralEnable(OUTPUT_MAPPING[outputTimerNum][OUTPUT_PORT_SYSCTL_PERIPH]);
     SysCtlDelay(2);
 
+    // In case timer was previously configured differently
+    SysCtlPeripheralReset(OUTPUT_MAPPING[outputTimerNum][OUTPUT_PORT_SYSCTL_PERIPH]);
+    SysCtlPeripheralReset(OUTPUT_MAPPING[outputTimerNum][OUTPUT_TIMER_SYSCTL_PERIPH]);
+
     TimerConfigure(outputTimerBase, OUTPUT_TIMER_CONFIG);
     TimerClockSourceSet(outputTimerBase, TIMER_CLOCK_PIOSC);
 
