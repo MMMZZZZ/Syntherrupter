@@ -6,4 +6,4 @@
  */
 
 
-#define COIL_COUNT 4
+#define COIL_COUNT 1

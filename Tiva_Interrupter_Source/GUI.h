@@ -17,6 +17,7 @@
 #include "System.h"
 #include "Nextion.h"
 #include "Coil.h"
+#include "MIDI.h"
 
 
 // Modes
@@ -36,7 +37,7 @@ class GUI
 public:
     GUI();
     virtual ~GUI();
-    void init(System* sys, void (*midiISR)(void));
+    void init(System* sys, void (*midiISR)(void), void(*oneshotISRs[])(void));
     bool update();
     void applyOutput();
     void setError(const char* err);
@@ -49,6 +50,7 @@ private:
     System* guiSys;
     Nextion guiNxt;
     EEPROMSettings guiCfg;
+    MIDI guiMidi;
 
     uint32_t guiUserMaxOntimeUS = 0;
     uint32_t guiUserMaxBPS = 0;

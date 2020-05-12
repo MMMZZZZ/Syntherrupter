@@ -14,7 +14,6 @@
 #include "InterrupterConfig.h"
 #include "Output.h"
 #include "Oneshot.h"
-#include "MIDI.h"
 #include "Filter.h"
 
 
@@ -23,7 +22,6 @@ class Coil
 public:
     Coil();
     virtual ~Coil();
-    MIDI     midi;
     Output   out;
     Oneshot  one;
     Filter   filteredOntimeUS;

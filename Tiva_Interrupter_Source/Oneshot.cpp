@@ -77,7 +77,14 @@ void Oneshot::setMaxOntimeUS(uint32_t maxOntimeUS)
 
 void Oneshot::setMinOfftimeUS(uint32_t minOfftimeUS)
 {
-    oneshotMinOffValue = minOfftimeUS * (oneshotSys->getPIOSCFreq() / 1000000);
+    if (minOfftimeUS)
+    {
+        oneshotMinOffValue = minOfftimeUS * (oneshotSys->getPIOSCFreq() / 1000000);
+    }
+    else
+    {
+        oneshotMinOffValue = 1;
+    }
 }
 
 void Oneshot::shot(uint32_t ontimeUS)

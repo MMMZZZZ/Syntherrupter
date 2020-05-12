@@ -38,24 +38,23 @@ public:
     void disable();
     void play();
     void stop();
-    void processNewDataByte(uint32_t c);
-    void setOntimeUSMax(float ontimeUSMax);
-    void setDutyPermMax(float ontimeDutyMax);
-    void setVolMode(uint32_t absNote);
-    void setChannels(uint32_t channels);
+    void newData(uint32_t c);
+    void setVolSettings(uint32_t coil, float ontimeUSMax, float dutyMax, uint32_t volMode);
+    void setChannels(uint32_t coil, uint32_t chns);
     bool isEnabled();
-    void updateFrequencyOntime();
-    float getOntimeUS();
-    float getFrequency();
+    void process();
+    //float getOntimeUS();
+    //float getFrequency();
     void setADSR(bool enable);
     static constexpr uint32_t voiceCount = 4;
     volatile uint32_t activeNotes[COIL_COUNT];
-    volatile Note notes[COIL_COUNT][voiceCount];
+    volatile Note *orderedNotes[COIL_COUNT][voiceCount];
 
 private:
     void resetAllValues();
-    void updateADSR();
-    float getLFOVal();
+    void updateEffects();
+    float getLFOVal(uint32_t channel);
+    void removeDeadNotes();
     static constexpr uint32_t MIDI_UART_SYSCTL_PERIPH      = 0;
     static constexpr uint32_t MIDI_UART_BASE               = 1;
     static constexpr uint32_t MIDI_UART_PORT_SYSCTL_PERIPH = 2;
@@ -88,21 +87,26 @@ private:
     // 4: Staccato (no long notes possible. They're short. Always.
     // 5: Legator (release = prolonged sustain)
     //                                                             Attack Amp/Dur        Decay Amp/Dur         Sustain Amp/Dur        Release Amp/Dur
-    const float MIDI_ADSR_PROGRAMS[MIDI_ADSR_PROGRAM_COUNT][9] = {{1.0f,    7000.0f,     0.5f,   15000.0f,     0.25f,  3000000.0f,     0.0f,    3000.0f},
-                                                                  {1.0f, 4000000.0f,     1.0f,       1.0f,     1.00f,        1.0f,     0.0f, 2000000.0f},
-                                                                  {0.3f,    8000.0f,     1.0f, 4000000.0f,     1.00f,        1.0f,     0.0f, 2000000.0f},
-                                                                  {1.0f, 1500000.0f,     1.0f,       1.0f,     1.00f,        1.0f,     0.0f,  750000.0f},
-                                                                  {1.0f,   10000.0f,     0.2f,   35000.0f,     0.00f,    10000.0f,     0.0f,   10000.0f},
-                                                                  {1.0f,    7000.0f,     0.5f,   10000.0f,     0.25f,  3000000.0f,     0.0f, 3000000.0f},
-                                                                  {0.3f,    8000.0f,     1.0f, 4000000.0f,     1.00f,        1.0f,     0.0f,  400000.0f},
-                                                                  {2.0f,   30000.0f,     1.0f,     250.0f,     0.00f,  3500000.0f,     0.0f,     150.0f},
-                                                                  {3.0f,    3000.0f,     1.0f,   27000.0f,     0.00f,   400000.0f,     0.0f,  400000.0f},
+    const float MIDI_ADSR_PROGRAMS[MIDI_ADSR_PROGRAM_COUNT + 1][9] = {{1.0f,    7000.0f,     0.5f,   15000.0f,     0.25f,  3000000.0f,     0.0f,    3000.0f},
+                                                                      {1.0f, 4000000.0f,     1.0f,       1.0f,     1.00f,        1.0f,     0.0f, 2000000.0f},
+                                                                      {0.3f,    8000.0f,     1.0f, 4000000.0f,     1.00f,        1.0f,     0.0f, 2000000.0f},
+                                                                      {1.0f, 1500000.0f,     1.0f,       1.0f,     1.00f,        1.0f,     0.0f,  750000.0f},
+                                                                      {1.0f,   10000.0f,     0.2f,   35000.0f,     0.00f,    10000.0f,     0.0f,   10000.0f},
+                                                                      {1.0f,    7000.0f,     0.5f,   10000.0f,     0.25f,  3000000.0f,     0.0f, 3000000.0f},
+                                                                      {0.3f,    8000.0f,     1.0f, 4000000.0f,     1.00f,        1.0f,     0.0f,  400000.0f},
+                                                                      {2.0f,   30000.0f,     1.0f,     250.0f,     0.00f,  3500000.0f,     0.0f,     150.0f},
+                                                                      {3.0f,    3000.0f,     1.0f,   27000.0f,     0.00f,   400000.0f,     0.0f,  400000.0f},
+
+                                                                      {1.0f,       1.0f,     1.0f,       1.0f,      1.0f,        1.0f,     0.0f,       1.0f},
     };
     System* midiSys;
 
-    volatile Note *orderedNotes[COIL_COUNT][voiceCount];
     volatile Channel channels[16];
+    volatile Note notes[COIL_COUNT][voiceCount];
     float midiAbsFreq[COIL_COUNT];
+    float midiMaxDuty[COIL_COUNT];
+    float midiMaxOntimeUS[COIL_COUNT];
+    uint8_t midiVolMode[COIL_COUNT];
 
     bool midiEnabled = false;
 

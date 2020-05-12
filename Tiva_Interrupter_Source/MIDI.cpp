@@ -43,8 +43,11 @@ void MIDI::init(System* sys, uint32_t uartNum, uint32_t baudRate, void (*ISR)(vo
 
     for (uint32_t i = 0; i < COIL_COUNT; i++)
     {
-        activeNotes[i] = 0;
-        midiAbsFreq[i] = 0.0f;
+        activeNotes[i]     = 0;
+        midiVolMode[i]     = 3;
+        midiAbsFreq[i]     = 0.0f;
+        midiMaxDuty[i]     = 0.0f;
+        midiMaxOntimeUS[i] = 0.0f;
 
         // To prevent excessive copy operations when ordering the notes,
         // orderedNotes only contains the pointers to the actual Note objects.
@@ -60,9 +63,12 @@ void MIDI::init(System* sys, uint32_t uartNum, uint32_t baudRate, void (*ISR)(vo
     {
         channels[i].coils = allCoils;
     }
+
+    // Init all notes and channels
+    resetAllValues();
 }
 
-void MIDI::processNewDataByte(uint32_t c)
+void MIDI::newData(uint32_t c)
 {
     uint32_t channel = 0;
 
@@ -89,35 +95,17 @@ void MIDI::processNewDataByte(uint32_t c)
         if (midiISRDataIndex >= 3)
         {
             midiISRDataIndex = 0;
-            if (!channels[channel].sustainPedal)
+            for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
-                for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+                if (channels[channel].coils && (1 << coil))
                 {
-                    if (channels[channel].coils && (1 << coil))
+                    for (uint32_t i = 0; i < voiceCount; i++)
                     {
-                        bool noteDeleted = false;
-                        for (uint32_t i = 0; i < voiceCount; i++)
+                        if (midiISRData[1] == orderedNotes[coil][i]->number)
                         {
-                            if (noteDeleted)
-                            {
-                                orderedNotes[coil][i-1] = orderedNotes[coil][i];
-                            }
-                            else
-                            {
-                                if (midiISRData[1] == orderedNotes[coil][i]->number
-                                        && channel == orderedNotes[coil][i]->channel)
-                                {
-                                    if (!midiISRSustainPedal)
-                                    {
-                                        orderedNotes[coil][i]->number = 0;
-                                        activeNotes[coil]--;
-                                        noteDeleted = true;
-                                    }
-                                    orderedNotes[coil][i]->velocity = 0;
-                                    orderedNotes[coil][i]->afterTouch = 0;
-                                    break;
-                                }
-                            }
+                            orderedNotes[coil][i]->velocity = midiISRData[2];
+                            orderedNotes[coil][i]->ADSRMode = 'R';
+                            break;
                         }
                     }
                 }
@@ -158,39 +146,23 @@ void MIDI::processNewDataByte(uint32_t c)
 
                         orderedNotes[coil][targetNote]->number = midiISRData[1];
                         orderedNotes[coil][targetNote]->velocity = midiISRData[2];
+                        orderedNotes[coil][targetNote]->ADSRMode = 'A';
                     }
                 }
             }
             else // Note has no velocity = note off. Code copy pasted from note off command.
             {
-                if (!channels[channel].sustainPedal)
+                for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
                 {
-                    for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+                    if (channels[channel].coils && (1 << coil))
                     {
-                        if (channels[channel].coils && (1 << coil))
+                        for (uint32_t i = 0; i < voiceCount; i++)
                         {
-                            bool noteDeleted = false;
-                            for (uint32_t i = 0; i < voiceCount; i++)
+                            if (midiISRData[1] == orderedNotes[coil][i]->number)
                             {
-                                if (noteDeleted)
-                                {
-                                    orderedNotes[coil][i-1] = orderedNotes[coil][i];
-                                }
-                                else
-                                {
-                                    if (midiISRData[1] == orderedNotes[coil][i]->number)
-                                    {
-                                        if (!midiISRSustainPedal)
-                                        {
-                                            orderedNotes[coil][i]->number = 0;
-                                            activeNotes[coil]--;
-                                            noteDeleted = true;
-                                        }
-                                        orderedNotes[coil][i]->velocity = 0;
-                                        orderedNotes[coil][i]->afterTouch = 0;
-                                        break;
-                                    }
-                                }
+                                orderedNotes[coil][i]->velocity = midiISRData[2];
+                                orderedNotes[coil][i]->ADSRMode = 'R';
+                                break;
                             }
                         }
                     }
@@ -258,10 +230,15 @@ void MIDI::processNewDataByte(uint32_t c)
                 break;
             case 0x78: // All Sounds off
             case 0x7B: // All Notes off
-                channels[channel].damperPedal = false;
+                channels[channel].sustainPedal = false;
                 for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
                 {
                     activeNotes[coil] = 0;
+                    for (uint32_t note = 0; note < voiceCount; note++)
+                    {
+                        notes[coil][note].rawOntimeUS = 0.0f;
+                        notes[coil][note].frequency = 0.0f;
+                    }
                 }
                 break;
             case 0x79: // Reset all Controllers
@@ -330,38 +307,41 @@ void MIDI::stop()
     midiPlaying = false;
 }
 
-void MIDI::setOntimeUSMax(float ontimeUSMax)
+void MIDI::setVolSettings(uint32_t coil, float ontimeUSMax, float dutyPermMax, uint32_t volMode)
 {
-    midiOntimeUSMax = ontimeUSMax;
-}
+    midiMaxOntimeUS[coil] = ontimeUSMax;
+    midiMaxDuty[coil] = dutyPermMax / 1000.0f;
 
-void MIDI::setDutyPermMax(float dutyMax)
-{
-    midiDutyMax = dutyMax / 1000.0f;
-}
-
-void MIDI::setVolMode(uint32_t volMode)
-{
     if (volMode == 1)
     {
         // Absolute Mode. Change to abs. mode at the very lowest note already.
-        midiAbsFreq = 0;
+        midiAbsFreq[coil] = 0.0f;
     }
     else if (volMode == 2)
     {
         // Relative Mode. Never change to abs. mode (= set crossover higher than highest note).
-        midiAbsFreq = 40000.0f;
+        midiAbsFreq[coil] = 40000.0f;
     }
     else if (volMode == 3)
     {
         // Auto Mode. Determine crossover note at which abs. and rel. mode would have equal frequency.
-        midiAbsFreq = midiDutyMax / midiOntimeUSMax * 1000000.0f;
+        midiAbsFreq[coil] = midiMaxDuty[coil] / midiMaxOntimeUS[coil] * 1000000.0f;
     }
 }
 
-void MIDI::setChannels(uint32_t channels)
+void MIDI::setChannels(uint32_t coil, uint32_t chns)
 {
-    midiChannels = channels;
+    for (uint32_t i = 0; i < 16; i++)
+    {
+        if (chns & (1 << i))
+        {
+            channels[i].coils |= (1 << coil);
+        }
+        else
+        {
+            channels[i].coils &= ~(1 << coil);
+        }
+    }
 }
 
 bool MIDI::isEnabled()
@@ -369,11 +349,60 @@ bool MIDI::isEnabled()
     return midiEnabled;
 }
 
-void MIDI::updateFrequencyOntime()
+void MIDI::process()
 {
+    if (midiISRNewData)
+    {
+        IntDisable(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_INT]);
+        midiISRNewData = false;
+        for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+        {
+            for (uint32_t note = 0; note < voiceCount; note++)
+            {
+                if (notes[coil][note].number)
+                {
+                    if (notes[coil][note].velocity)
+                    {
+                        float noteNumFloat = float(notes[coil][note].number) + 2.0f * float(channels[notes[coil][note].channel].pitchBend) / 8192.0f;
+                        notes[coil][note].frequency = powf(2.0f, (noteNumFloat - 69.0f) / 12.0f) * 440.0f;
+                        notes[coil][note].periodUS = 1000000.0f / notes[coil][note].frequency;
+                        notes[coil][note].halfPeriodUS = notes[coil][note].periodUS / 2.0f;
+
+                        float vol = notes[coil][note].velocity / 127.0f;
+
+                        // Determine if note is played in absolute (= same maxOntime for all notes) mode
+                        // or in relative mode (= same maxDuty for all notes)
+                        if (notes[coil][note].frequency >= midiAbsFreq[coil])
+                        {
+                            notes[coil][note].rawOntimeUS = midiMaxOntimeUS[coil] * vol;
+                        }
+                        else
+                        {
+                            notes[coil][note].rawOntimeUS = (1000000.0f / notes[coil][note].frequency) * midiMaxDuty[coil] * vol;
+                        }
+                    }
+                    else if (midiADSREnabled)
+                    {
+                        notes[coil][note].ADSRMode = 'R';
+                    }
+                    else
+                    {
+                        notes[coil][note].rawOntimeUS  = 0.0f;
+                        notes[coil][note].ADSROntimeUS = 0.0f;
+                    }
+                }
+            }
+        }
+        IntEnable(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_INT]);
+    }
+    updateEffects();
+    removeDeadNotes();
+
+
+
     /*
      * Take data snapshot to prevent changes during calculations.
-     */
+     *//*
     if (midiISRNewData)
     {
         IntDisable(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_INT]);
@@ -406,9 +435,10 @@ void MIDI::updateFrequencyOntime()
         }
         IntEnable(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_INT]);
     }
-    /*
+
+    *//*
      * If sustain pedal is pushed keep highest Note velocity (ignore release
-     */
+     *//*
     if (midiSustainPedal)
     {
         if (midiNoteVel > midiNoteVelPedal)
@@ -453,9 +483,10 @@ void MIDI::updateFrequencyOntime()
     else
     {
         midiADSROntimeUS = midiOntimeUS;
-    }
+    }*/
 }
 
+/*
 float MIDI::getOntimeUS()
 {
     return midiADSROntimeUS * (1.0f - getLFOVal()) * float(midiChnVol) / 127.0f * midiPlaying;
@@ -465,11 +496,38 @@ float MIDI::getFrequency()
 {
     return midiFrequency;
 }
-
+*/
 void MIDI::resetAllValues()
 {
     // Reset all values to default
-    midiADSRTimeUS = midiSys->getSystemTimeUS();
+    for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+    {
+        for (uint32_t note = 0; note < voiceCount; note++)
+        {
+            notes[coil][note].number       = 0;
+            notes[coil][note].velocity     = 0;
+            notes[coil][note].afterTouch   = 0;
+            notes[coil][note].ADSRMode     = 'A';
+            notes[coil][note].frequency    = 0.0f;
+            notes[coil][note].halfPeriodUS = 0.0f;
+            notes[coil][note].periodUS     = 0.0f;
+            notes[coil][note].rawOntimeUS  = 0.0f;
+            notes[coil][note].ADSROntimeUS = 0.0f;
+        }
+    }
+    for (uint32_t channel = 0; channel < 16; channel++)
+    {
+        channels[channel].channelAfterTouch = 0;
+        channels[channel].modulation        = 0;
+        channels[channel].pitchBend         = 0;
+        channels[channel].program           = MIDI_ADSR_PROGRAM_COUNT;
+        channels[channel].volume            = 127;
+        channels[channel].sustainPedal      = false;
+        channels[channel].damperPedal       = false;
+    }
+
+
+    /*midiADSRTimeUS = midiSys->getSystemTimeUS();
 
     midiFrequency      =   0;
     midiOntimeUS       =   0;
@@ -488,11 +546,12 @@ void MIDI::resetAllValues()
     midiISRNoteNum         = 0;
     midiISRNoteVel         = 0;
     midiISRProgram         = 0;
+    */
 }
 
-float MIDI::getLFOVal()
+float MIDI::getLFOVal(uint32_t channel)
 {
-    if (midiModWheel)
+    if (channels[channel].modulation)
     {
         /*
          *               /            t   \
@@ -505,7 +564,8 @@ float MIDI::getLFOVal()
          *
          * sine wave between 0 and 1 mapped to the desired modulation depth.
          */
-        return (sinf(float(midiSys->getSystemTimeUS()) * 6.283185307179586f / midiLFOPeriodUS) + 1) / 2.0f * (float(midiModWheel) / 127.0f);
+        return (sinf(float(midiSys->getSystemTimeUS()) * 6.283185307179586f / midiLFOPeriodUS) + 1)
+                / 2.0f * (float(channels[channel].modulation) / 127.0f);
     }
     else
     {
@@ -513,8 +573,9 @@ float MIDI::getLFOVal()
     }
 }
 
-void MIDI::updateADSR()
+void MIDI::updateEffects()
 {
+    // Needed for ADSR
     float targetAmp;
     float lastAmp;
     float durationUS;
@@ -522,44 +583,87 @@ void MIDI::updateADSR()
     float currentTime = midiSys->getSystemTimeUS();
     float timeDiffUS = currentTime - midiADSRTimeUS;
     midiADSRTimeUS = currentTime;
-    switch (midiADSRMode)
+    if (timeDiffUS > 1.0f)
     {
-    case 'A':
-        targetAmp = midiOntimeUS * (MIDI_ADSR_PROGRAMS[midiProgram][MIDI_ADSR_ATTACK_AMP]);
-        lastAmp   = midiOntimeUS * (MIDI_ADSR_PROGRAMS[midiProgram][MIDI_ADSR_RELEASE_AMP]);
-        durationUS  = (MIDI_ADSR_PROGRAMS[midiProgram][MIDI_ADSR_ATTACK_DUR_US]);
-        break;
-    case 'D':
-        targetAmp = midiOntimeUS * (MIDI_ADSR_PROGRAMS[midiProgram][MIDI_ADSR_DECAY_AMP]);
-        lastAmp   = midiOntimeUS * (MIDI_ADSR_PROGRAMS[midiProgram][MIDI_ADSR_ATTACK_AMP]);
-        durationUS  = (MIDI_ADSR_PROGRAMS[midiProgram][MIDI_ADSR_DECAY_DUR_US]);
-        break;
-    case 'S':
-        targetAmp = midiOntimeUS * (MIDI_ADSR_PROGRAMS[midiProgram][MIDI_ADSR_SUSTAIN_AMP]);
-        lastAmp   = midiOntimeUS * (MIDI_ADSR_PROGRAMS[midiProgram][MIDI_ADSR_DECAY_AMP]);
-        durationUS  = (MIDI_ADSR_PROGRAMS[midiProgram][MIDI_ADSR_SUSTAIN_DUR_US]);
-        break;
-    case 'R':
-        targetAmp = midiOntimeUS * (MIDI_ADSR_PROGRAMS[midiProgram][MIDI_ADSR_RELEASE_AMP]);
-        lastAmp   = midiOntimeUS * (MIDI_ADSR_PROGRAMS[midiProgram][MIDI_ADSR_SUSTAIN_AMP]);
-        durationUS  = (MIDI_ADSR_PROGRAMS[midiProgram][MIDI_ADSR_RELEASE_DUR_US]);
-        break;
-    }
-
-    ampDiff = targetAmp - lastAmp;
-
-    midiADSROntimeUS += ampDiff * timeDiffUS / durationUS;
-    if ((midiADSROntimeUS >= targetAmp && ampDiff >= 0) || (midiADSROntimeUS <= targetAmp && ampDiff <= 0))
-    {
-        if (midiADSRMode == 'A')
+        for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
         {
-            midiADSRMode = 'D';
+            for (uint32_t note = 0; note < activeNotes[coil]; note++)
+            {
+                uint32_t program = channels[notes[coil][note].channel].program;
+                switch (notes[coil][note].ADSRMode)
+                {
+                case 'A':
+                    targetAmp = notes[coil][note].rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_ATTACK_AMP]);
+                    lastAmp   = notes[coil][note].rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_RELEASE_AMP]);
+                    durationUS  = (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_ATTACK_DUR_US]);
+                    break;
+                case 'D':
+                    targetAmp = notes[coil][note].rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_DECAY_AMP]);
+                    lastAmp   = notes[coil][note].rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_ATTACK_AMP]);
+                    durationUS  = (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_DECAY_DUR_US]);
+                    break;
+                case 'S':
+                    targetAmp = notes[coil][note].rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_SUSTAIN_AMP]);
+                    lastAmp   = notes[coil][note].rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_DECAY_AMP]);
+                    durationUS  = (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_SUSTAIN_DUR_US]);
+                    break;
+                case 'R':
+                    targetAmp = notes[coil][note].rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_RELEASE_AMP]);
+                    lastAmp   = notes[coil][note].rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_SUSTAIN_AMP]);
+                    durationUS  = (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_RELEASE_DUR_US]);
+                    break;
+                }
+
+                ampDiff = targetAmp - lastAmp;
+
+                notes[coil][note].ADSROntimeUS += ampDiff * timeDiffUS / durationUS;
+                if (    (notes[coil][note].ADSROntimeUS >= targetAmp && ampDiff >= 0)
+                     || (notes[coil][note].ADSROntimeUS <= targetAmp && ampDiff <= 0))
+                {
+                    if (notes[coil][note].ADSRMode == 'A')
+                    {
+                        notes[coil][note].ADSRMode = 'D';
+                    }
+                    else if (notes[coil][note].ADSRMode == 'D')
+                    {
+                        notes[coil][note].ADSRMode = 'S';
+                    }
+                    notes[coil][note].ADSROntimeUS = targetAmp;
+                }
+
+                // After calculation of ADSR envelope, add other effects like channel volume or modulation
+                notes[coil][note].finishedOntimeUS = notes[coil][note].ADSROntimeUS
+                                                     * (1.0f - getLFOVal(notes[coil][note].channel))
+                                                     * float(channels[notes[coil][note].channel].volume) / 127.0f
+                                                     * midiPlaying;
+            }
         }
-        else if (midiADSRMode == 'D')
-        {
-            midiADSRMode = 'S';
-        }
-        midiADSROntimeUS = targetAmp;
     }
 }
 
+void MIDI::removeDeadNotes()
+{
+    for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+    {
+        uint32_t deadNotes = 0;
+        for (uint32_t note = 0; note < activeNotes[coil]; note++)
+        {
+            if (orderedNotes[coil][note]->ADSRMode != 'A' && orderedNotes[coil][note]->finishedOntimeUS < 0.1f)
+            {
+                deadNotes++;
+            }
+            else if (deadNotes)
+            {
+                orderedNotes[coil][note - deadNotes] = orderedNotes[coil][note];
+                orderedNotes[coil][note]->number       = 0;
+                orderedNotes[coil][note]->velocity     = 0;
+                orderedNotes[coil][note]->frequency    = 0.0f;
+                orderedNotes[coil][note]->halfPeriodUS = 0.0f;
+                orderedNotes[coil][note]->periodUS     = 0.0f;
+                orderedNotes[coil][note]->rawOntimeUS  = 0.0f;
+                orderedNotes[coil][note]->ADSROntimeUS = 0.0f;
+            }
+        }
+        activeNotes[coil] -= deadNotes;
+    }
+}

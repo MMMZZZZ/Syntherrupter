@@ -18,7 +18,6 @@ class Channel
 public:
     Channel();
     virtual ~Channel();
-    uint32_t number = 0;
     uint32_t volume = 0;
     uint32_t modulation = 0;
     uint32_t channelAfterTouch = 0;

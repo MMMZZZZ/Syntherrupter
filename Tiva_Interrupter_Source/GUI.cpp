@@ -27,15 +27,11 @@ void GUI::midiUartISR()
 
     while (UARTCharsAvail(UART0_BASE))
     {
-        uint32_t c = UARTCharGet(UART0_BASE);
-        for (uint32_t i = 0; i < COIL_COUNT; i++)
-        {
-            coils[i].midi.processNewDataByte(c);
-        }
+        guiMidi.newData(UARTCharGet(UART0_BASE));
     }
 }
 
-void GUI::init(System* sys, void (*midiISR)(void))
+void GUI::init(System* sys, void (*midiISR)(void), void(*oneshotISRs[])(void))
 {
     guiSys = sys;
     bool cfgInEEPROM = guiCfg.init(guiSys);
@@ -44,8 +40,9 @@ void GUI::init(System* sys, void (*midiISR)(void))
     {
         // As of now all coils share the same init settings. However this is
         // not mandatory.
-        coils[i].midi.init(guiSys, 0, 115200, midiISR);
+        guiMidi.init(guiSys, 0, 115200, midiISR);
         coils[i].out.init(guiSys, i);
+        coils[i].one.init(guiSys, i, oneshotISRs[i]);
         coils[i].filteredFrequency.init(guiSys, 1.8f, 5.0f);
         coils[i].filteredOntimeUS.init(guiSys, 2.0f, 30.0f);
     }
@@ -387,7 +384,7 @@ bool GUI::update()
                 if (coil < COIL_COUNT)
                 {
                     uint32_t channels = (guiCommandData[2] << 8) + guiCommandData[1];
-                    coils[coil].midi.setChannels(channels);
+                    guiMidi.setChannels(coil, channels);
                 }
                 // Data applied; clear command byte.
                 guiCommand = 0;
@@ -401,27 +398,39 @@ bool GUI::update()
                     if (guiCommandData[0] & (1 << i))
                     {
                         uint32_t ontimeUS  = (guiCommandData[2] << 8) + guiCommandData[1];
-                        uint32_t duty = (guiCommandData[4] << 8) + guiCommandData[3];
+                        uint32_t dutyPerm = (guiCommandData[4] << 8) + guiCommandData[3];
                         uint32_t volMode = (guiCommandData[0] & (0b11 << 6)) >> 6;
-                        coils[i].midi.setOntimeUSMax(ontimeUS);
-                        coils[i].midi.setDutyPermMax(duty);
-                        coils[i].midi.setVolMode(volMode);
+                        guiMidi.setVolSettings(i, ontimeUS, dutyPerm, volMode);
                     }
                 }
                 // Data applied; clear command byte.
                 guiCommand = 0;
             }
-            for (uint32_t i = 0; i < COIL_COUNT; i++)
+            if (!guiMidi.isEnabled())
             {
-                if (!coils[i].midi.isEnabled())
+                guiMidi.enable();
+                guiMidi.play();
+            }
+            guiMidi.process();
+            for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+            {
+                // TODO Feed outputs
+                float time = guiSys->getExactSystemTimeUS();
+                for (uint32_t note = 0; note < guiMidi.activeNotes[coil]; note++)
                 {
-                    coils[i].midi.enable();
-                    coils[i].midi.play();
+                    if (fmodf(time, guiMidi.orderedNotes[coil][note]->periodUS) < guiMidi.orderedNotes[coil][note]->halfPeriodUS)
+                    {
+                        if (!guiMidi.orderedNotes[coil][note]->fired)
+                        {
+                            guiMidi.orderedNotes[coil][note]->fired = true;
+                            coils[coil].one.shot(guiMidi.orderedNotes[coil][note]->finishedOntimeUS);
+                        }
+                        else
+                        {
+                            guiMidi.orderedNotes[coil][note]->fired = false;
+                        }
+                    }
                 }
-                coils[i].midi.updateFrequencyOntime();
-                float f = coils[i].midi.getFrequency();
-                float o = coils[i].midi.getOntimeUS();
-                coils[i].out.tone(f, o);
             }
             break;
         }
@@ -497,10 +506,7 @@ bool GUI::update()
             guiNxt.disableStdio();
 
             // Stop all MIDI UARTs
-            for (uint32_t i = 0; i < COIL_COUNT; i++)
-            {
-                coils[i].midi.disable();
-            }
+            guiMidi.disable();
             // UARTs are supposed to be initialized.
             uint32_t nxtUARTBase = guiNxt.getUARTBase();
             uint32_t usbUARTBase = UART0_BASE;
@@ -541,7 +547,7 @@ bool GUI::update()
             // Disable all outputs
             for (uint32_t i = 0; i < COIL_COUNT; i++)
             {
-                coils[i].midi.disable();
+                guiMidi.disable();
                 coils[i].filteredOntimeUS.setTarget(0.0f);
                 coils[i].out.tone(0.0f, 0.0f);
             }
