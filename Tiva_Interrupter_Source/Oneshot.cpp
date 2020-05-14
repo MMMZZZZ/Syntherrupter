@@ -32,7 +32,6 @@ void Oneshot::init(System *sys, uint32_t timerNum, void (*ISR)(void))
     SysCtlDelay(2);
 
     // In case timer was previously configured differently
-    SysCtlPeripheralReset(ONESHOT_MAPPING[oneshotTimerNum][ONESHOT_PORT_SYSCTL_PERIPH]);
     SysCtlPeripheralReset(ONESHOT_MAPPING[oneshotTimerNum][ONESHOT_TIMER_SYSCTL_PERIPH]);
 
     // Timer A generates the ontime, timer B assures enough offtime until the next pulse
@@ -89,21 +88,24 @@ void Oneshot::setMinOfftimeUS(uint32_t minOfftimeUS)
 
 void Oneshot::shot(uint32_t ontimeUS)
 {
-    uint32_t matchValue = ontimeUS * (oneshotSys->getPIOSCFreq() / 1000000) * oneshotReady;
-    if (matchValue)
+    if (oneshotReady)
     {
-        if (matchValue > oneshotMaxOnValue)
+        uint32_t matchValue = ontimeUS * (oneshotSys->getPIOSCFreq() / 1000000);
+        if (matchValue)
         {
-            matchValue = oneshotMaxOnValue;
-        }
-        TimerPrescaleMatchSet(oneshotTimerBase, TIMER_A, ((matchValue & 0xff0000) >> 16));
-        TimerMatchSet(oneshotTimerBase, TIMER_A, (matchValue & 0xffff));
+            if (matchValue > oneshotMaxOnValue)
+            {
+                matchValue = oneshotMaxOnValue;
+            }
+            TimerPrescaleMatchSet(oneshotTimerBase, TIMER_A, ((matchValue & 0xff0000) >> 16));
+            TimerMatchSet(oneshotTimerBase, TIMER_A, (matchValue & 0xffff));
 
-        // Ensure min offtime after the ontime
-        matchValue += oneshotMinOffValue;
-        TimerPrescaleSet(oneshotTimerBase, TIMER_A, ((matchValue & 0xff0000) >> 16));
-        TimerLoadSet(oneshotTimerBase, TIMER_A, (matchValue & 0xffff));
-        oneshotReady = false;
-        TimerEnable(oneshotTimerBase, TIMER_A);
+            // Ensure min offtime after the ontime
+            matchValue += oneshotMinOffValue;
+            TimerPrescaleSet(oneshotTimerBase, TIMER_A, ((matchValue & 0xff0000) >> 16));
+            TimerLoadSet(oneshotTimerBase, TIMER_A, (matchValue & 0xffff));
+            oneshotReady = false;
+            TimerEnable(oneshotTimerBase, TIMER_A);
+        }
     }
 }

@@ -6,4 +6,5 @@
  */
 
 
-#define COIL_COUNT 1
+#define COIL_COUNT 2
+#define MAX_VOICES 5

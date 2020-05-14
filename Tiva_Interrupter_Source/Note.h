@@ -18,18 +18,18 @@ class Note
 public:
     Note();
     virtual ~Note();
-    uint32_t channel = 0;
-    uint32_t number = 0;
-    uint32_t velocity = 0;
-    uint32_t afterTouch = 0;
-    uint32_t ADSRMode = 'A';
-    float rawOntimeUS = 0.0f;
-    float ADSROntimeUS = 0.0f;
-    float finishedOntimeUS = 0.0f;
-    float frequency = 0.0f;
-    float periodUS = 0.0f;
-    float halfPeriodUS = 0.0f;
-    bool fired = false;
+    volatile uint32_t channel        = 0;
+    volatile uint32_t number         = 0;
+    volatile uint32_t velocity       = 0;
+    volatile uint32_t afterTouch     = 0;
+    volatile uint32_t periodUS       = 0;
+    volatile uint32_t halfPeriodUS   = 0;
+    volatile uint32_t ADSRMode       = 'A';
+    volatile float rawOntimeUS       = 0.0f;
+    volatile float ADSROntimeUS      = 0.0f;
+    volatile float finishedOntimeUS  = 0.0f;
+    volatile float frequency         = 0.0f;
+    volatile bool fired              = false;
 };
 
 #endif /* NOTE_H_ */

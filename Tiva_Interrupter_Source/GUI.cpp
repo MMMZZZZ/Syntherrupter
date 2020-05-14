@@ -36,12 +36,12 @@ void GUI::init(System* sys, void (*midiISR)(void), void(*oneshotISRs[])(void))
     guiSys = sys;
     bool cfgInEEPROM = guiCfg.init(guiSys);
     guiNxt.init(guiSys, 3, 115200, guiNxtTimeoutUS);
+    guiMidi.init(guiSys, 0, 115200, midiISR);
     for (uint32_t i = 0; i < COIL_COUNT; i++)
     {
         // As of now all coils share the same init settings. However this is
         // not mandatory.
-        guiMidi.init(guiSys, 0, 115200, midiISR);
-        coils[i].out.init(guiSys, i);
+        //coils[i].out.init(guiSys, i);
         coils[i].one.init(guiSys, i, oneshotISRs[i]);
         coils[i].filteredFrequency.init(guiSys, 1.8f, 5.0f);
         coils[i].filteredOntimeUS.init(guiSys, 2.0f, 30.0f);
@@ -97,8 +97,9 @@ void GUI::init(System* sys, void (*midiISR)(void), void(*oneshotISRs[])(void))
             }
 
             // Apply to coil objects
-            coils[i].out.setMaxDutyPerm(maxDutyPerm);
-            coils[i].out.setMaxOntimeUS(maxOntimeUS);
+            //coils[i].out.setMaxDutyPerm(maxDutyPerm);
+            //coils[i].out.setMaxOntimeUS(maxOntimeUS);
+            coils[i].one.setMaxOntimeUS(maxOntimeUS);
 
             // Send to Nextion
             guiNxt.printf("%s.coil%iOn.val=%i\xff\xff\xff",
@@ -370,7 +371,7 @@ bool GUI::update()
             {
                 float f = coils[i].filteredFrequency.getFiltered();
                 float o = coils[i].filteredOntimeUS.getFiltered();
-                coils[i].out.tone(f, o);
+                //coils[i].out.tone(f, o);
             }
             break;
         }
@@ -415,20 +416,20 @@ bool GUI::update()
             for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
                 // TODO Feed outputs
-                float time = guiSys->getExactSystemTimeUS();
+                uint32_t time = guiSys->getExactSystemTimeUS();
                 for (uint32_t note = 0; note < guiMidi.activeNotes[coil]; note++)
                 {
-                    if (fmodf(time, guiMidi.orderedNotes[coil][note]->periodUS) < guiMidi.orderedNotes[coil][note]->halfPeriodUS)
+                    if ((time % guiMidi.orderedNotes[coil][note]->periodUS) < guiMidi.orderedNotes[coil][note]->halfPeriodUS)
                     {
                         if (!guiMidi.orderedNotes[coil][note]->fired)
                         {
                             guiMidi.orderedNotes[coil][note]->fired = true;
                             coils[coil].one.shot(guiMidi.orderedNotes[coil][note]->finishedOntimeUS);
                         }
-                        else
-                        {
-                            guiMidi.orderedNotes[coil][note]->fired = false;
-                        }
+                    }
+                    else
+                    {
+                        guiMidi.orderedNotes[coil][note]->fired = false;
                     }
                 }
             }
@@ -451,8 +452,9 @@ bool GUI::update()
                     // Coil limits. Number ranges from 1-6 instead of 0-5.
                     number--;
                     guiCfg.coilSettings[number] = data;
-                    coils[number].out.setMaxDutyPerm(guiCfg.getCoilsMaxDutyPerm(number));
-                    coils[number].out.setMaxOntimeUS(guiCfg.getCoilsMaxOntimeUS(number));
+                    //coils[number].out.setMaxDutyPerm(guiCfg.getCoilsMaxDutyPerm(number));
+                    //coils[number].out.setMaxOntimeUS(guiCfg.getCoilsMaxOntimeUS(number));
+                    coils[number].one.setMaxOntimeUS(guiCfg.getCoilsMaxOntimeUS(number));
                 }
                 else if (settings == 0 && number < 3)
                 {
@@ -549,7 +551,7 @@ bool GUI::update()
             {
                 guiMidi.disable();
                 coils[i].filteredOntimeUS.setTarget(0.0f);
-                coils[i].out.tone(0.0f, 0.0f);
+                //coils[i].out.tone(0.0f, 0.0f);
             }
 
             // Update EEPROM

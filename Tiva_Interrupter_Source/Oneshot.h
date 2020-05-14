@@ -53,7 +53,7 @@ private:
     static constexpr uint32_t ONESHOT_TIMER_CONFIG = TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_PWM;
 
     System* oneshotSys;
-    uint32_t oneshotMinOffValue = 1600;
+    uint32_t oneshotMinOffValue = 160;
     uint32_t oneshotMaxOnValue = 1600;
     uint32_t oneshotTimerNum = 0, oneshotTimerBase = 0;
     volatile bool oneshotReady = false;

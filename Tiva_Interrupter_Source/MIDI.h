@@ -46,15 +46,15 @@ public:
     //float getOntimeUS();
     //float getFrequency();
     void setADSR(bool enable);
-    static constexpr uint32_t voiceCount = 4;
     volatile uint32_t activeNotes[COIL_COUNT];
-    volatile Note *orderedNotes[COIL_COUNT][voiceCount];
+    volatile Note *orderedNotes[COIL_COUNT][MAX_VOICES];
 
 private:
     void resetAllValues();
     void updateEffects();
     float getLFOVal(uint32_t channel);
     void removeDeadNotes();
+    void resetNote(uint32_t coil, uint32_t note);
     static constexpr uint32_t MIDI_UART_SYSCTL_PERIPH      = 0;
     static constexpr uint32_t MIDI_UART_BASE               = 1;
     static constexpr uint32_t MIDI_UART_PORT_SYSCTL_PERIPH = 2;
@@ -102,7 +102,7 @@ private:
     System* midiSys;
 
     volatile Channel channels[16];
-    volatile Note notes[COIL_COUNT][voiceCount];
+    volatile Note notes[COIL_COUNT][MAX_VOICES];
     float midiAbsFreq[COIL_COUNT];
     float midiMaxDuty[COIL_COUNT];
     float midiMaxOntimeUS[COIL_COUNT];

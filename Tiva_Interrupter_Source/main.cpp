@@ -15,6 +15,9 @@ System sys;
 GUI gui;
 
 
+/*
+ * Awful. Still coudn't find a better way to use ISRs in C++.
+ */
 void sysTickISR()
 {
     sys.systemTimeIncrement();
