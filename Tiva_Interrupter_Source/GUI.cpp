@@ -25,10 +25,10 @@ void GUI::midiUartISR()
     uartIntStatus = UARTIntStatus(UART0_BASE, true);
     UARTIntClear(UART0_BASE, uartIntStatus);
 
-    while (UARTCharsAvail(UART0_BASE))
+    /*while (UARTCharsAvail(UART0_BASE))
     {
         guiMidi.newData(UARTCharGet(UART0_BASE));
-    }
+    }*/
 }
 
 void GUI::init(System* sys, void (*midiISR)(void), void(*oneshotISRs[])(void))
@@ -417,19 +417,23 @@ bool GUI::update()
             {
                 // TODO Feed outputs
                 uint32_t time = guiSys->getExactSystemTimeUS();
-                for (uint32_t note = 0; note < guiMidi.activeNotes[coil]; note++)
+                if (time - coils[coil].lastFiredUS > coils[coil].minOffUS)
                 {
-                    if ((time % guiMidi.orderedNotes[coil][note]->periodUS) < guiMidi.orderedNotes[coil][note]->halfPeriodUS)
+                    for (uint32_t note = 0; note < guiMidi.activeNotes[coil]; note++)
                     {
-                        if (!guiMidi.orderedNotes[coil][note]->fired)
+                        if ((time % guiMidi.orderedNotes[coil][note]->periodUS) < guiMidi.orderedNotes[coil][note]->halfPeriodUS)
                         {
-                            guiMidi.orderedNotes[coil][note]->fired = true;
-                            coils[coil].one.shot(guiMidi.orderedNotes[coil][note]->finishedOntimeUS);
+                            if (!guiMidi.orderedNotes[coil][note]->fired)
+                            {
+                                guiMidi.orderedNotes[coil][note]->fired = true;
+                                coils[coil].one.shot(guiMidi.orderedNotes[coil][note]->finishedOntimeUS);
+                                coils[coil].lastFiredUS = time + guiMidi.orderedNotes[coil][note]->finishedOntimeUS;
+                            }
                         }
-                    }
-                    else
-                    {
-                        guiMidi.orderedNotes[coil][note]->fired = false;
+                        else
+                        {
+                            guiMidi.orderedNotes[coil][note]->fired = false;
+                        }
                     }
                 }
             }

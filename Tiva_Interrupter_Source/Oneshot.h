@@ -50,13 +50,12 @@ private:
          {SYSCTL_PERIPH_TIMER4, TIMER4_BASE, SYSCTL_PERIPH_GPIOM, GPIO_PORTM_BASE, GPIO_PIN_4, GPIO_PM4_T4CCP0},
          {SYSCTL_PERIPH_TIMER5, TIMER5_BASE, SYSCTL_PERIPH_GPIOM, GPIO_PORTM_BASE, GPIO_PIN_6, GPIO_PM6_T5CCP0}
     };
-    static constexpr uint32_t ONESHOT_TIMER_CONFIG = TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_PWM;
+    static constexpr uint32_t ONESHOT_TIMER_CONFIG = (TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_ONE_SHOT | TIMER_CFG_A_ACT_SETCLRTO); //TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_PWM;
 
     System* oneshotSys;
     uint32_t oneshotMinOffValue = 160;
     uint32_t oneshotMaxOnValue = 1600;
     uint32_t oneshotTimerNum = 0, oneshotTimerBase = 0;
-    volatile bool oneshotReady = false;
 };
 
 #endif /* ONESHOT_H_ */

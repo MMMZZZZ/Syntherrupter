@@ -111,48 +111,16 @@ private:
     bool midiEnabled = false;
 
     // Values updated inside MIDI ISR
-    volatile bool midiISRADSREnabled        = false;
     volatile bool midiISRNewData            = true;
-    volatile bool midiISRSustainPedal       = false;
-    volatile bool midiISRDamperPedal        = false;
-    volatile bool midiISRNoteNew            = false;
-    volatile int32_t midiISRPitchBend       = 0;
-    volatile uint32_t midiISRAfterTouch     = 0;
-    volatile uint32_t midiISRChnVol         = 127;
     volatile uint32_t midiISRDataIndex      = 0;
     volatile uint32_t midiISRData[3]        = {0, 0, 0};
-    volatile uint32_t midiISRModWheel       = 0;
-    volatile uint32_t midiISRNoteAfterTouch = 0;
-    volatile uint32_t midiISRNoteNum        = 0;
-    volatile uint32_t midiISRNoteVel        = 0;
-    volatile uint32_t midiISRProgram        = 0;
-    volatile uint32_t midiChannels          = 0xff;
-    volatile uint8_t midiChannelOutputMapping[16] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-                                                     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+    volatile uint32_t midiChannel = 0;
 
     bool midiADSREnabled  = false;
-    bool midiADSRNextMode = false;
-    float midiADSROntimeUS = 0.0f;
-    float midiADSRResolutionUS = 10000.0f;
     float midiADSRTimeUS = 0.0f;
-    uint32_t midiNoteVelPedal      = 0;
-    uint32_t midiADSRMode = 'R';
     volatile bool midiPlaying = false;
-    float midiOntimeUSMax = 0.0f;
-    float midiDutyMax = 0.0f;
     uint32_t midiUARTNum;
     volatile uint32_t midiUARTBase;
-    uint32_t midiChnVol = 127;
-    uint32_t midiNoteNum           = 0;
-    uint32_t midiNoteVel           = 0;
-    uint32_t midiNoteAfterTouch    = 0;
-    uint32_t midiAfterTouch        = 0;
-    uint32_t midiModWheel          = 0;
-    int32_t  midiPitchBend         = 0;
-    uint32_t midiProgram           = 0;
-    bool midiSustainPedal          = false;
-    float midiFrequency            = 0.0f;
-    float midiOntimeUS             = 0.0f;
     float midiLFOPeriodUS          = 200000.0f;
 };
 
