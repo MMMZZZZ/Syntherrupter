@@ -29,7 +29,7 @@ class Oneshot
 public:
     Oneshot();
     virtual ~Oneshot();
-    void init(System *sys, uint32_t timer, void (*ISR)(void));
+    void init(System *sys, uint32_t timer);
     void setMaxOntimeUS(uint32_t maxOntimeUS);
     void setMinOfftimeUS(uint32_t minOfftimeUS);
     void shot(uint32_t ontimeUS);

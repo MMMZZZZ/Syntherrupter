@@ -19,7 +19,7 @@ Oneshot::~Oneshot()
     // TODO Auto-generated destructor stub
 }
 
-void Oneshot::init(System *sys, uint32_t timerNum, void (*ISR)(void))
+void Oneshot::init(System *sys, uint32_t timerNum)
 {
     oneshotSys = sys;
     oneshotTimerNum = timerNum;

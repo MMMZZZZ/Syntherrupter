@@ -37,7 +37,7 @@ class GUI
 public:
     GUI();
     virtual ~GUI();
-    void init(System* sys, void (*midiISR)(void), void(*oneshotISRs[])(void));
+    void init(System* sys, void (*midiISR)(void));
     bool update();
     void applyOutput();
     void setError(const char* err);

@@ -126,7 +126,7 @@ void MIDI::newData(uint32_t c)
                             if (targetNote >= MAX_VOICES)
                             {
                                 targetNote = MAX_VOICES - 1;
-                                volatile Note * tempNote = orderedNotes[coil][0];
+                                Note * tempNote = orderedNotes[coil][0];
                                 for (uint32_t note = 1; note < MAX_VOICES; note++)
                                 {
                                     orderedNotes[coil][note - 1] = orderedNotes[coil][note];
@@ -301,10 +301,10 @@ void MIDI::enable()
 void MIDI::disable()
 {
     // Disable and clear interrupts
-    IntDisable(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_INT]);
+    //IntDisable(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_INT]);
 
-    uint32_t uartIntStatus = UARTIntStatus(midiUARTBase, true);
-    UARTIntClear(midiUARTBase, uartIntStatus);
+    //uint32_t uartIntStatus = UARTIntStatus(midiUARTBase, true);
+    //UARTIntClear(midiUARTBase, uartIntStatus);
 
     midiEnabled = false;
 }
@@ -680,7 +680,7 @@ void MIDI::removeDeadNotes()
             }
             else if (deadNotes)
             {
-                volatile Note *tempNote              = orderedNotes[coil][note - deadNotes];
+                Note *tempNote                       = orderedNotes[coil][note - deadNotes];
                 orderedNotes[coil][note - deadNotes] = orderedNotes[coil][note];
                 orderedNotes[coil][note]             = tempNote;
             }

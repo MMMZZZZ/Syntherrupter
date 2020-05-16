@@ -31,7 +31,7 @@ void GUI::midiUartISR()
     }*/
 }
 
-void GUI::init(System* sys, void (*midiISR)(void), void(*oneshotISRs[])(void))
+void GUI::init(System* sys, void (*midiISR)(void))
 {
     guiSys = sys;
     bool cfgInEEPROM = guiCfg.init(guiSys);
@@ -42,7 +42,7 @@ void GUI::init(System* sys, void (*midiISR)(void), void(*oneshotISRs[])(void))
         // As of now all coils share the same init settings. However this is
         // not mandatory.
         //coils[i].out.init(guiSys, i);
-        coils[i].one.init(guiSys, i, oneshotISRs[i]);
+        coils[i].one.init(guiSys, i);
         coils[i].filteredFrequency.init(guiSys, 1.8f, 5.0f);
         coils[i].filteredOntimeUS.init(guiSys, 2.0f, 30.0f);
     }
@@ -344,6 +344,7 @@ bool GUI::update()
                 guiCommand = 0;
             }
             guiMode = idle;
+            break;
         }
 
         case simple:
@@ -547,6 +548,7 @@ bool GUI::update()
                     SysCtlReset();
                 }
             }
+            break;
         }
         case exit:
         {
@@ -563,6 +565,7 @@ bool GUI::update()
 
             // Now we can enter idle
             guiMode = idle;
+            break;
         }
         default: // includes idle
         {

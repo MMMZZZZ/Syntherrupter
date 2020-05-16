@@ -46,8 +46,8 @@ public:
     //float getOntimeUS();
     //float getFrequency();
     void setADSR(bool enable);
-    volatile uint32_t activeNotes[COIL_COUNT];
-    volatile Note *orderedNotes[COIL_COUNT][MAX_VOICES];
+    uint32_t activeNotes[COIL_COUNT];
+    Note *orderedNotes[COIL_COUNT][MAX_VOICES];
 
 private:
     void resetAllValues();
@@ -101,8 +101,8 @@ private:
     };
     System* midiSys;
 
-    volatile Channel channels[16];
-    volatile Note notes[COIL_COUNT][MAX_VOICES];
+    Channel channels[16];
+    Note notes[COIL_COUNT][MAX_VOICES];
     float midiAbsFreq[COIL_COUNT];
     float midiMaxDuty[COIL_COUNT];
     float midiMaxOntimeUS[COIL_COUNT];
@@ -111,16 +111,16 @@ private:
     bool midiEnabled = false;
 
     // Values updated inside MIDI ISR
-    volatile bool midiISRNewData            = true;
-    volatile uint32_t midiISRDataIndex      = 0;
-    volatile uint32_t midiISRData[3]        = {0, 0, 0};
-    volatile uint32_t midiChannel = 0;
+    bool midiISRNewData            = true;
+    uint32_t midiISRDataIndex      = 0;
+    uint32_t midiISRData[3]        = {0, 0, 0};
+    uint32_t midiChannel = 0;
 
     bool midiADSREnabled  = false;
     float midiADSRTimeUS = 0.0f;
-    volatile bool midiPlaying = false;
-    uint32_t midiUARTNum;
-    volatile uint32_t midiUARTBase;
+    bool midiPlaying = false;
+    uint32_t midiUARTNum = 0;
+    uint32_t midiUARTBase = 0;
     float midiLFOPeriodUS          = 200000.0f;
 };
 
