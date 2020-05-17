@@ -21,7 +21,6 @@ GUI gui;
 void sysTickISR()
 {
     sys.systemTimeIncrement();
-
 }
 
 void midiUartISR()

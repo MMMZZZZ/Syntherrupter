@@ -27,8 +27,9 @@ public:
     Filter   filteredOntimeUS;
     Filter   filteredFrequency;
 
-    uint32_t minOffUS = 50;
-    uint32_t lastFiredUS = 0;
+    uint32_t maxDutyPerm = 10;
+    uint32_t minOffUS    = 50;
+    uint32_t nextAllowedFireUS = 0;
 };
 
 #endif /* COIL_H_ */

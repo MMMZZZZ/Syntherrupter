@@ -34,27 +34,13 @@ void Oneshot::init(System *sys, uint32_t timerNum)
     // In case timer was previously configured differently
     SysCtlPeripheralReset(ONESHOT_MAPPING[oneshotTimerNum][ONESHOT_TIMER_SYSCTL_PERIPH]);
 
+    // Make sure the GPIO Pin is inactive while (re)configuring the timer
+    GPIOPinTypeGPIOOutput(ONESHOT_MAPPING[oneshotTimerNum][ONESHOT_PORT_BASE], ONESHOT_MAPPING[oneshotTimerNum][ONESHOT_PIN]);
+    GPIOPinWrite(ONESHOT_MAPPING[oneshotTimerNum][ONESHOT_PORT_BASE], ONESHOT_MAPPING[oneshotTimerNum][ONESHOT_PIN], 0);
+
     // Timer A generates the ontime, timer B assures enough offtime until the next pulse
     TimerConfigure(oneshotTimerBase, ONESHOT_TIMER_CONFIG);
     TimerClockSourceSet(oneshotTimerBase, TIMER_CLOCK_PIOSC);
-
-    // Invert output which means enable on match, clear on reload.
-    //TimerControlLevel(oneshotTimerBase, TIMER_A, true);
-
-    // ISR stops the timer (artificial oneshot mode), and allows to set new values.
-    //TimerControlEvent(oneshotTimerBase, TIMER_A, TIMER_EVENT_NEG_EDGE);
-    //TimerIntRegister(oneshotTimerBase, TIMER_A, ISR);
-    //TimerIntEnable(oneshotTimerBase, TIMER_CAPA_EVENT);
-
-    // Make sure output is low before enabling the GPIO Output
-    //TimerPrescaleSet(oneshotTimerBase, TIMER_A, 0);
-    //TimerLoadSet(oneshotTimerBase, TIMER_A, 65535);
-    //TimerPrescaleMatchSet(oneshotTimerBase, TIMER_A, 0xff);
-    //TimerMatchSet(oneshotTimerBase, TIMER_A, 0xff);
-    //TimerEnable(oneshotTimerBase, TIMER_A);
-    // while (!oneshotReady);
-    // while (GPIOPinRead(ONESHOT_MAPPING[oneshotTimerNum][ONESHOT_PORT_BASE], ONESHOT_MAPPING[oneshotTimerNum][ONESHOT_PIN]));
-    // TimerDisable(oneshotTimerBase, TIMER_A);
 
     shot(10);
 
@@ -114,15 +100,5 @@ void Oneshot::shot(uint32_t ontimeUS)
 
         // Enable the Timer
         HWREG(oneshotTimerBase + TIMER_O_CTL) |= TIMER_CTL_TAEN;
-
-        /*TimerPrescaleMatchSet(oneshotTimerBase, TIMER_A, ((matchValue & 0xff0000) >> 16));
-        TimerMatchSet(oneshotTimerBase, TIMER_A, (matchValue & 0xffff));
-
-        // Ensure min offtime after the ontime
-        matchValue += oneshotMinOffValue;
-        TimerPrescaleSet(oneshotTimerBase, TIMER_A, ((matchValue & 0xff0000) >> 16));
-        TimerLoadSet(oneshotTimerBase, TIMER_A, (matchValue & 0xffff));
-        oneshotReady = false;
-        TimerEnable(oneshotTimerBase, TIMER_A);*/
     }
 }

@@ -9,13 +9,11 @@
 
 GUI::GUI()
 {
-    // TODO Auto-generated constructor stub
 
 }
 
 GUI::~GUI()
 {
-    // TODO Auto-generated destructor stub
 }
 
 void GUI::midiUartISR()
@@ -39,10 +37,8 @@ void GUI::init(System* sys, void (*midiISR)(void))
     guiMidi.init(guiSys, 0, 115200, midiISR);
     for (uint32_t i = 0; i < COIL_COUNT; i++)
     {
-        // As of now all coils share the same init settings. However this is
+        // As of now all coils share the same filter settings. However this is
         // not mandatory.
-        //coils[i].out.init(guiSys, i);
-        coils[i].one.init(guiSys, i);
         coils[i].filteredFrequency.init(guiSys, 1.8f, 5.0f);
         coils[i].filteredOntimeUS.init(guiSys, 2.0f, 30.0f);
     }
@@ -56,8 +52,6 @@ void GUI::init(System* sys, void (*midiISR)(void))
         guiNxt.setVal("comOk", 1);
         guiSys->delayUS(10000);
     }
-
-    //guiMode = nxtFWUpdate;
 
     /*
      * If there is a valid configuration in the EEPROM, load it and send it to
@@ -76,12 +70,12 @@ void GUI::init(System* sys, void (*midiISR)(void))
 
         // Settings of all coils
         const char *AllCoilSettings = "TC_Settings";
-        for (uint32_t i = 0; i < COIL_COUNT; i++)
+        for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
         {
             // Load settings
-            uint32_t maxOntimeUS = guiCfg.getCoilsMaxOntimeUS(i);
-            uint32_t maxBPS      = guiCfg.getCoilsMaxBPS(i);
-            uint32_t maxDutyPerm = guiCfg.getCoilsMaxDutyPerm(i);
+            uint32_t maxOntimeUS = guiCfg.getCoilsMaxOntimeUS(coil);
+            uint32_t maxBPS      = guiCfg.getCoilsMaxBPS(coil);
+            uint32_t maxDutyPerm = guiCfg.getCoilsMaxDutyPerm(coil);
 
             if (maxOntimeUS > allCoilsMaxOntimeUS)
             {
@@ -97,30 +91,32 @@ void GUI::init(System* sys, void (*midiISR)(void))
             }
 
             // Apply to coil objects
-            //coils[i].out.setMaxDutyPerm(maxDutyPerm);
-            //coils[i].out.setMaxOntimeUS(maxOntimeUS);
-            coils[i].one.setMaxOntimeUS(maxOntimeUS);
+            guiMidi.setTotalMaxDutyPerm(coil, maxDutyPerm);
+            coils[coil].maxDutyPerm = maxDutyPerm;
+            coils[coil].out.setMaxDutyPerm(maxDutyPerm);
+            coils[coil].out.setMaxOntimeUS(maxOntimeUS);
+            coils[coil].one.setMaxOntimeUS(maxOntimeUS);
 
             // Send to Nextion
             guiNxt.printf("%s.coil%iOn.val=%i\xff\xff\xff",
-                          AllCoilSettings, i + 1, maxOntimeUS);
+                          AllCoilSettings, coil + 1, maxOntimeUS);
             guiNxt.printf("%s.coil%iBPS.val=%i\xff\xff\xff",
-                          AllCoilSettings, i + 1, maxBPS);
+                          AllCoilSettings, coil + 1, maxBPS);
             guiNxt.printf("%s.coil%iDuty.val=%i\xff\xff\xff",
-                          AllCoilSettings, i + 1, maxDutyPerm);
+                          AllCoilSettings, coil + 1, maxDutyPerm);
             // Give time to the UART to send the data
             guiSys->delayUS(10000);
         }
 
         // Settings of the 3 users
         const char *AllUsersPage = "User_Settings";
-        for (uint32_t i = 0; i < 3; i++)
+        for (uint32_t user = 0; user < 3; user++)
         {
-            uint32_t maxOntimeUS = guiCfg.getUsersMaxOntimeUS(i);
-            uint32_t maxBPS      = guiCfg.getUsersMaxBPS(i);
-            uint32_t maxDutyPerm = guiCfg.getUsersMaxDutyPerm(i);
+            uint32_t maxOntimeUS = guiCfg.getUsersMaxOntimeUS(user);
+            uint32_t maxBPS      = guiCfg.getUsersMaxBPS(user);
+            uint32_t maxDutyPerm = guiCfg.getUsersMaxDutyPerm(user);
 
-            if (i == 2)
+            if (user == 2)
             {
                 maxOntimeUS = allCoilsMaxOntimeUS;
                 maxBPS      = allCoilsMaxBPS;
@@ -128,15 +124,15 @@ void GUI::init(System* sys, void (*midiISR)(void))
             }
 
             guiNxt.printf("%s.u%iName.txt=\"%s\"\xff\xff\xff",
-                          AllUsersPage, i, guiCfg.userNames[i]);
+                          AllUsersPage, user, guiCfg.userNames[user]);
             guiNxt.printf("%s.u%iCode.txt=\"%s\"\xff\xff\xff",
-                          AllUsersPage, i, guiCfg.userPwds[i]);
+                          AllUsersPage, user, guiCfg.userPwds[user]);
             guiNxt.printf("%s.u%iOntime.val=%i\xff\xff\xff",
-                          AllUsersPage, i, maxOntimeUS);
+                          AllUsersPage, user, maxOntimeUS);
             guiNxt.printf("%s.u%iBPS.val=%i\xff\xff\xff",
-                          AllUsersPage, i, maxBPS);
+                          AllUsersPage, user, maxBPS);
             guiNxt.printf("%s.u%iDuty.val=%i\xff\xff\xff",
-                          AllUsersPage, i, maxDutyPerm);
+                          AllUsersPage, user, maxDutyPerm);
             // Give time to the UART to send the data
             guiSys->delayUS(10000);
         }
@@ -225,11 +221,11 @@ bool GUI::update()
                 }
                 else if (modeByte0 == 's' && modeByte1 == 'i')
                 {
-                    guiMode = simple;
+                    guiMode = enterSimple;
                 }
                 else if (modeByte0 == 'm' && modeByte1 == 'l')
                 {
-                    guiMode = midiLive;
+                    guiMode = enterMidiLive;
                 }
                 else if (modeByte0 == 'u' && modeByte1 == 's')
                 {
@@ -347,6 +343,21 @@ bool GUI::update()
             break;
         }
 
+        case enterSimple:
+        {
+            /*
+             * In simple mode we use the Output class to generate interrupter
+             * signals. It is easier and more efficient than the Oneshot class,
+             * but doesn't allow polyphony.
+             */
+            for (uint32_t i = 0; i < COIL_COUNT; i++)
+            {
+                coils[i].out.init(guiSys, i);
+            }
+            guiMode = simple;
+            break;
+        }
+
         case simple:
         {
             // Apply new data
@@ -372,10 +383,27 @@ bool GUI::update()
             {
                 float f = coils[i].filteredFrequency.getFiltered();
                 float o = coils[i].filteredOntimeUS.getFiltered();
-                //coils[i].out.tone(f, o);
+                coils[i].out.tone(f, o);
             }
             break;
         }
+
+        case enterMidiLive:
+        {
+            /*
+             * In midiLive mode we use the Oneshot class to generate polyphonic
+             * interrupter signals. While easier and more efficient to use,
+             * this is not possible with the Output class.
+             */
+            for (uint32_t i = 0; i < COIL_COUNT; i++)
+            {
+                coils[i].one.init(guiSys, i);
+                timesIndex[i] = 0;
+            }
+            guiMode = midiLive;
+            break;
+        }
+
         case midiLive:
         {
             // Apply new data
@@ -416,25 +444,36 @@ bool GUI::update()
             guiMidi.process();
             for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
-                // TODO Feed outputs
-                uint32_t time = guiSys->getExactSystemTimeUS();
-                if (time - coils[coil].lastFiredUS > coils[coil].minOffUS)
+                uint32_t timeUS = guiSys->getExactSystemTimeUS();
+                if (timeUS > coils[coil].nextAllowedFireUS)
                 {
-                    for (uint32_t note = 0; note < guiMidi.activeNotes[coil]; note++)
+                    uint32_t highestOntime = 0;
+                    for (uint32_t note = 0; note < MAX_VOICES; note++)
                     {
-                        if ((time % guiMidi.orderedNotes[coil][note]->periodUS) < guiMidi.orderedNotes[coil][note]->halfPeriodUS)
+                        if (note < guiMidi.activeNotes[coil])
                         {
-                            if (!guiMidi.orderedNotes[coil][note]->fired)
+                            Note *currentNote = guiMidi.orderedNotes[coil][note];
+                            if ((timeUS % currentNote->periodUS) < currentNote->halfPeriodUS)
                             {
-                                guiMidi.orderedNotes[coil][note]->fired = true;
-                                coils[coil].one.shot(guiMidi.orderedNotes[coil][note]->finishedOntimeUS);
-                                coils[coil].lastFiredUS = time + guiMidi.orderedNotes[coil][note]->finishedOntimeUS;
+                                if (!currentNote->fired)
+                                {
+                                    currentNote->fired = true;
+                                    if (currentNote->finishedOntimeUS > highestOntime)
+                                    {
+                                        highestOntime = currentNote->finishedOntimeUS;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                currentNote->fired = false;
                             }
                         }
-                        else
-                        {
-                            guiMidi.orderedNotes[coil][note]->fired = false;
-                        }
+                    }
+                    if (highestOntime)
+                    {
+                        coils[coil].one.shot(highestOntime);
+                        coils[coil].nextAllowedFireUS = timeUS + highestOntime + coils[coil].minOffUS;
                     }
                 }
             }

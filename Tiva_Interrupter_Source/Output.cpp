@@ -26,13 +26,18 @@ void Output::init(System* sys, uint32_t timerNum)
     // Timer base stored separately for better readability (used very often).
     outputTimerBase = OUTPUT_MAPPING[outputTimerNum][OUTPUT_TIMER_BASE];
 
+    // Allow reinitialization of timer and GPIO hardware to switch between oneshot and periodic operation.
+    // There might be better ways to do, this was however the easiest with the existing code.
     SysCtlPeripheralEnable(OUTPUT_MAPPING[outputTimerNum][OUTPUT_TIMER_SYSCTL_PERIPH]);
     SysCtlPeripheralEnable(OUTPUT_MAPPING[outputTimerNum][OUTPUT_PORT_SYSCTL_PERIPH]);
     SysCtlDelay(2);
 
     // In case timer was previously configured differently
-    SysCtlPeripheralReset(OUTPUT_MAPPING[outputTimerNum][OUTPUT_PORT_SYSCTL_PERIPH]);
     SysCtlPeripheralReset(OUTPUT_MAPPING[outputTimerNum][OUTPUT_TIMER_SYSCTL_PERIPH]);
+
+    // Make sure the GPIO Pin is inactive while (re)configuring the timer
+    GPIOPinTypeGPIOOutput(OUTPUT_MAPPING[outputTimerNum][OUTPUT_PORT_BASE], OUTPUT_MAPPING[outputTimerNum][OUTPUT_PIN]);
+    GPIOPinWrite(OUTPUT_MAPPING[outputTimerNum][OUTPUT_PORT_BASE], OUTPUT_MAPPING[outputTimerNum][OUTPUT_PIN], 0);
 
     TimerConfigure(outputTimerBase, OUTPUT_TIMER_CONFIG);
     TimerClockSourceSet(outputTimerBase, TIMER_CLOCK_PIOSC);
@@ -43,7 +48,7 @@ void Output::init(System* sys, uint32_t timerNum)
 
     // Make sure output is low before enabling the GPIO Output
     TimerPrescaleSet(outputTimerBase, TIMER_A, 0);
-    TimerLoadSet(outputTimerBase, TIMER_A, 65535);
+    TimerLoadSet(outputTimerBase, TIMER_A, 0xffff);
     TimerPrescaleMatchSet(outputTimerBase, TIMER_A, 0xff);
     TimerMatchSet(outputTimerBase, TIMER_A, 0xff);
     TimerEnable(outputTimerBase, TIMER_A);

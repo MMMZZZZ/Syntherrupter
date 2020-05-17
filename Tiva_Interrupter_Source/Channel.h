@@ -18,12 +18,12 @@ class Channel
 public:
     Channel();
     virtual ~Channel();
-    uint32_t volume = 0;
-    uint32_t modulation = 0;
     uint32_t channelAfterTouch = 0;
     uint32_t program = 127;
     uint32_t coils = 0;
     int32_t pitchBend = 0;
+    float volume = 0.0f;
+    float modulation = 0.0f;
     bool sustainPedal = false;
     bool damperPedal  = false;
 };

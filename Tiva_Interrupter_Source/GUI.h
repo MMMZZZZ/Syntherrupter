@@ -24,7 +24,9 @@
 enum Mode {
     exit,
     idle,
+    enterSimple,
     simple,
+    enterMidiLive,
     midiLive,
     userSelect,
     settings,
@@ -51,6 +53,9 @@ private:
     Nextion guiNxt;
     EEPROMSettings guiCfg;
     MIDI guiMidi;
+
+    uint32_t times[COIL_COUNT][1000];
+    uint32_t timesIndex[COIL_COUNT];
 
     uint32_t guiUserMaxOntimeUS = 0;
     uint32_t guiUserMaxBPS = 0;

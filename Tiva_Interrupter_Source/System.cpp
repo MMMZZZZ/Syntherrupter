@@ -94,12 +94,14 @@ uint32_t System::getExactSystemTimeUS()
     // Different variables needed to prevent sync issues.
 
     uint32_t newExactTime = sysExactTime + (SysTickPeriodGet() - SysTickValueGet()) / (sysClockFreq / 1000000);
-    while (newExactTime + sysTickHalfRes < sysTime)
+    while ((newExactTime + sysTickHalfRes) < sysTime)
     {
         sysExactTime += sysTickResUS;
         newExactTime += sysTickResUS;
     }
     return newExactTime;
+
+    // If ISR
 }
 
 void System::delayUS(uint32_t us)
