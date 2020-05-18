@@ -98,14 +98,14 @@ uint32_t EEPROMSettings::getCoilsMaxDutyPerm(uint32_t coil)
     return duty;
 }
 
-uint32_t EEPROMSettings::getCoilsMaxBPS(uint32_t coil)
+uint32_t EEPROMSettings::getCoilsMinOffUS(uint32_t coil)
 {
-    uint32_t bps = 0;
+    uint32_t minOffUS = 0;
     if (coil < 6)
     {
-        bps = ((coilSettings[coil] & 0x007ff000) >> 12) * 10;
+        minOffUS = ((coilSettings[coil] & 0x007ff000) >> 12);
     }
-    return bps;
+    return minOffUS;
 }
 
 uint32_t EEPROMSettings::getCoilsMaxOntimeUS(uint32_t coil)

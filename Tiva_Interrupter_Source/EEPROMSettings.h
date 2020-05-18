@@ -29,7 +29,7 @@ public:
     uint32_t getUsersMaxBPS(uint32_t user);
     uint32_t getUsersMaxDutyPerm(uint32_t user);
     uint32_t getCoilsMaxOntimeUS(uint32_t coil);
-    uint32_t getCoilsMaxBPS(uint32_t coil);
+    uint32_t getCoilsMinOffUS(uint32_t coil);
     uint32_t getCoilsMaxDutyPerm(uint32_t coil);
     uint32_t getStngsHoldTime();
     uint32_t getStngsBrightness();

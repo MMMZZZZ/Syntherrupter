@@ -63,9 +63,8 @@ void GUI::init(System* sys, void (*midiISR)(void))
      */
     if (cfgInEEPROM)
     {
-        // User 2 Settings defaults to the max coil settings.
+        // User 2 ontime and duty are determined by the max coil settings.
         uint32_t allCoilsMaxOntimeUS = 0;
-        uint32_t allCoilsMaxBPS      = 0;
         uint32_t allCoilsMaxDutyPerm = 0;
 
         // Settings of all coils
@@ -74,16 +73,12 @@ void GUI::init(System* sys, void (*midiISR)(void))
         {
             // Load settings
             uint32_t maxOntimeUS = guiCfg.getCoilsMaxOntimeUS(coil);
-            uint32_t maxBPS      = guiCfg.getCoilsMaxBPS(coil);
+            uint32_t minOffUS    = guiCfg.getCoilsMinOffUS(coil);
             uint32_t maxDutyPerm = guiCfg.getCoilsMaxDutyPerm(coil);
 
             if (maxOntimeUS > allCoilsMaxOntimeUS)
             {
                 allCoilsMaxOntimeUS = maxOntimeUS;
-            }
-            if (maxBPS > allCoilsMaxBPS)
-            {
-                allCoilsMaxBPS = maxBPS;
             }
             if (maxDutyPerm > allCoilsMaxDutyPerm)
             {
@@ -92,16 +87,16 @@ void GUI::init(System* sys, void (*midiISR)(void))
 
             // Apply to coil objects
             guiMidi.setTotalMaxDutyPerm(coil, maxDutyPerm);
-            coils[coil].maxDutyPerm = maxDutyPerm;
             coils[coil].out.setMaxDutyPerm(maxDutyPerm);
             coils[coil].out.setMaxOntimeUS(maxOntimeUS);
             coils[coil].one.setMaxOntimeUS(maxOntimeUS);
+            coils[coil].minOffUS = minOffUS;
 
             // Send to Nextion
             guiNxt.printf("%s.coil%iOn.val=%i\xff\xff\xff",
                           AllCoilSettings, coil + 1, maxOntimeUS);
-            guiNxt.printf("%s.coil%iBPS.val=%i\xff\xff\xff",
-                          AllCoilSettings, coil + 1, maxBPS);
+            guiNxt.printf("%s.coil%iMinOff.val=%i\xff\xff\xff",
+                          AllCoilSettings, coil + 1, minOffUS);
             guiNxt.printf("%s.coil%iDuty.val=%i\xff\xff\xff",
                           AllCoilSettings, coil + 1, maxDutyPerm);
             // Give time to the UART to send the data
@@ -119,7 +114,6 @@ void GUI::init(System* sys, void (*midiISR)(void))
             if (user == 2)
             {
                 maxOntimeUS = allCoilsMaxOntimeUS;
-                maxBPS      = allCoilsMaxBPS;
                 maxDutyPerm = allCoilsMaxDutyPerm;
             }
 
@@ -485,8 +479,8 @@ bool GUI::update()
             {
                 // Coil, user or other settings changed.
                 // Data format documented in separate file.
-                uint32_t settings = (guiCommandData[0] & (0b11 << 6)) >> 6;
-                uint32_t number =    guiCommandData[0] & 0b11111;
+                uint32_t settings = (guiCommandData[0] & 0b11000000) >> 6;
+                uint32_t number =    guiCommandData[0] & 0b00111111;
                 uint32_t data   =   (guiCommandData[4] << 24)
                                   + (guiCommandData[3] << 16)
                                   + (guiCommandData[2] << 8)
@@ -496,8 +490,10 @@ bool GUI::update()
                     // Coil limits. Number ranges from 1-6 instead of 0-5.
                     number--;
                     guiCfg.coilSettings[number] = data;
-                    //coils[number].out.setMaxDutyPerm(guiCfg.getCoilsMaxDutyPerm(number));
-                    //coils[number].out.setMaxOntimeUS(guiCfg.getCoilsMaxOntimeUS(number));
+                    coils[number].minOffUS = guiCfg.getCoilsMinOffUS(number);
+                    guiMidi.setTotalMaxDutyPerm(number, guiCfg.getCoilsMaxDutyPerm(number));
+                    coils[number].out.setMaxDutyPerm(guiCfg.getCoilsMaxDutyPerm(number));
+                    coils[number].out.setMaxOntimeUS(guiCfg.getCoilsMaxOntimeUS(number));
                     coils[number].one.setMaxOntimeUS(guiCfg.getCoilsMaxOntimeUS(number));
                 }
                 else if (settings == 0 && number < 3)
@@ -510,6 +506,7 @@ bool GUI::update()
                 }
                 else if (settings == 2 && number < 10)
                 {
+                    // Other (general) settings
                     guiCfg.otherSettings[number] = data;
                 }
                 // Data applied; clear command byte.
@@ -518,8 +515,8 @@ bool GUI::update()
             else if (guiCommand == 'u')
             {
                 uint32_t length = (guiCommandData[0] & 0b00011111) + 1;
-                uint32_t user   = (guiCommandData[0] & 0b11000000) >> 6;
                 bool     pwd    =  guiCommandData[0] & 0b00100000;
+                uint32_t user   = (guiCommandData[0] & 0b11000000) >> 6;
                 if (pwd)
                 {
                     // Data contains user password
