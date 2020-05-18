@@ -9,19 +9,24 @@
 #define GUI_H_
 
 
+#include "InterrupterConfig.h"
+#include "EEPROMSettings.h"
 #include "stdint.h"
 #include "stdbool.h"
 #include "driverlib/uart.h"
 #include "System.h"
 #include "Nextion.h"
 #include "Coil.h"
-#include "Configuration.h"
+#include "MIDI.h"
+
 
 // Modes
 enum Mode {
     exit,
     idle,
+    enterSimple,
     simple,
+    enterMidiLive,
     midiLive,
     userSelect,
     settings,
@@ -40,14 +45,17 @@ public:
     void setError(const char* err);
     void showError();
     void midiUartISR();
+    Coil coils[COIL_COUNT];
 private:
     bool checkValue(uint32_t val);
 
     System* guiSys;
     Nextion guiNxt;
-    Configuration guiCfg;
-    static constexpr uint32_t guiCoilCount = 1;
-    Coil guiCoils[guiCoilCount];
+    EEPROMSettings guiCfg;
+    MIDI guiMidi;
+
+    uint32_t times[COIL_COUNT][1000];
+    uint32_t timesIndex[COIL_COUNT];
 
     uint32_t guiUserMaxOntimeUS = 0;
     uint32_t guiUserMaxBPS = 0;

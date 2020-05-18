@@ -33,15 +33,17 @@ public:
     void systemTimeIncrement();
     void systemTimeReset();
     uint32_t getSystemTimeUS();
-    float getExactSystemTimeUS();
+    uint32_t getExactSystemTimeUS();
     void setSystemTimeResUS(uint32_t us);
     uint32_t getSystemTimeResUS();
     void delayUS(uint32_t us);
 private:
-    uint32_t sysClockFreq = 0;
+    static constexpr uint32_t sysClockFreq = 120000000;
     static constexpr uint32_t sysPIOSCFreq = 16000000;
-    uint32_t sysTime = 0;
-    uint32_t sysTickResUS = 50;
+    volatile uint32_t sysTime = 0;
+    volatile uint32_t sysTickResUS = 50;
+    uint32_t sysTickHalfRes = sysTickResUS / 2;
+    uint32_t sysExactTime = 0;
 
     // Peripherals that should be turned off in case of an error
     static constexpr uint_fast8_t sysPeripheralsCount = 43;

@@ -1,12 +1,12 @@
 /*
- * EEPROM.h
+ * EEPROMSettings.h
  *
  *  Created on: 28.04.2020
  *      Author: Max Zuidberg
  */
 
-#ifndef CONFIGURATION_H_
-#define CONFIGURATION_H_
+#ifndef EEPROMSETTINGS_H_
+#define EEPROMSETTINGS_H_
 
 
 #include <stdbool.h>
@@ -16,11 +16,11 @@
 #include "System.h"
 
 
-class Configuration
+class EEPROMSettings
 {
 public:
-    Configuration();
-    virtual ~Configuration();
+    EEPROMSettings();
+    virtual ~EEPROMSettings();
     bool init(System *sys);
     void read();
     void write();
@@ -29,7 +29,7 @@ public:
     uint32_t getUsersMaxBPS(uint32_t user);
     uint32_t getUsersMaxDutyPerm(uint32_t user);
     uint32_t getCoilsMaxOntimeUS(uint32_t coil);
-    uint32_t getCoilsMaxBPS(uint32_t coil);
+    uint32_t getCoilsMinOffUS(uint32_t coil);
     uint32_t getCoilsMaxDutyPerm(uint32_t coil);
     uint32_t getStngsHoldTime();
     uint32_t getStngsBrightness();
@@ -64,4 +64,4 @@ private:
     bool cfgEEPROMUpToDate = false;
 };
 
-#endif /* CONFIGURATION_H_ */
+#endif /* EEPROMSETTINGS_H_ */

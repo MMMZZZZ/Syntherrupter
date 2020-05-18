@@ -9,9 +9,6 @@
 #define NEXTION_H_
 
 
-#ifndef UART_BUFFERED
-#define UART_BUFFERED                   // Creates buffer for the Nextion UARTstdio // constant predefined
-#endif
 
 #include <stdbool.h>
 #include <stdint.h>

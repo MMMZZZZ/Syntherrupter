@@ -10,8 +10,10 @@
 
 
 #include <stdint.h>
+#include <stdbool.h>
+#include "InterrupterConfig.h"
 #include "Output.h"
-#include "MIDI.h"
+#include "Oneshot.h"
 #include "Filter.h"
 
 
@@ -20,13 +22,13 @@ class Coil
 public:
     Coil();
     virtual ~Coil();
-    MIDI     midi;
     Output   out;
+    Oneshot  one;
     Filter   filteredOntimeUS;
     Filter   filteredFrequency;
 
-    uint32_t ontimeUS = 0;
-    uint32_t periodUS = 0;
+    uint32_t minOffUS    = 50;
+    uint32_t nextAllowedFireUS = 0;
 };
 
 #endif /* COIL_H_ */

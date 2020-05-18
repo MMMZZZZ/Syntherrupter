@@ -6,7 +6,7 @@
  */
 
 
-#include <Output.h>
+#include "InterrupterConfig.h"
 #include "System.h"
 #include "GUI.h"
 
@@ -15,6 +15,9 @@ System sys;
 GUI gui;
 
 
+/*
+ * Awful. Still coudn't find a better way to use ISRs in C++.
+ */
 void sysTickISR()
 {
     sys.systemTimeIncrement();
@@ -28,6 +31,7 @@ void midiUartISR()
 int main(void)
 {
     sys.init(120000000, sysTickISR);
+    sys.setSystemTimeResUS(1000);
     gui.init(&sys, midiUartISR);
 
     while (42)

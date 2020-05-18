@@ -20,7 +20,16 @@ System::~System()
 
 void System::init(uint32_t clockFreq, void (*ISR)(void))
 {
-    sysClockFreq = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ |SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), clockFreq);
+     uint32_t clock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ |SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), sysClockFreq);
+
+     if (clock != sysClockFreq)
+     {
+         error();
+     }
+
+     sysExactTime = 0;
+     sysTime = 0;
+
 
     FPULazyStackingEnable();
     FPUEnable();
@@ -29,7 +38,7 @@ void System::init(uint32_t clockFreq, void (*ISR)(void))
 
     SysTickIntRegister(ISR);
     IntPrioritySet(FAULT_SYSTICK, 0b11100000);
-    setSystemTimeResUS(1000);
+    setSystemTimeResUS(100);
     SysTickIntEnable();
     SysTickEnable();
 }
@@ -61,6 +70,7 @@ void System::error()
 void System::setSystemTimeResUS(uint32_t us)
 {
     sysTickResUS = us;
+    sysTickHalfRes = sysTickResUS / 2;
     SysTickPeriodSet((sysClockFreq / 1000000) * sysTickResUS);
 }
 
@@ -79,9 +89,19 @@ uint32_t System::getSystemTimeUS()
     return sysTime;
 }
 
-float System::getExactSystemTimeUS()
+uint32_t System::getExactSystemTimeUS()
 {
-    return float(sysTime) + float(SysTickPeriodGet() - SysTickValueGet()) / float((sysClockFreq / 1000000));
+    // Different variables needed to prevent sync issues.
+
+    uint32_t newExactTime = sysExactTime + (SysTickPeriodGet() - SysTickValueGet()) / (sysClockFreq / 1000000);
+    while ((newExactTime + sysTickHalfRes) < sysTime)
+    {
+        sysExactTime += sysTickResUS;
+        newExactTime += sysTickResUS;
+    }
+    return newExactTime;
+
+    // If ISR
 }
 
 void System::delayUS(uint32_t us)
