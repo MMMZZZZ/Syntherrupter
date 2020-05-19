@@ -18,15 +18,7 @@ GUI::~GUI()
 
 void GUI::midiUartISR()
 {
-    // Read and clear the asserted interrupts
-    volatile uint32_t uartIntStatus;
-    uartIntStatus = UARTIntStatus(UART0_BASE, true);
-    UARTIntClear(UART0_BASE, uartIntStatus);
-
-    /*while (UARTCharsAvail(UART0_BASE))
-    {
-        guiMidi.newData(UARTCharGet(UART0_BASE));
-    }*/
+    guiMidi.uartISR();
 }
 
 void GUI::init(System* sys, void (*midiISR)(void))
@@ -239,7 +231,7 @@ bool GUI::update()
             {
                 time = guiSys->getSystemTimeUS();
                 uint32_t i = 0;
-                while (i < 6)
+                while (i < 5)
                 {
                     if (guiNxt.charsAvail())
                     {

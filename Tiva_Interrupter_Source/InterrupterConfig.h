@@ -7,4 +7,4 @@
 
 
 #define COIL_COUNT 6
-#define MAX_VOICES 6
+#define MAX_VOICES 8

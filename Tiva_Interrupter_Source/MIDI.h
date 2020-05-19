@@ -34,6 +34,7 @@ public:
     MIDI();
     virtual ~MIDI();
     void init(System* sys, uint32_t uartNum, uint32_t baudRate, void (*ISR)(void));
+    void uartISR();
     void enable();
     void disable();
     void play();
@@ -51,7 +52,7 @@ public:
     Note *orderedNotes[COIL_COUNT][MAX_VOICES];
 
 private:
-    void resetAllValues();
+    void resetChannelControllers(uint32_t channel);
     void updateEffects();
     float getLFOVal(uint32_t channel);
     void removeDeadNotes();
@@ -94,7 +95,7 @@ private:
     // 4: Staccato (no long notes possible. They're short. Always.
     // 5: Legator (release = prolonged sustain)
     //                                                                 Attack Amp/Invers Dur.       Decay Amp/Invers Dur.        Sustain Amp/Invers Dur.       Release Amp/Invers Dur.
-    const float MIDI_ADSR_PROGRAMS[MIDI_ADSR_PROGRAM_COUNT + 1][9] = {{1.0f, 1.0f /    7000.0f,     0.5f, 1.0f /   15000.0f,     0.25f, 1.0f /  3000000.0f,     0.0f, 1.0f /    3000.0f},
+    const float MIDI_ADSR_PROGRAMS[MIDI_ADSR_PROGRAM_COUNT + 1][9] = {{1.0f, 1.0f /   30000.0f,     0.5f, 1.0f /     250.0f,     0.25f, 1.0f /  3500000.0f,     0.0f, 1.0f /     150.0f},
                                                                       {1.0f, 1.0f / 4000000.0f,     1.0f, 1.0f /       1.0f,     1.00f, 1.0f /        1.0f,     0.0f, 1.0f / 2000000.0f},
                                                                       {0.3f, 1.0f /    8000.0f,     1.0f, 1.0f / 4000000.0f,     1.00f, 1.0f /        1.0f,     0.0f, 1.0f / 2000000.0f},
                                                                       {1.0f, 1.0f / 1500000.0f,     1.0f, 1.0f /       1.0f,     1.00f, 1.0f /        1.0f,     0.0f, 1.0f /  750000.0f},
@@ -115,11 +116,15 @@ private:
     float midiSingleNoteMaxOntimeUS[COIL_COUNT];
     float midiTotalMaxDutyUS[COIL_COUNT];
     uint8_t midiVolMode[COIL_COUNT];
+    static constexpr uint32_t midiUARTBufferSize = 1024;
+    volatile uint8_t midiUARTBuffer[midiUARTBufferSize];
+    volatile uint32_t midiUARTBufferWriteIndex = 0;
+    volatile uint32_t midiUARTBufferReadIndex = 0;
 
     bool midiEnabled = false;
 
     // Values updated inside MIDI ISR
-    bool midiNewData            = true;
+    bool midiNoteChange            = true;
     uint32_t midiISRDataIndex      = 0;
     uint32_t midiISRData[3]        = {0, 0, 0};
     uint32_t midiChannel = 0;

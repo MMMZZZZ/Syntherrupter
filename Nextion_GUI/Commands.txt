@@ -53,7 +53,7 @@ List of commands send by the Nextion. Dots indicate variable bytes. Bytes are nu
 			* Other settings, page 1
 				* Byte 2: Display brightness
 			* Byte 6: can't be used in this context.
-		* u[..]: User Command. Length is variable and indicated in byte 1 by the bits 0-4. The other bits are context sensitive. In this context:	
+		* u..(.): User Command. Length is variable and indicated in byte 1 by the bits 0-4. The other bits are context sensitive. In this context:	
 			* Byte 1: 
 				* Bit 6-7: User. Can be 0, 1 or 2. 
 				* Bit   5: Indicates content of the following bytes. 0 = Name, 1 = Password
