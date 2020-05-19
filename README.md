@@ -26,9 +26,11 @@ The sound can be selected by the MIDI command "Program Change". In your MIDI pro
 * Program 7: Roughly like a piano. Even without release the note fades out over a few seconds - like a real piano. Attack peaks to 2 (a.k.a doublingt he given ontime for a few miliseconds)
 * Program 8: Forced Staccato with slight sustain. Attack peaks to 3 (a.k.a tripling the given ontime for a few miliseconds)
 * Program 9-127: No ADSR. Constant ontime (except for other effects like modulation).
+
 If you wonder why you would want to exceed the given ontime, it is an "efficient" way to get louder notes even with high voice count without tripping your circuit breaker. Since the ontime drops pretty fast after the attack you can consider the ontime on the display more like an average ontime. Note that all these ADSR settings do not allow to exceed your coil limits (->Settings->Coil Setttings). 
 
-Source code is not overwhelmingly documented but there's a complete documentation of all features, how to use it and how to build your own. Its pretty simple and cheap.
+### Other documentation
+With the release of v1.x I wrote a complete documentation of all features, how to use it and how to build your own. Its pretty simple and cheap. The forum threads also contain posts and videos explaining and demonstrating the features of v2.x.x and v3.x.x
 
 English: https://highvoltageforum.net/index.php?topic=1020.0
 
