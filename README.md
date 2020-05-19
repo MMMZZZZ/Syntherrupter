@@ -7,7 +7,8 @@ You can control up to 6 different coils simultaneously. On each coil you can pla
 Have a look at the [releases page](https://github.com/MMMZZZZ/Syntherrupter/releases).
 
 ## Documentation
-### Outputs
+### Output pins
+The following pins supply the interrupt signal for the given coil. Signal is active high, 3.3V, max. 2mA.
 * Coil 1: PD0
 * Coil 2: PD2
 * Coil 3: PM0
