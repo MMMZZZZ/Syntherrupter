@@ -2,7 +2,7 @@
  * Oneshot.cpp
  *
  *  Created on: 08.05.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #include <Oneshot.h>

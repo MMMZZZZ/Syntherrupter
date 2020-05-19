@@ -2,7 +2,7 @@
  * Nextion.h
  *
  *  Created on: 26.03.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #ifndef NEXTION_H_

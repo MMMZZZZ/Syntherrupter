@@ -2,7 +2,7 @@
  * GUI.cpp
  *
  *  Created on: 26.03.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #include <GUI.h>
@@ -135,7 +135,14 @@ void GUI::init(System* sys, void (*midiISR)(void))
     guiNxt.setVal("TC_Settings.maxCoilCount", COIL_COUNT);
 
     // Initialization completed.
-    guiNxt.sendCmd("vis pStartup,1");
+    if (cfgInEEPROM)
+    {
+        guiNxt.sendCmd("vis pStartup,1");
+    }
+    else
+    {
+        guiNxt.sendCmd("vis tNoConfig,1");
+    }
 }
 
 void GUI::setError(const char* err)

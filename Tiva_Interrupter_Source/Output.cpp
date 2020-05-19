@@ -2,7 +2,7 @@
  * Output.cpp
  *
  *  Created on: 28.03.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #include <Output.h>

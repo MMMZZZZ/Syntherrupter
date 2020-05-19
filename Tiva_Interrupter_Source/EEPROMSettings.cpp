@@ -2,7 +2,7 @@
  * EEPROMSettings.cpp
  *
  *  Created on: 28.04.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #include <EEPROMSettings.h>

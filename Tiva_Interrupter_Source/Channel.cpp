@@ -2,7 +2,7 @@
  * Channel.cpp
  *
  *  Created on: 10.05.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #include <Channel.h>

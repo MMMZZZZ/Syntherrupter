@@ -2,7 +2,7 @@
  * Filter.h
  *
  *  Created on: 29.03.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #ifndef FILTER_H_

@@ -2,7 +2,7 @@
  * MIDI.h
  *
  *  Created on: 27.03.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #ifndef MIDI_H_

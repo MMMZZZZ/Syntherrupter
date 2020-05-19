@@ -2,7 +2,7 @@
  * Oneshot.h
  *
  *  Created on: 08.05.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #ifndef ONESHOT_H_

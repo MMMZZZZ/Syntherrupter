@@ -2,7 +2,7 @@
  * Output.h
  *
  *  Created on: 28.03.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #ifndef OUTPUT_H_

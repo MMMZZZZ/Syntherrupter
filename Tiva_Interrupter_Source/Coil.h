@@ -2,7 +2,7 @@
  * Coil.h
  *
  *  Created on: 25.04.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #ifndef COIL_H_

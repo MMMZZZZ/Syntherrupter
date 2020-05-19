@@ -3,9 +3,9 @@ Normal Blue:
 	Green:  95
 	Blue:  160
 Dark Blue:
-	Red:    31
-	Green:  95
-	Blue:  160
+	Red:    20
+	Green:  63
+	Blue:  106
 Gray:
 	Red:   127
 	Green: 127

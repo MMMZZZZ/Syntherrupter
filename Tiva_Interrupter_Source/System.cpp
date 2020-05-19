@@ -2,7 +2,7 @@
  * System.cpp
  *
  *  Created on: 26.03.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #include <System.h>

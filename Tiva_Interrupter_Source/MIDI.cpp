@@ -2,7 +2,7 @@
  * MIDI.cpp
  *
  *  Created on: 27.03.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #include <MIDI.h>
