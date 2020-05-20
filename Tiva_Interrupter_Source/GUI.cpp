@@ -588,11 +588,17 @@ bool GUI::update()
         case exit:
         {
             // Disable all outputs
-            for (uint32_t i = 0; i < COIL_COUNT; i++)
+            if (guiMidi.isEnabled())
             {
                 guiMidi.disable();
-                coils[i].filteredOntimeUS.setTarget(0.0f);
-                //coils[i].out.tone(0.0f, 0.0f);
+            }
+            else
+            {
+                for (uint32_t i = 0; i < COIL_COUNT; i++)
+                {
+                    coils[i].filteredOntimeUS.setTarget(0.0f);
+                    coils[i].out.tone(0.0f, 0.0f);
+                }
             }
 
             // Update EEPROM

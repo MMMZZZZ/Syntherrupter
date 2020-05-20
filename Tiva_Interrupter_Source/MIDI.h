@@ -95,17 +95,17 @@ private:
     // 4: Staccato (no long notes possible. They're short. Always.
     // 5: Legator (release = prolonged sustain)
     //                                                                 Attack Amp/Invers Dur.       Decay Amp/Invers Dur.        Sustain Amp/Invers Dur.       Release Amp/Invers Dur.
-    const float MIDI_ADSR_PROGRAMS[MIDI_ADSR_PROGRAM_COUNT + 1][9] = {{1.0f, 1.0f /   30000.0f,     0.5f, 1.0f /     250.0f,     0.25f, 1.0f /  3500000.0f,     0.0f, 1.0f /     150.0f},
+    const float MIDI_ADSR_PROGRAMS[MIDI_ADSR_PROGRAM_COUNT + 1][9] = {{1.0f, 1.0f /   30000.0f,     0.5f, 1.0f /     250.0f,     0.10f, 1.0f /  3500000.0f,     0.0f, 1.0f /     150.0f},
                                                                       {1.0f, 1.0f / 4000000.0f,     1.0f, 1.0f /       1.0f,     1.00f, 1.0f /        1.0f,     0.0f, 1.0f / 2000000.0f},
                                                                       {0.3f, 1.0f /    8000.0f,     1.0f, 1.0f / 4000000.0f,     1.00f, 1.0f /        1.0f,     0.0f, 1.0f / 2000000.0f},
                                                                       {1.0f, 1.0f / 1500000.0f,     1.0f, 1.0f /       1.0f,     1.00f, 1.0f /        1.0f,     0.0f, 1.0f /  750000.0f},
-                                                                      {1.0f, 1.0f /   10000.0f,     0.2f, 1.0f /   35000.0f,     0.00f, 1.0f /    10000.0f,     0.0f, 1.0f /   10000.0f},
+                                                                      {1.0f, 1.0f /    3000.0f,     0.3f, 1.0f /   30000.0f,     0.00f, 1.0f /   400000.0f,     0.0f, 1.0f /  400000.0f},
                                                                       {1.0f, 1.0f /    7000.0f,     0.5f, 1.0f /   10000.0f,     0.25f, 1.0f /  3000000.0f,     0.0f, 1.0f / 3000000.0f},
                                                                       {0.3f, 1.0f /    8000.0f,     1.0f, 1.0f / 4000000.0f,     1.00f, 1.0f /        1.0f,     0.0f, 1.0f /  400000.0f},
-                                                                      {2.0f, 1.0f /   30000.0f,     1.0f, 1.0f /     250.0f,     0.00f, 1.0f /  3500000.0f,     0.0f, 1.0f /     150.0f},
+                                                                      {2.0f, 1.0f /   30000.0f,     1.0f, 1.0f /     250.0f,     0.20f, 1.0f /  3500000.0f,     0.0f, 1.0f /     150.0f},
                                                                       {3.0f, 1.0f /    3000.0f,     1.0f, 1.0f /   27000.0f,     0.00f, 1.0f /   400000.0f,     0.0f, 1.0f /  400000.0f},
 
-                                                                      {1.0f,       1.0f,            1.0f,       1.0f,            1.0f,        1.0f,             0.0f,       1.0f},
+                                                                      {1.0f,              1.0f,     1.0f,              1.0f,     1.0f,               1.0f,      0.0f,              1.0f},
     };
     System* midiSys;
 
