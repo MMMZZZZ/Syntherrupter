@@ -1,5 +1,6 @@
 # Syntherrupter
 By Max Zuidberg, with help and inspiration from [Netzpfuscher and his awesome UD3](https://github.com/Netzpfuscher/UD3)
+
 Powerful polyphonic MIDI Interrupter with GUI for Tesla Coils based on the TI Tiva TM4C1294XL microcontroller board and a Nextion resistive Touch Display.
 You can control up to 6 different coils simultaneously. On each coil you can play up to 8 notes - making a total of 48 voices. Should be enough for most MIDI files ;) 
 
