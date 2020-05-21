@@ -5,7 +5,7 @@ Powerful polyphonic MIDI Interrupter with GUI for Tesla Coils based on the TI Ti
 You can control up to 6 different coils simultaneously. On each coil you can play up to 8 notes - making a total of 48 voices. Should be enough for most MIDI files ;) 
 
 ## Download and Installation
-Have a look at the [releases page](https://github.com/MMMZZZZ/Syntherrupter/releases).
+Have a look at the [releases page](https://github.com/MMMZZZZ/Syntherrupter/releases) and the forum links below.
 
 ## Documentation
 ### Output pins
