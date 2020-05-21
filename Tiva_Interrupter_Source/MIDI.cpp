@@ -81,15 +81,20 @@ void MIDI::uartISR()
     // Store all available chars in bigger buffer.
     while (UARTCharsAvail(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_BASE]))
     {
-        midiUARTBuffer[midiUARTBufferWriteIndex++] = UARTCharGet(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_BASE]);
-        if (midiUARTBufferWriteIndex >= midiUARTBufferSize)
-        {
-            midiUARTBufferWriteIndex = 0;
-        }
-        if (midiUARTBufferWriteIndex == midiUARTBufferReadIndex)
-        {
-            midiUARTBufferReadIndex = midiUARTBufferWriteIndex + 1;
-        }
+        addData(UARTCharGet(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_BASE]));
+    }
+}
+
+void MIDI::addData(uint32_t data)
+{
+    midiUARTBuffer[midiUARTBufferWriteIndex++] = data;
+    if (midiUARTBufferWriteIndex >= midiUARTBufferSize)
+    {
+        midiUARTBufferWriteIndex = 0;
+    }
+    if (midiUARTBufferWriteIndex == midiUARTBufferReadIndex)
+    {
+        midiUARTBufferReadIndex = midiUARTBufferWriteIndex + 1;
     }
 }
 

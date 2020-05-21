@@ -35,6 +35,7 @@ public:
     virtual ~MIDI();
     void init(System* sys, uint32_t uartNum, uint32_t baudRate, void (*ISR)(void));
     void uartISR();
+    void addData(uint32_t data);
     void enable();
     void disable();
     void play();

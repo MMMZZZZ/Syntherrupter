@@ -210,15 +210,26 @@ bool GUI::update()
                 char modeByte1 = guiNxt.getChar();
                 if (modeByte0 == 'e' && modeByte1 == 'x')
                 {
-                    guiMode = exit;
+                    if (guiMode == simple)
+                    {
+                        guiMode = simpleExit;
+                    }
+                    else if (guiMode == midiLive)
+                    {
+                        guiMode = midiLiveExit;
+                    }
+                    else if (guiMode == settings)
+                    {
+                        guiMode = settingsExit;
+                    }
                 }
                 else if (modeByte0 == 's' && modeByte1 == 'i')
                 {
-                    guiMode = enterSimple;
+                    guiMode = simpleEnter;
                 }
                 else if (modeByte0 == 'm' && modeByte1 == 'l')
                 {
-                    guiMode = enterMidiLive;
+                    guiMode = midiLiveEnter;
                 }
                 else if (modeByte0 == 'u' && modeByte1 == 's')
                 {
@@ -336,7 +347,7 @@ bool GUI::update()
             break;
         }
 
-        case enterSimple:
+        case simpleEnter:
         {
             /*
              * In simple mode we use the Output class to generate interrupter
@@ -381,7 +392,7 @@ bool GUI::update()
             break;
         }
 
-        case enterMidiLive:
+        case midiLiveEnter:
         {
             /*
              * In midiLive mode we use the Oneshot class to generate polyphonic
@@ -397,6 +408,19 @@ bool GUI::update()
             break;
         }
 
+        case simpleExit:
+        {
+            for (uint32_t i = 0; i < COIL_COUNT; i++)
+            {
+                coils[i].filteredOntimeUS.setTarget(0.0f);
+                coils[i].out.tone(0.0f, 0.0f);
+            }
+
+            // Now we can enter idle
+            guiMode = idle;
+            break;
+        }
+
         case midiLive:
         {
             // Apply new data
@@ -408,6 +432,21 @@ bool GUI::update()
                 {
                     uint32_t channels = (guiCommandData[2] << 8) + guiCommandData[1];
                     guiMidi.setChannels(coil, channels);
+                }
+                else
+                {
+                    // Important date!
+                    uint32_t dateDDMMYYYY = (guiCommandData[2] << 16) + (guiCommandData[1] << 8) + guiCommandData[0];
+                    if (dateDDMMYYYY == 11102161)
+                    {
+                        guiEEE = true;
+                        guiEET = guiSys->getSystemTimeUS() >> 4;
+                        guiEEI = 0;
+                        for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+                        {
+                            guiMidi.setChannels(coil, 0xffff);
+                        }
+                    }
                 }
                 // Data applied; clear command byte.
                 guiCommand = 0;
@@ -433,6 +472,21 @@ bool GUI::update()
             {
                 guiMidi.enable();
                 guiMidi.play();
+            }
+            if (guiEEE)
+            {
+                uint32_t time = guiSys->getSystemTimeUS() >> 4;
+                if ((time - guiEET) > ((uint32_t) guiEED[guiEEI][0] * 1000))
+                {
+                    guiEET = time;
+                    guiMidi.addData(guiEED[guiEEI][1]);
+                    guiMidi.addData(guiEED[guiEEI][2]);
+                    guiMidi.addData(guiEED[guiEEI][3]);
+                    if (++guiEEI >= guiEES)
+                    {
+                        guiEEE = false;
+                    }
+                }
             }
             guiMidi.process();
             for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
@@ -472,6 +526,17 @@ bool GUI::update()
             }
             break;
         }
+        case midiLiveExit:
+        {
+            // Stop MIDI operation
+            guiMidi.disable();
+            guiEEE = false;
+
+            // Now we can enter idle
+            guiMode = idle;
+            break;
+        }
+
         case settings:
         {
             if (guiCommand == 'd')
@@ -539,6 +604,15 @@ bool GUI::update()
             }
             break;
         }
+        case settingsExit:
+        {
+            // Update EEPROM
+            guiCfg.update();
+
+            // Now we can enter idle
+            guiMode = idle;
+            break;
+        }
         case nxtFWUpdate:
         {
             // Stop normal operation and pass data between Nextion UART and USB UART
@@ -583,29 +657,6 @@ bool GUI::update()
                     SysCtlReset();
                 }
             }
-            break;
-        }
-        case exit:
-        {
-            // Disable all outputs
-            if (guiMidi.isEnabled())
-            {
-                guiMidi.disable();
-            }
-            else
-            {
-                for (uint32_t i = 0; i < COIL_COUNT; i++)
-                {
-                    coils[i].filteredOntimeUS.setTarget(0.0f);
-                    coils[i].out.tone(0.0f, 0.0f);
-                }
-            }
-
-            // Update EEPROM
-            guiCfg.update();
-
-            // Now we can enter idle
-            guiMode = idle;
             break;
         }
         default: // includes idle
