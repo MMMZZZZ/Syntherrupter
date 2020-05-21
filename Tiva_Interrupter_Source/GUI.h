@@ -43,7 +43,7 @@ public:
     GUI();
     virtual ~GUI();
     void init(System* sys, void (*midiISR)(void));
-    bool update();
+    void update();
     void applyOutput();
     void setError(const char* err);
     void showError();

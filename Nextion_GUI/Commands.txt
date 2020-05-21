@@ -1,4 +1,5 @@
 List of commands send by the Nextion. Dots indicate variable bytes. Bytes are numerated left to right. Bits (in a byte) are numerated from LSB=0 to MSB=7.
+Note: Any value ranges that have no specified meaning here should be ignored by the microcontroller for compatibility with future version. 
 * General: First byte of all commands indicate command type, length and (context sensitive) content. 
 * m..: Mode command. Tells the microcontroller the context of any other commands. There are no context sensitive variants of this command. 
 	* mex: Mode EXit command. We left the last mode and are in idle now. It causes the microcontroller to update the configuration stored in its EEPROM. 

@@ -35,16 +35,16 @@ public:
     virtual ~MIDI();
     void init(System* sys, uint32_t uartNum, uint32_t baudRate, void (*ISR)(void));
     void uartISR();
-    void addData(uint32_t data);
-    void enable();
-    void disable();
-    void play();
+    void addData(uint8_t data);
+    void UARTEnable();
+    void UARTDisable();
+    void start();
     void stop();
     void newData(uint32_t c);
     void setVolSettings(uint32_t coil, float ontimeUSMax, float dutyMax, uint32_t volMode);
     void setChannels(uint32_t coil, uint32_t chns);
     void setTotalMaxDutyPerm(uint32_t coil, float maxDuty);
-    bool isEnabled();
+    bool isPlaying();
     void process();
     //float getOntimeUS();
     //float getFrequency();
@@ -108,8 +108,8 @@ private:
 
                                                                       {1.0f,              1.0f,     1.0f,              1.0f,     1.0f,               1.0f,      0.0f,              1.0f},
     };
-    System* midiSys;
 
+    System* midiSys;
     Channel channels[16];
     Note notes[COIL_COUNT][MAX_VOICES];
     float midiAbsFreq[COIL_COUNT];
@@ -122,12 +122,9 @@ private:
     volatile uint32_t midiUARTBufferWriteIndex = 0;
     volatile uint32_t midiUARTBufferReadIndex = 0;
 
-    bool midiEnabled = false;
-
-    // Values updated inside MIDI ISR
     bool midiNoteChange            = true;
-    uint32_t midiISRDataIndex      = 0;
-    uint32_t midiISRData[3]        = {0, 0, 0};
+    uint32_t midiDataIndex      = 0;
+    uint32_t midiData[3]        = {0, 0, 0};
     uint32_t midiChannel = 0;
 
     bool midiADSREnabled  = false;

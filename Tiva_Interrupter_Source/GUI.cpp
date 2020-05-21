@@ -183,7 +183,7 @@ bool GUI::checkValue(uint32_t val)
     return true;
 }
 
-bool GUI::update()
+void GUI::update()
 {
     // Used to detect timeouts
     uint32_t time = 0;
@@ -392,6 +392,19 @@ bool GUI::update()
             break;
         }
 
+        case simpleExit:
+        {
+            for (uint32_t i = 0; i < COIL_COUNT; i++)
+            {
+                coils[i].filteredOntimeUS.setTarget(0.0f);
+                coils[i].out.tone(0.0f, 0.0f);
+            }
+
+            // Now we can enter idle
+            guiMode = idle;
+            break;
+        }
+
         case midiLiveEnter:
         {
             /*
@@ -403,20 +416,9 @@ bool GUI::update()
             {
                 coils[i].one.init(guiSys, i);
             }
+            guiMidi.UARTEnable();
+            guiMidi.start();
             guiMode = midiLive;
-            break;
-        }
-
-        case simpleExit:
-        {
-            for (uint32_t i = 0; i < COIL_COUNT; i++)
-            {
-                coils[i].filteredOntimeUS.setTarget(0.0f);
-                coils[i].out.tone(0.0f, 0.0f);
-            }
-
-            // Now we can enter idle
-            guiMode = idle;
             break;
         }
 
@@ -438,6 +440,7 @@ bool GUI::update()
                     uint32_t dateDDMMYYYY = (guiCommandData[2] << 16) + (guiCommandData[1] << 8) + guiCommandData[0];
                     if (dateDDMMYYYY == 11102161)
                     {
+                        guiMidi.UARTDisable();
                         guiEEE = true;
                         guiEET = guiSys->getSystemTimeUS() >> 4;
                         guiEEI = 0;
@@ -467,11 +470,6 @@ bool GUI::update()
                 // Data applied; clear command byte.
                 guiCommand = 0;
             }
-            if (!guiMidi.isEnabled())
-            {
-                guiMidi.enable();
-                guiMidi.play();
-            }
             if (guiEEE)
             {
                 uint32_t time = guiSys->getSystemTimeUS() >> 4;
@@ -484,6 +482,7 @@ bool GUI::update()
                     if (++guiEEI >= guiEES)
                     {
                         guiEEE = false;
+                        guiMidi.UARTEnable();
                     }
                 }
             }
@@ -525,10 +524,12 @@ bool GUI::update()
             }
             break;
         }
+
         case midiLiveExit:
         {
             // Stop MIDI operation
-            guiMidi.disable();
+            guiMidi.UARTDisable();
+            guiMidi.stop();
             guiEEE = false;
 
             // Now we can enter idle
@@ -603,6 +604,7 @@ bool GUI::update()
             }
             break;
         }
+
         case settingsExit:
         {
             // Update EEPROM
@@ -612,6 +614,7 @@ bool GUI::update()
             guiMode = idle;
             break;
         }
+
         case nxtFWUpdate:
         {
             // Stop normal operation and pass data between Nextion UART and USB UART
@@ -621,7 +624,7 @@ bool GUI::update()
             guiNxt.disableStdio();
 
             // Stop all MIDI UARTs
-            guiMidi.disable();
+            guiMidi.UARTDisable();
             // UARTs are supposed to be initialized.
             uint32_t nxtUARTBase = guiNxt.getUARTBase();
             uint32_t usbUARTBase = UART0_BASE;
@@ -663,5 +666,4 @@ bool GUI::update()
             break;
         }
     }
-    return true;
 }
