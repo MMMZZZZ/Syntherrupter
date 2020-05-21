@@ -57,9 +57,6 @@ private:
     EEPROMSettings guiCfg;
     MIDI guiMidi;
 
-    uint32_t times[COIL_COUNT][1000];
-    uint32_t timesIndex[COIL_COUNT];
-
     uint32_t guiUserMaxOntimeUS = 0;
     uint32_t guiUserMaxBPS = 0;
     uint32_t guiUserMaxDutyPerm = 0;

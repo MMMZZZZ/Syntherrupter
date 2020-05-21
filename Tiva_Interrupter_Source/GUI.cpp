@@ -402,7 +402,6 @@ bool GUI::update()
             for (uint32_t i = 0; i < COIL_COUNT; i++)
             {
                 coils[i].one.init(guiSys, i);
-                timesIndex[i] = 0;
             }
             guiMode = midiLive;
             break;
