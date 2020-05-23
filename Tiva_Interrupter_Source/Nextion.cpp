@@ -39,7 +39,7 @@ void Nextion::init(System* sys, uint32_t uartNumber, uint32_t baudRate, uint32_t
 
     //UARTCharPut(NXT_UART_MAPPING[nxtUARTNum][NXT_UART_BASE], 'T');
     UARTIntRegister(NXT_UART_MAPPING[nxtUARTNum][NXT_UART_BASE], UARTStdioIntHandler);
-    IntPrioritySet(NXT_UART_MAPPING[nxtUARTNum][NXT_UART_INT], 0b00100000);
+    IntPrioritySet(NXT_UART_MAPPING[nxtUARTNum][NXT_UART_INT], 0b01000000);
     UARTStdioConfig(nxtUARTNum, baudRate, nxtSys->getClockFreq());
     UARTEchoSet(false);
 }

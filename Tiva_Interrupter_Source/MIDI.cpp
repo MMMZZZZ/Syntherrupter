@@ -19,27 +19,41 @@ MIDI::~MIDI()
     // TODO Auto-generated destructor stub
 }
 
-void MIDI::init(System* sys, uint32_t uartNum, uint32_t baudRate, void (*ISR)(void))
+void MIDI::init(System* sys, uint32_t usbUartNum, uint32_t baudRate, void (*usbISR)(void), uint32_t midiUartNum, void(*midiISR)(void))
 {
     midiSys = sys;
 
-    // MIDI UART setup
-    midiUARTNum = uartNum;
-    midiUARTBase = MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_BASE];
-    SysCtlPeripheralEnable(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_SYSCTL_PERIPH]);
-    SysCtlPeripheralEnable(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_PORT_SYSCTL_PERIPH]);
+    // Enable MIDI receiving over the USB UART (selectable baud rate) and a separate MIDI UART (31250 fixed baud rate).
+    midiUSBUARTNum = usbUartNum;
+    midiMIDIUARTNum = midiUartNum;
+    midiUSBUARTBase = MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_BASE];
+    midiMIDIUARTBase = MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_BASE];
+    SysCtlPeripheralEnable(MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_SYSCTL_PERIPH]);
+    SysCtlPeripheralEnable(MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_SYSCTL_PERIPH]);
+    SysCtlPeripheralEnable(MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_PORT_SYSCTL_PERIPH]);
+    SysCtlPeripheralEnable(MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_PORT_SYSCTL_PERIPH]);
     SysCtlDelay(3);
-    GPIOPinConfigure(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_RX_PIN_CFG]);
-    GPIOPinConfigure(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_TX_PIN_CFG]);
-    GPIOPinTypeUART(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_PORT_BASE],
-                    MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_TX_PIN] | MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_RX_PIN]);
+    GPIOPinConfigure(MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_RX_PIN_CFG]);
+    GPIOPinConfigure(MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_RX_PIN_CFG]);
+    GPIOPinConfigure(MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_TX_PIN_CFG]);
+    GPIOPinConfigure(MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_TX_PIN_CFG]);
+    GPIOPinTypeUART(MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_PORT_BASE],
+                    MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_TX_PIN] | MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_RX_PIN]);
+    GPIOPinTypeUART(MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_PORT_BASE],
+                    MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_TX_PIN] | MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_RX_PIN]);
 
-    UARTConfigSetExpClk(midiUARTBase, midiSys->getClockFreq(), baudRate,
+    UARTConfigSetExpClk(midiUSBUARTBase, midiSys->getClockFreq(), baudRate,
                         (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
-    UARTFIFODisable(midiUARTBase);
-    UARTIntRegister(midiUARTBase, ISR);
-    UARTIntEnable(midiUARTBase, UART_INT_RX);
-    IntPrioritySet(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_INT], 0b00000000);
+    UARTConfigSetExpClk(midiMIDIUARTBase, midiSys->getClockFreq(), baudRate,
+                        (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
+    UARTFIFODisable(midiUSBUARTBase);
+    UARTFIFODisable(midiMIDIUARTBase);
+    UARTIntRegister(midiUSBUARTBase, usbISR);
+    UARTIntRegister(midiMIDIUARTBase, usbISR);
+    UARTIntEnable(midiUSBUARTBase, UART_INT_RX);
+    UARTIntEnable(midiMIDIUARTBase, UART_INT_RX);
+    IntPrioritySet(MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_INT], 0b00000000);
+    IntPrioritySet(MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_INT], 0b00100000);
 
     for (uint32_t i = 0; i < COIL_COUNT; i++)
     {
@@ -71,17 +85,31 @@ void MIDI::init(System* sys, uint32_t uartNum, uint32_t baudRate, void (*ISR)(vo
     }
 }
 
-void MIDI::uartISR()
+void MIDI::usbUartISR()
 {
     // Read and clear the asserted interrupts
     volatile uint32_t uartIntStatus;
-    uartIntStatus = UARTIntStatus(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_BASE], true);
-    UARTIntClear(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_BASE], uartIntStatus);
+    uartIntStatus = UARTIntStatus(MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_BASE], true);
+    UARTIntClear(MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_BASE], uartIntStatus);
 
     // Store all available chars in bigger buffer.
-    while (UARTCharsAvail(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_BASE]))
+    while (UARTCharsAvail(MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_BASE]))
     {
-        addData(UARTCharGet(MIDI_UART_MAPPING[midiUARTNum][MIDI_UART_BASE]));
+        addData(UARTCharGet(MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_BASE]));
+    }
+}
+
+void MIDI::midiUartISR()
+{
+    // Read and clear the asserted interrupts
+    volatile uint32_t uartIntStatus;
+    uartIntStatus = UARTIntStatus(MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_BASE], true);
+    UARTIntClear(MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_BASE], uartIntStatus);
+
+    // Store all available chars in bigger buffer.
+    while (UARTCharsAvail(MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_BASE]))
+    {
+        addData(UARTCharGet(MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_BASE]));
     }
 }
 
@@ -331,12 +359,12 @@ void MIDI::newData(uint32_t c)
 
 void MIDI::UARTEnable()
 {
-    UARTIntEnable(midiUARTBase, UART_INT_RX);
+    UARTIntEnable(midiUSBUARTBase, UART_INT_RX);
 }
 
 void MIDI::UARTDisable()
 {
-    UARTIntDisable(midiUARTBase, UART_INT_RX);
+    UARTIntDisable(midiUSBUARTBase, UART_INT_RX);
 }
 
 void MIDI::start()

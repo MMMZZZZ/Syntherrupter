@@ -33,8 +33,9 @@ class MIDI
 public:
     MIDI();
     virtual ~MIDI();
-    void init(System* sys, uint32_t uartNum, uint32_t baudRate, void (*ISR)(void));
-    void uartISR();
+    void init(System* sys, uint32_t usbUartNum, uint32_t baudRate, void (*usbISR)(void), uint32_t midiUartNum, void (*MIDIISR)(void));
+    void usbUartISR();
+    void midiUartISR();
     void addData(uint8_t data);
     void UARTEnable();
     void UARTDisable();
@@ -133,8 +134,8 @@ private:
     bool midiADSREnabled  = false;
     float midiADSRTimeUS = 0.0f;
     bool midiPlaying = false;
-    uint32_t midiUARTNum;
-    uint32_t midiUARTBase;
+    uint32_t midiUSBUARTNum, midiMIDIUARTNum;
+    uint32_t midiUSBUARTBase, midiMIDIUARTBase;
     float midiLFOPeriodUS          = 200000.0f;
 };
 

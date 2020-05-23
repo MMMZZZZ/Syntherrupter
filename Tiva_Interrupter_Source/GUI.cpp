@@ -16,17 +16,22 @@ GUI::~GUI()
 {
 }
 
-void GUI::midiUartISR()
+void GUI::midiUsbUartISR()
 {
-    guiMidi.uartISR();
+    guiMidi.usbUartISR();
 }
 
-void GUI::init(System* sys, void (*midiISR)(void))
+void GUI::midiMidiUartISR()
+{
+    guiMidi.midiUartISR();
+}
+
+void GUI::init(System* sys, void (*midiUsbISR)(void), void (*midiMidiISR)(void))
 {
     guiSys = sys;
     bool cfgInEEPROM = guiCfg.init(guiSys);
     guiNxt.init(guiSys, 3, 115200, guiNxtTimeoutUS);
-    guiMidi.init(guiSys, 0, 115200, midiISR);
+    guiMidi.init(guiSys, 0, 115200, midiUsbISR, 7, midiMidiISR);
     for (uint32_t i = 0; i < COIL_COUNT; i++)
     {
         // As of now all coils share the same filter settings. However this is

@@ -23,16 +23,21 @@ void sysTickISR()
     sys.systemTimeIncrement();
 }
 
-void midiUartISR()
+void midiUsbUartISR()
 {
-    gui.midiUartISR();
+    gui.midiUsbUartISR();
+}
+
+void midiMidiUartISR()
+{
+    gui.midiMidiUartISR();
 }
 
 int main(void)
 {
     sys.init(120000000, sysTickISR);
     sys.setSystemTimeResUS(1000);
-    gui.init(&sys, midiUartISR);
+    gui.init(&sys, midiUsbUartISR, midiMidiUartISR);
 
     while (42)
     {

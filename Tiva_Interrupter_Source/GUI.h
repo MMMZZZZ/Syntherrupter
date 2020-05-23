@@ -42,12 +42,13 @@ class GUI
 public:
     GUI();
     virtual ~GUI();
-    void init(System* sys, void (*midiISR)(void));
+    void init(System* sys, void (*midiUsbISR)(void), void (*midiMidiISR)(void));
     void update();
     void applyOutput();
     void setError(const char* err);
     void showError();
-    void midiUartISR();
+    void midiUsbUartISR();
+    void midiMidiUartISR();
     Coil coils[COIL_COUNT];
 private:
     bool checkValue(uint32_t val);
