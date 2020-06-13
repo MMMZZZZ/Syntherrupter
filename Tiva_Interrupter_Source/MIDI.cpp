@@ -296,6 +296,58 @@ void MIDI::newData(uint32_t c)
                         }
                         midiNoteChange = true;
                         break;
+                    case 0x64: // Registered Parameter Number, fine
+                        midiRPNFine = midiData[2];
+                        break;
+                    case 0x65: // Registered Parameter Number, coarse
+                        midiRPNCoarse = midiData[2];
+                        break;
+                    case 0x06: // RPN Data Entry, fine
+                        if (midiRPNFine == 0) // Pitch bend range
+                        {
+                            channels[midiChannel].pitchBendRangeFine = midiData[2];
+                            channels[midiChannel].pitchBendRange  =   channels[midiChannel].pitchBendRangeCoarse
+                                                                    + channels[midiChannel].pitchBendRangeFine / 100.0f;
+                            channels[midiChannel].pitchBendRange /= 8192.0f;
+                        }
+                        else if (midiRPNFine == 1) // Fine tuning
+                        {
+                            /*
+                             * Fine tuning mapping is similar to pitch bend. A 14 bit value (0..16383) is mapped to -2.0f..2.0f
+                             * Coarse tuning is unmapped.
+                             */
+                            channels[midiChannel].fineTuningFine = midiData[2];
+                            channels[midiChannel].tuning = ((channels[midiChannel].fineTuningCoarse << 8)
+                                                            + channels[midiChannel].fineTuningFine) - 8192.0f;
+                            channels[midiChannel].tuning /= 4096.0f;
+                            channels[midiChannel].tuning += channels[midiChannel].coarseTuning;
+                        }
+                        break;
+                    case 0x26: // RPN Data Entry, coase
+                        if (midiRPNFine == 0) // Pitch bend range
+                        {
+                            channels[midiChannel].pitchBendRangeCoarse = midiData[2];
+                            channels[midiChannel].pitchBendRange  =   channels[midiChannel].pitchBendRangeCoarse
+                                                                    + channels[midiChannel].pitchBendRangeFine / 100.0f;
+                            channels[midiChannel].pitchBendRange /= 8192.0f;
+                        }
+                        else if (midiRPNFine == 1) // Fine tuning
+                        {
+                            channels[midiChannel].fineTuningCoarse = midiData[2];
+                            channels[midiChannel].tuning = ((channels[midiChannel].fineTuningCoarse << 8)
+                                                            + channels[midiChannel].fineTuningFine) - 8192.0f;
+                            channels[midiChannel].tuning /= 4096.0f;
+                            channels[midiChannel].tuning += channels[midiChannel].coarseTuning;
+                        }
+                        else if (midiRPNFine == 2) // Coarse tuning
+                        {
+                            channels[midiChannel].coarseTuning = midiData[2];
+                            channels[midiChannel].tuning = ((channels[midiChannel].fineTuningCoarse << 8)
+                                                            + channels[midiChannel].fineTuningFine) - 8192.0f;
+                            channels[midiChannel].tuning /= 4096.0f;
+                            channels[midiChannel].tuning += channels[midiChannel].coarseTuning;
+                        }
+                        break;
                     case 0x78: // All Sounds off
                         channels[midiChannel].sustainPedal = false;
                         for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
@@ -454,7 +506,7 @@ void MIDI::process()
                     uint32_t channel = notes[coil][note].channel;
                     if (notes[coil][note].velocity)
                     {
-                        float noteNumFloat = float(notes[coil][note].number) + 2.0f * float(channels[channel].pitchBend) / 8192.0f;
+                        float noteNumFloat = float(notes[coil][note].number) + channels[channel].pitchBendRange * channels[channel].pitchBend;
                         notes[coil][note].frequency = powf(2.0f, (noteNumFloat - 69.0f) / 12.0f) * 440.0f;
                         notes[coil][note].periodUS = 1000000.0f / notes[coil][note].frequency + 0.5f;
                         notes[coil][note].halfPeriodUS = notes[coil][note].periodUS / 2;
@@ -491,9 +543,10 @@ void MIDI::process()
 void MIDI::resetChannelControllers(uint32_t channel)
 {
     channels[channel].channelAfterTouch = 0;
-    channels[channel].pitchBend         = 0;
     channels[channel].volume            = 1.0f;
+    channels[channel].pitchBend         = 0.0f;
     channels[channel].modulation        = 0.0f;
+    channels[channel].pitchBendRange    = 2.0f / 8192.0f;
     channels[channel].program           = MIDI_ADSR_PROGRAM_COUNT;
     channels[channel].sustainPedal      = false;
     channels[channel].damperPedal       = false;

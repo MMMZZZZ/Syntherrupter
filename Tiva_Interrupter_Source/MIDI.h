@@ -130,6 +130,8 @@ private:
     uint32_t midiDataIndex      = 0;
     uint32_t midiData[3]        = {0, 0, 0};
     uint32_t midiChannel = 0;
+    uint32_t midiRPNFine = 256;
+    uint32_t midiRPNCoarse = 256;
 
     bool midiADSREnabled  = false;
     float midiADSRTimeUS = 0.0f;
