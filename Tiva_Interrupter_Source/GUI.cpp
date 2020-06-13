@@ -215,38 +215,38 @@ void GUI::update()
                 char modeByte1 = guiNxt.getChar();
                 if (modeByte0 == 'e' && modeByte1 == 'x')
                 {
-                    if (guiMode == simple)
+                    if (guiMode == Mode::simple)
                     {
-                        guiMode = simpleExit;
+                        guiMode = Mode::simpleExit;
                     }
-                    else if (guiMode == midiLive)
+                    else if (guiMode == Mode::midiLive)
                     {
-                        guiMode = midiLiveExit;
+                        guiMode = Mode::midiLiveExit;
                     }
-                    else if (guiMode == settings)
+                    else if (guiMode == Mode::settings)
                     {
-                        guiMode = settingsExit;
+                        guiMode = Mode::settingsExit;
                     }
                 }
                 else if (modeByte0 == 's' && modeByte1 == 'i')
                 {
-                    guiMode = simpleEnter;
+                    guiMode = Mode::simpleEnter;
                 }
                 else if (modeByte0 == 'm' && modeByte1 == 'l')
                 {
-                    guiMode = midiLiveEnter;
+                    guiMode = Mode::midiLiveEnter;
                 }
                 else if (modeByte0 == 'u' && modeByte1 == 's')
                 {
-                    guiMode = userSelect;
+                    guiMode = Mode::userSelect;
                 }
                 else if (modeByte0 == 'n' && modeByte1 == 'u')
                 {
-                    guiMode = nxtFWUpdate;
+                    guiMode = Mode::nxtFWUpdate;
                 }
                 else if (modeByte0 == 's' && modeByte1 == 'e')
                 {
-                    guiMode = settings;
+                    guiMode = Mode::settings;
                 }
                 break;
             }
@@ -334,341 +334,366 @@ void GUI::update()
     // operation
     switch (guiMode)
     {
-        case userSelect:
+    case Mode::userSelect:
+        userSelect();
+        break;
+
+    case Mode::simpleEnter:
+        simpleEnter();
+        guiMode = Mode::simple;
+        break;
+    case Mode::simple:
+        simple();
+        break;
+    case Mode::simpleExit:
+        simpleExit();
+        guiMode = Mode::idle;
+        break;
+
+    case Mode::midiLiveEnter:
+        midiLiveEnter();
+        guiMode = Mode::midiLive;
+        break;
+    case Mode::midiLive:
+        midiLive();
+        break;
+    case Mode::midiLiveExit:
+        midiLiveExit();
+        guiMode = Mode::idle;
+        break;
+
+    case Mode::settings:
+        settings();
+        break;
+    case Mode::settingsExit:
+        settingsExit();
+        guiMode = Mode::idle;
+        break;
+
+    case Mode::nxtFWUpdate:
+        nxtFWUpdate();
+        break;
+
+    default:
+        idle();
+        break;
+    }
+}
+
+void GUI::idle()
+{
+    ;
+}
+
+void GUI::userSelect()
+{
+    if (guiCommand == 'd')
+    {
+        uint32_t user = guiCommandData[0];
+        if (user < 2)
         {
-            if (guiCommand == 'd')
-            {
-                uint32_t user = guiCommandData[0];
-                if (user < 2)
-                {
-                    guiUserMaxOntimeUS = guiCfg.getUsersMaxOntimeUS(user);
-                    guiUserMaxBPS      = guiCfg.getUsersMaxBPS(user);
-                    guiUserMaxDutyPerm = guiCfg.getUsersMaxDutyPerm(user);
-                }
-                // Data applied; clear command byte.
-                guiCommand = 0;
-            }
-            guiMode = idle;
-            break;
+            guiUserMaxOntimeUS = guiCfg.getUsersMaxOntimeUS(user);
+            guiUserMaxBPS      = guiCfg.getUsersMaxBPS(user);
+            guiUserMaxDutyPerm = guiCfg.getUsersMaxDutyPerm(user);
         }
+        // Data applied; clear command byte.
+        guiCommand = 0;
+    }
+    guiMode = Mode::idle;
+}
 
-        case simpleEnter:
+
+void GUI::simpleEnter()
+{
+    /*
+     * In simple mode we use the Output class to generate interrupter
+     * signals. It is easier and more efficient than the Oneshot class,
+     * but doesn't allow polyphony.
+     */
+    for (uint32_t i = 0; i < COIL_COUNT; i++)
+    {
+        coils[i].out.init(guiSys, i);
+    }
+}
+
+void GUI::simple()
+{
+    // Apply new data
+    if (guiCommand == 'd')
+    {
+        for (uint32_t i = 0; i < COIL_COUNT; i++)
         {
-            /*
-             * In simple mode we use the Output class to generate interrupter
-             * signals. It is easier and more efficient than the Oneshot class,
-             * but doesn't allow polyphony.
-             */
-            for (uint32_t i = 0; i < COIL_COUNT; i++)
-            {
-                coils[i].out.init(guiSys, i);
-            }
-            guiMode = simple;
-            break;
-        }
-
-        case simple:
-        {
-            // Apply new data
-            if (guiCommand == 'd')
-            {
-                for (uint32_t i = 0; i < COIL_COUNT; i++)
-                {
-                    // check if current coil is affected by command. Skip otherwise
-                    // Data format documented in separate file
-                    if (guiCommandData[0] & (1 << i))
-                    {
-                        uint32_t ontimeUS  = (guiCommandData[2] << 8) + guiCommandData[1];
-                        uint32_t frequency = (guiCommandData[4] << 8) + guiCommandData[3];
-                        coils[i].filteredOntimeUS.setTarget(ontimeUS);
-                        coils[i].filteredFrequency.setTarget(frequency);
-                    }
-                }
-                // Data applied; clear command byte.
-                guiCommand = 0;
-            }
-            // Apply outputs
-            for (uint32_t i = 0; i < COIL_COUNT; i++)
-            {
-                float f = coils[i].filteredFrequency.getFiltered();
-                float o = coils[i].filteredOntimeUS.getFiltered();
-                coils[i].out.tone(f, o);
-            }
-            break;
-        }
-
-        case simpleExit:
-        {
-            for (uint32_t i = 0; i < COIL_COUNT; i++)
-            {
-                coils[i].filteredOntimeUS.setTarget(0.0f);
-                coils[i].out.tone(0.0f, 0.0f);
-            }
-
-            // Now we can enter idle
-            guiMode = idle;
-            break;
-        }
-
-        case midiLiveEnter:
-        {
-            /*
-             * In midiLive mode we use the Oneshot class to generate polyphonic
-             * interrupter signals. While easier and more efficient to use,
-             * this is not possible with the Output class.
-             */
-            for (uint32_t i = 0; i < COIL_COUNT; i++)
-            {
-                coils[i].one.init(guiSys, i);
-            }
-            guiMidi.UARTEnable();
-            guiMidi.start();
-            guiMode = midiLive;
-            break;
-        }
-
-        case midiLive:
-        {
-            // Apply new data
+            // check if current coil is affected by command. Skip otherwise
             // Data format documented in separate file
-            if (guiCommand == 'c')
+            if (guiCommandData[0] & (1 << i))
             {
-                uint32_t coil = guiCommandData[0] - 1;
-                if (coil < COIL_COUNT)
+                uint32_t ontimeUS  = (guiCommandData[2] << 8) + guiCommandData[1];
+                uint32_t frequency = (guiCommandData[4] << 8) + guiCommandData[3];
+                coils[i].filteredOntimeUS.setTarget(ontimeUS);
+                coils[i].filteredFrequency.setTarget(frequency);
+            }
+        }
+        // Data applied; clear command byte.
+        guiCommand = 0;
+    }
+    // Apply outputs
+    for (uint32_t i = 0; i < COIL_COUNT; i++)
+    {
+        float f = coils[i].filteredFrequency.getFiltered();
+        float o = coils[i].filteredOntimeUS.getFiltered();
+        coils[i].out.tone(f, o);
+    }
+}
+
+void GUI::simpleExit()
+{
+    for (uint32_t i = 0; i < COIL_COUNT; i++)
+    {
+        coils[i].filteredOntimeUS.setTarget(0.0f);
+        coils[i].out.tone(0.0f, 0.0f);
+    }
+}
+
+void GUI::midiLiveEnter()
+{
+    /*
+     * In midiLive mode we use the Oneshot class to generate polyphonic
+     * interrupter signals. While easier and more efficient to use,
+     * this is not possible with the Output class.
+     */
+    for (uint32_t i = 0; i < COIL_COUNT; i++)
+    {
+        coils[i].one.init(guiSys, i);
+    }
+    guiMidi.UARTEnable();
+    guiMidi.start();
+}
+
+void GUI::midiLive()
+{
+    // Apply new data
+    // Data format documented in separate file
+    if (guiCommand == 'c')
+    {
+        uint32_t coil = guiCommandData[0] - 1;
+        if (coil < COIL_COUNT)
+        {
+            uint32_t channels = (guiCommandData[2] << 8) + guiCommandData[1];
+            guiMidi.setChannels(coil, channels);
+        }
+        else
+        {
+            // Important date!
+            uint32_t dateDDMMYYYY = (guiCommandData[2] << 16) + (guiCommandData[1] << 8) + guiCommandData[0];
+            if (dateDDMMYYYY == 11102161)
+            {
+                guiMidi.UARTDisable();
+                guiEEE = true;
+                guiEET = guiSys->getSystemTimeUS() >> 4;
+                guiEEI = 0;
+                for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
                 {
-                    uint32_t channels = (guiCommandData[2] << 8) + guiCommandData[1];
-                    guiMidi.setChannels(coil, channels);
+                    guiMidi.setChannels(coil, 0xffff);
                 }
-                else
+            }
+        }
+        // Data applied; clear command byte.
+        guiCommand = 0;
+    }
+    else if (guiCommand == 'd')
+    {
+        for (uint32_t i = 0; i < COIL_COUNT; i++)
+        {
+            // check if current coil is affected by command. Skip otherwise
+            // Data format documented in separate file
+            if (guiCommandData[0] & (1 << i))
+            {
+                uint32_t ontimeUS  = (guiCommandData[2] << 8) + guiCommandData[1];
+                uint32_t dutyPerm = (guiCommandData[4] << 8) + guiCommandData[3];
+                uint32_t volMode = (guiCommandData[0] & (0b11 << 6)) >> 6;
+                guiMidi.setVolSettings(i, ontimeUS, dutyPerm, volMode);
+            }
+        }
+        // Data applied; clear command byte.
+        guiCommand = 0;
+    }
+    if (guiEEE)
+    {
+        uint32_t time = guiSys->getSystemTimeUS() >> 4;
+        if ((time - guiEET) > ((uint32_t) guiEED[guiEEI][0] * 1000))
+        {
+            guiEET = time;
+            guiMidi.addData(guiEED[guiEEI][1]);
+            guiMidi.addData(guiEED[guiEEI][2]);
+            guiMidi.addData(guiEED[guiEEI][3]);
+            if (++guiEEI >= guiEES)
+            {
+                guiEEE = false;
+                guiMidi.UARTEnable();
+            }
+        }
+    }
+    guiMidi.process();
+    for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+    {
+        uint32_t timeUS = guiSys->getExactSystemTimeUS();
+        if (timeUS > coils[coil].nextAllowedFireUS)
+        {
+            uint32_t highestOntime = 0;
+            for (uint32_t note = 0; note < MAX_VOICES; note++)
+            {
+                if (note < guiMidi.activeNotes[coil])
                 {
-                    // Important date!
-                    uint32_t dateDDMMYYYY = (guiCommandData[2] << 16) + (guiCommandData[1] << 8) + guiCommandData[0];
-                    if (dateDDMMYYYY == 11102161)
+                    Note *currentNote = guiMidi.orderedNotes[coil][note];
+                    if ((timeUS % currentNote->periodUS) < currentNote->halfPeriodUS)
                     {
-                        guiMidi.UARTDisable();
-                        guiEEE = true;
-                        guiEET = guiSys->getSystemTimeUS() >> 4;
-                        guiEEI = 0;
-                        for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+                        if (!currentNote->fired)
                         {
-                            guiMidi.setChannels(coil, 0xffff);
+                            currentNote->fired = true;
+                            if (currentNote->finishedOntimeUS > highestOntime)
+                            {
+                                highestOntime = currentNote->finishedOntimeUS;
+                            }
                         }
                     }
+                    else
+                    {
+                        currentNote->fired = false;
+                    }
                 }
-                // Data applied; clear command byte.
-                guiCommand = 0;
             }
-            else if (guiCommand == 'd')
+            if (highestOntime)
             {
-                for (uint32_t i = 0; i < COIL_COUNT; i++)
-                {
-                    // check if current coil is affected by command. Skip otherwise
-                    // Data format documented in separate file
-                    if (guiCommandData[0] & (1 << i))
-                    {
-                        uint32_t ontimeUS  = (guiCommandData[2] << 8) + guiCommandData[1];
-                        uint32_t dutyPerm = (guiCommandData[4] << 8) + guiCommandData[3];
-                        uint32_t volMode = (guiCommandData[0] & (0b11 << 6)) >> 6;
-                        guiMidi.setVolSettings(i, ontimeUS, dutyPerm, volMode);
-                    }
-                }
-                // Data applied; clear command byte.
-                guiCommand = 0;
+                coils[coil].one.shot(highestOntime);
+                coils[coil].nextAllowedFireUS = timeUS + highestOntime + coils[coil].minOffUS;
             }
-            if (guiEEE)
-            {
-                uint32_t time = guiSys->getSystemTimeUS() >> 4;
-                if ((time - guiEET) > ((uint32_t) guiEED[guiEEI][0] * 1000))
-                {
-                    guiEET = time;
-                    guiMidi.addData(guiEED[guiEEI][1]);
-                    guiMidi.addData(guiEED[guiEEI][2]);
-                    guiMidi.addData(guiEED[guiEEI][3]);
-                    if (++guiEEI >= guiEES)
-                    {
-                        guiEEE = false;
-                        guiMidi.UARTEnable();
-                    }
-                }
-            }
-            guiMidi.process();
-            for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
-            {
-                uint32_t timeUS = guiSys->getExactSystemTimeUS();
-                if (timeUS > coils[coil].nextAllowedFireUS)
-                {
-                    uint32_t highestOntime = 0;
-                    for (uint32_t note = 0; note < MAX_VOICES; note++)
-                    {
-                        if (note < guiMidi.activeNotes[coil])
-                        {
-                            Note *currentNote = guiMidi.orderedNotes[coil][note];
-                            if ((timeUS % currentNote->periodUS) < currentNote->halfPeriodUS)
-                            {
-                                if (!currentNote->fired)
-                                {
-                                    currentNote->fired = true;
-                                    if (currentNote->finishedOntimeUS > highestOntime)
-                                    {
-                                        highestOntime = currentNote->finishedOntimeUS;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                currentNote->fired = false;
-                            }
-                        }
-                    }
-                    if (highestOntime)
-                    {
-                        coils[coil].one.shot(highestOntime);
-                        coils[coil].nextAllowedFireUS = timeUS + highestOntime + coils[coil].minOffUS;
-                    }
-                }
-            }
-            break;
         }
+    }
+}
 
-        case midiLiveExit:
+void GUI::midiLiveExit()
+{
+    // Stop MIDI operation
+    guiMidi.UARTDisable();
+    guiMidi.stop();
+    guiEEE = false;
+}
+
+void GUI::settings()
+{
+    if (guiCommand == 'd')
+    {
+        // Coil, user or other settings changed.
+        // Data format documented in separate file.
+        uint32_t settings = (guiCommandData[0] & 0b11000000) >> 6;
+        uint32_t number =    guiCommandData[0] & 0b00111111;
+        uint32_t data   =   (guiCommandData[4] << 24)
+                          + (guiCommandData[3] << 16)
+                          + (guiCommandData[2] << 8)
+                          +  guiCommandData[1];
+        if (settings == 1 && (number - 1) < COIL_COUNT)
         {
-            // Stop MIDI operation
-            guiMidi.UARTDisable();
-            guiMidi.stop();
-            guiEEE = false;
-
-            // Now we can enter idle
-            guiMode = idle;
-            break;
+            // Coil limits. Number ranges from 1-6 instead of 0-5.
+            number--;
+            guiCfg.coilSettings[number] = data;
+            coils[number].minOffUS = guiCfg.getCoilsMinOffUS(number);
+            guiMidi.setTotalMaxDutyPerm(number, guiCfg.getCoilsMaxDutyPerm(number));
+            coils[number].out.setMaxDutyPerm(guiCfg.getCoilsMaxDutyPerm(number));
+            coils[number].out.setMaxOntimeUS(guiCfg.getCoilsMaxOntimeUS(number));
+            coils[number].one.setMaxOntimeUS(guiCfg.getCoilsMaxOntimeUS(number));
         }
-
-        case settings:
+        else if (settings == 0 && number < 3)
         {
-            if (guiCommand == 'd')
+            // User limits.
+            guiCfg.userSettings[number] = data;
+            guiUserMaxOntimeUS = guiCfg.getUsersMaxOntimeUS(number);
+            guiUserMaxBPS      = guiCfg.getUsersMaxBPS(number);
+            guiUserMaxDutyPerm = guiCfg.getUsersMaxDutyPerm(number);
+        }
+        else if (settings == 2 && number < 10)
+        {
+            // Other (general) settings
+            guiCfg.otherSettings[number] = data;
+        }
+        // Data applied; clear command byte.
+        guiCommand = 0;
+    }
+    else if (guiCommand == 'u')
+    {
+        uint32_t length = (guiCommandData[0] & 0b00011111) + 1;
+        bool     pwd    =  guiCommandData[0] & 0b00100000;
+        uint32_t user   = (guiCommandData[0] & 0b11000000) >> 6;
+        if (pwd)
+        {
+            // Data contains user password
+            for (uint32_t i = 0; i < length; i++)
             {
-                // Coil, user or other settings changed.
-                // Data format documented in separate file.
-                uint32_t settings = (guiCommandData[0] & 0b11000000) >> 6;
-                uint32_t number =    guiCommandData[0] & 0b00111111;
-                uint32_t data   =   (guiCommandData[4] << 24)
-                                  + (guiCommandData[3] << 16)
-                                  + (guiCommandData[2] << 8)
-                                  +  guiCommandData[1];
-                if (settings == 1 && (number - 1) < COIL_COUNT)
-                {
-                    // Coil limits. Number ranges from 1-6 instead of 0-5.
-                    number--;
-                    guiCfg.coilSettings[number] = data;
-                    coils[number].minOffUS = guiCfg.getCoilsMinOffUS(number);
-                    guiMidi.setTotalMaxDutyPerm(number, guiCfg.getCoilsMaxDutyPerm(number));
-                    coils[number].out.setMaxDutyPerm(guiCfg.getCoilsMaxDutyPerm(number));
-                    coils[number].out.setMaxOntimeUS(guiCfg.getCoilsMaxOntimeUS(number));
-                    coils[number].one.setMaxOntimeUS(guiCfg.getCoilsMaxOntimeUS(number));
-                }
-                else if (settings == 0 && number < 3)
-                {
-                    // User limits.
-                    guiCfg.userSettings[number] = data;
-                    guiUserMaxOntimeUS = guiCfg.getUsersMaxOntimeUS(number);
-                    guiUserMaxBPS      = guiCfg.getUsersMaxBPS(number);
-                    guiUserMaxDutyPerm = guiCfg.getUsersMaxDutyPerm(number);
-                }
-                else if (settings == 2 && number < 10)
-                {
-                    // Other (general) settings
-                    guiCfg.otherSettings[number] = data;
-                }
-                // Data applied; clear command byte.
-                guiCommand = 0;
+                guiCfg.userPwds[user][i] = guiCommandData[i + 1];
             }
-            else if (guiCommand == 'u')
+            guiCfg.userPwds[user][length] = '\0';
+        }
+        else
+        {
+            // Data contains user name
+            for (uint32_t i = 0; i < length; i++)
             {
-                uint32_t length = (guiCommandData[0] & 0b00011111) + 1;
-                bool     pwd    =  guiCommandData[0] & 0b00100000;
-                uint32_t user   = (guiCommandData[0] & 0b11000000) >> 6;
-                if (pwd)
-                {
-                    // Data contains user password
-                    for (uint32_t i = 0; i < length; i++)
-                    {
-                        guiCfg.userPwds[user][i] = guiCommandData[i + 1];
-                    }
-                    guiCfg.userPwds[user][length] = '\0';
-                }
-                else
-                {
-                    // Data contains user name
-                    for (uint32_t i = 0; i < length; i++)
-                    {
-                        guiCfg.userNames[user][i] = guiCommandData[i + 1];
-                    }
-                    guiCfg.userNames[user][length] = '\0';
-                }
-                // Data applied; clear command byte.
-                guiCommand = 0;
+                guiCfg.userNames[user][i] = guiCommandData[i + 1];
             }
-            break;
+            guiCfg.userNames[user][length] = '\0';
         }
+        // Data applied; clear command byte.
+        guiCommand = 0;
+    }
+}
 
-        case settingsExit:
+void GUI::settingsExit()
+{
+    // Update EEPROM
+    guiCfg.update();
+}
+
+void GUI::nxtFWUpdate()
+{
+    // Stop normal operation and pass data between Nextion UART and USB UART
+    // After upload is done (1 sec timeout) the uC performs a reset.
+
+    // Stop Nextion UARTstdio operation
+    guiNxt.disableStdio();
+
+    // Stop all MIDI UARTs
+    guiMidi.UARTDisable();
+    // UARTs are supposed to be initialized.
+    uint32_t nxtUARTBase = guiNxt.getUARTBase();
+    uint32_t usbUARTBase = UART0_BASE;
+    uint32_t baudRate = guiNxt.getBaudRate();
+    // Re-init to make sure settings are correct
+    // (We do assume they are already enabled. TODO)
+    UARTConfigSetExpClk(nxtUARTBase, guiSys->getClockFreq(), baudRate,
+                        (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
+    UARTConfigSetExpClk(usbUARTBase, guiSys->getClockFreq(), baudRate,
+                        (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
+    UARTFIFOEnable(nxtUARTBase);
+    UARTFIFOEnable(usbUARTBase);
+
+    bool uploadStarted = false;
+    uint32_t timeUS = guiSys->getExactSystemTimeUS();
+    while (42)
+    {
+        if (UARTCharsAvail(nxtUARTBase))
         {
-            // Update EEPROM
-            guiCfg.update();
-
-            // Now we can enter idle
-            guiMode = idle;
-            break;
+            unsigned char c = UARTCharGet(nxtUARTBase);
+            UARTCharPutNonBlocking(usbUARTBase, c);
         }
-
-        case nxtFWUpdate:
+        if (UARTCharsAvail(usbUARTBase))
         {
-            // Stop normal operation and pass data between Nextion UART and USB UART
-            // After upload is done (1 sec timeout) the uC performs a reset.
-
-            // Stop Nextion UARTstdio operation
-            guiNxt.disableStdio();
-
-            // Stop all MIDI UARTs
-            guiMidi.UARTDisable();
-            // UARTs are supposed to be initialized.
-            uint32_t nxtUARTBase = guiNxt.getUARTBase();
-            uint32_t usbUARTBase = UART0_BASE;
-            uint32_t baudRate = guiNxt.getBaudRate();
-            // Re-init to make sure settings are correct
-            // (We do assume they are already enabled. TODO)
-            UARTConfigSetExpClk(nxtUARTBase, guiSys->getClockFreq(), baudRate,
-                                (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
-            UARTConfigSetExpClk(usbUARTBase, guiSys->getClockFreq(), baudRate,
-                                (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
-            UARTFIFOEnable(nxtUARTBase);
-            UARTFIFOEnable(usbUARTBase);
-
-            bool uploadStarted = false;
-            uint32_t timeUS = guiSys->getExactSystemTimeUS();
-            while (42)
-            {
-                if (UARTCharsAvail(nxtUARTBase))
-                {
-                    unsigned char c = UARTCharGet(nxtUARTBase);
-                    UARTCharPutNonBlocking(usbUARTBase, c);
-                }
-                if (UARTCharsAvail(usbUARTBase))
-                {
-                    uploadStarted = true;
-                    timeUS = guiSys->getSystemTimeUS();
-                    unsigned char c = UARTCharGet(usbUARTBase);
-                    UARTCharPutNonBlocking(nxtUARTBase, c);
-                }
-                if (uploadStarted && (guiSys->getSystemTimeUS() - timeUS) > 1000000)
-                {
-                    SysCtlReset();
-                }
-            }
-            break;
+            uploadStarted = true;
+            timeUS = guiSys->getSystemTimeUS();
+            unsigned char c = UARTCharGet(usbUARTBase);
+            UARTCharPutNonBlocking(nxtUARTBase, c);
         }
-        default: // includes idle
+        if (uploadStarted && (guiSys->getSystemTimeUS() - timeUS) > 1000000)
         {
-            break;
+            SysCtlReset();
         }
     }
 }

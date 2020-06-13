@@ -21,8 +21,7 @@
 
 
 // Modes
-enum Mode {
-    exit,
+enum class Mode {
     idle,
     simpleEnter,
     simple,
@@ -51,6 +50,18 @@ public:
     void midiMidiUartISR();
     Coil coils[COIL_COUNT];
 private:
+    void exit();
+    void idle();
+    void simpleEnter();
+    void simple();
+    void simpleExit();
+    void midiLiveEnter();
+    void midiLive();
+    void midiLiveExit();
+    void userSelect();
+    void settings();
+    void settingsExit();
+    void nxtFWUpdate();
     bool checkValue(uint32_t val);
 
     System* guiSys;
@@ -66,7 +77,7 @@ private:
                                    0, 0, 0, 0, 0, 0, 0, 0,
                                    0, 0, 0, 0, 0, 0, 0, 0,
                                    0, 0, 0, 0, 0, 0, 0, 0, 0}; // sized to max length of all commands.
-    Mode guiMode = idle;
+    Mode guiMode = Mode::idle;
 
     bool guiEEE = false;
     uint32_t guiEET = 0;
