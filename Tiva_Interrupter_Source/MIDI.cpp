@@ -508,14 +508,14 @@ float MIDI::getLFOVal(uint32_t channel)
          * LFO_SINE = sin| 2 * Pi * ----- |
          *               \           T_0  /
          *
-         *       /  LFO_SINE + 1       ModWheelValue    \
-         * val = | --------------- * ------------------ |
-         *       \        2           MaxModWheelValue  /
+         *       1   /  LFO_SINE + 1       ModWheelValue    \
+         * val = - * | --------------- * ------------------ |
+         *       2   \        2           MaxModWheelValue  /
          *
-         * sine wave between 0 and 1 mapped to the desired modulation depth.
+         * sine wave between 0 and 0.5 mapped to the desired modulation depth.
          */
-        return (sinf(6.283185307179586f * float(midiSys->getSystemTimeUS()) / midiLFOPeriodUS) + 1)
-                / 2.0f * channels[channel].modulation;
+        return (sinf(6.283185307179586f * float(midiSys->getSystemTimeUS()) / midiLFOPeriodUS) + 1) / 4.0f
+                * channels[channel].modulation;
     }
     else
     {
