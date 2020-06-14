@@ -297,20 +297,22 @@ void MIDI::newData(uint32_t c)
                         midiNoteChange = true;
                         break;
                     case 0x64: // Registered Parameter Number, fine
-                        midiRPNFine = midiData[2];
+                        midiRPN &= 0xff00;
+                        midiRPN += midiData[2];
                         break;
                     case 0x65: // Registered Parameter Number, coarse
-                        midiRPNCoarse = midiData[2];
+                        midiRPN &= 0x00ff;
+                        midiRPN += (midiData[2] << 8);
                         break;
                     case 0x06: // RPN Data Entry, fine
-                        if (midiRPNFine == 0) // Pitch bend range
+                        if (midiRPN == 0) // Pitch bend range
                         {
                             channels[midiChannel].pitchBendRangeFine = midiData[2];
                             channels[midiChannel].pitchBendRange  =   channels[midiChannel].pitchBendRangeCoarse
                                                                     + channels[midiChannel].pitchBendRangeFine / 100.0f;
                             channels[midiChannel].pitchBendRange /= 8192.0f;
                         }
-                        else if (midiRPNFine == 1) // Fine tuning
+                        else if (midiRPN == 1) // Fine tuning
                         {
                             /*
                              * Fine tuning mapping is similar to pitch bend. A 14 bit value (0..16383) is mapped to -2.0f..2.0f
@@ -324,14 +326,14 @@ void MIDI::newData(uint32_t c)
                         }
                         break;
                     case 0x26: // RPN Data Entry, coase
-                        if (midiRPNFine == 0) // Pitch bend range
+                        if (midiRPN == 0) // Pitch bend range
                         {
                             channels[midiChannel].pitchBendRangeCoarse = midiData[2];
                             channels[midiChannel].pitchBendRange  =   channels[midiChannel].pitchBendRangeCoarse
                                                                     + channels[midiChannel].pitchBendRangeFine / 100.0f;
                             channels[midiChannel].pitchBendRange /= 8192.0f;
                         }
-                        else if (midiRPNFine == 1) // Fine tuning
+                        else if (midiRPN == 1) // Fine tuning
                         {
                             channels[midiChannel].fineTuningCoarse = midiData[2];
                             channels[midiChannel].tuning = ((channels[midiChannel].fineTuningCoarse << 8)
@@ -339,7 +341,7 @@ void MIDI::newData(uint32_t c)
                             channels[midiChannel].tuning /= 4096.0f;
                             channels[midiChannel].tuning += channels[midiChannel].coarseTuning;
                         }
-                        else if (midiRPNFine == 2) // Coarse tuning
+                        else if (midiRPN == 2) // Coarse tuning
                         {
                             channels[midiChannel].coarseTuning = midiData[2];
                             channels[midiChannel].tuning = ((channels[midiChannel].fineTuningCoarse << 8)
