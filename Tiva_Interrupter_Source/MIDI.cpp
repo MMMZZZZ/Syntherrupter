@@ -311,6 +311,7 @@ void MIDI::newData(uint32_t c)
                             channels[midiChannel].pitchBendRange  =   channels[midiChannel].pitchBendRangeCoarse
                                                                     + channels[midiChannel].pitchBendRangeFine / 100.0f;
                             channels[midiChannel].pitchBendRange /= 8192.0f;
+                            midiNoteChange = true;
                         }
                         else if (midiRPN == 1) // Fine tuning
                         {
@@ -323,6 +324,7 @@ void MIDI::newData(uint32_t c)
                                                             + channels[midiChannel].fineTuningFine) - 8192.0f;
                             channels[midiChannel].tuning /= 4096.0f;
                             channels[midiChannel].tuning += channels[midiChannel].coarseTuning;
+                            midiNoteChange = true;
                         }
                         break;
                     case 0x26: // RPN Data Entry, coase
@@ -332,6 +334,7 @@ void MIDI::newData(uint32_t c)
                             channels[midiChannel].pitchBendRange  =   channels[midiChannel].pitchBendRangeCoarse
                                                                     + channels[midiChannel].pitchBendRangeFine / 100.0f;
                             channels[midiChannel].pitchBendRange /= 8192.0f;
+                            midiNoteChange = true;
                         }
                         else if (midiRPN == 1) // Fine tuning
                         {
@@ -340,6 +343,7 @@ void MIDI::newData(uint32_t c)
                                                             + channels[midiChannel].fineTuningFine) - 8192.0f;
                             channels[midiChannel].tuning /= 4096.0f;
                             channels[midiChannel].tuning += channels[midiChannel].coarseTuning;
+                            midiNoteChange = true;
                         }
                         else if (midiRPN == 2) // Coarse tuning
                         {
@@ -348,6 +352,7 @@ void MIDI::newData(uint32_t c)
                                                             + channels[midiChannel].fineTuningFine) - 8192.0f;
                             channels[midiChannel].tuning /= 4096.0f;
                             channels[midiChannel].tuning += channels[midiChannel].coarseTuning;
+                            midiNoteChange = true;
                         }
                         break;
                     case 0x78: // All Sounds off
@@ -383,7 +388,8 @@ void MIDI::newData(uint32_t c)
                 if (midiDataIndex >= 3)
                 {
                     midiDataIndex = 0;
-                    channels[midiChannel].pitchBend = int32_t(((midiData[2] << 7) + midiData[1])) - 8192;
+                    channels[midiChannel].pitchBend = ((midiData[2] << 7) + midiData[1]);
+                    channels[midiChannel].pitchBend -= 8192.0f;
                     midiNoteChange = true;
                 }
                 break;
@@ -508,7 +514,9 @@ void MIDI::process()
                     uint32_t channel = notes[coil][note].channel;
                     if (notes[coil][note].velocity)
                     {
-                        float noteNumFloat = float(notes[coil][note].number) + channels[channel].pitchBendRange * channels[channel].pitchBend;
+                        float noteNumFloat =   float(notes[coil][note].number)
+                                             + channels[channel].pitchBend * channels[channel].pitchBendRange
+                                             + channels[channel].tuning;
                         notes[coil][note].frequency = powf(2.0f, (noteNumFloat - 69.0f) / 12.0f) * 440.0f;
                         notes[coil][note].periodUS = 1000000.0f / notes[coil][note].frequency + 0.5f;
                         notes[coil][note].halfPeriodUS = notes[coil][note].periodUS / 2;
