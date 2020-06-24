@@ -262,17 +262,20 @@ void MIDI::newData(uint32_t c)
                     switch (midiData[1])
                     {
                     case 0x01: // Modulation Wheel
-                        channels[midiChannel].modulation = midiData[2] / 127.0f;
+                        channels[midiChannel].modulation = midiData[2] / 128.0f;
                         break;
                     case 0x02: // Breath Controller
 
                         break;
                     case 0x07: // Channel Volume
-                        channels[midiChannel].volume = midiData[2] / 127.0f;
+                        channels[midiChannel].volume = midiData[2] / 128.0f;
                         midiNoteChange = true;
                         break;
                     case 0x0A: // Pan
 
+                        break;
+                    case 0x0B: // Expression coarse
+                        channels[midiChannel].expression = midiData[2] / 128.0f;
                         break;
                     case 0x40: // Sustain Pedal
                         if (midiData[2] >= 64)
@@ -521,7 +524,7 @@ void MIDI::process()
                         notes[coil][note].periodUS = 1000000.0f / notes[coil][note].frequency + 0.5f;
                         notes[coil][note].halfPeriodUS = notes[coil][note].periodUS / 2;
 
-                        float vol = notes[coil][note].velocity / 127.0f;
+                        float vol = notes[coil][note].velocity / 128.0f;
                         if (channels[channel].damperPedal)
                         {
                             vol *= 0.6f;
@@ -652,6 +655,7 @@ void MIDI::updateEffects()
                     currentNote->finishedOntimeUS = currentNote->ADSROntimeUS
                                                     * (1.0f - getLFOVal(currentNote->channel))
                                                     * channels[currentNote->channel].volume
+                                                    * channels[currentNote->channel].expression
                                                     * midiPlaying;
 
                     totalDutyUS += currentNote->finishedOntimeUS * currentNote->frequency;
