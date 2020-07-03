@@ -134,14 +134,16 @@ void GUI::init(System* sys, void (*midiISR)(void))
     }
     guiNxt.setVal("TC_Settings.maxCoilCount", COIL_COUNT);
 
+    // Display Tiva firmware versions
+    guiNxt.setTxt("tTivaFWVersion", "v3.1.0-beta.1");
+
     // Initialization completed.
-    if (cfgInEEPROM)
+    guiNxt.sendCmd("vis 255,1");
+
+    // Show warning if no valid config is present in EEPROM. Warning is one layer below normal startup picture.
+    if (!cfgInEEPROM)
     {
-        guiNxt.sendCmd("vis pStartup,1");
-    }
-    else
-    {
-        guiNxt.sendCmd("vis tNoConfig,1");
+        guiNxt.sendCmd("vis pStartup,0");
     }
 }
 
