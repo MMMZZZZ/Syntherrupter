@@ -29,6 +29,7 @@ public:
     float ADSROntimeUS      = 0.0f;
     float finishedOntimeUS  = 0.0f;
     float frequency         = 0.0f;
+    float panVol            = 1.0f;
     bool fired              = false;
 };
 

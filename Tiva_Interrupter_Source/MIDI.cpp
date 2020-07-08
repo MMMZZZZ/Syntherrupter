@@ -40,7 +40,7 @@ void MIDI::init(System* sys, uint32_t usbUartNum, uint32_t baudRate, void (*usbI
     GPIOPinTypeUART(MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_PORT_BASE],
                     MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_TX_PIN] | MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_RX_PIN]);
     GPIOPinTypeUART(MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_PORT_BASE],
-                    MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_TX_PIN] | MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_RX_PIN]);
+                    MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_TX_PIN] | MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_RX_PIN]);
 
     UARTConfigSetExpClk(midiUSBUARTBase, midiSys->getClockFreq(), baudRate,
                         (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
@@ -49,7 +49,7 @@ void MIDI::init(System* sys, uint32_t usbUartNum, uint32_t baudRate, void (*usbI
     UARTFIFODisable(midiUSBUARTBase);
     UARTFIFODisable(midiMIDIUARTBase);
     UARTIntRegister(midiUSBUARTBase, usbISR);
-    UARTIntRegister(midiMIDIUARTBase, usbISR);
+    UARTIntRegister(midiMIDIUARTBase, midiISR);
     UARTIntEnable(midiUSBUARTBase, UART_INT_RX);
     UARTIntEnable(midiMIDIUARTBase, UART_INT_RX);
     IntPrioritySet(MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_INT], 0b00000000);
@@ -272,7 +272,8 @@ void MIDI::newData(uint32_t c)
                         midiNoteChange = true;
                         break;
                     case 0x0A: // Pan
-
+                        channels[midiChannel].pan = midiData[2] / 128.0f;
+                        midiNoteChange = true;
                         break;
                     case 0x0B: // Expression coarse
                         channels[midiChannel].expression = midiData[2] / 128.0f;
@@ -473,12 +474,24 @@ void MIDI::setChannels(uint32_t coil, uint32_t chns)
     {
         if (chns & (1 << i))
         {
-            channels[i].coils |= (1 << coil);
+            channels[i].coils |=  (1 << coil);
         }
         else
         {
             channels[i].coils &= ~(1 << coil);
         }
+    }
+}
+
+void MIDI::setPan(uint32_t coil, uint32_t pan)
+{
+    if (pan < 128)
+    {
+        midiCoilPan[coil] = pan / 128.0f;
+    }
+    else
+    {
+        midiCoilPan[coil] = -1.0f;
     }
 }
 
@@ -510,40 +523,50 @@ void MIDI::process()
         midiNoteChange = false;
         for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
         {
-            for (uint32_t note = 0; note < MAX_VOICES; note++)
+            for (uint32_t noteNum = 0; noteNum < MAX_VOICES; noteNum++)
             {
-                if (notes[coil][note].number)
+                if (notes[coil][noteNum].number)
                 {
-                    uint32_t channel = notes[coil][note].channel;
-                    if (notes[coil][note].velocity)
-                    {
-                        float noteNumFloat =   float(notes[coil][note].number)
-                                             + channels[channel].pitchBend * channels[channel].pitchBendRange
-                                             + channels[channel].tuning;
-                        notes[coil][note].frequency = powf(2.0f, (noteNumFloat - 69.0f) / 12.0f) * 440.0f;
-                        notes[coil][note].periodUS = 1000000.0f / notes[coil][note].frequency + 0.5f;
-                        notes[coil][note].halfPeriodUS = notes[coil][note].periodUS / 2;
+                    Note* note =  &(notes[coil][noteNum]);
+                    Channel* channel = &(channels[note->channel]);
 
-                        float vol = notes[coil][note].velocity / 128.0f;
-                        if (channels[channel].damperPedal)
+                    if (note->velocity)
+                    {
+                        float noteNumFloat =   float(note->number)
+                                             + channel->pitchBend * channel->pitchBendRange
+                                             + channel->tuning;
+                        note->frequency = powf(2.0f, (noteNumFloat - 69.0f) / 12.0f) * 440.0f;
+                        note->periodUS = 1000000.0f / note->frequency + 0.5f;
+                        note->halfPeriodUS = note->periodUS / 2;
+
+                        // Determine MIDI volume, including all effects that are not time-dependant.
+                        float vol = note->velocity / 128.0f;
+                        if (channel->damperPedal)
                         {
                             vol *= 0.6f;
                         }
 
+                        if (midiCoilPan[coil] >= 0.0f)
+                        {
+                            vol *= 1.0f - fabsf(channel->pan - midiCoilPan[coil]);
+                        }
+
+                        vol *= channel->volume * channel->expression;
+
                         // Determine if note is played in absolute (= same maxOntime for all notes) mode
                         // or in relative mode (= same maxDuty for all notes)
-                        if (notes[coil][note].frequency >= midiAbsFreq[coil])
+                        if (note->frequency >= midiAbsFreq[coil])
                         {
-                            notes[coil][note].rawOntimeUS = midiSingleNoteMaxOntimeUS[coil] * vol;
+                            note->rawOntimeUS = midiSingleNoteMaxOntimeUS[coil] * vol;
                         }
                         else
                         {
-                            notes[coil][note].rawOntimeUS = (1000000.0f / notes[coil][note].frequency) * midiSingleNoteMaxDuty[coil] * vol;
+                            note->rawOntimeUS = (1000000.0f / note->frequency) * midiSingleNoteMaxDuty[coil] * vol;
                         }
                     }
-                    else if (!channels[channel].sustainPedal)
+                    else if (!channel->sustainPedal)
                     {
-                        notes[coil][note].ADSRMode = 'R';
+                        note->ADSRMode = 'R';
                     }
                 }
             }
@@ -559,6 +582,7 @@ void MIDI::resetChannelControllers(uint32_t channel)
     channels[channel].volume            = 1.0f;
     channels[channel].pitchBend         = 0.0f;
     channels[channel].modulation        = 0.0f;
+    channels[channel].pan               = 0.5f;
     channels[channel].pitchBendRange    = 2.0f / 8192.0f;
     channels[channel].program           = MIDI_ADSR_PROGRAM_COUNT;
     channels[channel].sustainPedal      = false;
@@ -651,11 +675,9 @@ void MIDI::updateEffects()
                         currentNote->ADSROntimeUS = targetAmp;
                     }
 
-                    // After calculation of ADSR envelope, add other effects like channel volume or modulation
+                    // After calculation of ADSR envelope, add other time-dependent effects like modulation
                     currentNote->finishedOntimeUS = currentNote->ADSROntimeUS
                                                     * (1.0f - getLFOVal(currentNote->channel))
-                                                    * channels[currentNote->channel].volume
-                                                    * channels[currentNote->channel].expression
                                                     * midiPlaying;
 
                     totalDutyUS += currentNote->finishedOntimeUS * currentNote->frequency;

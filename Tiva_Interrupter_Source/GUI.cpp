@@ -129,9 +129,9 @@ void GUI::init(System* sys, void (*midiUsbISR)(void), void (*midiMidiISR)(void))
         }
 
         // Other Settings
-        uint32_t buttonHoldTime = guiCfg.otherSettings[0] & 0xffff;
+        uint32_t buttonHoldTime =  guiCfg.otherSettings[0] & 0x0000ffff;
         uint32_t sleepDelay     = (guiCfg.otherSettings[0] & 0xffff0000) >> 16;
-        uint32_t dispBrightness = guiCfg.otherSettings[1] & 0xff;
+        uint32_t dispBrightness =  guiCfg.otherSettings[1] & 0xff;
         guiNxt.printf("Other_Settings.nHoldTime.val=%i\xff\xff\xff",
                       buttonHoldTime);
         guiNxt.printf("thsp=%i\xff\xff\xff", sleepDelay);
@@ -139,9 +139,11 @@ void GUI::init(System* sys, void (*midiUsbISR)(void), void (*midiMidiISR)(void))
     }
     guiNxt.setVal("TC_Settings.maxCoilCount", COIL_COUNT);
 
+    // Give time to the UART to send the data
+    guiSys->delayUS(10000);
 
     // Display Tiva firmware versions
-    guiNxt.setTxt("tTivaFWVersion", "v3.1.0-beta.1");
+    guiNxt.setTxt("tTivaFWVersion", "v3.1.0-beta.2");
 
     // Initialization completed.
     guiNxt.sendCmd("vis 255,1");
@@ -481,6 +483,7 @@ void GUI::midiLive()
         uint32_t coil = guiCommandData[0] - 1;
         if (coil < COIL_COUNT)
         {
+            // Legacy
             uint32_t channels = (guiCommandData[2] << 8) + guiCommandData[1];
             guiMidi.setChannels(coil, channels);
         }
@@ -505,16 +508,25 @@ void GUI::midiLive()
     }
     else if (guiCommand == 'd')
     {
-        for (uint32_t i = 0; i < COIL_COUNT; i++)
+        uint32_t mode = (guiCommandData[0] >> 6) & 0b11;
+        for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
         {
             // check if current coil is affected by command. Skip otherwise
             // Data format documented in separate file
-            if (guiCommandData[0] & (1 << i))
+            if (guiCommandData[0] & (1 << coil))
             {
-                uint32_t ontimeUS  = (guiCommandData[2] << 8) + guiCommandData[1];
-                uint32_t dutyPerm = (guiCommandData[4] << 8) + guiCommandData[3];
-                uint32_t volMode = (guiCommandData[0] & (0b11 << 6)) >> 6;
-                guiMidi.setVolSettings(i, ontimeUS, dutyPerm, volMode);
+                if (mode)
+                {
+                    uint32_t ontimeUS = (guiCommandData[2] << 8) + guiCommandData[1];
+                    uint32_t dutyPerm = (guiCommandData[4] << 8) + guiCommandData[3];
+                    guiMidi.setVolSettings(coil, ontimeUS, dutyPerm, mode);
+                }
+                else
+                {
+                    uint32_t channels = (guiCommandData[2] << 8) + guiCommandData[1];
+                    guiMidi.setChannels(coil, channels);
+                    guiMidi.setPan(coil, guiCommandData[3]);
+                }
             }
         }
         // Data applied; clear command byte.

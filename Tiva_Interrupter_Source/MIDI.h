@@ -44,11 +44,10 @@ public:
     void newData(uint32_t c);
     void setVolSettings(uint32_t coil, float ontimeUSMax, float dutyMax, uint32_t volMode);
     void setChannels(uint32_t coil, uint32_t chns);
+    void setPan(uint32_t coil, uint32_t pan);
     void setTotalMaxDutyPerm(uint32_t coil, float maxDuty);
     bool isPlaying();
     void process();
-    //float getOntimeUS();
-    //float getFrequency();
     void setADSR(bool enable);
     uint32_t activeNotes[COIL_COUNT];
     Note *orderedNotes[COIL_COUNT][MAX_VOICES];
@@ -120,6 +119,7 @@ private:
     float midiSingleNoteMaxDuty[COIL_COUNT];
     float midiSingleNoteMaxOntimeUS[COIL_COUNT];
     float midiTotalMaxDutyUS[COIL_COUNT];
+    float midiCoilPan[COIL_COUNT];
     uint8_t midiVolMode[COIL_COUNT];
     static constexpr uint32_t midiUARTBufferSize = 1024;
     volatile uint8_t midiUARTBuffer[midiUARTBufferSize];

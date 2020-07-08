@@ -25,6 +25,7 @@ public:
     float volume = 0.0f;
     float expression = 0.0f;
     float modulation = 0.0f;
+    float pan = 0.0f;
     float pitchBendRange = 2.0f / 8192.0f; // Unit: Semitones / 8192 - since the pitchbend value ranges from -8192 to 8192. Taking that factor in the range reduces the amount of calcs.
     float tuning = 0.0f;
     uint8_t pitchBendRangeFine = 0;
