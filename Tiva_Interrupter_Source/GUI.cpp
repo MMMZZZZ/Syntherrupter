@@ -568,11 +568,14 @@ void GUI::midiLive()
                             {
                                 highestOntimeUS = currentNote->finishedOntimeUS;
                             }
-                            currentNote->nextFireUS = timeUS + currentNote->periodUS;
+                        }
+                        if (currentNote->nextFireUS)
+                        {
+                            currentNote->nextFireUS += currentNote->periodUS;
                         }
                         else
                         {
-                            currentNote->nextFireUS += currentNote->periodUS;
+                            currentNote->nextFireUS = timeUS;
                         }
                         currentNote->nextFireEndUS = currentNote->nextFireUS + currentNote->periodTolUS;
                     }

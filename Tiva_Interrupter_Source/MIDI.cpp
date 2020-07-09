@@ -712,6 +712,7 @@ void MIDI::removeDeadNotes()
             {
                 deadNotes++;
                 orderedNotes[coil][note]->number = 0;
+                orderedNotes[coil][note]->nextFireUS = 0;
             }
             else if (deadNotes)
             {
