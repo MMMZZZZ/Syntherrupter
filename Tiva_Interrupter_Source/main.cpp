@@ -36,7 +36,7 @@ void midiMidiUartISR()
 int main(void)
 {
     sys.init(120000000, sysTickISR);
-    sys.setSystemTimeResUS(500);
+    sys.setSystemTimeResUS(1000);
     gui.init(&sys, midiUsbUartISR, midiMidiUartISR);
 
     while (42)
