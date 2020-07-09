@@ -23,14 +23,13 @@ public:
     uint32_t velocity       = 0;
     uint32_t afterTouch     = 0;
     uint32_t periodUS       = 0;
-    uint32_t halfPeriodUS   = 0;
     uint32_t ADSRMode       = 'A';
+    uint32_t nextFireUS     = 0;
     float rawOntimeUS       = 0.0f;
     float ADSROntimeUS      = 0.0f;
     float finishedOntimeUS  = 0.0f;
     float frequency         = 0.0f;
     float panVol            = 1.0f;
-    bool fired              = false;
 };
 
 #endif /* NOTE_H_ */

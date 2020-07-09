@@ -549,38 +549,31 @@ void GUI::midiLive()
         }
     }
     guiMidi.process();
+    uint32_t timeUS = guiSys->getExactSystemTimeUS();
     for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
     {
-        uint32_t timeUS = guiSys->getExactSystemTimeUS();
         if (timeUS > coils[coil].nextAllowedFireUS)
         {
-            uint32_t highestOntime = 0;
+            uint32_t highestOntimeUS = 0;
             for (uint32_t note = 0; note < MAX_VOICES; note++)
             {
                 if (note < guiMidi.activeNotes[coil])
                 {
                     Note *currentNote = guiMidi.orderedNotes[coil][note];
-                    if ((timeUS % currentNote->periodUS) < currentNote->halfPeriodUS)
+                    if (timeUS >= currentNote->nextFireUS)
                     {
-                        if (!currentNote->fired)
+                        if (currentNote->finishedOntimeUS > highestOntimeUS)
                         {
-                            currentNote->fired = true;
-                            if (currentNote->finishedOntimeUS > highestOntime)
-                            {
-                                highestOntime = currentNote->finishedOntimeUS;
-                            }
+                            highestOntimeUS = currentNote->finishedOntimeUS;
                         }
-                    }
-                    else
-                    {
-                        currentNote->fired = false;
+                        currentNote->nextFireUS = timeUS + currentNote->periodUS;
                     }
                 }
             }
-            if (highestOntime)
+            if (highestOntimeUS)
             {
-                coils[coil].one.shot(highestOntime);
-                coils[coil].nextAllowedFireUS = timeUS + highestOntime + coils[coil].minOffUS;
+                coils[coil].one.shot(highestOntimeUS);
+                coils[coil].nextAllowedFireUS = timeUS + highestOntimeUS + coils[coil].minOffUS;
             }
         }
     }
