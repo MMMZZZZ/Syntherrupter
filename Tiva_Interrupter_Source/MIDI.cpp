@@ -24,9 +24,9 @@ void MIDI::init(System* sys, uint32_t usbUartNum, uint32_t baudRate, void (*usbI
     midiSys = sys;
 
     // Enable MIDI receiving over the USB UART (selectable baud rate) and a separate MIDI UART (31250 fixed baud rate).
-    midiUSBUARTNum = usbUartNum;
+    midiUSBUARTNum  = usbUartNum;
     midiMIDIUARTNum = midiUartNum;
-    midiUSBUARTBase = MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_BASE];
+    midiUSBUARTBase  = MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_BASE];
     midiMIDIUARTBase = MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_BASE];
     SysCtlPeripheralEnable(MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_SYSCTL_PERIPH]);
     SysCtlPeripheralEnable(MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_SYSCTL_PERIPH]);
@@ -44,24 +44,25 @@ void MIDI::init(System* sys, uint32_t usbUartNum, uint32_t baudRate, void (*usbI
 
     UARTConfigSetExpClk(midiUSBUARTBase, midiSys->getClockFreq(), baudRate,
                         (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
-    UARTConfigSetExpClk(midiMIDIUARTBase, midiSys->getClockFreq(), baudRate,
+    UARTConfigSetExpClk(midiMIDIUARTBase, midiSys->getClockFreq(), 31250,
                         (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
     UARTFIFODisable(midiUSBUARTBase);
     UARTFIFODisable(midiMIDIUARTBase);
-    UARTIntRegister(midiUSBUARTBase, usbISR);
+    UARTIntRegister(midiUSBUARTBase,  usbISR);
     UARTIntRegister(midiMIDIUARTBase, midiISR);
-    UARTIntEnable(midiUSBUARTBase, UART_INT_RX);
+    UARTIntEnable(midiUSBUARTBase,  UART_INT_RX);
     UARTIntEnable(midiMIDIUARTBase, UART_INT_RX);
-    IntPrioritySet(MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_INT], 0b00000000);
+    IntPrioritySet(MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_INT],  0b00000000);
     IntPrioritySet(MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_INT], 0b00100000);
 
     for (uint32_t i = 0; i < COIL_COUNT; i++)
     {
-        activeNotes[i]     = 0;
-        midiVolMode[i]     = 3;
-        midiAbsFreq[i]     = 0.0f;
-        midiSingleNoteMaxDuty[i]     = 0.0f;
-        midiSingleNoteMaxOntimeUS[i] = 0.0f;
+        activeNotes[i]               =  0;
+        midiVolMode[i]               =  3;
+        midiAbsFreq[i]               =  0.0f;
+        midiSingleNoteMaxDuty[i]     =  0.0f;
+        midiSingleNoteMaxOntimeUS[i] =  0.0f;
+        midiCoilPan[i]               = -1.0f;
 
         // To prevent excessive copy operations when ordering the notes,
         // orderedNotes only contains the pointers to the actual Note objects.
@@ -410,7 +411,7 @@ void MIDI::newData(uint32_t c)
                 }
                 else
                 {
-                    channels[midiChannel].program = MIDI_ADSR_PROGRAM_COUNT;
+                    channels[midiChannel].program = 0;
                 }
                 break;
             default:
@@ -537,7 +538,7 @@ void MIDI::process()
                                              + channel->tuning;
                         note->frequency = powf(2.0f, (noteNumFloat - 69.0f) / 12.0f) * 440.0f;
                         note->periodUS = 1000000.0f / note->frequency;
-                        note->periodTolUS = note->periodUS / 16;
+                        note->periodTolUS = note->periodUS / 2;
 
                         // Determine MIDI volume, including all effects that are not time-dependant.
                         float vol = note->velocity / 128.0f;

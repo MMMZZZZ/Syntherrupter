@@ -549,9 +549,9 @@ void GUI::midiLive()
         }
     }
     guiMidi.process();
-    uint32_t timeUS = guiSys->getExactSystemTimeUS();
     for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
     {
+        uint32_t timeUS = guiSys->getExactSystemTimeUS();
         if (timeUS > coils[coil].nextAllowedFireUS)
         {
             uint32_t highestOntimeUS = 0;

@@ -19,7 +19,7 @@ public:
     Channel();
     virtual ~Channel();
     uint32_t channelAfterTouch = 0;
-    uint32_t program           = 127;
+    uint32_t program           = 0;
     uint32_t coils             = 0;
     float pitchBend            = 0.0f;
     float volume               = 1.0f;
