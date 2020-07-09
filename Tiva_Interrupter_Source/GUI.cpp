@@ -562,11 +562,19 @@ void GUI::midiLive()
                     Note *currentNote = guiMidi.orderedNotes[coil][note];
                     if (timeUS >= currentNote->nextFireUS)
                     {
-                        if (currentNote->finishedOntimeUS > highestOntimeUS)
+                        if (timeUS < currentNote->nextFireEndUS)
                         {
-                            highestOntimeUS = currentNote->finishedOntimeUS;
+                            if (currentNote->finishedOntimeUS > highestOntimeUS)
+                            {
+                                highestOntimeUS = currentNote->finishedOntimeUS;
+                            }
+                            currentNote->nextFireUS = timeUS + currentNote->periodUS;
                         }
-                        currentNote->nextFireUS = timeUS + currentNote->periodUS;
+                        else
+                        {
+                            currentNote->nextFireUS += currentNote->periodUS;
+                        }
+                        currentNote->nextFireEndUS = currentNote->nextFireUS + currentNote->periodTolUS;
                     }
                 }
             }

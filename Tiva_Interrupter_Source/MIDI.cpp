@@ -537,6 +537,7 @@ void MIDI::process()
                                              + channel->tuning;
                         note->frequency = powf(2.0f, (noteNumFloat - 69.0f) / 12.0f) * 440.0f;
                         note->periodUS = 1000000.0f / note->frequency;
+                        note->periodTolUS = note->periodUS / 16;
 
                         // Determine MIDI volume, including all effects that are not time-dependant.
                         float vol = note->velocity / 128.0f;
