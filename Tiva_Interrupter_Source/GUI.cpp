@@ -551,7 +551,7 @@ void GUI::midiLive()
     guiMidi.process();
     for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
     {
-        uint32_t timeUS = guiSys->getExactSystemTimeUS();
+        uint32_t timeUS = guiSys->getSystemTimeUS();
         if (timeUS > coils[coil].nextAllowedFireUS)
         {
             uint32_t highestOntimeUS = 0;
@@ -695,7 +695,7 @@ void GUI::nxtFWUpdate()
     UARTFIFOEnable(usbUARTBase);
 
     bool uploadStarted = false;
-    uint32_t timeUS = guiSys->getExactSystemTimeUS();
+    uint32_t timeUS = guiSys->getSystemTimeUS();
     while (42)
     {
         if (UARTCharsAvail(nxtUARTBase))

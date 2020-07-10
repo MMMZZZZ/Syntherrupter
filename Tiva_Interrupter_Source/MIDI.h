@@ -112,6 +112,7 @@ private:
                                                                       {2.0f, 1.0f /   30000.0f,     1.0f, 1.0f /    2500.0f,     0.20f, 1.0f /  3500000.0f,     0.0f, 1.0f /   10000.0f},
                                                                       {3.0f, 1.0f /    3000.0f,     1.0f, 1.0f /   27000.0f,     0.00f, 1.0f /   400000.0f,     0.0f, 1.0f /  400000.0f},
     };
+    static constexpr uint32_t midiEffectResolutionUS = 1000;
 
     System* midiSys;
     Channel channels[16];

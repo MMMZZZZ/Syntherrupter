@@ -52,8 +52,8 @@ void MIDI::init(System* sys, uint32_t usbUartNum, uint32_t baudRate, void (*usbI
     UARTIntRegister(midiMIDIUARTBase, midiISR);
     UARTIntEnable(midiUSBUARTBase,  UART_INT_RX);
     UARTIntEnable(midiMIDIUARTBase, UART_INT_RX);
-    IntPrioritySet(MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_INT],  0b00000000);
-    IntPrioritySet(MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_INT], 0b00100000);
+    IntPrioritySet(MIDI_UART_MAPPING[midiUSBUARTNum][MIDI_UART_INT],  0b00100000);
+    IntPrioritySet(MIDI_UART_MAPPING[midiMIDIUARTNum][MIDI_UART_INT], 0b01100000);
 
     for (uint32_t i = 0; i < COIL_COUNT; i++)
     {
@@ -605,7 +605,7 @@ float MIDI::getLFOVal(uint32_t channel)
          * val = - * | --------------- * ------------------ |
          *       2   \        2           MaxModWheelValue  /
          *
-         * sine wave between 0 and 0.5 mapped to the desired modulation depth.
+         * sine wave between 0 and 1 mapped to the desired modulation depth (50% max).
          */
         return (sinf(6.283185307179586f * float(midiSys->getSystemTimeUS()) / midiLFOPeriodUS) + 1) / 4.0f
                 * channels[channel].modulation;
@@ -625,9 +625,9 @@ void MIDI::updateEffects()
     float ampDiff;
     float currentTime = midiSys->getSystemTimeUS();
     float timeDiffUS = currentTime - midiADSRTimeUS;
-    midiADSRTimeUS = currentTime;
-    if (timeDiffUS > 1.0f)
+    if (timeDiffUS > midiEffectResolutionUS)
     {
+        midiADSRTimeUS = currentTime;
         for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
         {
             float totalDutyUS = 0.0f;
@@ -637,45 +637,60 @@ void MIDI::updateEffects()
                 {
                     uint32_t program = channels[orderedNotes[coil][note]->channel].program;
                     Note* currentNote = orderedNotes[coil][note];
-                    switch (currentNote->ADSRMode)
+                    if (program)
                     {
-                    case 'A':
-                        targetAmp = currentNote->rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_ATTACK_AMP]);
-                        lastAmp   = currentNote->rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_RELEASE_AMP]);
-                        inversDurationUS  = (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_ATTACK_INVDUR_US]);
-                        break;
-                    case 'D':
-                        targetAmp = currentNote->rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_DECAY_AMP]);
-                        lastAmp   = currentNote->rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_ATTACK_AMP]);
-                        inversDurationUS  = (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_DECAY_INVDUR_US]);
-                        break;
-                    case 'S':
-                        targetAmp = currentNote->rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_SUSTAIN_AMP]);
-                        lastAmp   = currentNote->rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_DECAY_AMP]);
-                        inversDurationUS  = (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_SUSTAIN_INVDUR_US]);
-                        break;
-                    case 'R':
-                        targetAmp = currentNote->rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_RELEASE_AMP]);
-                        lastAmp   = currentNote->rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_SUSTAIN_AMP]);
-                        inversDurationUS  = (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_RELEASE_INVDUR_US]);
-                        break;
+                        switch (currentNote->ADSRMode)
+                        {
+                        case 'A':
+                            targetAmp = currentNote->rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_ATTACK_AMP]);
+                            lastAmp   = currentNote->rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_RELEASE_AMP]);
+                            inversDurationUS  = (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_ATTACK_INVDUR_US]);
+                            break;
+                        case 'D':
+                            targetAmp = currentNote->rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_DECAY_AMP]);
+                            lastAmp   = currentNote->rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_ATTACK_AMP]);
+                            inversDurationUS  = (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_DECAY_INVDUR_US]);
+                            break;
+                        case 'S':
+                            targetAmp = currentNote->rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_SUSTAIN_AMP]);
+                            lastAmp   = currentNote->rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_DECAY_AMP]);
+                            inversDurationUS  = (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_SUSTAIN_INVDUR_US]);
+                            break;
+                        case 'R':
+                            targetAmp = currentNote->rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_RELEASE_AMP]);
+                            lastAmp   = currentNote->rawOntimeUS * (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_SUSTAIN_AMP]);
+                            inversDurationUS  = (MIDI_ADSR_PROGRAMS[program][MIDI_ADSR_RELEASE_INVDUR_US]);
+                            break;
+                        }
+
+                        ampDiff = targetAmp - lastAmp;
+
+                        currentNote->ADSROntimeUS += ampDiff * timeDiffUS * inversDurationUS;
+                        if (    (currentNote->ADSROntimeUS >= targetAmp && ampDiff >= 0)
+                             || (currentNote->ADSROntimeUS <= targetAmp && ampDiff <= 0))
+                        {
+                            if (currentNote->ADSRMode == 'A')
+                            {
+                                currentNote->ADSRMode = 'D';
+                            }
+                            else if (currentNote->ADSRMode == 'D')
+                            {
+                                currentNote->ADSRMode = 'S';
+                            }
+                            currentNote->ADSROntimeUS = targetAmp;
+                        }
                     }
-
-                    ampDiff = targetAmp - lastAmp;
-
-                    currentNote->ADSROntimeUS += ampDiff * timeDiffUS * inversDurationUS;
-                    if (    (currentNote->ADSROntimeUS >= targetAmp && ampDiff >= 0)
-                         || (currentNote->ADSROntimeUS <= targetAmp && ampDiff <= 0))
+                    else
                     {
-                        if (currentNote->ADSRMode == 'A')
+                        // No ADSR calculations. A/D/S = on, R = off
+                        if (currentNote->ADSRMode != 'R')
                         {
-                            currentNote->ADSRMode = 'D';
+                            currentNote->ADSROntimeUS = currentNote->rawOntimeUS;
                         }
-                        else if (currentNote->ADSRMode == 'D')
+                        else
                         {
-                            currentNote->ADSRMode = 'S';
+                            currentNote->ADSROntimeUS = 0;
                         }
-                        currentNote->ADSROntimeUS = targetAmp;
                     }
 
                     // After calculation of ADSR envelope, add other time-dependent effects like modulation
