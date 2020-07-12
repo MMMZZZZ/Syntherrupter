@@ -301,6 +301,11 @@ void MIDI::newData(uint32_t c)
                         }
                         midiNoteChange = true;
                         break;
+                    case 0x62: // Non Registered Parameter Number, fine
+                    case 0x63: // Non Registered Parameter Number, coarse
+                        // Ignore data commands for NRPs by resetting the parameter number.
+                        midiRPN = 0xffff;
+                        break;
                     case 0x64: // Registered Parameter Number, fine
                         midiRPN &= 0xff00;
                         midiRPN += midiData[2];
