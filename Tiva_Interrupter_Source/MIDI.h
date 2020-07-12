@@ -122,12 +122,12 @@ private:
     float midiTotalMaxDutyUS[COIL_COUNT];
     float midiCoilPan[COIL_COUNT];
     uint8_t midiVolMode[COIL_COUNT];
+    bool midiCoilChange[COIL_COUNT];
     static constexpr uint32_t midiUARTBufferSize = 1024;
     volatile uint8_t midiUARTBuffer[midiUARTBufferSize];
     volatile uint32_t midiUARTBufferWriteIndex = 0;
     volatile uint32_t midiUARTBufferReadIndex = 0;
 
-    bool midiNoteChange            = true;
     uint32_t midiDataIndex      = 0;
     uint32_t midiData[3]        = {0, 0, 0};
     uint32_t midiChannel = 0;
