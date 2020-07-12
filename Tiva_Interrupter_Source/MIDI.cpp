@@ -82,7 +82,7 @@ void MIDI::init(System* sys, uint32_t usbUartNum, uint32_t baudRate, void (*usbI
     // Init all channels
     for (uint32_t channel = 0; channel < 16; channel++)
     {
-        resetChannelControllers(channel);
+        channels[channel].resetControllers();
     }
 }
 
@@ -372,7 +372,7 @@ void MIDI::newData(uint32_t c)
                         }
                         break;
                     case 0x79: // Reset all Controllers
-                        resetChannelControllers(midiChannel);
+                        channels[midiChannel].resetControllers();
                         break;
                     case 0x7B: // All Notes off
                         channels[midiChannel].sustainPedal = false;
@@ -436,7 +436,7 @@ void MIDI::start()
 {
     for (uint32_t channel = 0; channel < 16; channel++)
     {
-        resetChannelControllers(channel);
+        channels[channel].resetControllers();
     }
     midiPlaying = true;
 }
@@ -575,21 +575,6 @@ void MIDI::process()
     }
     updateEffects();
     removeDeadNotes();
-}
-
-void MIDI::resetChannelControllers(uint32_t channel)
-{
-    channels[channel].channelAfterTouch = 0;
-    channels[channel].volume            = 1.0f;
-    channels[channel].expression        = 1.0f;
-    channels[channel].pitchBend         = 0.0f;
-    channels[channel].modulation        = 0.0f;
-    channels[channel].pan               = 0.5f;
-    channels[channel].tuning            = 0.0f;
-    channels[channel].pitchBendRange    = 2.0f / 8192.0f;
-    //channels[channel].program           = MIDI_ADSR_PROGRAM_COUNT;
-    channels[channel].sustainPedal      = false;
-    channels[channel].damperPedal       = false;
 }
 
 float MIDI::getLFOVal(uint32_t channel)

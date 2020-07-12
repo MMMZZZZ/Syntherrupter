@@ -18,6 +18,8 @@ class Channel
 public:
     Channel();
     virtual ~Channel();
+    void resetControllers();
+
     uint32_t channelAfterTouch = 0;
     uint32_t program           = 0;
     uint32_t coils             = 0;

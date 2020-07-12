@@ -53,7 +53,6 @@ public:
     Note *orderedNotes[COIL_COUNT][MAX_VOICES];
 
 private:
-    void resetChannelControllers(uint32_t channel);
     void updateEffects();
     float getLFOVal(uint32_t channel);
     void removeDeadNotes();
