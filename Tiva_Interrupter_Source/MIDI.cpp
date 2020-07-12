@@ -670,6 +670,9 @@ void MIDI::updateEffects()
                         // No ADSR calculations. A/D/S = on, R = off
                         if (currentNote->ADSRMode != 'R')
                         {
+                            // ADSRMode must not be 'A' otherwise it will not be removed by MIDI::removeDeadNotes
+                            currentNote->ADSRMode = 'S';
+
                             currentNote->ADSROntimeUS = currentNote->rawOntimeUS;
                         }
                         else
