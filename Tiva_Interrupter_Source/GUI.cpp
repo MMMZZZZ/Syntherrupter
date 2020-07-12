@@ -587,6 +587,20 @@ void GUI::midiLive()
                 coils[coil].nextAllowedFireUS = timeUS + highestOntimeUS + coils[coil].minOffUS;
             }
         }
+        /*
+         * Overflow detection. No ontime or min offtime is larger than 10
+         * seconds.
+         * Note: In theory you'd need a similar detection for the
+         * currentNote->nextFireUS variables above. In practice this means that
+         * the notes playing during the overflow will stop playing but the next
+         * notes will be fine. Therefore it is not worth the additional CPU
+         * time to check each time for an overflow. Remember, it only happens
+         * less than once an hour.
+         */
+        else if (coils[coil].nextAllowedFireUS - timeUS > 10000000)
+        {
+            coils[coil].nextAllowedFireUS = 0;
+        }
     }
 }
 

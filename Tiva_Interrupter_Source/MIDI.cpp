@@ -609,6 +609,10 @@ void MIDI::updateEffects()
     float inversDurationUS;
     float ampDiff;
     float currentTime = midiSys->getSystemTimeUS();
+    if (currentTime < midiADSRTimeUS)
+    {
+        midiADSRTimeUS = currentTime;
+    }
     float timeDiffUS = currentTime - midiADSRTimeUS;
     if (timeDiffUS > midiEffectResolutionUS)
     {
