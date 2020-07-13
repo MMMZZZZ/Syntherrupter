@@ -574,9 +574,9 @@ void MIDI::process()
             {
                 break;
             }
-            if (midiCoilChange[coil] || notes[coil][noteNum].changed)
+            if (midiCoilChange[coil] || orderedNotes[coil][noteNum]->changed)
             {
-                Note* note =  &(notes[coil][noteNum]);
+                Note* note =  orderedNotes[coil][noteNum];
                 Channel* channel = &(channels[note->channel]);
 
                 note->changed = false;
