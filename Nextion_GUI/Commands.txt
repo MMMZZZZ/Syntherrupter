@@ -14,12 +14,20 @@ Note: Any value ranges that have no specified meaning here should be ignored by 
 		* d.....: Data command. In this context:
 			* Byte 1: 
 				* Bit 0-5: Output which is affected by this command. Value ranges from 1-6 corresponding to the outputs 0-5.
-				* Bit 6-7: volume mode. 1 = absolute mode (constant ontime), 2 = relative mode (constant duty), 3 = auto mode (low notes = relative, high notes = absolute. Crossover where ontime is equal for both modes).
-			* Byte 2: lower byte of the maximum ontime [us] in absolute mode
-			* Byte 3: upper byte of the maximum ontime [us] in absolute mode
-			* Byte 4: lower byte of the maximum duty [1/1000] in relative mode
-			* Byte 5: upper byte of the maximum duty [1/1000] in relative mode
-		* c...: Channel command. Indicates which MIDI channels this output listens to. 
+				* Bit 6-7: mode. 0 = Pan/channel data, 1 = absolute volume mode (constant ontime), 2 = relative volume mode (constant duty), 3 = auto volume mode (low notes = relative, high notes = absolute. Crossover where ontime is equal for both modes).
+			* Absolute, relative and auto volume mode
+				* Byte 2: lower byte of the maximum ontime [us] in absolute mode
+				* Byte 3: upper byte of the maximum ontime [us] in absolute mode
+				* Byte 4: lower byte of the maximum duty [1/1000] in relative mode
+				* Byte 5: upper byte of the maximum duty [1/1000] in relative mode
+			* Pan/channel data
+				* Byte 2: Bits 0-7 correspond to channels 0-7. If a bit is set, the output will listen to this MIDI channel.
+				* Byte 3: Bits 0-7 correspond to channels 8-15. If a bit is set, the output will listen to this MIDI channel.
+				* Byte 4: 
+					* Bit 0-6: Pan position, where 0 = left, 64 = middle, 127 = right.
+					* Bit 7: 0 = use pan position, 1 = ignore pan position.
+				* Byte 5: unused
+		* c...: Channel command (legacy). Indicates which MIDI channels this output listens to. 
 			* Byte 1: bit 0-5 indicate which of the outputs 0-5 is affected by this command.
 			* Byte 2: Bits 0-7 correspond to channels 0-7
 			* Byte 3: Bits 0-7 correspond to channels 8-15
@@ -44,7 +52,8 @@ Note: Any value ranges that have no specified meaning here should be ignored by 
 			* Coil limits
 				* Byte 2-5: form a 32bit bitfield containing the absolute maximum ratings that must not be exceeded for this coil. The microcontroller assures to operate within these limits no matter what values are requested by other commands. Note: in MIDI operation the displayed values can be exceeded for numerous reasons. F.ex. ADSR can be adjusted to exceed a given value for a short time. Therefore the user limits are more "average limits". The limits in this command however cannot be exceeded. Not even for a single pulse. 
 					* Bit  0-11: Maximum allowed ontime [10us]
-					* Bit 12-22: Minimum offtime after each ontime [1us] 
+					* Bit 12-15: Maximum number of simultaneous voices in MIDI playback minus one.
+					* Bit 16-22: Minimum offtime after each ontime [10us]
 					* Bit 23-31: Maximum allowed duty [1/1000]
 			* Other settings, page 0
 				* Byte 2: Button hold time LSB

@@ -46,6 +46,7 @@ public:
     void setChannels(uint32_t coil, uint32_t chns);
     void setPan(uint32_t coil, uint32_t pan);
     void setTotalMaxDutyPerm(uint32_t coil, float maxDuty);
+    void setMaxVoices(uint32_t coil, uint32_t maxVoices);
     bool isPlaying();
     void process();
     void setADSR(bool enable);
@@ -122,6 +123,7 @@ private:
     float midiTotalMaxDutyUS[COIL_COUNT];
     float midiCoilPan[COIL_COUNT];
     uint8_t midiVolMode[COIL_COUNT];
+    uint32_t midiCoilMaxVoices[COIL_COUNT];
     bool midiCoilChange[COIL_COUNT];
     static constexpr uint32_t midiUARTBufferSize = 1024;
     volatile uint8_t midiUARTBuffer[midiUARTBufferSize];

@@ -103,9 +103,19 @@ uint32_t EEPROMSettings::getCoilsMinOffUS(uint32_t coil)
     uint32_t minOffUS = 0;
     if (coil < 6)
     {
-        minOffUS = ((coilSettings[coil] & 0x007ff000) >> 12);
+        minOffUS = ((coilSettings[coil] & 0x007f0000) >> 16) * 10;
     }
     return minOffUS;
+}
+
+uint32_t EEPROMSettings::getCoilsMaxVoices(uint32_t coil)
+{
+    uint32_t maxVoices = 0;
+    if (coil < 6)
+    {
+        maxVoices = ((coilSettings[coil] & 0x0000f000) >> 12) + 1;
+    }
+    return maxVoices;
 }
 
 uint32_t EEPROMSettings::getCoilsMaxOntimeUS(uint32_t coil)

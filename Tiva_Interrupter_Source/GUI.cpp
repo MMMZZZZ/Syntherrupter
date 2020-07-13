@@ -71,6 +71,7 @@ void GUI::init(System* sys, void (*midiUsbISR)(void), void (*midiMidiISR)(void))
             // Load settings
             uint32_t maxOntimeUS = guiCfg.getCoilsMaxOntimeUS(coil);
             uint32_t minOffUS    = guiCfg.getCoilsMinOffUS(coil);
+            uint32_t maxVoices   = guiCfg.getCoilsMaxVoices(coil);
             uint32_t maxDutyPerm = guiCfg.getCoilsMaxDutyPerm(coil);
 
             if (maxOntimeUS > allCoilsMaxOntimeUS)
@@ -84,6 +85,7 @@ void GUI::init(System* sys, void (*midiUsbISR)(void), void (*midiMidiISR)(void))
 
             // Apply to coil objects
             guiMidi.setTotalMaxDutyPerm(coil, maxDutyPerm);
+            guiMidi.setMaxVoices(coil, maxVoices);
             coils[coil].out.setMaxDutyPerm(maxDutyPerm);
             coils[coil].out.setMaxOntimeUS(maxOntimeUS);
             coils[coil].one.setMaxOntimeUS(maxOntimeUS);
@@ -92,8 +94,8 @@ void GUI::init(System* sys, void (*midiUsbISR)(void), void (*midiMidiISR)(void))
             // Send to Nextion
             guiNxt.printf("%s.coil%iOn.val=%i\xff\xff\xff",
                           AllCoilSettings, coil + 1, maxOntimeUS);
-            guiNxt.printf("%s.coil%iMinOff.val=%i\xff\xff\xff",
-                          AllCoilSettings, coil + 1, minOffUS);
+            guiNxt.printf("%s.coil%iOffVoices.val=%i\xff\xff\xff",
+                          AllCoilSettings, coil + 1, (maxVoices << 16) + minOffUS);
             guiNxt.printf("%s.coil%iDuty.val=%i\xff\xff\xff",
                           AllCoilSettings, coil + 1, maxDutyPerm);
             // Give time to the UART to send the data
@@ -138,12 +140,13 @@ void GUI::init(System* sys, void (*midiUsbISR)(void), void (*midiMidiISR)(void))
         guiNxt.printf("dim=%i\xff\xff\xff", dispBrightness);
     }
     guiNxt.setVal("TC_Settings.maxCoilCount", COIL_COUNT);
+    guiNxt.setVal("TC_Settings.maxVoices", MAX_VOICES);
 
     // Give time to the UART to send the data
     guiSys->delayUS(10000);
 
     // Display Tiva firmware versions
-    guiNxt.setTxt("tTivaFWVersion", "v3.1.0-beta.2");
+    guiNxt.setTxt("tTivaFWVersion", "v3.1.0-beta.3");
 
     // Initialization completed.
     guiNxt.sendCmd("vis 255,1");
@@ -629,8 +632,9 @@ void GUI::settings()
             // Coil limits. Number ranges from 1-6 instead of 0-5.
             number--;
             guiCfg.coilSettings[number] = data;
-            coils[number].minOffUS = guiCfg.getCoilsMinOffUS(number);
             guiMidi.setTotalMaxDutyPerm(number, guiCfg.getCoilsMaxDutyPerm(number));
+            guiMidi.setMaxVoices(number, guiCfg.getCoilsMaxVoices(number));
+            coils[number].minOffUS = guiCfg.getCoilsMinOffUS(number);
             coils[number].out.setMaxDutyPerm(guiCfg.getCoilsMaxDutyPerm(number));
             coils[number].out.setMaxOntimeUS(guiCfg.getCoilsMaxOntimeUS(number));
             coils[number].one.setMaxOntimeUS(guiCfg.getCoilsMaxOntimeUS(number));

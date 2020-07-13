@@ -30,6 +30,7 @@ public:
     uint32_t getUsersMaxDutyPerm(uint32_t user);
     uint32_t getCoilsMaxOntimeUS(uint32_t coil);
     uint32_t getCoilsMinOffUS(uint32_t coil);
+    uint32_t getCoilsMaxVoices(uint32_t coil);
     uint32_t getCoilsMaxDutyPerm(uint32_t coil);
     uint32_t getStngsHoldTime();
     uint32_t getStngsBrightness();
@@ -48,7 +49,7 @@ private:
     bool writeChangedSequence(void *newData, uint32_t byteSize);
     bool updateBank();
 
-    static constexpr uint32_t CFG_PRESENT = 0x42000000; // MSB: Random value != 0 and != 0xff to check if data has been written to the EEPROM. Next byte: Config Version. Increments if there has been incompatible changes. Lowest two bytes: wear leveling. Switch to next bank on overflow.
+    static constexpr uint32_t CFG_PRESENT = 0x42010000; // MSB: Random value != 0 and != 0xff to check if data has been written to the EEPROM. Next byte: Config Version. Increments if there has been incompatible changes. Lowest two bytes: wear leveling. Switch to next bank on overflow.
     static constexpr uint32_t CFG_WRITE_EEPROM = 0;
     static constexpr uint32_t CFG_READ_EEPROM = 1;
     static constexpr uint32_t CFG_UPDATE_EEPROM = 2;
