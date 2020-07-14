@@ -45,6 +45,7 @@ public:
     void setVolSettings(uint32_t coil, float ontimeUSMax, float dutyMax, uint32_t volMode);
     void setChannels(uint32_t coil, uint32_t chns);
     void setPan(uint32_t coil, uint32_t pan);
+    void setPanReach(uint32_t coil, uint32_t reach);
     void setTotalMaxDutyPerm(uint32_t coil, float maxDuty);
     void setMaxVoices(uint32_t coil, uint32_t maxVoices);
     bool isPlaying();
@@ -122,6 +123,7 @@ private:
     float midiSingleNoteMaxOntimeUS[COIL_COUNT];
     float midiTotalMaxDutyUS[COIL_COUNT];
     float midiCoilPan[COIL_COUNT];
+    float midiInversPanReach[COIL_COUNT];
     uint8_t midiVolMode[COIL_COUNT];
     uint32_t midiCoilMaxVoices[COIL_COUNT];
     bool midiCoilChange[COIL_COUNT];

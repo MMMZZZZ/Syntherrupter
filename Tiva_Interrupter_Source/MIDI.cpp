@@ -63,6 +63,7 @@ void MIDI::init(System* sys, uint32_t usbUartNum, uint32_t baudRate, void (*usbI
         midiSingleNoteMaxDuty[i]     =  0.0f;
         midiSingleNoteMaxOntimeUS[i] =  0.0f;
         midiCoilPan[i]               = -1.0f;
+        midiInversPanReach[i]        =  3.0f;
 
         // To prevent excessive copy operations when ordering the notes,
         // orderedNotes only contains the pointers to the actual Note objects.
@@ -534,6 +535,11 @@ void MIDI::setPan(uint32_t coil, uint32_t pan)
     }
 }
 
+void MIDI::setPanReach(uint32_t coil, uint32_t reach)
+{
+    midiInversPanReach[coil] = 128.0f / reach;
+}
+
 void MIDI::setTotalMaxDutyPerm(uint32_t coil, float maxDuty)
 {
     // dutyUS = ontime[us] * freq[Hz] = duty * 1000000 = (dutyPerm / 1000) * 1000000
@@ -599,7 +605,11 @@ void MIDI::process()
 
                     if (midiCoilPan[coil] >= 0.0f)
                     {
-                        vol *= 1.0f - fabsf(channel->pan - midiCoilPan[coil]);
+                        note->panVol = 1.0f - fmax(0.0f, midiInversPanReach[coil] * fabsf(channel->pan - midiCoilPan[coil]));
+                    }
+                    else
+                    {
+                        note->panVol = 1.0f;
                     }
 
                     vol *= channel->volume * channel->expression;
@@ -737,9 +747,10 @@ void MIDI::updateEffects()
                     }
                 }
 
-                // After calculation of ADSR envelope, add other time-dependent effects like modulation
+                // After calculation of ADSR envelope, add other effects like modulation
                 currentNote->finishedOntimeUS = currentNote->ADSROntimeUS
                                                 * (1.0f - getLFOVal(currentNote->channel))
+                                                * currentNote->panVol
                                                 * midiPlaying;
 
                 totalDutyUS += currentNote->finishedOntimeUS * currentNote->frequency;

@@ -528,7 +528,8 @@ void GUI::midiLive()
                 {
                     uint32_t channels = (guiCommandData[2] << 8) + guiCommandData[1];
                     guiMidi.setChannels(coil, channels);
-                    guiMidi.setPan(coil, guiCommandData[3]);
+                    guiMidi.setPanReach(coil, guiCommandData[3]);
+                    guiMidi.setPan(coil, guiCommandData[4]);
                 }
             }
         }
