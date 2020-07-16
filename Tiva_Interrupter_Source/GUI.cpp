@@ -146,7 +146,7 @@ void GUI::init(System* sys, void (*midiUsbISR)(void), void (*midiMidiISR)(void))
     guiSys->delayUS(10000);
 
     // Display Tiva firmware versions
-    guiNxt.setTxt("tTivaFWVersion", "v3.1.0-beta.3");
+    guiNxt.setTxt("tTivaFWVersion", TIVA_FW_VERSION);
 
     // Initialization completed.
     guiNxt.sendCmd("vis 255,1");
