@@ -42,12 +42,13 @@ public:
     void start();
     void stop();
     void newData(uint32_t c);
-    void setVolSettings(uint32_t coil, float ontimeUSMax, float dutyMax, uint32_t volMode);
+    void setVolSettings(uint32_t coil, float ontimeUSMax, float dutyMax);
     void setChannels(uint32_t coil, uint32_t chns);
     void setPan(uint32_t coil, uint32_t pan);
     void setPanReach(uint32_t coil, uint32_t reach);
     void setTotalMaxDutyPerm(uint32_t coil, float maxDuty);
     void setMaxVoices(uint32_t coil, uint32_t maxVoices);
+    void resetNRPs(uint32_t chns = 0xffff);
     bool isPlaying();
     void process();
     void setADSR(bool enable);
@@ -132,10 +133,9 @@ private:
     volatile uint32_t midiUARTBufferWriteIndex = 0;
     volatile uint32_t midiUARTBufferReadIndex = 0;
 
-    uint32_t midiDataIndex      = 0;
-    uint32_t midiData[3]        = {0, 0, 0};
+    uint8_t  midiData[3]   = {0, 0, 0};
+    uint8_t  midiDataIndex = 0;
     uint32_t midiChannel = 0;
-    uint32_t midiRPN = 127;
 
     bool midiADSREnabled  = false;
     float midiADSRTimeUS = 0.0f;

@@ -294,8 +294,11 @@ void MIDI::newData(uint32_t c)
                         channelChange = true;
                         break;
                     case 0x0A: // Pan
-                        channels[midiChannel].pan = midiData[2] / 128.0f;
-                        channelChange = true;
+                        if (!channels[midiChannel].notePanEnabled)
+                        {
+                            channels[midiChannel].pan = midiData[2] / 128.0f;
+                            channelChange = true;
+                        }
                         break;
                     case 0x0B: // Expression coarse
                         channels[midiChannel].expression = midiData[2] / 128.0f;
@@ -323,20 +326,36 @@ void MIDI::newData(uint32_t c)
                         channelChange = true;
                         break;
                     case 0x62: // Non Registered Parameter Number, fine
+                        channels[midiChannel].NRPN &= 0xff00;
+                        channels[midiChannel].NRPN += midiData[2];
+
+                        // Can't receive RP and NRP data at the same time.
+                        channels[midiChannel].RPN   = 0x7f7f;
+                        break;
                     case 0x63: // Non Registered Parameter Number, coarse
-                        // Ignore data commands for NRPs by resetting the parameter number.
-                        midiRPN = 0xffff;
+                        channels[midiChannel].NRPN &= 0x00ff;
+                        channels[midiChannel].NRPN += (midiData[2] << 8);
+
+                        // Can't receive RP and NRP data at the same time.
+                        channels[midiChannel].RPN   = 0x7f7f;
                         break;
                     case 0x64: // Registered Parameter Number, fine
-                        midiRPN &= 0xff00;
-                        midiRPN += midiData[2];
+                        channels[midiChannel].RPN &= 0xff00;
+                        channels[midiChannel].RPN += midiData[2];
+
+                        // Can't receive RP and NRP data at the same time.
+                        channels[midiChannel].NRPN = 0x7f7f;
                         break;
                     case 0x65: // Registered Parameter Number, coarse
-                        midiRPN &= 0x00ff;
-                        midiRPN += (midiData[2] << 8);
+                        channels[midiChannel].RPN &= 0x00ff;
+                        channels[midiChannel].RPN += (midiData[2] << 8);
+
+                        // Can't receive RP and NRP data at the same time.
+                        channels[midiChannel].NRPN = 0x7f7f;
                         break;
-                    case 0x06: // RPN Data Entry, coase
-                        if (midiRPN == 0) // Pitch bend range
+                    case 0x06: // (N)RPN Data Entry, coase
+                        // Registered Parameter
+                        if (channels[midiChannel].RPN == 0) // Pitch bend range
                         {
                             channels[midiChannel].pitchBendRangeCoarse = midiData[2];
                             channels[midiChannel].pitchBendRange  =   channels[midiChannel].pitchBendRangeCoarse
@@ -344,7 +363,7 @@ void MIDI::newData(uint32_t c)
                             channels[midiChannel].pitchBendRange /= 8192.0f;
                             channelChange = true;
                         }
-                        else if (midiRPN == 1) // Fine tuning
+                        else if (channels[midiChannel].RPN == 1) // Fine tuning
                         {
                             channels[midiChannel].fineTuningCoarse = midiData[2];
                             channels[midiChannel].tuning = ((channels[midiChannel].fineTuningCoarse << 8)
@@ -353,7 +372,7 @@ void MIDI::newData(uint32_t c)
                             channels[midiChannel].tuning += channels[midiChannel].coarseTuning;
                             channelChange = true;
                         }
-                        else if (midiRPN == 2) // Coarse tuning
+                        else if (channels[midiChannel].RPN == 2) // Coarse tuning
                         {
                             channels[midiChannel].coarseTuning = midiData[2];
                             channels[midiChannel].tuning = ((channels[midiChannel].fineTuningCoarse << 8)
@@ -362,9 +381,21 @@ void MIDI::newData(uint32_t c)
                             channels[midiChannel].tuning += channels[midiChannel].coarseTuning;
                             channelChange = true;
                         }
+
+                        // Non-Registered Parameter
+                        if (channels[midiChannel].NRPN == (42 << 8) + 1) // Note pan mode - source range upper limit
+                        {
+                            channels[midiChannel].notePanSourceRangeHigh = midiData[2];
+                            channelChange = true;
+                        }
+                        else if (channels[midiChannel].NRPN == (42 << 8) + 2) // Note pan mode - target range upper limit
+                        {
+                            channels[midiChannel].notePanTargetRangeHigh = midiData[2] / 128.0f;
+                            channelChange = true;
+                        }
                         break;
-                    case 0x26: // RPN Data Entry, fine
-                        if (midiRPN == 0) // Pitch bend range
+                    case 0x26: // (N)RPN Data Entry, fine
+                        if (channels[midiChannel].RPN == 0) // Pitch bend range
                         {
                             channels[midiChannel].pitchBendRangeFine = midiData[2];
                             channels[midiChannel].pitchBendRange  =   channels[midiChannel].pitchBendRangeCoarse
@@ -372,7 +403,7 @@ void MIDI::newData(uint32_t c)
                             channels[midiChannel].pitchBendRange /= 8192.0f;
                             channelChange = true;
                         }
-                        else if (midiRPN == 1) // Fine tuning
+                        else if (channels[midiChannel].RPN == 1) // Fine tuning
                         {
                             /*
                              * Fine tuning mapping is similar to pitch bend. A 14 bit value (0..16383) is mapped to -2.0f..2.0f
@@ -383,6 +414,31 @@ void MIDI::newData(uint32_t c)
                                                             + channels[midiChannel].fineTuningFine) - 8192.0f;
                             channels[midiChannel].tuning /= 4096.0f;
                             channels[midiChannel].tuning += channels[midiChannel].coarseTuning;
+                            channelChange = true;
+                        }
+
+                        // Non-Registered Parameter
+                        if (channels[midiChannel].NRPN == (42 << 8) + 0) // Note pan mode - enable/disable
+                        {
+                            if (midiData[2] == 2)
+                            {
+                                // Omni Mode (Note plays everywhere)
+                                channels[midiChannel].notePanOmniMode = true;
+                            }
+                            else
+                            {
+                                channels[midiChannel].notePanOmniMode = false;
+                                channels[midiChannel].notePanEnabled = midiData[2];
+                            }
+                        }
+                        else if (channels[midiChannel].NRPN == (42 << 8) + 1) // Note pan mode - source range lower limit
+                        {
+                            channels[midiChannel].notePanSourceRangeLow = midiData[2];
+                            channelChange = true;
+                        }
+                        else if (channels[midiChannel].NRPN == (42 << 8) + 2) // Note pan mode - target range lower limit
+                        {
+                            channels[midiChannel].notePanTargetRangeLow = midiData[2] / 128.0f;
                             channelChange = true;
                         }
                         break;
@@ -485,26 +541,19 @@ void MIDI::stop()
     midiPlaying = false;
 }
 
-void MIDI::setVolSettings(uint32_t coil, float ontimeUSMax, float dutyPermMax, uint32_t volMode)
+void MIDI::setVolSettings(uint32_t coil, float ontimeUSMax, float dutyPermMax)
 {
+    // Prevent divide by 0.
+    if (ontimeUSMax < 1.0f)
+    {
+        ontimeUSMax = 1.0f;
+    }
     midiSingleNoteMaxOntimeUS[coil] = ontimeUSMax;
     midiSingleNoteMaxDuty[coil] = dutyPermMax / 1000.0f;
 
-    if (volMode == 1)
-    {
-        // Absolute Mode. Change to abs. mode at the very lowest note already.
-        midiAbsFreq[coil] = 0.0f;
-    }
-    else if (volMode == 2)
-    {
-        // Relative Mode. Never change to abs. mode (= set crossover higher than highest note).
-        midiAbsFreq[coil] = 40000.0f;
-    }
-    else if (volMode == 3)
-    {
-        // Auto Mode. Determine crossover note at which abs. and rel. mode would have equal frequency.
-        midiAbsFreq[coil] = midiSingleNoteMaxDuty[coil] / midiSingleNoteMaxOntimeUS[coil] * 1000000.0f;
-    }
+    // Determine crossover note at which abs. and rel. mode would have equal frequency.
+    midiAbsFreq[coil] = midiSingleNoteMaxDuty[coil] / midiSingleNoteMaxOntimeUS[coil] * 1000000.0f;
+
     midiCoilChange[coil] = true;
 }
 
@@ -555,6 +604,27 @@ void MIDI::setMaxVoices(uint32_t coil, uint32_t maxVoices)
     midiCoilMaxVoices[coil] = maxVoices;
 }
 
+void MIDI::resetNRPs(uint32_t chns)
+{
+    /*
+     *  The bits in chns indicate which channels shall reset their NRPs.
+     *  A value equal or higher than 2^16-1 causes a reset on all channels.
+     *  Default value is 0xffff (reset on all channels).
+     */
+
+    if (chns > 0xffff)
+    {
+        chns = 0xffff;
+    }
+    for (uint32_t i = 0; i < 16; i++)
+    {
+        if (chns & (1 << i))
+        {
+            channels[i].resetNRPs();
+        }
+    }
+}
+
 bool MIDI::isPlaying()
 {
     return midiPlaying;
@@ -603,9 +673,38 @@ void MIDI::process()
                         vol *= 0.6f;
                     }
 
-                    if (midiCoilPan[coil] >= 0.0f)
+                    if (midiCoilPan[coil] >= 0.0f && !channel->notePanOmniMode)
                     {
-                        note->panVol = 1.0f - fmax(0.0f, midiInversPanReach[coil] * fabsf(channel->pan - midiCoilPan[coil]));
+                        float pan = 0.0f;
+                        if (channel->notePanEnabled)
+                        {
+                            /*
+                             * In this mode the note number determines the pan position of the note.
+                             * This is done with a mapping. A source range, convering any part of
+                             * the [0..127] note number range, will be mapped to a target range,
+                             * covering any part of the [0..1] pan position range.
+                             */
+                            if (noteNumFloat <= channel->notePanSourceRangeLow)
+                            {
+                                pan = channel->notePanTargetRangeLow;
+                            }
+                            else if (noteNumFloat >= channel->notePanSourceRangeHigh)
+                            {
+                                pan = channel->notePanTargetRangeHigh;
+                            }
+                            else
+                            {
+                                pan =   (noteNumFloat - channel->notePanSourceRangeLow)
+                                      * (channel->notePanTargetRangeHigh - channel->notePanTargetRangeLow)
+                                      / (channel->notePanSourceRangeHigh - channel->notePanSourceRangeLow)
+                                      +  channel->notePanTargetRangeLow;
+                            }
+                        }
+                        else
+                        {
+                            pan = channel->pan;
+                        }
+                        note->panVol = 1.0f - fmax(0.0f, midiInversPanReach[coil] * fabsf(pan - midiCoilPan[coil]));
                     }
                     else
                     {

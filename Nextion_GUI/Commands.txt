@@ -14,23 +14,27 @@ Note: Any value ranges that have no specified meaning here should be ignored by 
 		* d.....: Data command. In this context:
 			* Byte 1: 
 				* Bit 0-5: Output which is affected by this command. Value ranges from 1-6 corresponding to the outputs 0-5.
-				* Bit 6-7: mode. 0 = Pan/channel data, 1 = absolute volume mode (constant ontime), 2 = relative volume mode (constant duty), 3 = auto volume mode (low notes = relative, high notes = absolute. Crossover where ontime is equal for both modes).
-			* Absolute, relative and auto volume mode
+				* Bit 6-7: mode. 
+					* 0 = Pan/channel data
+					* 1 = NRP reset
+					* 2 = Unused
+					* 3 = Volume
+			* Volume. Note: In absolute mode the duty bytes are 0, in relative mode the ontime bytes are 0. This forces the crossover to be at either side of the range, effectively making all notes absolute or relative. In auto mode the crossover is somewhere in between (at the frequency where the duty and ontime settings lead to the same signal). 
 				* Byte 2: lower byte of the maximum ontime [us] in absolute mode
 				* Byte 3: upper byte of the maximum ontime [us] in absolute mode
 				* Byte 4: lower byte of the maximum duty [1/1000] in relative mode
 				* Byte 5: upper byte of the maximum duty [1/1000] in relative mode
+			* NRP reset. This makes the microcontroller reset all NRPs to power on default values for the given channels. 
+				* Byte 2: Bits 0-7 correspond to channels 0-7. If a bit is set, this MIDI channel is modified. 
+				* Byte 3: Bits 0-7 correspond to channels 8-15. If a bit is set, this MIDI channel is modified.
+				* Byte 4-5: unused. 
 			* Pan/channel data
 				* Byte 2: Bits 0-7 correspond to channels 0-7. If a bit is set, the output will listen to this MIDI channel.
 				* Byte 3: Bits 0-7 correspond to channels 8-15. If a bit is set, the output will listen to this MIDI channel.
 				* Byte 4: 
 					* Bit 0-6: Pan position, where 0 = left, 64 = middle, 127 = right.
 					* Bit 7: 0 = use pan position, 1 = ignore pan position.
-				* Byte 5: unused
-		* c...: Channel command (legacy). Indicates which MIDI channels this output listens to. 
-			* Byte 1: bit 0-5 indicate which of the outputs 0-5 is affected by this command.
-			* Byte 2: Bits 0-7 correspond to channels 0-7
-			* Byte 3: Bits 0-7 correspond to channels 8-15
+				* Byte 5: Pan reach. Distance to the coil to which the volume of the note decreases to 0. A range of 10 indicates that a note at the distance 5 plays at half volume, and all notes at distance 10 or more don't play. 
 	* mnu: Mode Nextion firmware Update. In this mode the Tiva "connects" the Nextion to the USB serial to allow updating the Nextion firmware via USB. It automatically performs a self reset after the update. 
 	* mus: Mode User Select command. User has been selected / changed. Load corresponding settings. 
 	* mse: Mode SEttings command. 

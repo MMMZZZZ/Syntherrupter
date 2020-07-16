@@ -518,18 +518,23 @@ void GUI::midiLive()
             // Data format documented in separate file
             if (guiCommandData[0] & (1 << coil))
             {
-                if (mode)
-                {
-                    uint32_t ontimeUS = (guiCommandData[2] << 8) + guiCommandData[1];
-                    uint32_t dutyPerm = (guiCommandData[4] << 8) + guiCommandData[3];
-                    guiMidi.setVolSettings(coil, ontimeUS, dutyPerm, mode);
-                }
-                else
+                if (mode == 0)
                 {
                     uint32_t channels = (guiCommandData[2] << 8) + guiCommandData[1];
                     guiMidi.setChannels(coil, channels);
                     guiMidi.setPanReach(coil, guiCommandData[3]);
                     guiMidi.setPan(coil, guiCommandData[4]);
+                }
+                else if (mode == 1)
+                {
+                    uint32_t channels = (guiCommandData[2] << 8) + guiCommandData[1];
+                    guiMidi.resetNRPs(channels);
+                }
+                else if (mode == 3)
+                {
+                    uint32_t ontimeUS = (guiCommandData[2] << 8) + guiCommandData[1];
+                    uint32_t dutyPerm = (guiCommandData[4] << 8) + guiCommandData[3];
+                    guiMidi.setVolSettings(coil, ontimeUS, dutyPerm);
                 }
             }
         }
