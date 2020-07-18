@@ -718,8 +718,11 @@ void GUI::nxtFWUpdate()
     UARTFIFOEnable(nxtUARTBase);
     UARTFIFOEnable(usbUARTBase);
 
-    bool uploadStarted = false;
-    uint32_t timeUS = guiSys->getSystemTimeUS();
+    bool uploadStarted               = false;
+    uint32_t timeUS                  = guiSys->getSystemTimeUS();
+    uint32_t uploadBeginUS           = timeUS;
+    constexpr uint32_t minDurationUS = 15000000;
+    constexpr uint32_t timeoutUS     = 1000000; // must be smaller than minUploadDurationUS
     while (42)
     {
         if (UARTCharsAvail(nxtUARTBase))
@@ -729,14 +732,27 @@ void GUI::nxtFWUpdate()
         }
         if (UARTCharsAvail(usbUARTBase))
         {
-            uploadStarted = true;
             timeUS = guiSys->getSystemTimeUS();
+            if (!uploadStarted)
+            {
+                uploadStarted = true;
+                uploadBeginUS = timeUS;
+            }
             unsigned char c = UARTCharGet(usbUARTBase);
             UARTCharPutNonBlocking(nxtUARTBase, c);
         }
-        if (uploadStarted && (guiSys->getSystemTimeUS() - timeUS) > 1000000)
+        if (uploadStarted && (guiSys->getSystemTimeUS() - timeUS) > timeoutUS)
         {
-            SysCtlReset();
+            if (timeUS - uploadBeginUS > minDurationUS)
+            {
+                // Upload has happened.
+                SysCtlReset();
+            }
+            else
+            {
+                // Maybe just a port check.
+                uploadStarted = false;
+            }
         }
     }
 }
