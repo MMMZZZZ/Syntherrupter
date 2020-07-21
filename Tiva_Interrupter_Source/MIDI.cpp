@@ -133,10 +133,25 @@ void MIDI::newData(uint32_t c)
     // Minimum MIDI Data Processing
     if (c & 0b10000000) // The first byte of a MIDI Command starts with a 1. Following bytes start with a 0.
     {
-        // Lower 4 bits are channel.
-        midiChannel = c & 0x0f;
-        midiData[0] = c;
-        midiDataIndex = 1;
+        // Ignore System messages.
+        if (0xf0 <= c && c <= 0xf7)
+        {
+            // System exclusive and system common messages reset the running status.
+            midiDataIndex = 0;
+            return;
+        }
+        else if (0xf8 <= c)
+        {
+            // System real time messages do not affect the running status.
+            return;
+        }
+        else
+        {
+            // Lower 4 bits are channel.
+            midiChannel = c & 0x0f;
+            midiData[0] = c;
+            midiDataIndex = 1;
+        }
     }
     else if (midiDataIndex >= 1) // Data byte can't be the first byte of the Command.
     {
@@ -152,7 +167,8 @@ void MIDI::newData(uint32_t c)
             case 0x80: // Note off
                 if (midiDataIndex >= 3)
                 {
-                    midiDataIndex = 0;
+                    // Keep running status
+                    midiDataIndex = 1;
                     for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
                     {
                         for (uint32_t note = 0; note < MAX_VOICES; note++)
@@ -175,7 +191,8 @@ void MIDI::newData(uint32_t c)
             case 0x90: // Note on
                 if (midiDataIndex >= 3)
                 {
-                    midiDataIndex = 0;
+                    // Keep running status
+                    midiDataIndex = 1;
                     if (midiData[2]) // Note has a velocity
                     {
                         for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
@@ -258,7 +275,8 @@ void MIDI::newData(uint32_t c)
             case 0xA0: // Polyphonic Aftertouch
                 if (midiDataIndex >= 3)
                 {
-                    midiDataIndex = 0;
+                    // Keep running status
+                    midiDataIndex = 1;
                     for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
                     {
                         if (channels[midiChannel].coils & (1 << coil))
@@ -280,7 +298,8 @@ void MIDI::newData(uint32_t c)
             case 0xB0: // Control Change / Channel Mode
                 if (midiDataIndex >= 3)
                 {
-                    midiDataIndex = 0;
+                    // Keep running status
+                    midiDataIndex = 1;
                     switch (midiData[1])
                     {
                     case 0x01: // Modulation Wheel
@@ -480,19 +499,19 @@ void MIDI::newData(uint32_t c)
             case 0xE0: // Pitch Bend
                 if (midiDataIndex >= 3)
                 {
-                    midiDataIndex = 0;
+                    midiDataIndex = 1;
                     channels[midiChannel].pitchBend = ((midiData[2] << 7) + midiData[1]);
                     channels[midiChannel].pitchBend -= 8192.0f;
                     channelChange = true;
                 }
                 break;
             case 0xD0: // Channel Aftertouch
-                midiDataIndex = 0;
+                midiDataIndex = 1;
                 channels[midiChannel].channelAfterTouch = midiData[1];
                 channelChange = true;
                 break;
             case 0xC0: // Program Change
-                midiDataIndex = 0;
+                midiDataIndex = 1;
                 if (midiData[1] <= MIDI_ADSR_PROGRAM_COUNT)
                 {
                     channels[midiChannel].program = midiData[1];
