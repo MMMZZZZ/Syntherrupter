@@ -61,6 +61,9 @@ void Output::init(System* sys, uint32_t timerNum)
     GPIOPinConfigure(OUTPUT_MAPPING[outputTimerNum][OUTPUT_PIN_CONFIG]);
     GPIOPinTypeTimer(OUTPUT_MAPPING[outputTimerNum][OUTPUT_PORT_BASE], OUTPUT_MAPPING[outputTimerNum][OUTPUT_PIN]);
 
+    // Configure pins for highest output current.
+    GPIOPadConfigSet(OUTPUT_MAPPING[outputTimerNum], OUTPUT_MAPPING[OUTPUT_PIN], GPIO_STRENGTH_12MA, GPIO_PIN_TYPE_STD)
+
     outputMinFreq = float(outputSys->getPIOSCFreq()) / float((1 << 24) - 1);
 }
 
