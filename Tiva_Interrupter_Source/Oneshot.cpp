@@ -51,7 +51,7 @@ void Oneshot::init(System *sys, uint32_t timerNum)
     GPIOPinTypeTimer(ONESHOT_MAPPING[oneshotTimerNum][ONESHOT_PORT_BASE], ONESHOT_MAPPING[oneshotTimerNum][ONESHOT_PIN]);
 
     // Configure pins for highest output current.
-    GPIOPadConfigSet(OUTPUT_MAPPING[outputTimerNum], OUTPUT_MAPPING[OUTPUT_PIN], GPIO_STRENGTH_12MA, GPIO_PIN_TYPE_STD)
+    GPIOPadConfigSet(ONESHOT_MAPPING[oneshotTimerNum][ONESHOT_PORT_BASE], ONESHOT_MAPPING[oneshotTimerNum][ONESHOT_PIN], GPIO_STRENGTH_12MA, GPIO_PIN_TYPE_STD);
 }
 
 void Oneshot::rearmISR()
