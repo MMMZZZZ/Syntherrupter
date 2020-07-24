@@ -32,6 +32,7 @@ void System::init(uint32_t clockFreq, void (*ISR)(void))
 
 
     FPULazyStackingEnable();
+    FPUFlushToZeroModeSet(FPU_FLUSH_TO_ZERO_EN);
     FPUEnable();
 
     IntMasterEnable();
