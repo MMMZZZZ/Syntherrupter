@@ -681,7 +681,7 @@ void MIDI::process()
                     float noteNumFloat =   float(note->number)
                                          + channel->pitchBend * channel->pitchBendRange
                                          + channel->tuning;
-                    note->frequency = powf(2.0f, (noteNumFloat - 69.0f) / 12.0f) * 440.0f;
+                    note->frequency = exp2f((noteNumFloat - 69.0f) / 12.0f) * 440.0f;
                     note->periodUS = 1000000.0f / note->frequency;
                     note->periodTolUS = note->periodUS / 2;
 
