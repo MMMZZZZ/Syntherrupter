@@ -605,7 +605,25 @@ void MIDI::setPan(uint32_t coil, uint32_t pan)
 
 void MIDI::setPanReach(uint32_t coil, uint32_t reach)
 {
-    midiInversPanReach[coil] = 128.0f / reach;
+    if (reach & 0b10000000)
+    {
+        midiPanConstVol[coil] = true;
+        reach &= 0b01111111;
+    }
+    else
+    {
+        midiPanConstVol[coil] = false;
+    }
+
+    if (reach)
+    {
+        midiInversPanReach[coil] = 128.0f / reach;
+    }
+    else
+    {
+        // only needs to be >>128.0f
+        midiInversPanReach[coil] = 1024.0f;
+    }
 }
 
 void MIDI::setTotalMaxDutyPerm(uint32_t coil, float maxDuty)
@@ -723,7 +741,17 @@ void MIDI::process()
                         {
                             pan = channel->pan;
                         }
-                        note->panVol = 1.0f - fmax(0.0f, midiInversPanReach[coil] * fabsf(pan - midiCoilPan[coil]));
+
+                        note->panVol = 1.0f - midiInversPanReach[coil] * fabsf(pan - midiCoilPan[coil]);
+                        if (note->panVol <= 0.0f)
+                        {
+                            note->panVol = 0.0f;
+                        }
+                        else if (midiPanConstVol[coil])
+                        {
+                            note->panVol = 1.0f;
+                        }
+
                     }
                     else
                     {

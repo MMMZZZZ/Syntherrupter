@@ -128,6 +128,7 @@ private:
     uint8_t midiVolMode[COIL_COUNT];
     uint32_t midiCoilMaxVoices[COIL_COUNT];
     bool midiCoilChange[COIL_COUNT];
+    bool midiPanConstVol[COIL_COUNT];
     static constexpr uint32_t midiUARTBufferSize = 1024;
     volatile uint8_t midiUARTBuffer[midiUARTBufferSize];
     volatile uint32_t midiUARTBufferWriteIndex = 0;

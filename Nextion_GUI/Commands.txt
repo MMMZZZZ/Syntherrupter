@@ -34,7 +34,11 @@ Note: Any value ranges that have no specified meaning here should be ignored by 
 				* Byte 4: 
 					* Bit 0-6: Pan position, where 0 = left, 64 = middle, 127 = right.
 					* Bit 7: 0 = use pan position, 1 = ignore pan position.
-				* Byte 5: Pan reach. Distance to the coil to which the volume of the note decreases to 0. A range of 10 indicates that a note at the distance 5 plays at half volume, and all notes at distance 10 or more don't play. 
+				* Byte 5: 
+					* Bit 0-6: Pan reach, ranging from 0-127. Notes within this range (abs(coilPanPos - notePanPos) <= panReach) will play on this coil. 
+					* Bit 7: 
+						* 0 = linear mode. The volume of the note decreases linearly with the distance from the coil. At distance 0 the volume is equal to the notes volume. At the limit of the range the volume drops to 0. 
+						* 1 = constant mode. All notes within the range will play at their nominal volume.
 	* mnu: Mode Nextion firmware Update. In this mode the Tiva "connects" the Nextion to the USB serial to allow updating the Nextion firmware via USB. It automatically performs a self reset after the update. 
 	* mus: Mode User Select command. User has been selected / changed. Load corresponding settings. 
 	* mse: Mode SEttings command. 
