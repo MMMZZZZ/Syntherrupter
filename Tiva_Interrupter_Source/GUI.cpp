@@ -47,7 +47,7 @@ void GUI::init(System* sys, void (*midiUsbISR)(void), void (*midiMidiISR)(void))
         guiNxt.sendCmd("rest");
         guiSys->delayUS(700000);
         guiNxt.setVal("comOk", 1);
-        guiSys->delayUS(10000);
+        guiSys->delayUS(20000);
     }
 
     /*
@@ -99,7 +99,7 @@ void GUI::init(System* sys, void (*midiUsbISR)(void), void (*midiMidiISR)(void))
             guiNxt.printf("%s.coil%iDuty.val=%i\xff\xff\xff",
                           AllCoilSettings, coil + 1, maxDutyPerm);
             // Give time to the UART to send the data
-            guiSys->delayUS(10000);
+            guiSys->delayUS(20000);
         }
 
         // Settings of the 3 users
@@ -127,7 +127,7 @@ void GUI::init(System* sys, void (*midiUsbISR)(void), void (*midiMidiISR)(void))
             guiNxt.printf("%s.u%iDuty.val=%i\xff\xff\xff",
                           AllUsersPage, user, maxDutyPerm);
             // Give time to the UART to send the data
-            guiSys->delayUS(10000);
+            guiSys->delayUS(20000);
         }
 
         // Other Settings
@@ -143,7 +143,7 @@ void GUI::init(System* sys, void (*midiUsbISR)(void), void (*midiMidiISR)(void))
     guiNxt.setVal("TC_Settings.maxVoices", MAX_VOICES);
 
     // Give time to the UART to send the data
-    guiSys->delayUS(10000);
+    guiSys->delayUS(20000);
 
     // Display Tiva firmware versions
     guiNxt.setTxt("tTivaFWVersion", TIVA_FW_VERSION);
