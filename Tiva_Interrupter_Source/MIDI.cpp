@@ -562,16 +562,17 @@ void MIDI::stop()
 
 void MIDI::setVolSettings(uint32_t coil, float ontimeUSMax, float dutyPermMax)
 {
+    midiSingleNoteMaxOntimeUS[coil] = ontimeUSMax;
+    midiSingleNoteMaxDuty[coil]     = dutyPermMax / 1000.0f;
+
     // Prevent divide by 0.
     if (ontimeUSMax < 1.0f)
     {
         ontimeUSMax = 1.0f;
     }
-    midiSingleNoteMaxOntimeUS[coil] = ontimeUSMax;
-    midiSingleNoteMaxDuty[coil] = dutyPermMax / 1000.0f;
 
     // Determine crossover note at which abs. and rel. mode would have equal frequency.
-    midiAbsFreq[coil] = midiSingleNoteMaxDuty[coil] / midiSingleNoteMaxOntimeUS[coil] * 1000000.0f;
+    midiAbsFreq[coil] = dutyPermMax / ontimeUSMax * 1000.0f;
 
     midiCoilChange[coil] = true;
 }
