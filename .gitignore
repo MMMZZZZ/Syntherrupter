@@ -1,2 +1,8 @@
-
+# Exclude compiled Nextion firmwares
 *.tft
+# Exclude compiled Tiva firmwares
+*.bin
+# Exluce Nextion sources in root directory
+/*.hmi
+# Exclude zip files in root directory
+/*.zip
