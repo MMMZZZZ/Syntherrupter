@@ -1,8 +1,5 @@
-# Exclude compiled Nextion firmwares
-*.tft
-# Exclude compiled Tiva firmwares
-*.bin
-# Exluce Nextion sources in root directory
-/*.hmi
+# Exclude firmwares
+/Syntherrupter_Firmwares
+
 # Exclude zip files in root directory
 /*.zip

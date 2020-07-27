@@ -32,11 +32,15 @@
 *.app
 
 # CCS
-**/Debug/**
-**/Release/**
 **/.launches/**
 **/.settings/**
-
 vars.ini
 /Debug/
 /Release/
+/Release_1/
+/Release_2/
+/Release_3/
+/Release_4/
+/Release_5/
+/Release_6/
+/Teabug/
