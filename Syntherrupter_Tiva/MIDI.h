@@ -37,8 +37,8 @@ public:
     void usbUartISR();
     void midiUartISR();
     void addData(uint8_t data);
-    void UARTEnable();
-    void UARTDisable();
+    void UARTEnable(bool usbUart = true);
+    void UARTDisable(bool usbUart = true);
     void start();
     void stop();
     void newData(uint32_t c);
@@ -54,6 +54,7 @@ public:
     void setADSR(bool enable);
     uint32_t activeNotes[COIL_COUNT];
     Note *orderedNotes[COIL_COUNT][MAX_VOICES];
+    Channel channels[16];
 
 private:
     void updateEffects();
@@ -117,7 +118,6 @@ private:
     static constexpr uint32_t midiEffectResolutionUS = 1000;
 
     System* midiSys;
-    Channel channels[16];
     Note notes[COIL_COUNT][MAX_VOICES];
     float midiAbsFreq[COIL_COUNT];
     float midiSingleNoteMaxDuty[COIL_COUNT];

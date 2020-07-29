@@ -536,14 +536,28 @@ void MIDI::newData(uint32_t c)
     }
 }
 
-void MIDI::UARTEnable()
+void MIDI::UARTEnable(bool usbUart)
 {
-    UARTIntEnable(midiUSBUARTBase, UART_INT_RX);
+    if (usbUart)
+    {
+        UARTIntEnable(midiUSBUARTBase, UART_INT_RX);
+    }
+    else
+    {
+        UARTIntEnable(midiMIDIUARTBase, UART_INT_RX);
+    }
 }
 
-void MIDI::UARTDisable()
+void MIDI::UARTDisable(bool usbUart)
 {
-    UARTIntDisable(midiUSBUARTBase, UART_INT_RX);
+    if (usbUart)
+    {
+        UARTIntDisable(midiUSBUARTBase, UART_INT_RX);
+    }
+    else
+    {
+        UARTIntDisable(midiMIDIUARTBase, UART_INT_RX);
+    }
 }
 
 void MIDI::start()
@@ -743,7 +757,8 @@ void MIDI::process()
                             pan = channel->pan;
                         }
 
-                        note->panVol = 1.0f - midiInversPanReach[coil] * fabsf(pan - midiCoilPan[coil]);
+                        // 1.01f instead of 1.0f to include the borders of the range.
+                        note->panVol = 1.01f - midiInversPanReach[coil] * fabsf(pan - midiCoilPan[coil]);
                         if (note->panVol <= 0.0f)
                         {
                             note->panVol = 0.0f;

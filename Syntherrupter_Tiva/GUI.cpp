@@ -473,7 +473,8 @@ void GUI::midiLiveEnter()
     {
         coils[i].one.init(guiSys, i);
     }
-    guiMidi.UARTEnable();
+    guiMidi.UARTEnable(0);
+    guiMidi.UARTEnable(1);
     guiMidi.start();
 }
 
@@ -512,29 +513,64 @@ void GUI::midiLive()
     else if (guiCommand == 'd')
     {
         uint32_t mode = (guiCommandData[0] >> 6) & 0b11;
-        for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+        if (mode == 2)
         {
-            // check if current coil is affected by command. Skip otherwise
-            // Data format documented in separate file
-            if (guiCommandData[0] & (1 << coil))
+            bool isMIDICommand = guiCommandData[0] & 0b10000;
+            if (isMIDICommand)
             {
-                if (mode == 0)
+                // Disable both MIDI UARTs to ensure data integrity.
+                guiMidi.UARTDisable(0);
+                guiMidi.UARTDisable(1);
+                guiMidi.addData(guiCommandData[1]);
+                guiMidi.addData(guiCommandData[2]);
+                guiMidi.addData(guiCommandData[3]);
+                guiMidi.UARTEnable(0);
+                guiMidi.UARTEnable(1);
+            }
+            else
+            {
+                uint8_t channel = guiCommandData[0] & 0xf;
+                guiMidi.UARTDisable(0);
+                guiMidi.UARTDisable(1);
+                guiMidi.addData(0xB0 + channel);    // Control Change
+                guiMidi.addData(0x63);              // NRPN Coarse
+                guiMidi.addData(guiCommandData[1]); // Value
+                guiMidi.addData(0x62);              // NRPN Fine
+                guiMidi.addData(guiCommandData[2]); // Value
+                guiMidi.addData(0x06);              // Data Entry Coarse
+                guiMidi.addData(guiCommandData[3]); // Value
+                guiMidi.addData(0x26);              // Data Entry Fine
+                guiMidi.addData(guiCommandData[4]); // Value
+                guiMidi.UARTEnable(0);
+                guiMidi.UARTEnable(1);
+            }
+        }
+        else
+        {
+            for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+            {
+                // check if current coil is affected by command. Skip otherwise
+                // Data format documented in separate file
+                if (guiCommandData[0] & (1 << coil))
                 {
-                    uint32_t channels = (guiCommandData[2] << 8) + guiCommandData[1];
-                    guiMidi.setChannels(coil, channels);
-                    guiMidi.setPanReach(coil, guiCommandData[3]);
-                    guiMidi.setPan(coil, guiCommandData[4]);
-                }
-                else if (mode == 1)
-                {
-                    uint32_t channels = (guiCommandData[2] << 8) + guiCommandData[1];
-                    guiMidi.resetNRPs(channels);
-                }
-                else if (mode == 3)
-                {
-                    uint32_t ontimeUS = (guiCommandData[2] << 8) + guiCommandData[1];
-                    uint32_t dutyPerm = (guiCommandData[4] << 8) + guiCommandData[3];
-                    guiMidi.setVolSettings(coil, ontimeUS, dutyPerm);
+                    if (mode == 0)
+                    {
+                        uint32_t channels = (guiCommandData[2] << 8) + guiCommandData[1];
+                        guiMidi.setChannels(coil, channels);
+                        guiMidi.setPanReach(coil, guiCommandData[3]);
+                        guiMidi.setPan(coil, guiCommandData[4]);
+                    }
+                    else if (mode == 1)
+                    {
+                        uint32_t channels = (guiCommandData[2] << 8) + guiCommandData[1];
+                        guiMidi.resetNRPs(channels);
+                    }
+                    else if (mode == 3)
+                    {
+                        uint32_t ontimeUS = (guiCommandData[2] << 8) + guiCommandData[1];
+                        uint32_t dutyPerm = (guiCommandData[4] << 8) + guiCommandData[3];
+                        guiMidi.setVolSettings(coil, ontimeUS, dutyPerm);
+                    }
                 }
             }
         }
@@ -553,7 +589,8 @@ void GUI::midiLive()
             if (++guiEEI >= guiEES)
             {
                 guiEEE = false;
-                guiMidi.UARTEnable();
+                guiMidi.UARTEnable(0);
+                guiMidi.UARTEnable(1);
             }
         }
     }
@@ -616,7 +653,8 @@ void GUI::midiLive()
 void GUI::midiLiveExit()
 {
     // Stop MIDI operation
-    guiMidi.UARTDisable();
+    guiMidi.UARTDisable(0);
+    guiMidi.UARTDisable(1);
     guiMidi.stop();
     guiEEE = false;
 }

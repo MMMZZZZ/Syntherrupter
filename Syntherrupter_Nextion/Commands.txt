@@ -13,11 +13,11 @@ Note: Any value ranges that have no specified meaning here should be ignored by 
 	* mml: Mode Midi Live command. We entered MIDI Live mode in which the microcontroller shall process MIDI commands.
 		* d.....: Data command. In this context:
 			* Byte 1: 
-				* Bit 0-5: Output which is affected by this command. Value ranges from 1-6 corresponding to the outputs 0-5.
-				* Bit 6-7: mode. 
+				* Bit 0-5: For Mode 0, 1, 3: Output which is affected by this command. Value ranges from 1-6 corresponding to the outputs 0-5.
+				* Bit 6-7: Mode. 
 					* 0 = Pan/channel data
 					* 1 = NRP reset
-					* 2 = Unused
+					* 2 = NRP/MIDI command
 					* 3 = Volume
 			* Volume. Note: In absolute mode the duty bytes are 0, in relative mode the ontime bytes are 0. This forces the crossover to be at either side of the range, effectively making all notes absolute or relative. In auto mode the crossover is somewhere in between (at the frequency where the duty and ontime settings lead to the same signal). 
 				* Byte 2: lower byte of the maximum ontime [us] in absolute mode
@@ -28,6 +28,21 @@ Note: Any value ranges that have no specified meaning here should be ignored by 
 				* Byte 2: Bits 0-7 correspond to channels 0-7. If a bit is set, this MIDI channel is modified. 
 				* Byte 3: Bits 0-7 correspond to channels 8-15. If a bit is set, this MIDI channel is modified.
 				* Byte 4-5: unused. 
+			* NRP/MIDI command
+				* Byte 1:
+					* Bits 0-3: In case of an NRP change (see below): Channel to which the settings apply. Otherwise unused and should be 0.
+					* Bits 4-5: 0: NRP Change, 1: Normal MIDI Command, 2: unused, 3: unused.
+					* Bits 6-7: Mode. See above.
+				* NRP Change. 
+					* Data byte 2: NRP Number coarse. 0-127: set value. 128: keep current value
+					* Data byte 3: NRP Number fine. 0-127: set value. 128: keep current value
+					* Data byte 4: NRP Data coarse. 0-127: set value. 128: keep current value
+					* Data byte 5: NRP Data fine. 0-127: set value. 128: keep current value
+				* MIDI Command.
+ 					* Data byte 2: MIDI Status byte
+					* Data byte 3: MIDI Data byte 1
+					* Data byte 4: MIDI Data byte 2
+					* Data byte 5: Unused. Should be 0
 			* Pan/channel data
 				* Byte 2: Bits 0-7 correspond to channels 0-7. If a bit is set, the output will listen to this MIDI channel.
 				* Byte 3: Bits 0-7 correspond to channels 8-15. If a bit is set, the output will listen to this MIDI channel.
