@@ -5,7 +5,7 @@
  *      Author: Max Zuidberg
  */
 
-#define TIVA_FW_VERSION "v3.1.0-beta.5"
+#define TIVA_FW_VERSION "v3.1.0-beta.6"
 
 #ifdef COIL_COUNT_1
 #define COIL_COUNT 1
