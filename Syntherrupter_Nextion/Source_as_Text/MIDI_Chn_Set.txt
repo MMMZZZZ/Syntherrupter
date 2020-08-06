@@ -42,6 +42,7 @@ Page MIDI_Chn_Set
             {
                 if(nStatus.val<0xf0)
                 {
+                    nStatus.val=nStatus.val&0xf0
                     nStatus.val+=chnNum.val
                 }
             }
