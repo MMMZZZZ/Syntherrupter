@@ -1,0 +1,1051 @@
+Page MIDI_TC_Set
+    Events
+        Preinitialize Event
+            // Display username
+            if(User_Settings.userNum.val==0)
+            {
+                tUser.txt=" "+User_Settings.u0Name.txt
+            }else if(User_Settings.userNum.val==1)
+            {
+                tUser.txt=" "+User_Settings.u1Name.txt
+            }else if(User_Settings.userNum.val==2)
+            {
+                tUser.txt=" "+User_Settings.u2Name.txt
+            }
+            //
+            // functions shall not be visible
+            vis fConvBtnState,0
+            vis fStore,0
+            // Set page title
+            covx coilNum.val,sCoilNum.txt,0,0
+            tTitle.txt=sTitleStart.txt+sCoilNum.txt
+            // Get coil data
+            if(coilNum.val==1)
+            {
+                sys0=TC_Settings.coil1Chn.val
+            }else if(coilNum.val==2)
+            {
+                sys0=TC_Settings.coil2Chn.val
+            }else if(coilNum.val==3)
+            {
+                sys0=TC_Settings.coil3Chn.val
+            }else if(coilNum.val==4)
+            {
+                sys0=TC_Settings.coil4Chn.val
+            }else if(coilNum.val==5)
+            {
+                sys0=TC_Settings.coil5Chn.val
+            }else if(coilNum.val==6)
+            {
+                sys0=TC_Settings.coil6Chn.val
+            }
+            // Get button states (format documented in Return button)
+            fConvBtnState.val=sys0&0xffff
+            // Get pan reach
+            sys0=sys0>>16
+            sReach.val=sys0&127
+            // Get reach mode
+            sys0=sys0>>7
+            sys1=sys0&1
+            if(sys1==0)
+            {
+                bLinConst.txt=sLinear.txt
+            }else
+            {
+                bLinConst.txt=sConst.txt
+            }
+            // Get pan
+            sys0=sys0>>1
+            sPan.val=sys0&127
+            // Get pan disabled
+            // Note: Since this information is originally stored in the sign bit, we cannot directly assign the value (see https://nextion.tech/instruction-set/#s2_14 )
+            sys0=sys0>>7
+            if(sys0==0)
+            {
+                btPanDis.val=0
+            }else
+            {
+                btPanDis.val=1
+            }
+            //
+            // Hide Previous button for first coil
+            if(coilNum.val==1)
+            {
+                vis bPrevious,0
+            }
+            // Hide Next button for last coil
+            if(coilNum.val==TC_Settings.maxCoilCount.val)
+            {
+                vis bNext,0
+            }
+            //
+            // Hide Pan objects in case its disabled (prevents flickering)
+            vis tL,0
+            vis sPan,0
+            vis tR,0
+            vis tPanReach,0
+            vis sReach,0
+            vis tReachInfo,0
+            vis bLinConst,0
+            // Show button state
+            click fConvBtnState,0
+            click btPanDis,0
+        
+        Postinitialize Event
+            
+        Touch Press Event
+            if(Other_Settings.nBackOff.val!=0)
+            {
+                // Default "stop" action. Set ontime of all Coils to 0
+                // Details about the data format described in a separate file and in the bApply button.
+                // shift bits for volume mode
+                sys1=3<<6
+                sys1+=63 // apply to all coils
+                prints "d",1
+                prints sys1,1
+                prints 0,4 // 0 ontime, 0 duty
+                MIDI_Live.set1.val=0
+                MIDI_Live.set2.val=0
+                MIDI_Live.set3.val=0
+                MIDI_Live.set4.val=0
+                MIDI_Live.set5.val=0
+                MIDI_Live.set6.val=0
+            }
+        
+        Touch Release Event
+            
+        Page Exit Event
+            
+    Components
+        Text tHideBack1
+            Properties
+                Scope       : Local
+                Initial Text: " "
+                Max. length : 1
+            
+            Events
+                Touch Press Event
+                    // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+                
+                Touch Release Event
+                    
+        Text tTitle
+            Properties
+                Scope       : Local
+                Initial Text: "Settings for Tesla Coil 42"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Button bReturn
+            Properties
+                Scope      : Local
+                Caption    : "Return"
+                Max. length: 10
+            
+            Events
+                Touch Press Event
+                    // Since this code is also executed by the previous/next buttons, it can't be here, otherwise you would see a Touch Press Event on this button, too.
+                    click fStore,1
+                
+                Touch Release Event
+                    // Go back to origin page.
+                    page origin.val
+                
+        Text tUser
+            Properties
+                Scope       : Local
+                Initial Text: " Guest"
+                Max. length : 32
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tChan
+            Properties
+                Scope       : Local
+                Initial Text: "Assign MIDI channels:"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Variable origin
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable sTitleStart
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: "Settings for Tesla Coil "
+                Max. length   : 30
+            
+        Dual-state Button btChn0
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "0"
+                Max. length  : 2
+            
+            Events
+                Touch Press Event
+                    sChnNum.txt=btChn0.txt
+                    tmButtonHold.en=1
+                
+                Touch Release Event
+                    // Stop and reset timer that detects long hold.
+                    tmButtonHold.en=0
+                    tmButtonHold.tim=Other_Settings.nHoldTime.val
+                
+        Dual-state Button btChn1
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "1"
+                Max. length  : 2
+            
+            Events
+                Touch Press Event
+                    sChnNum.txt=btChn1.txt
+                    tmButtonHold.en=1
+                
+                Touch Release Event
+                    // Stop and reset timer that detects long hold.
+                    tmButtonHold.en=0
+                    tmButtonHold.tim=Other_Settings.nHoldTime.val
+                
+        Dual-state Button btChn2
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "2"
+                Max. length  : 2
+            
+            Events
+                Touch Press Event
+                    sChnNum.txt=btChn2.txt
+                    tmButtonHold.en=1
+                
+                Touch Release Event
+                    // Stop and reset timer that detects long hold.
+                    tmButtonHold.en=0
+                    tmButtonHold.tim=Other_Settings.nHoldTime.val
+                
+        Dual-state Button btChn3
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "3"
+                Max. length  : 2
+            
+            Events
+                Touch Press Event
+                    sChnNum.txt=btChn3.txt
+                    tmButtonHold.en=1
+                
+                Touch Release Event
+                    // Stop and reset timer that detects long hold.
+                    tmButtonHold.en=0
+                    tmButtonHold.tim=Other_Settings.nHoldTime.val
+                
+        Dual-state Button btChn8
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "8"
+                Max. length  : 2
+            
+            Events
+                Touch Press Event
+                    sChnNum.txt=btChn8.txt
+                    tmButtonHold.en=1
+                
+                Touch Release Event
+                    // Stop and reset timer that detects long hold.
+                    tmButtonHold.en=0
+                    tmButtonHold.tim=Other_Settings.nHoldTime.val
+                
+        Dual-state Button btChn9
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "9"
+                Max. length  : 2
+            
+            Events
+                Touch Press Event
+                    sChnNum.txt=btChn9.txt
+                    tmButtonHold.en=1
+                
+                Touch Release Event
+                    // Stop and reset timer that detects long hold.
+                    tmButtonHold.en=0
+                    tmButtonHold.tim=Other_Settings.nHoldTime.val
+                
+        Dual-state Button btChn10
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "10"
+                Max. length  : 3
+            
+            Events
+                Touch Press Event
+                    sChnNum.txt=btChn10.txt
+                    tmButtonHold.en=1
+                
+                Touch Release Event
+                    // Stop and reset timer that detects long hold.
+                    tmButtonHold.en=0
+                    tmButtonHold.tim=Other_Settings.nHoldTime.val
+                
+        Dual-state Button btChn11
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "11"
+                Max. length  : 3
+            
+            Events
+                Touch Press Event
+                    sChnNum.txt=btChn11.txt
+                    tmButtonHold.en=1
+                
+                Touch Release Event
+                    // Stop and reset timer that detects long hold.
+                    tmButtonHold.en=0
+                    tmButtonHold.tim=Other_Settings.nHoldTime.val
+                
+        Dual-state Button btChn4
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "4"
+                Max. length  : 2
+            
+            Events
+                Touch Press Event
+                    sChnNum.txt=btChn4.txt
+                    tmButtonHold.en=1
+                
+                Touch Release Event
+                    // Stop and reset timer that detects long hold.
+                    tmButtonHold.en=0
+                    tmButtonHold.tim=Other_Settings.nHoldTime.val
+                
+        Dual-state Button btChn5
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "5"
+                Max. length  : 2
+            
+            Events
+                Touch Press Event
+                    sChnNum.txt=btChn5.txt
+                    tmButtonHold.en=1
+                
+                Touch Release Event
+                    // Stop and reset timer that detects long hold.
+                    tmButtonHold.en=0
+                    tmButtonHold.tim=Other_Settings.nHoldTime.val
+                
+        Dual-state Button btChn6
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "6"
+                Max. length  : 2
+            
+            Events
+                Touch Press Event
+                    sChnNum.txt=btChn6.txt
+                    tmButtonHold.en=1
+                
+                Touch Release Event
+                    // Stop and reset timer that detects long hold.
+                    tmButtonHold.en=0
+                    tmButtonHold.tim=Other_Settings.nHoldTime.val
+                
+        Dual-state Button btChn7
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "7"
+                Max. length  : 2
+            
+            Events
+                Touch Press Event
+                    sChnNum.txt=btChn7.txt
+                    tmButtonHold.en=1
+                
+                Touch Release Event
+                    // Stop and reset timer that detects long hold.
+                    tmButtonHold.en=0
+                    tmButtonHold.tim=Other_Settings.nHoldTime.val
+                
+        Dual-state Button btChn12
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "12"
+                Max. length  : 3
+            
+            Events
+                Touch Press Event
+                    sChnNum.txt=btChn12.txt
+                    tmButtonHold.en=1
+                
+                Touch Release Event
+                    // Stop and reset timer that detects long hold.
+                    tmButtonHold.en=0
+                    tmButtonHold.tim=Other_Settings.nHoldTime.val
+                
+        Dual-state Button btChn13
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "13"
+                Max. length  : 3
+            
+            Events
+                Touch Press Event
+                    sChnNum.txt=btChn13.txt
+                    tmButtonHold.en=1
+                
+                Touch Release Event
+                    // Stop and reset timer that detects long hold.
+                    tmButtonHold.en=0
+                    tmButtonHold.tim=Other_Settings.nHoldTime.val
+                
+        Dual-state Button btChn14
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "14"
+                Max. length  : 3
+            
+            Events
+                Touch Press Event
+                    sChnNum.txt=btChn14.txt
+                    tmButtonHold.en=1
+                
+                Touch Release Event
+                    // Stop and reset timer that detects long hold.
+                    tmButtonHold.en=0
+                    tmButtonHold.tim=Other_Settings.nHoldTime.val
+                
+        Dual-state Button btChn15
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "15"
+                Max. length  : 3
+            
+            Events
+                Touch Press Event
+                    sChnNum.txt=btChn15.txt
+                    tmButtonHold.en=1
+                
+                Touch Release Event
+                    // Stop and reset timer that detects long hold.
+                    tmButtonHold.en=0
+                    tmButtonHold.tim=Other_Settings.nHoldTime.val
+                
+        Button bNone
+            Properties
+                Scope      : Local
+                Caption    : "None"
+                Max. length: 6
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    btChn0.val=0
+                    btChn1.val=0
+                    btChn2.val=0
+                    btChn3.val=0
+                    btChn4.val=0
+                    btChn5.val=0
+                    btChn6.val=0
+                    btChn7.val=0
+                    btChn8.val=0
+                    btChn9.val=0
+                    btChn10.val=0
+                    btChn11.val=0
+                    btChn12.val=0
+                    btChn13.val=0
+                    btChn14.val=0
+                    btChn15.val=0
+                    click btChn0,0
+                
+        Button bAll
+            Properties
+                Scope      : Local
+                Caption    : "All"
+                Max. length: 6
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    btChn0.val=1
+                    btChn1.val=1
+                    btChn2.val=1
+                    btChn3.val=1
+                    btChn4.val=1
+                    btChn5.val=1
+                    btChn6.val=1
+                    btChn7.val=1
+                    btChn8.val=1
+                    btChn9.val=1
+                    btChn10.val=1
+                    btChn11.val=1
+                    btChn12.val=1
+                    btChn13.val=1
+                    btChn14.val=1
+                    btChn15.val=1
+                    click btChn0,0
+                
+        Variable coilNum
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable sCoilNum
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: "0"
+                Max. length   : 1
+            
+        Number fConvBtnState
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Store button state in variable. Bit n corresponds to channel n.
+                    // sys0 only used because shorter, meaning better readable.
+                    sys0=btChn0.val
+                    sys0=btChn1.val*2+sys0
+                    sys0=btChn2.val*4+sys0
+                    sys0=btChn3.val*8+sys0
+                    sys0=btChn4.val*16+sys0
+                    sys0=btChn5.val*32+sys0
+                    sys0=btChn6.val*64+sys0
+                    sys0=btChn7.val*128+sys0
+                    sys0=btChn8.val*256+sys0
+                    sys0=btChn9.val*512+sys0
+                    sys0=btChn10.val*1024+sys0
+                    sys0=btChn11.val*2048+sys0
+                    sys0=btChn12.val*4096+sys0
+                    sys0=btChn13.val*8192+sys0
+                    sys0=btChn14.val*16384+sys0
+                    sys0=btChn15.val*32768+sys0
+                    fConvBtnState.val=sys0
+                
+                Touch Release Event
+                    // Load button state from variable. Bit n corresponds to channel n.
+                    // Make sure all buttons are off.
+                    btChn0.val=0
+                    btChn1.val=0
+                    btChn2.val=0
+                    btChn3.val=0
+                    btChn4.val=0
+                    btChn5.val=0
+                    btChn6.val=0
+                    btChn7.val=0
+                    btChn8.val=0
+                    btChn9.val=0
+                    btChn10.val=0
+                    btChn11.val=0
+                    btChn12.val=0
+                    btChn13.val=0
+                    btChn14.val=0
+                    btChn15.val=0
+                    // if x >= 2^n, the nth bit in x is set.
+                    sys0=32768 //2^15
+                    if(fConvBtnState.val>=sys0)
+                    {
+                        btChn15.val=1
+                        fConvBtnState.val-=sys0
+                    }
+                    sys0/=2
+                    if(fConvBtnState.val>=sys0)
+                    {
+                        btChn14.val=1
+                        fConvBtnState.val-=sys0
+                    }
+                    sys0/=2
+                    if(fConvBtnState.val>=sys0)
+                    {
+                        btChn13.val=1
+                        fConvBtnState.val-=sys0
+                    }
+                    sys0/=2
+                    if(fConvBtnState.val>=sys0)
+                    {
+                        btChn12.val=1
+                        fConvBtnState.val-=sys0
+                    }
+                    sys0/=2
+                    if(fConvBtnState.val>=sys0)
+                    {
+                        btChn11.val=1
+                        fConvBtnState.val-=sys0
+                    }
+                    sys0/=2
+                    if(fConvBtnState.val>=sys0)
+                    {
+                        btChn10.val=1
+                        fConvBtnState.val-=sys0
+                    }
+                    sys0/=2
+                    if(fConvBtnState.val>=sys0)
+                    {
+                        btChn9.val=1
+                        fConvBtnState.val-=sys0
+                    }
+                    sys0/=2
+                    if(fConvBtnState.val>=sys0)
+                    {
+                        btChn8.val=1
+                        fConvBtnState.val-=sys0
+                    }
+                    sys0/=2
+                    if(fConvBtnState.val>=sys0)
+                    {
+                        btChn7.val=1
+                        fConvBtnState.val-=sys0
+                    }
+                    sys0/=2
+                    if(fConvBtnState.val>=sys0)
+                    {
+                        btChn6.val=1
+                        fConvBtnState.val-=sys0
+                    }
+                    sys0/=2
+                    if(fConvBtnState.val>=sys0)
+                    {
+                        btChn5.val=1
+                        fConvBtnState.val-=sys0
+                    }
+                    sys0/=2
+                    if(fConvBtnState.val>=sys0)
+                    {
+                        btChn4.val=1
+                        fConvBtnState.val-=sys0
+                    }
+                    sys0/=2
+                    if(fConvBtnState.val>=sys0)
+                    {
+                        btChn3.val=1
+                        fConvBtnState.val-=sys0
+                    }
+                    sys0/=2
+                    if(fConvBtnState.val>=sys0)
+                    {
+                        btChn2.val=1
+                        fConvBtnState.val-=sys0
+                    }
+                    sys0/=2
+                    if(fConvBtnState.val>=sys0)
+                    {
+                        btChn1.val=1
+                        fConvBtnState.val-=sys0
+                    }
+                    sys0/=2
+                    if(fConvBtnState.val>=sys0)
+                    {
+                        btChn0.val=1
+                        fConvBtnState.val-=sys0
+                    }
+                
+        Slider sPan
+            Properties
+                Scope           : Local
+                Initial Position: 64
+                Lower End       : 0
+                Upper End       : 127
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(sPan.val<=6)
+                    {
+                        sPan.val=0
+                    }else if(sPan.val<=19)
+                    {
+                        sPan.val=13
+                    }else if(sPan.val<=32)
+                    {
+                        sPan.val=26
+                    }else if(sPan.val<=45)
+                    {
+                        sPan.val=39
+                    }else if(sPan.val<=57)
+                    {
+                        sPan.val=51
+                    }else if(sPan.val<=70)
+                    {
+                        sPan.val=64
+                    }else if(sPan.val<=83)
+                    {
+                        sPan.val=77
+                    }else if(sPan.val<=96)
+                    {
+                        sPan.val=90
+                    }else if(sPan.val<=108)
+                    {
+                        sPan.val=102
+                    }else if(sPan.val<=121)
+                    {
+                        sPan.val=115
+                    }else
+                    {
+                        sPan.val=127
+                    }
+                
+                Touch Move
+                    
+        Text tPan
+            Properties
+                Scope       : Local
+                Initial Text: "Pan:"
+                Max. length : 20
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Variable sPanEn
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: "Enabled"
+                Max. length   : 8
+            
+        Variable sPanDis
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: "Disabled"
+                Max. length   : 8
+            
+        Text tL
+            Properties
+                Scope       : Local
+                Initial Text: "L"
+                Max. length : 20
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tR
+            Properties
+                Scope       : Local
+                Initial Text: "R"
+                Max. length : 20
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Dual-state Button btPanDis
+            Properties
+                Scope        : Local
+                Initial State: 1
+                Caption      : "Disabled"
+                Max. length  : 8
+            
+            Events
+                Touch Press Event
+                    // For some reason the button does not show its text in the editor view. However when the program runs everything is fine.
+                
+                Touch Release Event
+                    if(btPanDis.val!=0)
+                    {
+                        btPanDis.txt=sPanDis.txt
+                        vis tL,0
+                        vis sPan,0
+                        vis tR,0
+                        vis tPanReach,0
+                        vis sReach,0
+                        vis tReachInfo,0
+                        vis bLinConst,0
+                    }else
+                    {
+                        btPanDis.txt=sPanEn.txt
+                        vis tL,1
+                        vis sPan,1
+                        vis tR,1
+                        vis tPanReach,1
+                        vis sReach,1
+                        vis tReachInfo,1
+                        vis bLinConst,1
+                    }
+                
+        Text tPanReach
+            Properties
+                Scope       : Local
+                Initial Text: "Reach:"
+                Max. length : 10
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Slider sReach
+            Properties
+                Scope           : Local
+                Initial Position: 64
+                Lower End       : 0
+                Upper End       : 127
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(sReach.val<=6)
+                    {
+                        sReach.val=0
+                    }else if(sReach.val<=19)
+                    {
+                        sReach.val=13
+                    }else if(sReach.val<=32)
+                    {
+                        sReach.val=26
+                    }else if(sReach.val<=45)
+                    {
+                        sReach.val=39
+                    }else if(sReach.val<=57)
+                    {
+                        sReach.val=51
+                    }else if(sReach.val<=70)
+                    {
+                        sReach.val=64
+                    }else if(sReach.val<=83)
+                    {
+                        sReach.val=77
+                    }else if(sReach.val<=96)
+                    {
+                        sReach.val=90
+                    }else if(sReach.val<=108)
+                    {
+                        sReach.val=102
+                    }else if(sReach.val<=121)
+                    {
+                        sReach.val=115
+                    }else
+                    {
+                        sReach.val=127
+                    }
+                
+                Touch Move
+                    
+        Text tReachInfo
+            Properties
+                Scope       : Local
+                Initial Text: "Distance from source at which the signal is no more audible. Same scale as pan slider."
+                Max. length : 255
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Button bLinConst
+            Properties
+                Scope      : Local
+                Caption    : "Linear"
+                Max. length: 6
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(bLinConst.txt==sLinear.txt)
+                    {
+                        bLinConst.txt=sConst.txt
+                    }else
+                    {
+                        bLinConst.txt=sLinear.txt
+                    }
+                
+        Variable sConst
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: "Const"
+                Max. length   : 6
+            
+        Variable sLinear
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: "Linear"
+                Max. length   : 6
+            
+        Button bPrevious
+            Properties
+                Scope      : Local
+                Caption    : "Previous"
+                Max. length: 10
+            
+            Events
+                Touch Press Event
+                    // Save current state and send it to the microcontroller
+                    click fStore,1
+                    // Set previous coil
+                    if(coilNum.val>1)
+                    {
+                        coilNum.val-=1
+                    }
+                    // Reload page for previous coil
+                    page MIDI_TC_Set
+                
+                Touch Release Event
+                    
+        Button bNext
+            Properties
+                Scope      : Local
+                Caption    : "Next"
+                Max. length: 10
+            
+            Events
+                Touch Press Event
+                    // Save current state and send it to the microcontroller
+                    click fStore,1
+                    // Set next coil
+                    if(coilNum.val<TC_Settings.maxCoilCount.val)
+                    {
+                        coilNum.val+=1
+                    }
+                    // Reload page for previous coil
+                    page MIDI_TC_Set
+                
+                Touch Release Event
+                    
+        Number fStore
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
+                    // Data byte 1:
+                    // Data byte 1:
+                    //   Bits 0-5: coils to which settings apply.
+                    //   Bits 6-7: Mode
+                    //     0b00 = MIDI TC Settings Change
+                    //     Other values = Not used here.
+                    // Data byte 2: Bit 0-7 correspond to channel 0-7
+                    // Data byte 3: Bit 0-7 correspond to channel 8-15
+                    // Data byte 4:
+                    //   Bit 0-6 contain the Pan value (0-127)
+                    //   Bit 7: 0: Pan enabled, 1: Pan disabled
+                    // Data Byte 5:
+                    //   Bit 0-6: Pan reach, ranging from 0-127. Notes within this range (abs(coilPanPos - notePanPos) <= panReach) will play on this coil.
+                    //   Bit 7:
+                    //     0 = linear mode. The volume of the note decreases linearly with the distance from the coil. At distance 0 the volume is equal to the notes volume. At the limit of the range the volume drops to 0.
+                    //     1 = constant mode. All notes within the range will play at their nominal volume.
+                    //
+                    //
+                    // Convert button state to bit array
+                    click fConvBtnState,1
+                    //
+                    // Add Pan data to sys0
+                    sys0=btPanDis.val<<7
+                    sys0+=sPan.val
+                    // Add pan reach data to sys0
+                    sys0=sys0<<1
+                    if(bLinConst.txt==sConst.txt)
+                    {
+                        sys0+=1
+                    }
+                    sys0=sys0<<7
+                    sys0+=sReach.val
+                    sys0=sys0<<16
+                    //
+                    // Add button state bit array to sys0 and send the data
+                    sys0+=fConvBtnState.val
+                    //
+                    // sys1: coil bit. Note that coilNum ranges from 1-6 instead of 0-5
+                    sys1=1<<coilNum.val
+                    sys1=sys1>>1
+                    prints "d",1
+                    prints sys1,1
+                    prints sys0,4
+                    // Store settings in coil variable
+                    if(coilNum.val==1)
+                    {
+                        TC_Settings.coil1Chn.val=sys0
+                    }else if(coilNum.val==2)
+                    {
+                        TC_Settings.coil2Chn.val=sys0
+                    }else if(coilNum.val==3)
+                    {
+                        TC_Settings.coil3Chn.val=sys0
+                    }else if(coilNum.val==4)
+                    {
+                        TC_Settings.coil4Chn.val=sys0
+                    }else if(coilNum.val==5)
+                    {
+                        TC_Settings.coil5Chn.val=sys0
+                    }else if(coilNum.val==6)
+                    {
+                        TC_Settings.coil6Chn.val=sys0
+                    }
+                
+                Touch Release Event
+                    
+        Timer tmButtonHold
+            Properties
+                Scope      : Local
+                Period [ms]: 400
+                Running    : No
+            
+            Events
+                Touch Press Event
+                    p
+                    e
+                
+                Touch Release Event
+                    p
+                    e
+                
+        Variable sChnNum
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: "0"
+                Max. length   : 2
+            

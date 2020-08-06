@@ -1,0 +1,316 @@
+Page Identification
+    Events
+        Preinitialize Event
+            vis tTitle,1
+        
+        Postinitialize Event
+            click bOK,0
+        
+        Touch Press Event
+            
+        Touch Release Event
+            
+        Page Exit Event
+            // Tell the MCU that a user has been selected / changed: Mode User Select
+            prints "mus",0
+            vis tTitle,0
+            tTitle.txt=sNoCode.txt
+        
+    Components
+        Text tTitle
+            Properties
+                Scope       : Global
+                Initial Text: "Enter Code"
+                Max. length : 37
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Button b0
+            Properties
+                Scope      : Local
+                Caption    : "0"
+                Max. length: 10
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(tTitle.txt==sNoCode.txt)
+                    {
+                        tTitle.pw=1
+                        tTitle.txt=""
+                    }
+                    strlen tTitle.txt,sys0
+                    if(sys0<tTitle.txt_maxl)
+                    {
+                        tTitle.txt+=b0.txt
+                    }
+                
+        Button b1
+            Properties
+                Scope      : Local
+                Caption    : "1"
+                Max. length: 2
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(tTitle.txt==sNoCode.txt)
+                    {
+                        tTitle.pw=1
+                        tTitle.txt=""
+                    }
+                    strlen tTitle.txt,sys0
+                    if(sys0<tTitle.txt_maxl)
+                    {
+                        tTitle.txt+=b1.txt
+                    }
+                
+        Button b2
+            Properties
+                Scope      : Local
+                Caption    : "2"
+                Max. length: 2
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(tTitle.txt==sNoCode.txt)
+                    {
+                        tTitle.pw=1
+                        tTitle.txt=""
+                    }
+                    strlen tTitle.txt,sys0
+                    if(sys0<tTitle.txt_maxl)
+                    {
+                        tTitle.txt+=b2.txt
+                    }
+                
+        Button b3
+            Properties
+                Scope      : Local
+                Caption    : "3"
+                Max. length: 2
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(tTitle.txt==sNoCode.txt)
+                    {
+                        tTitle.pw=1
+                        tTitle.txt=""
+                    }
+                    strlen tTitle.txt,sys0
+                    if(sys0<tTitle.txt_maxl)
+                    {
+                        tTitle.txt+=b3.txt
+                    }
+                
+        Button b4
+            Properties
+                Scope      : Local
+                Caption    : "4"
+                Max. length: 2
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(tTitle.txt==sNoCode.txt)
+                    {
+                        tTitle.pw=1
+                        tTitle.txt=""
+                    }
+                    strlen tTitle.txt,sys0
+                    if(sys0<tTitle.txt_maxl)
+                    {
+                        tTitle.txt+=b4.txt
+                    }
+                
+        Button b5
+            Properties
+                Scope      : Local
+                Caption    : "5"
+                Max. length: 2
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(tTitle.txt==sNoCode.txt)
+                    {
+                        tTitle.pw=1
+                        tTitle.txt=""
+                    }
+                    strlen tTitle.txt,sys0
+                    if(sys0<tTitle.txt_maxl)
+                    {
+                        tTitle.txt+=b5.txt
+                    }
+                
+        Button b6
+            Properties
+                Scope      : Local
+                Caption    : "6"
+                Max. length: 2
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(tTitle.txt==sNoCode.txt)
+                    {
+                        tTitle.pw=1
+                        tTitle.txt=""
+                    }
+                    strlen tTitle.txt,sys0
+                    if(sys0<tTitle.txt_maxl)
+                    {
+                        tTitle.txt+=b6.txt
+                    }
+                
+        Button b7
+            Properties
+                Scope      : Local
+                Caption    : "7"
+                Max. length: 2
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(tTitle.txt==sNoCode.txt)
+                    {
+                        tTitle.pw=1
+                        tTitle.txt=""
+                    }
+                    strlen tTitle.txt,sys0
+                    if(sys0<tTitle.txt_maxl)
+                    {
+                        tTitle.txt+=b7.txt
+                    }
+                
+        Button b8
+            Properties
+                Scope      : Local
+                Caption    : "8"
+                Max. length: 2
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(tTitle.txt==sNoCode.txt)
+                    {
+                        tTitle.pw=1
+                        tTitle.txt=""
+                    }
+                    strlen tTitle.txt,sys0
+                    if(sys0<tTitle.txt_maxl)
+                    {
+                        tTitle.txt+=b8.txt
+                    }
+                
+        Button b9
+            Properties
+                Scope      : Local
+                Caption    : "9"
+                Max. length: 2
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(tTitle.txt==sNoCode.txt)
+                    {
+                        tTitle.pw=1
+                        tTitle.txt=""
+                    }
+                    strlen tTitle.txt,sys0
+                    if(sys0<tTitle.txt_maxl)
+                    {
+                        tTitle.txt+=b9.txt
+                    }
+                
+        Button bClear
+            Properties
+                Scope      : Local
+                Caption    : "X"
+                Max. length: 2
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    tTitle.txt=sNoCode.txt
+                    tTitle.pw=0
+                
+        Button bOK
+            Properties
+                Scope      : Local
+                Caption    : "OK"
+                Max. length: 2
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
+                    // Data byte 1: User number. Can be 0, 1 or 2.
+                    // Data byte 2-5: unused.
+                    //
+                    if(tTitle.txt!=sNoCode.txt)
+                    {
+                        if(tTitle.txt==User_Settings.u0Code.txt)
+                        {
+                            User_Settings.userNum.val=0
+                            tTitle.txt="Hello "+User_Settings.u0Name.txt+"!"
+                            tTitle.pw=0
+                        }else if(tTitle.txt==User_Settings.u1Code.txt)
+                        {
+                            User_Settings.userNum.val=1
+                            tTitle.txt="Hello "+User_Settings.u1Name.txt+"!"
+                            tTitle.pw=0
+                        }else if(tTitle.txt==User_Settings.u2Code.txt)
+                        {
+                            User_Settings.userNum.val=2
+                            tTitle.txt="Hello "+User_Settings.u2Name.txt+"!"
+                            tTitle.pw=0
+                        }else
+                        {
+                            tTitle.txt=sWrongCode.txt
+                            tTitle.pw=0
+                            delay=3000
+                            tTitle.txt=sNoCode.txt
+                        }
+                        if(tTitle.txt!=sNoCode.txt)
+                        {
+                            prints "d",1
+                            prints User_Settings.userNum.val,1
+                            prints 0,4
+                            prints 0,1
+                            delay=1000
+                            page Menu
+                        }
+                    }
+                
+        Variable sNoCode
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: "Enter Code"
+                Max. length   : 37
+            
+        Variable sWrongCode
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: "Wrong Code!"
+                Max. length   : 37
+            

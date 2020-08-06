@@ -1,0 +1,37 @@
+Page USB_FW_Update
+    Events
+        Preinitialize Event
+            
+        Postinitialize Event
+            // Tell the microcontroller: Mode Nextion firmware Update
+            prints "mnu",0
+        
+        Touch Press Event
+            
+        Touch Release Event
+            
+        Page Exit Event
+            
+    Components
+        Text tTitle
+            Properties
+                Scope       : Local
+                Initial Text: "USB Firmware Update"
+                Max. length : 25
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tInfo
+            Properties
+                Scope       : Local
+                Initial Text: "Waiting for beginning of transmission..."
+                Max. length : 40
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    

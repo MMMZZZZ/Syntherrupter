@@ -1,0 +1,1185 @@
+Page MIDI_Chn_Set
+    Events
+        Preinitialize Event
+            // Display username
+            if(User_Settings.userNum.val==0)
+            {
+                tUser.txt=" "+User_Settings.u0Name.txt
+            }else if(User_Settings.userNum.val==1)
+            {
+                tUser.txt=" "+User_Settings.u1Name.txt
+            }else if(User_Settings.userNum.val==2)
+            {
+                tUser.txt=" "+User_Settings.u2Name.txt
+            }
+            //
+            // Idle field is just used for default text/background color and as target for the numpad if no component is selected. Ergo should be hidden like functions.
+            vis fStore,0
+            vis fCheck,0
+            vis idle,0
+            newValTargetId.val=idle.id
+            // Set page title
+            covx chnNum.val,sChnNum.txt,0,0
+            tTitle.txt=sTitleStart.txt+sChnNum.txt
+            //
+            // Load values
+            sys0=NRPData.val
+            nDataFine.val=sys0&0xff
+            sys0=sys0>>8
+            nDataCoarse.val=sys0&0xff
+            sys0=sys0>>8
+            nNumFine.val=sys0&0xff
+            sys0=sys0>>8
+            nNumCoarse.val=sys0&0xff
+            //
+            sys0=MIDIData.val
+            nStatus.val=sys0&0xff
+            sys0=sys0>>8
+            nData1.val=sys0&0xff
+            sys0=sys0>>8
+            nData2.val=sys0&0xf0
+            if(nStatus.val>0)
+            {
+                if(nStatus.val<0xf0)
+                {
+                    nStatus.val+=chnNum.val
+                }
+            }
+            //
+            // Hide Previous button for first coil
+            if(chnNum.val==0)
+            {
+                vis bPrevious,0
+            }
+            // Hide Next button for last coil
+            if(chnNum.val==15)
+            {
+                vis bNext,0
+            }
+        
+        Postinitialize Event
+            // Draw horizontal lines for NRP Editor table
+            // sys0: x start, sys1: x end, sys2: y
+            sys0=tNRPN.x
+            sys1=tData.x+tData.w
+            sys2=tDataCoarse.y-tNRPN.y-tNRPN.h
+            sys2/=2
+            sys2+=tNRPN.y+tNRPN.h
+            line sys0,sys2,sys1,sys2,tNRPN.pco
+            //
+            //sys2=nNumCoarse.y-tDataCoarse.y-tDataCoarse.h
+            //sys2/=2
+            //sys2+=tDataCoarse.y+tDataCoarse.h
+            //line sys0,sys2,sys1,sys2,tNRPN.pco
+            //
+            // Draw vertical lines for NRP Editor table
+            // sys0: y start, sys1: y end, sys2: x
+            sys0=sys2
+            sys1=nNumCoarse.y+nNumCoarse.h
+            sys2=tNRPFine.x-tNRPCoarse.x-tNRPCoarse.w
+            sys2/=2
+            sys2+=tNRPCoarse.x+tNRPCoarse.w
+            line sys2,sys0,sys2,sys1,tNRPN.pco
+            //
+            sys2=tDataFine.x-tDataCoarse.x-tDataCoarse.w
+            sys2/=2
+            sys2+=tDataCoarse.x+tDataCoarse.w
+            line sys2,sys0,sys2,sys1,tNRPN.pco
+            //
+            sys0=tNRPN.y
+            sys2=tData.x-tNRPN.x-tNRPN.w
+            sys2/=2
+            sys2+=tNRPN.x+tNRPN.w
+            line sys2,sys0,sys2,sys1,tNRPN.pco
+            //
+            // Draw MIDI Command vertical lines.
+            // sys0: y start, sys1: y end, sys2: x
+            sys0=tStatus.y
+            sys1=nStatus.y+nStatus.h
+            sys2=tData1.x-tStatus.x-tStatus.w
+            sys2/=2
+            sys2+=tStatus.x+tStatus.w
+            line sys2,sys0,sys2,sys1,tNRPN.pco
+            //
+            sys2=tData2.x-tData1.x-tData1.w
+            sys2/=2
+            sys2+=tData1.x+tData1.w
+            line sys2,sys0,sys2,sys1,tNRPN.pco
+        
+        Touch Press Event
+            if(Other_Settings.nBackOff.val!=0)
+            {
+                // Default "stop" action. Set ontime of all Coils to 0
+                // Details about the data format described in a separate file and in the bApply button.
+                // shift bits for volume mode
+                sys1=3<<6
+                sys1+=63 // apply to all coils
+                prints "d",1
+                prints sys1,1
+                prints 0,4 // 0 ontime, 0 duty
+                MIDI_Live.set1.val=0
+                MIDI_Live.set2.val=0
+                MIDI_Live.set3.val=0
+                MIDI_Live.set4.val=0
+                MIDI_Live.set5.val=0
+                MIDI_Live.set6.val=0
+            }
+        
+        Touch Release Event
+            
+        Page Exit Event
+            
+    Components
+        Text tHideBack3
+            Properties
+                Scope       : Local
+                Initial Text: " "
+                Max. length : 1
+            
+            Events
+                Touch Press Event
+                    // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+                
+                Touch Release Event
+                    
+        Text tHideBack2
+            Properties
+                Scope       : Local
+                Initial Text: " "
+                Max. length : 1
+            
+            Events
+                Touch Press Event
+                    // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+                
+                Touch Release Event
+                    
+        Text tHideBack
+            Properties
+                Scope       : Local
+                Initial Text: " "
+                Max. length : 1
+            
+            Events
+                Touch Press Event
+                    // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+                
+                Touch Release Event
+                    
+        Text tTitle
+            Properties
+                Scope       : Local
+                Initial Text: "Settings for Channel 42"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Button bReturn
+            Properties
+                Scope      : Local
+                Caption    : "Return"
+                Max. length: 10
+            
+            Events
+                Touch Press Event
+                    // Since this code is also executed by the previous/next buttons, it can't be here, otherwise you would see a Touch Press Event on this button, too.
+                    click fStore,1
+                
+                Touch Release Event
+                    // Go back to origin page.
+                    page origin.val
+                
+        Text tUser
+            Properties
+                Scope       : Local
+                Initial Text: " Guest"
+                Max. length : 32
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tChan
+            Properties
+                Scope       : Local
+                Initial Text: "NRP Editor"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Variable origin
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable sTitleStart
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: "Settings for Channel "
+                Max. length   : 30
+            
+        Variable chnNum
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable sChnNum
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: "0"
+                Max. length   : 2
+            
+        Button bPrevious
+            Properties
+                Scope      : Local
+                Caption    : "Previous"
+                Max. length: 10
+            
+            Events
+                Touch Press Event
+                    // Save current state and send it to the microcontroller
+                    click fStore,1
+                    // Set previous coil
+                    if(chnNum.val>0)
+                    {
+                        chnNum.val-=1
+                    }
+                    // Reload page for previous coil
+                    page MIDI_Chn_Set
+                
+                Touch Release Event
+                    
+        Button bNext
+            Properties
+                Scope      : Local
+                Caption    : "Next"
+                Max. length: 10
+            
+            Events
+                Touch Press Event
+                    // Save current state and send it to the microcontroller
+                    click fStore,1
+                    // Set next coil
+                    if(chnNum.val<15)
+                    {
+                        chnNum.val+=1
+                    }
+                    // Reload page for previous coil
+                    page MIDI_Chn_Set
+                
+                Touch Release Event
+                    
+        Number fStore
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
+                    // Data byte 1:
+                    //   Bits 0-3: In case of an NRP change (see below): Channel to which the settings apply. Otherwise unused and should be 0.
+                    //   Bits 4-5: 0: NRP Change, 1: Normal MIDI Command, 2: unused, 3: unused.
+                    //   Bits 6-7: Mode
+                    //     0b10 = MIDI Command
+                    //     Other values = Not used here.
+                    // NRP Change:
+                    //   Data byte 2: NRP Number coarse. 0-127: set value. 128: keep current value
+                    //   Data byte 3: NRP Number fine. 0-127: set value. 128: keep current value
+                    //   Data byte 4: NRP Data coarse. 0-127: set value. 128: keep current value
+                    //   Data byte 5: NRP Data fine. 0-127: set value. 128: keep current value
+                    // MIDI Command:
+                    //   Data byte 2: MIDI Status byte
+                    //   Data byte 3: MIDI Data byte 1
+                    //   Data byte 4: MIDI Data byte 2
+                    //   Data byte 5: Unused. Should be 0
+                    click fCheck,0
+                    //
+                    // If all NRP values are 128 (sum = 512), all values shall be preserved. Don't send them.
+                    sys0=nNumCoarse.val+nNumFine.val+nDataCoarse.val+nDataFine.val
+                    if(sys0<512)
+                    {
+                        // Data byte 1
+                        sys0=2<<6
+                        sys0+=chnNum.val
+                        //
+                        sys1=0
+                        sys1+=nNumCoarse.val
+                        sys1=sys1<<8
+                        sys1+=nNumFine.val
+                        sys1=sys1<<8
+                        sys1+=nDataCoarse.val
+                        sys1=sys1<<8
+                        sys1+=nDataFine.val
+                        // Send data only if it was modified or if the channel changed.
+                        if(NRPData.val!=sys1)
+                        {
+                            NRPData.val=sys1
+                            prints "d",1
+                            prints sys0,1
+                            prints NRPData.val,4
+                        }
+                    }
+                    //
+                    // If MIDI command is valid.
+                    if(nStatus.val>=128)
+                    {
+                        // Data byte 1
+                        sys0=2
+                        sys0=sys0<<2
+                        sys0+=1
+                        sys0=sys0<<4
+                        //
+                        sys1=0
+                        sys1=nData2.val
+                        sys1=sys1<<8
+                        sys1+=nData1.val
+                        sys1=sys1<<8
+                        sys1+=nStatus.val
+                        sys2=sys1&0xfff0ffff
+                        // Send data only if it was modified.
+                        if(MIDIData.val!=sys2)
+                        {
+                            MIDIData.val=sys2
+                            prints "d",1
+                            prints sys0,1
+                            prints sys1,4
+                        }
+                    }
+                
+                Touch Release Event
+                    
+        Button b0
+            Properties
+                Scope      : Local
+                Caption    : "0"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=base.val
+                    }
+                
+        Button b1
+            Properties
+                Scope      : Local
+                Caption    : "1"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=base.val
+                    }
+                    b[newValTargetId.val].val+=1
+                
+        Button b2
+            Properties
+                Scope      : Local
+                Caption    : "2"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=base.val
+                    }
+                    b[newValTargetId.val].val+=2
+                
+        Button b3
+            Properties
+                Scope      : Local
+                Caption    : "3"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=base.val
+                    }
+                    b[newValTargetId.val].val+=3
+                
+        Button b4
+            Properties
+                Scope      : Local
+                Caption    : "4"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=base.val
+                    }
+                    b[newValTargetId.val].val+=4
+                
+        Button b5
+            Properties
+                Scope      : Local
+                Caption    : "5"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=base.val
+                    }
+                    b[newValTargetId.val].val+=5
+                
+        Button b6
+            Properties
+                Scope      : Local
+                Caption    : "6"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=base.val
+                    }
+                    b[newValTargetId.val].val+=6
+                
+        Button b7
+            Properties
+                Scope      : Local
+                Caption    : "7"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=base.val
+                    }
+                    b[newValTargetId.val].val+=7
+                
+        Button b8
+            Properties
+                Scope      : Local
+                Caption    : "8"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=base.val
+                    }
+                    b[newValTargetId.val].val+=8
+                
+        Button b9
+            Properties
+                Scope      : Local
+                Caption    : "9"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=base.val
+                    }
+                    b[newValTargetId.val].val+=9
+                
+        Button bClear
+            Properties
+                Scope      : Local
+                Caption    : "X"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    b[newValTargetId.val].val=0
+                
+        Button bOK
+            Properties
+                Scope      : Local
+                Caption    : "ok"
+                Max. length: 2
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    newValTargetId.val=idle.id
+                    //
+                    // Make sure the values will be transmitted.
+                    NRPData.val+=1
+                    MIDIData.val+=1
+                    click fStore,1
+                
+        Text fCheck
+            Properties
+                Scope       : Local
+                Initial Text: " "
+                Max. length : 10
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    // Settings must stay in certain ranges. this function checks and fixes them.
+                    //
+                    // NRP values must be between 0 and 127. Any higher value becomes 128, which means "not send".
+                    if(nNumCoarse.val>128)
+                    {
+                        nNumCoarse.val=128
+                    }
+                    if(nNumFine.val>128)
+                    {
+                        nNumFine.val=128
+                    }
+                    if(nDataCoarse.val>128)
+                    {
+                        nDataCoarse.val=128
+                    }
+                    if(nDataFine.val>128)
+                    {
+                        nDataFine.val=128
+                    }
+                    //
+                    // Status byte must be between 128 and 255. A value of 127 means no command will be send. Data bytes must be between 0 and 127
+                    if(nStatus.val<128)
+                    {
+                        nStatus.val=0
+                    }else if(nStatus.val>255)
+                    {
+                        nStatus.val=255
+                    }else if(nStatus.val<0xf0)
+                    {
+                        nStatus.val=nStatus.val&0xf0
+                        nStatus.val+=chnNum.val
+                    }
+                    if(nData1.val>127)
+                    {
+                        nData1.val=127
+                    }
+                    if(nData2.val>127)
+                    {
+                        nData2.val=127
+                    }
+                
+        Float idle
+            Properties
+                Scope           : Local
+                Initial Value   : 0
+                Divide by [10^x]: 0
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Variable newValTargetId
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 68
+            
+        Variable newSelect
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
+        Number nNumCoarse
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nNumCoarse.bco=idle.pco
+                    nNumCoarse.pco=idle.bco
+                    newValTargetId.val=nNumCoarse.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Text tNRPN
+            Properties
+                Scope       : Local
+                Initial Text: "NRP Number"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tNRPCoarse
+            Properties
+                Scope       : Local
+                Initial Text: "Coarse"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tNRPFine
+            Properties
+                Scope       : Local
+                Initial Text: "Fine"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Number nNumFine
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nNumFine.bco=idle.pco
+                    nNumFine.pco=idle.bco
+                    newValTargetId.val=nNumFine.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nDataCoarse
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nDataCoarse.bco=idle.pco
+                    nDataCoarse.pco=idle.bco
+                    newValTargetId.val=nDataCoarse.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Text tData
+            Properties
+                Scope       : Local
+                Initial Text: "Data Entry"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tDataCoarse
+            Properties
+                Scope       : Local
+                Initial Text: "Coarse"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tDataFine
+            Properties
+                Scope       : Local
+                Initial Text: "Fine"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Number nDataFine
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nDataFine.bco=idle.pco
+                    nDataFine.pco=idle.bco
+                    newValTargetId.val=nDataFine.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Text tMIDICmd
+            Properties
+                Scope       : Local
+                Initial Text: "MIDI Command"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Variable base
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 16
+            
+        Button bA
+            Properties
+                Scope      : Local
+                Caption    : "A"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=base.val
+                    }
+                    b[newValTargetId.val].val+=10
+                
+        Button bB
+            Properties
+                Scope      : Local
+                Caption    : "B"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=base.val
+                    }
+                    b[newValTargetId.val].val+=11
+                
+        Button bC
+            Properties
+                Scope      : Local
+                Caption    : "C"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=base.val
+                    }
+                    b[newValTargetId.val].val+=12
+                
+        Button bD
+            Properties
+                Scope      : Local
+                Caption    : "D"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=base.val
+                    }
+                    b[newValTargetId.val].val+=13
+                
+        Button bE
+            Properties
+                Scope      : Local
+                Caption    : "E"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=base.val
+                    }
+                    b[newValTargetId.val].val+=14
+                
+        Button bF
+            Properties
+                Scope      : Local
+                Caption    : "F"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=base.val
+                    }
+                    b[newValTargetId.val].val+=15
+                
+        Text tStatus
+            Properties
+                Scope       : Local
+                Initial Text: "Status"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tData1
+            Properties
+                Scope       : Local
+                Initial Text: "Data 1"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tData2
+            Properties
+                Scope       : Local
+                Initial Text: "Data 2"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Number nStatus
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nStatus.bco=idle.pco
+                    nStatus.pco=idle.bco
+                    newValTargetId.val=nStatus.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nData1
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nData1.bco=idle.pco
+                    nData1.pco=idle.bco
+                    newValTargetId.val=nData1.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nData2
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nData2.bco=idle.pco
+                    nData2.pco=idle.bco
+                    newValTargetId.val=nData2.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Button bBase
+            Properties
+                Scope      : Local
+                Caption    : "Hex"
+                Max. length: 10
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(bBase.txt==sDec.txt)
+                    {
+                        bBase.txt=sHex.txt
+                        base.val=16
+                        nNumCoarse.format=2
+                        nNumFine.format=2
+                        nDataCoarse.format=2
+                        nDataFine.format=2
+                        nStatus.format=2
+                        nData1.format=2
+                        nData2.format=2
+                        tKeep.txt=sKeepStart.txt+"0x80"+sKeepEnd.txt
+                        vis bA,1
+                        vis bB,1
+                        vis bC,1
+                        vis bD,1
+                        vis bE,1
+                        vis bF,1
+                    }else
+                    {
+                        bBase.txt=sDec.txt
+                        base.val=10
+                        nNumCoarse.format=0
+                        nNumFine.format=0
+                        nDataCoarse.format=0
+                        nDataFine.format=0
+                        nStatus.format=0
+                        nData1.format=0
+                        nData2.format=0
+                        tKeep.txt=sKeepStart.txt+"128"+sKeepEnd.txt
+                        vis bA,0
+                        vis bB,0
+                        vis bC,0
+                        vis bD,0
+                        vis bE,0
+                        vis bF,0
+                    }
+                
+        Text tSelToMod
+            Properties
+                Scope       : Local
+                Initial Text: "Select any value to modify."
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Variable sHex
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: "Hex"
+                Max. length   : 10
+            
+        Variable sDec
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: "Decimal"
+                Max. length   : 10
+            
+        Text tKeep
+            Properties
+                Scope       : Local
+                Initial Text: "Enter 0x80 to keep the current value."
+                Max. length : 60
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Variable sKeepStart
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: "Enter "
+                Max. length   : 50
+            
+        Variable sKeepEnd
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: " to keep the current value."
+                Max. length   : 50
+            
+        Text tNoMIDI
+            Properties
+                Scope       : Local
+                Initial Text: "A status of 0 sends no MIDI command.\r\nUse Data 2 if only 1 data byte is required."
+                Max. length : 200
+            
+            Events
+                Touch Press Event
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Variable NRPData
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable MIDIData
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
