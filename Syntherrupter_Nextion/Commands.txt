@@ -1,0 +1,94 @@
+List of commands send by the Nextion. Dots indicate variable bytes. Bytes are numerated left to right. Bits (in a byte) are numerated from LSB=0 to MSB=7.
+Note: Any value ranges that have no specified meaning here should be ignored by the microcontroller for compatibility with future version. 
+* General: First byte of all commands indicate command type, length and (context sensitive) content. 
+* m..: Mode command. Tells the microcontroller the context of any other commands. There are no context sensitive variants of this command. 
+	* mex: Mode EXit command. We left the last mode and are in idle now. It causes the microcontroller to update the configuration stored in its EEPROM. 
+	* msi: Mode SImple command. We entered simple mode
+		* d.....: Data command. In this context:
+			* Byte 1: bit 0-5 indicate which of the outputs 0-5 is affected by this command
+			* Byte 2: lower byte of the ontime [us]
+			* Byte 3: upper byte of the ontime [us]
+			* Byte 4: lower byte of the BPS/interrupt frequency [Hz]
+			* Byte 5: upper byte of the BPS/interrupt frequency [Hz]
+	* mml: Mode Midi Live command. We entered MIDI Live mode in which the microcontroller shall process MIDI commands.
+		* d.....: Data command. In this context:
+			* Byte 1: 
+				* Bit 0-5: For Mode 0, 1, 3: Output which is affected by this command. Value ranges from 1-6 corresponding to the outputs 0-5.
+				* Bit 6-7: Mode. 
+					* 0 = Pan/channel data
+					* 1 = NRP reset
+					* 2 = NRP/MIDI command
+					* 3 = Volume
+			* Volume. Note: In absolute mode the duty bytes are 0, in relative mode the ontime bytes are 0. This forces the crossover to be at either side of the range, effectively making all notes absolute or relative. In auto mode the crossover is somewhere in between (at the frequency where the duty and ontime settings lead to the same signal). 
+				* Byte 2: lower byte of the maximum ontime [us] in absolute mode
+				* Byte 3: upper byte of the maximum ontime [us] in absolute mode
+				* Byte 4: lower byte of the maximum duty [1/1000] in relative mode
+				* Byte 5: upper byte of the maximum duty [1/1000] in relative mode
+			* NRP reset. This makes the microcontroller reset all NRPs to power on default values for the given channels. 
+				* Byte 2: Bits 0-7 correspond to channels 0-7. If a bit is set, this MIDI channel is modified. 
+				* Byte 3: Bits 0-7 correspond to channels 8-15. If a bit is set, this MIDI channel is modified.
+				* Byte 4-5: unused. 
+			* NRP/MIDI command
+				* Byte 1:
+					* Bits 0-3: In case of an NRP change (see below): Channel to which the settings apply. Otherwise unused and should be 0.
+					* Bits 4-5: 0: NRP Change, 1: Normal MIDI Command, 2: unused, 3: unused.
+					* Bits 6-7: Mode. See above.
+				* NRP Change. 
+					* Data byte 2: NRP Number coarse. 0-127: set value. 128: keep current value
+					* Data byte 3: NRP Number fine. 0-127: set value. 128: keep current value
+					* Data byte 4: NRP Data coarse. 0-127: set value. 128: keep current value
+					* Data byte 5: NRP Data fine. 0-127: set value. 128: keep current value
+				* MIDI Command.
+ 					* Data byte 2: MIDI Status byte
+					* Data byte 3: MIDI Data byte 1
+					* Data byte 4: MIDI Data byte 2
+					* Data byte 5: Unused. Should be 0
+			* Pan/channel data
+				* Byte 2: Bits 0-7 correspond to channels 0-7. If a bit is set, the output will listen to this MIDI channel.
+				* Byte 3: Bits 0-7 correspond to channels 8-15. If a bit is set, the output will listen to this MIDI channel.
+				* Byte 4: 
+					* Bit 0-6: Pan position, where 0 = left, 64 = middle, 127 = right.
+					* Bit 7: 0 = use pan position, 1 = ignore pan position.
+				* Byte 5: 
+					* Bit 0-6: Pan reach, ranging from 0-127. Notes within this range (abs(coilPanPos - notePanPos) <= panReach) will play on this coil. 
+					* Bit 7: 
+						* 0 = linear mode. The volume of the note decreases linearly with the distance from the coil. At distance 0 the volume is equal to the notes volume. At the limit of the range the volume drops to 0. 
+						* 1 = constant mode. All notes within the range will play at their nominal volume.
+	* mnu: Mode Nextion firmware Update. In this mode the Tiva "connects" the Nextion to the USB serial to allow updating the Nextion firmware via USB. It automatically performs a self reset after the update. 
+	* mus: Mode User Select command. User has been selected / changed. Load corresponding settings. 
+	* mse: Mode SEttings command. 
+		* d.....: Data command. In this context:
+			* Byte 1:
+				* bit 6-7: indicates the settings type.
+					0 = User limits
+					1 = Coil limits
+					2 = Other settings
+				* bit 0-5: 
+					* Settings type 0: A value from 1 to 6 indicates which one of the outputs 0-5 is affected by this command. 
+					* Settings type 1: A value from 0 to 2 indicates which user is affected by this command.
+					* Settings type 2: A value from 0 to 9 indicates a page number, and thus the meaning of the following bytes.
+			* User limits
+				* Byte 2-5: form a 32bit bitfield containing the limits of what the user can enter with the GUI. Note: in MIDI operation these values can be exceeded for numerous reasons. F.ex. ADSR can be adjusted to exceed a given value for a short time. Therefore the user limits are more "average limits". The never-exceeded-hard-limits are set by the Coil limits below. 
+					* Bit  0-11: Maximum allowed ontime [10us]
+					* Bit 12-22: Maximum allowed BPS/interrupt frequency [10Hz]  
+					* Bit 23-31: Maximum allowed duty [1/1000]
+			* Coil limits
+				* Byte 2-5: form a 32bit bitfield containing the absolute maximum ratings that must not be exceeded for this coil. The microcontroller assures to operate within these limits no matter what values are requested by other commands. Note: in MIDI operation the displayed values can be exceeded for numerous reasons. F.ex. ADSR can be adjusted to exceed a given value for a short time. Therefore the user limits are more "average limits". The limits in this command however cannot be exceeded. Not even for a single pulse. 
+					* Bit  0-11: Maximum allowed ontime [10us]
+					* Bit 12-15: Maximum number of simultaneous voices in MIDI playback minus one.
+					* Bit 16-22: Minimum offtime after each ontime [10us]
+					* Bit 23-31: Maximum allowed duty [1/1000]
+			* Other settings, page 0
+				* Byte 2: Button hold time LSB
+				* Byte 3: Button hold time MSB
+				* Byte 4: Delay until sleep in seconds LSB
+				* Byte 5: Delay until sleep in seconds MSB
+			* Other settings, page 1
+				* Byte 2: Display brightness
+			* Byte 6: can't be used in this context.
+		* u..(.): User Command. Length is variable and indicated in byte 1 by the bits 0-4. The other bits are context sensitive. In this context:	
+			* Byte 1: 
+				* Bit 6-7: User. Can be 0, 1 or 2. 
+				* Bit   5: Indicates content of the following bytes. 0 = Name, 1 = Password
+				* Bit 0-4: Number of following bytes minus one. This means Name or password are at least 1 character and at most 32 characters. 
+			* Byte 2-x: Characters of the username/password without null termination character.

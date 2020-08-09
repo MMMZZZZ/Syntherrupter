@@ -1,0 +1,611 @@
+Page Other_Settings
+    Events
+        Preinitialize Event
+            // Display username
+            if(User_Settings.userNum.val==0)
+            {
+                tUser.txt=" "+User_Settings.u0Name.txt
+            }else if(User_Settings.userNum.val==1)
+            {
+                tUser.txt=" "+User_Settings.u1Name.txt
+            }else if(User_Settings.userNum.val==2)
+            {
+                tUser.txt=" "+User_Settings.u2Name.txt
+            }
+            //
+            vis idle,0
+            vis fCheckNApply,0
+            vis fSqrt,0
+            //
+            newValTargetId.val=idle.id
+            //
+            // Load settings from global variables.
+            fSqrt.val=dim*sBrightness.maxval
+            click fSqrt,1
+            sBrightness.val=fSqrt.val
+            sys0=thsp
+            nSleepMin.val=sys0/60
+            sys1=nSleepMin.val*60
+            sys0-=sys1
+            nSleepS.val=sys0
+        
+        Postinitialize Event
+            
+        Touch Press Event
+            
+        Touch Release Event
+            
+        Page Exit Event
+            
+    Components
+        Text tTitle
+            Properties
+                Scope       : Local
+                Initial Text: "Other Settings"
+                Max. length : 22
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Button bReturn
+            Properties
+                Scope      : Local
+                Caption    : "Return"
+                Max. length: 10
+            
+            Events
+                Touch Press Event
+                    click bOK,0
+                    // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
+                    // Data byte 1:
+                    //    Bit 6-7: 2 = Other Settings
+                    //    Bit 0-5: Settings page (a.k.a. meaning of the following bytes). Ranges from 0-10
+                    // Settings page 0
+                    //   Data byte 2: Button hold time LSB
+                    //   Data byte 3: Button hold time MSB
+                    //   Data byte 4: Delay until sleep in seconds LSB
+                    //   Data byte 5: Delay until sleep in seconds MSB
+                    // Settings page 1
+                    //   Data byte 2: Brightness
+                    //
+                    // sys0 contains data byte 1
+                    sys0=0
+                    sys0=2<<6
+                    prints "d",1
+                    prints sys0,1
+                    prints nHoldTime.val,2
+                    prints thsp,2
+                    sys0+=1
+                    prints "d",1
+                    prints sys0,1
+                    prints dim,1
+                    prints 0,3
+                
+                Touch Release Event
+                    page Settings
+                
+        Text tUser
+            Properties
+                Scope       : Local
+                Initial Text: " Guest"
+                Max. length : 32
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tHoldTime
+            Properties
+                Scope       : Local
+                Initial Text: "Button hold Time:"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Number nHoldTime
+            Properties
+                Scope        : Global
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal and if so, apply them
+                    click fCheckNApply,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nHoldTime.bco=idle.pco
+                    nHoldTime.pco=idle.bco
+                    newValTargetId.val=nHoldTime.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Variable newValTargetId
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 20
+            
+        Variable newSelect
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
+        Float idle
+            Properties
+                Scope           : Local
+                Initial Value   : 0
+                Divide by [10^x]: 0
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Button b0
+            Properties
+                Scope      : Local
+                Caption    : "0"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                
+        Button b1
+            Properties
+                Scope      : Local
+                Caption    : "1"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=1
+                
+        Button b2
+            Properties
+                Scope      : Local
+                Caption    : "2"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=2
+                
+        Button b3
+            Properties
+                Scope      : Local
+                Caption    : "3"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=3
+                
+        Button b4
+            Properties
+                Scope      : Local
+                Caption    : "4"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=4
+                
+        Button b5
+            Properties
+                Scope      : Local
+                Caption    : "5"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=5
+                
+        Button b6
+            Properties
+                Scope      : Local
+                Caption    : "6"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=6
+                
+        Button b7
+            Properties
+                Scope      : Local
+                Caption    : "7"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=7
+                
+        Button b8
+            Properties
+                Scope      : Local
+                Caption    : "8"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=8
+                
+        Button b9
+            Properties
+                Scope      : Local
+                Caption    : "9"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=9
+                
+        Button bClear
+            Properties
+                Scope      : Local
+                Caption    : "X"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    b[newValTargetId.val].val=0
+                
+        Button bOK
+            Properties
+                Scope      : Local
+                Caption    : "ok"
+                Max. length: 2
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    newValTargetId.val=idle.id
+                    click fCheckNApply,0
+                
+        Text tSelToMod
+            Properties
+                Scope       : Local
+                Initial Text: "Select any value to modify."
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tBrightness
+            Properties
+                Scope       : Local
+                Initial Text: "Display brightness:"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Slider sBrightness
+            Properties
+                Scope           : Local
+                Initial Position: 100
+                Lower End       : 10
+                Upper End       : 100
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal and if so, apply them
+                    click fCheckNApply,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // No value selected to modify
+                    newValTargetId.val=idle.id
+                    // A new value has been selected
+                    newSelect.val=0
+                
+                Touch Release Event
+                    sys0=sBrightness.val*sBrightness.val
+                    sys0/=sBrightness.maxval
+                    dim=sys0
+                
+                Touch Move
+                    sys0=sBrightness.val*sBrightness.val
+                    sys0/=sBrightness.maxval
+                    dim=sys0
+                
+        Text fCheckNApply
+            Properties
+                Scope       : Local
+                Initial Text: " "
+                Max. length : 10
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    // Settings must stay in certain ranges. this function checks and fixes them.Afterwards settings are applied
+                    if(nBackOff.val!=0)
+                    {
+                        nBackOff.val=1
+                    }
+                    if(nHoldTime.val<50)
+                    {
+                        // Hold time must at least be 50ms. This is the lower limit of the nextion timer object
+                        nHoldTime.val=50
+                    }else if(nHoldTime.val>9999)
+                    {
+                        // Who would want to push a button 10s or more??
+                        nHoldTime.val=9999
+                    }
+                    if(nSleepMin.val>60)
+                    {
+                        nSleepMin.val=60
+                    }
+                    if(nSleepS.val>59)
+                    {
+                        nSleepS.val=59
+                    }
+                    thsp=nSleepMin.val*60+nSleepS.val
+                
+        Text tSleep
+            Properties
+                Scope       : Local
+                Initial Text: "Enter sleep after:"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Number nSleepMin
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal and if so, apply them
+                    click fCheckNApply,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nSleepMin.bco=idle.pco
+                    nSleepMin.pco=idle.bco
+                    newValTargetId.val=nSleepMin.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nSleepS
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal and if so, apply them
+                    click fCheckNApply,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nSleepS.bco=idle.pco
+                    nSleepS.pco=idle.bco
+                    newValTargetId.val=nSleepS.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Text tMin
+            Properties
+                Scope       : Local
+                Initial Text: "min"
+                Max. length : 3
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tS
+            Properties
+                Scope       : Local
+                Initial Text: "s"
+                Max. length : 3
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tms
+            Properties
+                Scope       : Local
+                Initial Text: "ms"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Number fSqrt
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // fXxxx are functions. Since they need to be clicked to execute their code they need to be on the same page. Usage:
+                    // 1. set the component value (fXxx.val) to the input value
+                    // 2. Execute code with "click fXxxx,1".
+                    // 3. Read the result from the component value (fXxx.val)
+                    // This functions calculates the square root.
+                    if(fSqrt.val>=2)
+                    {
+                        sys0=10
+                        sys2=fSqrt.val+1
+                        while(sys2>fSqrt.val)
+                        {
+                            sys1=fSqrt.val/sys0
+                            sys0+=sys1
+                            sys0/=2
+                            sys2=sys0*sys0
+                        }
+                        fSqrt.val=sys0
+                    }
+                
+                Touch Release Event
+                    
+        Text tBackOff
+            Properties
+                Scope       : Local
+                Initial Text: "Background shutdown:"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Number nBackOff
+            Properties
+                Scope        : Global
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal and if so, apply them
+                    click fCheckNApply,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nBackOff.bco=idle.pco
+                    nBackOff.pco=idle.bco
+                    newValTargetId.val=nBackOff.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    

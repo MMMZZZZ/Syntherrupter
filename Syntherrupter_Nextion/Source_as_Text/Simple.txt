@@ -1,0 +1,1407 @@
+Page Simple
+    Events
+        Preinitialize Event
+            // Display username
+            if(User_Settings.userNum.val==0)
+            {
+                tUser.txt=" "+User_Settings.u0Name.txt
+            }else if(User_Settings.userNum.val==1)
+            {
+                tUser.txt=" "+User_Settings.u1Name.txt
+            }else if(User_Settings.userNum.val==2)
+            {
+                tUser.txt=" "+User_Settings.u2Name.txt
+            }
+            //
+            ref bReturn
+            // Default mode is on release.
+            vis bModeImmediate,0
+            vis bModeManual,0
+            vis bApply,0
+            vis bModeRelease,1
+            sMode.txt=bModeRelease.txt
+            // Functions shall be invisible
+            vis fSqrt,0
+            vis fSlider,0
+            // Hide buttons for unavailable tesla coils
+            if(TC_Settings.maxCoilCount.val<6)
+            {
+                vis btCoil6,0
+                vis nOn6,0
+                vis nBPS6,0
+                vis nDuty6,0
+                vis tus6,0
+                vis tHz6,0
+                vis tPerc6,0
+            }
+            if(TC_Settings.maxCoilCount.val<5)
+            {
+                vis btCoil5,0
+                vis nOn5,0
+                vis nBPS5,0
+                vis nDuty5,0
+                vis tus5,0
+                vis tHz5,0
+                vis tPerc5,0
+            }
+            if(TC_Settings.maxCoilCount.val<4)
+            {
+                vis btCoil4,0
+                vis nOn4,0
+                vis nBPS4,0
+                vis nDuty4,0
+                vis tus4,0
+                vis tHz4,0
+                vis tPerc4,0
+            }
+            if(TC_Settings.maxCoilCount.val<3)
+            {
+                vis btCoil3,0
+                vis nOn3,0
+                vis nBPS3,0
+                vis nDuty3,0
+                vis tus3,0
+                vis tHz3,0
+                vis tPerc3,0
+            }
+            if(TC_Settings.maxCoilCount.val<2)
+            {
+                // Single Coil Mode. No need to show a select option.
+                vis btCoil2,0
+                vis nOn2,0
+                vis nBPS2,0
+                vis nDuty2,0
+                vis tus2,0
+                vis tHz2,0
+                vis tPerc2,0
+                vis btCoil1,0
+                vis nOn1,0
+                vis nBPS1,0
+                vis nDuty1,0
+                vis tus1,0
+                vis tHz1,0
+                vis tPerc1,0
+                vis tCoil,0
+                // Make sure that the coil is active.
+                btCoil1.val=1
+                click btCoil1,0
+            }
+            // Load button state
+            sys0=32
+            sys1=TC_Settings.activeCoils.val
+            if(sys1>=sys0)
+            {
+                btCoil6.val=1
+                sys1-=sys0
+            }
+            sys0/=2
+            if(sys1>=sys0)
+            {
+                btCoil5.val=1
+                sys1-=sys0
+            }
+            sys0/=2
+            if(sys1>=sys0)
+            {
+                btCoil4.val=1
+                sys1-=sys0
+            }
+            sys0/=2
+            if(sys1>=sys0)
+            {
+                btCoil3.val=1
+                sys1-=sys0
+            }
+            sys0/=2
+            if(sys1>=sys0)
+            {
+                btCoil2.val=1
+                sys1-=sys0
+            }
+            sys0/=2
+            if(sys1>=sys0)
+            {
+                btCoil1.val=1
+                sys1-=sys0
+            }
+            // Load user's ontime and duty limit.
+            if(User_Settings.userNum.val==2)
+            {
+                userOnLimit.val=User_Settings.u2Ontime.val
+                userDutyLimit.val=User_Settings.u2Duty.val
+                userBPSLimit.val=User_Settings.u2BPS.val
+            }else if(User_Settings.userNum.val==1)
+            {
+                userOnLimit.val=User_Settings.u1Ontime.val
+                userDutyLimit.val=User_Settings.u1Duty.val
+                userBPSLimit.val=User_Settings.u1BPS.val
+            }else
+            {
+                userOnLimit.val=User_Settings.u0Ontime.val
+                userDutyLimit.val=User_Settings.u0Duty.val
+                userBPSLimit.val=User_Settings.u0BPS.val
+            }
+            // Load Ontime, BPS and Duty from variables. Note: variables take much less space than displayed elements and are therefore better as persistent (= global) variables.
+            nOn.val=ontime.val
+            nBPS.val=BPS.val
+            nDuty.val=duty.val
+            // Restore slider positions
+            fSliderInput.val=sDuty.maxval
+            fSliderOutput.val=userDutyLimit.val
+            fSlider.val=nDuty.val
+            click fSlider,0
+            sDuty.val=fSlider.val
+            fSliderInput.val=sOn.maxval
+            fSliderOutput.val=userOnLimit.val
+            fSlider.val=nOn.val
+            click fSlider,0
+            sBPS.val=fSlider.val
+            fSliderInput.val=sBPS.maxval
+            fSliderOutput.val=userBPSLimit.val
+            fSlider.val=nBPS.val
+            click fSlider,0
+            sBPS.val=fSlider.val
+            // Tell the microcontroller: Mode: SImple
+            prints "msi",0
+        
+        Postinitialize Event
+            // Make sure the microcontroller is up-to-date
+            click bApply,0
+        
+        Touch Press Event
+            if(Other_Settings.nBackOff.val!=0)
+            {
+                // Default "stop" action. Set ontime of all Coils to 0
+                // Details about the data format described in a separate file and in the bApply button.
+                prints "d",1
+                printh FF // All coils
+                prints 0,2 // 0 ontime
+                prints nBPS.val,2 // do not change frequency
+                nOn.val=0
+                sOn.val=0
+                nOn1.val=0
+                nOn2.val=0
+                nOn3.val=0
+                nOn4.val=0
+                nOn5.val=0
+                nOn6.val=0
+                nDuty.val=0
+                sDuty.val=0
+                nDuty1.val=0
+                nDuty2.val=0
+                nDuty3.val=0
+                nDuty4.val=0
+                nDuty5.val=0
+                nDuty6.val=0
+            }
+        
+        Touch Release Event
+            
+        Page Exit Event
+            // Store Ontime, BPS and Duty in  variables. Note: variables take much less space than displayed elements and are therefore better as persistent (= global) variables.
+            ontime.val=nOn.val
+            BPS.val=nBPS.val
+            duty.val=nDuty.val
+        
+    Components
+        Text tHideBack
+            Properties
+                Scope       : Local
+                Initial Text: " "
+                Max. length : 1
+            
+            Events
+                Touch Press Event
+                    // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+                
+                Touch Release Event
+                    
+        Text tTitle
+            Properties
+                Scope       : Local
+                Initial Text: "Simple Mode"
+                Max. length : 22
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Button bModeRelease
+            Properties
+                Scope      : Local
+                Caption    : "On Release"
+                Max. length: 15
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    vis bModeRelease,0
+                    vis bModeManual,1
+                    vis bApply,1
+                    sMode.txt=bModeManual.txt
+                
+        Slider sOn
+            Properties
+                Scope           : Local
+                Initial Position: 0
+                Lower End       : 0
+                Upper End       : 439
+            
+            Events
+                Touch Press Event
+                    keepOntime.val=1
+                
+                Touch Release Event
+                    fSliderInput.val=sOn.maxval
+                    fSliderOutput.val=userOnLimit.val
+                    fSlider.val=sOn.val
+                    click fSlider,1 // final Ontime value
+                    // Round to multiple of five
+                    fSlider.val/=5
+                    fSlider.val*=5
+                    sys1=nBPS.val*fSlider.val/1000 // resulting duty cycle
+                    if(sys1<=userDutyLimit.val)
+                    {
+                        if(nOn.val!=fSlider.val)
+                        {
+                            nOn.val=fSlider.val
+                            nDuty.val=sys1
+                            fSliderInput.val=sDuty.maxval
+                            fSliderOutput.val=userDutyLimit.val
+                            fSlider.val=nDuty.val
+                            click fSlider,0
+                            // Round to multiple of five
+                            fSlider.val/=5
+                            fSlider.val*=5
+                            sDuty.val=fSlider.val
+                            newData.val=1
+                        }
+                    }
+                    // to understand the following lines have a look at the Touch Move code.
+                    // what you would actually wanna do is put the code above in touch move and perform a click event on touch move here (because your can press/release a slider, changing its value without moving it).
+                    // However "click" can only execute press/release events, so it gets more complicated...
+                    if(sMode.txt==bModeRelease.txt)
+                    {
+                        click bApply,0
+                    }
+                    if(sMode.txt==bModeImmediate.txt)
+                    {
+                        click bApply,0
+                    }
+                
+                Touch Move
+                    // Prevent double data transmission on move.
+                    sMode.txt+="M"
+                    click sOn,0
+                    sMode.txt-=1
+                    if(sMode.txt==bModeImmediate.txt)
+                    {
+                        click bApply,0
+                    }
+                
+        Text tOn
+            Properties
+                Scope       : Local
+                Initial Text: "Ontime:     us"
+                Max. length : 20
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Number nOn
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Slider sBPS
+            Properties
+                Scope           : Local
+                Initial Position: 44
+                Lower End       : 0
+                Upper End       : 439
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    // Note: nDuty.val is actually in 10ths of percent.
+                    fSliderInput.val=sBPS.maxval
+                    fSliderOutput.val=userBPSLimit.val
+                    fSlider.val=sBPS.val
+                    click fSlider,1
+                    // Round to multiple of five
+                    fSlider.val/=5
+                    fSlider.val*=5
+                    temp.val=fSlider.val // final BPS value
+                    // Depending on whether ontime or duty was set, calculate the resulting value for the other one and check if it's legal.
+                    if(keepOntime.val>0)
+                    {
+                        sys1=nOn.val*temp.val/1000 // resulting duty cycle
+                        if(sys1<=userDutyLimit.val)
+                        {
+                            nDuty.val=sys1
+                            fSliderInput.val=sDuty.maxval
+                            fSliderOutput.val=userDutyLimit.val
+                            fSlider.val=nDuty.val
+                            click fSlider,0
+                            // Round to multiple of five
+                            fSlider.val/=5
+                            fSlider.val*=5
+                            sDuty.val=fSlider.val
+                        }else
+                        {
+                            temp.val=nBPS.val
+                        }
+                    }else
+                    {
+                        sys1=nDuty.val*1000/temp.val // Resulting Ontime
+                        if(sys1<=userOnLimit.val)
+                        {
+                            nOn.val=sys1
+                            fSliderInput.val=sOn.maxval
+                            fSliderOutput.val=userOnLimit.val
+                            fSlider.val=nOn.val
+                            click fSlider,0
+                            // Round to multiple of five
+                            fSlider.val/=5
+                            fSlider.val*=5
+                            sOn.val=fSlider.val
+                        }else
+                        {
+                            temp.val=nBPS.val
+                        }
+                    }
+                    if(nBPS.val!=temp.val)
+                    {
+                        nBPS.val=temp.val
+                        newData.val=1
+                    }
+                    // to understand the following lines have a look at the Touch Move code.
+                    // what you would actually wanna do is put the code above in touch move and perform a click event on touch move here (because your can press/release a slider, changing its value without moving it).
+                    // However "click" can only execute press/release events, so it gets more complicated...
+                    if(sMode.txt==bModeRelease.txt)
+                    {
+                        click bApply,0
+                    }
+                    if(sMode.txt==bModeImmediate.txt)
+                    {
+                        click bApply,0
+                    }
+                
+                Touch Move
+                    // Prevent double data transmission on move.
+                    sMode.txt+="M"
+                    click sBPS,0
+                    sMode.txt-=1
+                    if(sMode.txt==bModeImmediate.txt)
+                    {
+                        click bApply,0
+                    }
+                
+        Text tBPS
+            Properties
+                Scope       : Local
+                Initial Text: "BPS:"
+                Max. length : 20
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Number nBPS
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Slider sDuty
+            Properties
+                Scope           : Local
+                Initial Position: 0
+                Lower End       : 0
+                Upper End       : 439
+            
+            Events
+                Touch Press Event
+                    keepOntime.val=0
+                
+                Touch Release Event
+                    // Note: nDuty.val is actually in 10ths of percent. .
+                    fSliderInput.val=sDuty.maxval
+                    fSliderOutput.val=userDutyLimit.val
+                    fSlider.val=sDuty.val
+                    click fSlider,1
+                    // Round to multiple of five
+                    fSlider.val/=5
+                    fSlider.val*=5
+                    sys1=fSlider.val*1000/nBPS.val // Resulting Ontime
+                    if(sys1<=userOnLimit.val)
+                    {
+                        if(sDuty.val!=fSlider.val)
+                        {
+                            newData.val=1
+                            nDuty.val=fSlider.val
+                            nOn.val=sys1
+                            fSliderInput.val=sOn.maxval
+                            fSliderOutput.val=userOnLimit.val
+                            fSlider.val=nOn.val
+                            click fSlider,0
+                            // Round to multiple of five
+                            fSlider.val/=5
+                            fSlider.val*=5
+                            sOn.val=fSlider.val
+                        }
+                    }
+                    // to understand the following lines have a look at the Touch Move code.
+                    // what you would actually wanna do is put the code above in touch move and perform a click event on touch move here (because your can press/release a slider, changing its value without moving it).
+                    // However "click" can only execute press/release events, so it gets more complicated...
+                    if(sMode.txt==bModeRelease.txt)
+                    {
+                        click bApply,0
+                    }
+                    if(sMode.txt==bModeImmediate.txt)
+                    {
+                        click bApply,0
+                    }
+                
+                Touch Move
+                    // Prevent double data transmission on move.
+                    sMode.txt+="M"
+                    click sDuty,0
+                    sMode.txt-=1
+                    if(sMode.txt==bModeImmediate.txt)
+                    {
+                        click bApply,0
+                    }
+                
+        Text tDuty
+            Properties
+                Scope       : Local
+                Initial Text: "Duty:"
+                Max. length : 20
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Number fSqrt
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // fXxxx are functions. Since they need to be clicked to execute their code they need to be on the same page. Usage:
+                    // 1. set the component value (fXxx.val) to the input value
+                    // 2. Execute code with "click fXxxx,1".
+                    // 3. Read the result from the component value (fXxx.val)
+                    // This functions calculates the square root. Source: https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Binary_numeral_system_(base_2)
+                    sys0=0
+                    sys1=1
+                    while(sys1<=fSqrt.val)
+                    {
+                        sys1=sys1<<2
+                    }
+                    sys1=sys1>>2
+                    while(sys1!=0)
+                    {
+                        sys2=sys0+sys1
+                        if(fSqrt.val>=sys2)
+                        {
+                            fSqrt.val-=sys2
+                            sys0=sys0>>1
+                            sys0+=sys1
+                        }else
+                        {
+                            sys0=sys0>>1
+                        }
+                        sys1=sys1>>2
+                    }
+                    fSqrt.val=sys0
+                
+                Touch Release Event
+                    
+        Button bReturn
+            Properties
+                Scope      : Local
+                Caption    : "Return"
+                Max. length: 10
+            
+            Events
+                Touch Press Event
+                    // Set outputs to 0
+                    click Simple,1
+                
+                Touch Release Event
+                    // Mode: EXit.
+                    prints "mex",0
+                    page Menu
+                
+        Float nDuty
+            Properties
+                Scope           : Local
+                Initial Value   : 0
+                Divide by [10^x]: 1
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tHz
+            Properties
+                Scope       : Local
+                Initial Text: "Hz"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tPerc
+            Properties
+                Scope       : Local
+                Initial Text: "%"
+                Max. length : 1
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tUser
+            Properties
+                Scope       : Local
+                Initial Text: " Guest"
+                Max. length : 32
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Button bModeImmediate
+            Properties
+                Scope      : Local
+                Caption    : "Immediately"
+                Max. length: 15
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    vis bModeImmediate,0
+                    vis bModeRelease,1
+                    sMode.txt=bModeRelease.txt
+                
+        Button bModeManual
+            Properties
+                Scope      : Local
+                Caption    : "Manually"
+                Max. length: 15
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    vis bApply,0
+                    vis bModeManual,0
+                    vis bModeImmediate,1
+                    sMode.txt=bModeImmediate.txt
+                
+        Variable sMode
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: "newtxt"
+                Max. length   : 16
+            
+        Text tCoil
+            Properties
+                Scope       : Local
+                Initial Text: "Apply to:"
+                Max. length : 20
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Dual-state Button btCoil1
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "1"
+                Max. length  : 3
+            
+            Events
+                Touch Press Event
+                    sCoil.txt=btCoil1.txt
+                
+                Touch Release Event
+                    // A coil might have been enabled, and thus does not have the currently displayed values.
+                    newData.val=1
+                    // Bit 0-5 correspond to the state of the buttons btCoil1-btCoil6
+                    sys0=btCoil1.val
+                    sys0=btCoil2.val*2+sys0
+                    sys0=btCoil3.val*4+sys0
+                    sys0=btCoil4.val*8+sys0
+                    sys0=btCoil5.val*16+sys0
+                    sys0=btCoil6.val*32+sys0
+                    // Store settings
+                    TC_Settings.activeCoils.val=sys0
+                
+        Dual-state Button btCoil2
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "2"
+                Max. length  : 4
+            
+            Events
+                Touch Press Event
+                    sCoil.txt=btCoil2.txt
+                
+                Touch Release Event
+                    click btCoil1,0
+                
+        Dual-state Button btCoil3
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "3"
+                Max. length  : 4
+            
+            Events
+                Touch Press Event
+                    sCoil.txt=btCoil3.txt
+                
+                Touch Release Event
+                    click btCoil1,0
+                
+        Dual-state Button btCoil4
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "4"
+                Max. length  : 4
+            
+            Events
+                Touch Press Event
+                    sCoil.txt=btCoil4.txt
+                
+                Touch Release Event
+                    click btCoil1,0
+                
+        Dual-state Button btCoil5
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "5"
+                Max. length  : 4
+            
+            Events
+                Touch Press Event
+                    sCoil.txt=btCoil5.txt
+                
+                Touch Release Event
+                    click btCoil1,0
+                
+        Dual-state Button btCoil6
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "6"
+                Max. length  : 4
+            
+            Events
+                Touch Press Event
+                    sCoil.txt=btCoil6.txt
+                
+                Touch Release Event
+                    click btCoil1,0
+                
+        Text tus
+            Properties
+                Scope       : Local
+                Initial Text: "탎"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Variable sCoil
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: "0"
+                Max. length   : 3
+            
+        Variable newData
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
+        Variable ontime
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable BPS
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 100
+            
+        Variable duty
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Number nOn1
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tus1
+            Properties
+                Scope       : Local
+                Initial Text: "탎"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Number nBPS1
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Number nOn2
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tus2
+            Properties
+                Scope       : Local
+                Initial Text: "탎"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Number nBPS2
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Number nOn3
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tus3
+            Properties
+                Scope       : Local
+                Initial Text: "탎"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Number nBPS3
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Number nOn4
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tus4
+            Properties
+                Scope       : Local
+                Initial Text: "탎"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Number nBPS4
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Number nOn5
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tus5
+            Properties
+                Scope       : Local
+                Initial Text: "탎"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Number nBPS5
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Number nOn6
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tus6
+            Properties
+                Scope       : Local
+                Initial Text: "탎"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Number nBPS6
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tPerc6
+            Properties
+                Scope       : Local
+                Initial Text: "%"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tPerc1
+            Properties
+                Scope       : Local
+                Initial Text: "%"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tPerc2
+            Properties
+                Scope       : Local
+                Initial Text: "%"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tPerc3
+            Properties
+                Scope       : Local
+                Initial Text: "%"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tPerc5
+            Properties
+                Scope       : Local
+                Initial Text: "%"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tPerc4
+            Properties
+                Scope       : Local
+                Initial Text: "%"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tHz6
+            Properties
+                Scope       : Local
+                Initial Text: "Hz"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tHz1
+            Properties
+                Scope       : Local
+                Initial Text: "Hz"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tHz2
+            Properties
+                Scope       : Local
+                Initial Text: "Hz"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tHz3
+            Properties
+                Scope       : Local
+                Initial Text: "Hz"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tHz5
+            Properties
+                Scope       : Local
+                Initial Text: "Hz"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Text tHz4
+            Properties
+                Scope       : Local
+                Initial Text: "Hz"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Float nDuty1
+            Properties
+                Scope           : Local
+                Initial Value   : 0
+                Divide by [10^x]: 1
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Float nDuty2
+            Properties
+                Scope           : Local
+                Initial Value   : 0
+                Divide by [10^x]: 1
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Float nDuty3
+            Properties
+                Scope           : Local
+                Initial Value   : 0
+                Divide by [10^x]: 1
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Float nDuty4
+            Properties
+                Scope           : Local
+                Initial Value   : 0
+                Divide by [10^x]: 1
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Float nDuty5
+            Properties
+                Scope           : Local
+                Initial Value   : 0
+                Divide by [10^x]: 1
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Float nDuty6
+            Properties
+                Scope           : Local
+                Initial Value   : 0
+                Divide by [10^x]: 1
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click Simple,1
+                
+                Touch Release Event
+                    
+        Button bApply
+            Properties
+                Scope      : Local
+                Caption    : "Apply now"
+                Max. length: 15
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    // Return format: 'd', data byte 1, 2, 3, 4, 5
+                    // Data byte 1: Bits 0-5: coils to which settings apply.
+                    // Data byte 2: ontime[us] lower byte
+                    // Data byte 3: ontime[us] upper byte
+                    // Data byte 4: BPS lower byte
+                    // Data byte 5: BPS upper byte
+                    sys0=newData.val*TC_Settings.activeCoils.val
+                    if(sys0>0)
+                    {
+                        // Update Info below coil buttons
+                        if(btCoil1.val==1)
+                        {
+                            nOn1.val=nOn.val
+                            nBPS1.val=nBPS.val
+                            nDuty1.val=nDuty.val
+                        }
+                        if(btCoil2.val==1)
+                        {
+                            nOn2.val=nOn.val
+                            nBPS2.val=nBPS.val
+                            nDuty2.val=nDuty.val
+                        }
+                        if(btCoil3.val==1)
+                        {
+                            nOn3.val=nOn.val
+                            nBPS3.val=nBPS.val
+                            nDuty3.val=nDuty.val
+                        }
+                        if(btCoil4.val==1)
+                        {
+                            nOn4.val=nOn.val
+                            nBPS4.val=nBPS.val
+                            nDuty4.val=nDuty.val
+                        }
+                        if(btCoil5.val==1)
+                        {
+                            nOn5.val=nOn.val
+                            nBPS5.val=nBPS.val
+                            nDuty5.val=nDuty.val
+                        }
+                        if(btCoil6.val==1)
+                        {
+                            nOn6.val=nOn.val
+                            nBPS6.val=nBPS.val
+                            nDuty6.val=nDuty.val
+                        }
+                        prints "d",0
+                        prints TC_Settings.activeCoils.val,1
+                        prints nOn.val,2
+                        prints nBPS.val,2
+                        newData.val=0
+                    }
+                
+        Variable fSliderInput
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
+        Variable fSliderOutput
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
+        Variable userOnLimit
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
+        Variable userDutyLimit
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
+        Variable userBPSLimit
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
+        Variable keepOntime
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 1
+            
+        Variable temp
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
+        Number fSlider
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // fXxxx are functions. Since they need to be clicked to execute their code they need to be on the same page. Usage:
+                    // 1. set the component value (fXxx.val) to the input value
+                    // 2. Execute code with "click fXxxx,1".
+                    // 3. Read the result from the component value (fXxx.val)
+                    //
+                    // Touch Press: g = o * f(x / i) with f(x) = (x^2 + x) / 2, i: input range, o: output range. => g = (x^2 + i * x) * o / (2 * i^2)
+                    // Touch Release: g^-1 = ( sqrt( ( x * 8 + o ) * o ) - o ) * i / ( 2 * o )
+                    //
+                    sys0=fSlider.val
+                    fSlider.val=sys0*sys0
+                    sys0*=fSliderInput.val
+                    fSlider.val+=sys0
+                    fSlider.val*=fSliderOutput.val
+                    sys0=2*fSliderInput.val*fSliderInput.val
+                    fSlider.val/=sys0
+                
+                Touch Release Event
+                    // fXxxx are functions. Since they need to be clicked to execute their code they need to be on the same page. Usage:
+                    // 1. set the component value (fXxx.val) to the input value
+                    // 2. Execute code with "click fXxxx,1".
+                    // 3. Read the result from the component value (fXxx.val)
+                    //
+                    // Touch Press: g = o * f(x / i) with f(x) = (x^2 + x) / 2, i: input range, o: output range. => g = (x^2 + i * x) * o / (2 * i^2)
+                    // Touch Release: g^-1 = ( sqrt( ( x * 8 + o ) * o ) - o ) * i / ( 2 * o )
+                    //
+                    fSqrt.val=fSlider.val*8
+                    fSqrt.val+=fSliderOutput.val
+                    fSqrt.val*=fSliderOutput.val
+                    click fSqrt,1
+                    fSqrt.val-=fSliderOutput.val
+                    fSqrt.val*=fSliderInput.val
+                    sys0=2*fSliderOutput.val
+                    fSlider.val=fSqrt.val/sys0
+                

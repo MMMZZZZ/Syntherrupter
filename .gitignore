@@ -1,2 +1,5 @@
+# Exclude firmwares
+/Syntherrupter_Firmwares
 
-*.tft
+# Exclude zip files in root directory
+/*.zip

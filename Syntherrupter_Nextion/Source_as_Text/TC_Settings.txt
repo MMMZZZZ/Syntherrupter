@@ -1,0 +1,1692 @@
+Page TC_Settings
+    Events
+        Preinitialize Event
+            // Display username
+            if(User_Settings.userNum.val==0)
+            {
+                tUser.txt=" "+User_Settings.u0Name.txt
+            }else if(User_Settings.userNum.val==1)
+            {
+                tUser.txt=" "+User_Settings.u1Name.txt
+            }else if(User_Settings.userNum.val==2)
+            {
+                tUser.txt=" "+User_Settings.u2Name.txt
+            }
+            //
+            // This page should only be accessible for user 2.
+            // Power on default for all MIDI channel assignments and active coils is 1 (all assigned and active).
+            //
+            // Load global variable values into local variables. Note: Since a component consists of many different properties (like font size, color, position, ...) its memory footprint is much larger and it should not be global.
+            // Since min offtime and max MIDI voices are not used elsewhere in the GUI they are packed into the same variable, where minOff occupies the lower 16 bit, and voices the uppe 16 bit.
+            if(maxCoilCount.val>=1)
+            {
+                nCoil1On.val=coil1On.val
+                nCoil1MinOff.val=coil1OffVoices.val&0x0000ffff
+                nCoil1Voices.val=coil1OffVoices.val&0xffff0000
+                nCoil1Voices.val=nCoil1Voices.val>>16
+                nCoil1Duty.val=coil1Duty.val
+            }
+            if(maxCoilCount.val>=2)
+            {
+                nCoil2On.val=coil2On.val
+                nCoil2MinOff.val=coil2OffVoices.val&0x0000ffff
+                nCoil2Voices.val=coil2OffVoices.val&0xffff0000
+                nCoil2Voices.val=nCoil2Voices.val>>16
+                nCoil2Duty.val=coil2Duty.val
+            }
+            if(maxCoilCount.val>=3)
+            {
+                nCoil3On.val=coil3On.val
+                nCoil3MinOff.val=coil3OffVoices.val&0x0000ffff
+                nCoil3Voices.val=coil3OffVoices.val&0xffff0000
+                nCoil3Voices.val=nCoil3Voices.val>>16
+                nCoil3Duty.val=coil3Duty.val
+            }
+            if(maxCoilCount.val>=4)
+            {
+                nCoil4On.val=coil4On.val
+                nCoil4MinOff.val=coil4OffVoices.val&0x0000ffff
+                nCoil4Voices.val=coil4OffVoices.val&0xffff0000
+                nCoil4Voices.val=nCoil4Voices.val>>16
+                nCoil4Duty.val=coil4Duty.val
+            }
+            if(maxCoilCount.val>=5)
+            {
+                nCoil5On.val=coil5On.val
+                nCoil5MinOff.val=coil5OffVoices.val&0x0000ffff
+                nCoil5Voices.val=coil5OffVoices.val&0xffff0000
+                nCoil5Voices.val=nCoil5Voices.val>>16
+                nCoil5Duty.val=coil5Duty.val
+            }
+            if(maxCoilCount.val>=6)
+            {
+                nCoil6On.val=coil6On.val
+                nCoil6MinOff.val=coil6OffVoices.val&0x0000ffff
+                nCoil6Voices.val=coil6OffVoices.val&0xffff0000
+                nCoil6Voices.val=nCoil6Voices.val>>16
+                nCoil6Duty.val=coil6Duty.val
+            }
+            // Idle field is just used for default text/background color and as target for the numpad if no component is selected. Ergo should be hidden like functions.
+            vis idle,0
+            vis fCheck,0
+            newValTargetId.val=idle.id
+            //
+            // Hide settings of coils that don't exist.
+            if(maxCoilCount.val<6)
+            {
+                vis tCoil6,0
+                vis nCoil6On,0
+                vis nCoil6MinOff,0
+                vis nCoil6Duty,0
+                vis nCoil6Voices,0
+            }
+            if(maxCoilCount.val<5)
+            {
+                vis tCoil5,0
+                vis nCoil5On,0
+                vis nCoil5MinOff,0
+                vis nCoil5Duty,0
+                vis nCoil5Voices,0
+            }
+            if(maxCoilCount.val<4)
+            {
+                vis tCoil4,0
+                vis nCoil4On,0
+                vis nCoil4MinOff,0
+                vis nCoil4Duty,0
+                vis nCoil4Voices,0
+            }
+            if(maxCoilCount.val<3)
+            {
+                vis tCoil3,0
+                vis nCoil3On,0
+                vis nCoil3MinOff,0
+                vis nCoil3Duty,0
+                vis nCoil3Voices,0
+            }
+            if(maxCoilCount.val<2)
+            {
+                vis tCoil2,0
+                vis nCoil2On,0
+                vis nCoil2MinOff,0
+                vis nCoil2Duty,0
+                vis nCoil2Voices,0
+            }
+            if(maxCoilCount.val<1)
+            {
+                vis tCoil1,0
+                vis nCoil1On,0
+                vis nCoil1MinOff,0
+                vis nCoil1Duty,0
+                vis nCoil1Voices,0
+                vis tMaxOn,0
+                vis tMinOff,0
+                vis tMaxDuty,0
+                vis tSelToMod,0
+                vis b0,0
+                vis b1,0
+                vis b2,0
+                vis b3,0
+                vis b4,0
+                vis b5,0
+                vis b6,0
+                vis b7,0
+                vis b8,0
+                vis b9,0
+                vis bClear,0
+                vis bOK,0
+            }
+        
+        Postinitialize Event
+            if(maxCoilCount.val>0)
+            {
+                // Table grid
+                // Determine Table height (a.k.a up to where the lines shall be drawn
+                sys2=maxCoilCount.val
+                sys2*=31
+                sys2+=110
+                // Vertical grid lines
+                line 130,90,130,sys2,idle.pco
+                line 290,90,290,sys2,idle.pco
+                line 445,90,445,sys2,idle.pco
+                line 585,90,585,sys2,idle.pco
+                // Horizontal grid lines
+                sys1=116
+                for(sys0=0;sys0<6;sys0++)
+                {
+                    if(sys1<sys2)
+                    {
+                        line 15,sys1,730,sys1,tCoil1.pco
+                    }
+                    sys1+=31
+                }
+            }
+        
+        Touch Press Event
+            
+        Touch Release Event
+            
+        Page Exit Event
+            
+    Components
+        Text tTitle
+            Properties
+                Scope       : Local
+                Initial Text: "Limits of all Tesla Coils"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Button bReturn
+            Properties
+                Scope      : Local
+                Caption    : "Return"
+                Max. length: 10
+            
+            Events
+                Touch Press Event
+                    click bOK,0
+                    // Store local component values in global variables. Note: Since a component consists of many different properties (like font size, color, position, ...) its memory footprint is much larger and it should not be global.
+                    // Since min offtime and max MIDI voices are not used elsewhere in the GUI they are packed into the same variable, where minOff occupies the lower 16 bit, and voices the uppe 16 bit.
+                    // Set user 2 limits to max Coil limits.
+                    //   sys0 = max ontime of all coils
+                    //   sys1 = max duty of all coils
+                    sys0=0
+                    sys1=0
+                    if(maxCoilCount.val>=1)
+                    {
+                        coil1On.val=nCoil1On.val
+                        coil1OffVoices.val=nCoil1Voices.val<<16
+                        coil1OffVoices.val+=nCoil1MinOff.val
+                        coil1Duty.val=nCoil1Duty.val
+                        if(coil1On.val>sys0)
+                        {
+                            sys0=coil1On.val
+                        }
+                        if(coil1Duty.val>sys1)
+                        {
+                            sys1=coil1Duty.val
+                        }
+                    }
+                    if(maxCoilCount.val>=2)
+                    {
+                        coil2On.val=nCoil2On.val
+                        coil2OffVoices.val=nCoil2Voices.val<<16
+                        coil2OffVoices.val+=nCoil2MinOff.val
+                        coil2Duty.val=nCoil2Duty.val
+                        if(coil2On.val>sys0)
+                        {
+                            sys0=coil2On.val
+                        }
+                        if(coil2Duty.val>sys1)
+                        {
+                            sys1=coil2Duty.val
+                        }
+                    }
+                    if(maxCoilCount.val>=3)
+                    {
+                        coil3On.val=nCoil3On.val
+                        coil3OffVoices.val=nCoil3Voices.val<<16
+                        coil3OffVoices.val+=nCoil3MinOff.val
+                        coil3Duty.val=nCoil3Duty.val
+                        if(coil3On.val>sys0)
+                        {
+                            sys0=coil3On.val
+                        }
+                        if(coil3Duty.val>sys1)
+                        {
+                            sys1=coil3Duty.val
+                        }
+                    }
+                    if(maxCoilCount.val>=4)
+                    {
+                        coil4On.val=nCoil4On.val
+                        coil4OffVoices.val=nCoil4Voices.val<<16
+                        coil4OffVoices.val+=nCoil4MinOff.val
+                        coil4Duty.val=nCoil4Duty.val
+                        if(coil4On.val>sys0)
+                        {
+                            sys0=coil4On.val
+                        }
+                        if(coil4Duty.val>sys1)
+                        {
+                            sys1=coil4Duty.val
+                        }
+                    }
+                    if(maxCoilCount.val>=5)
+                    {
+                        coil5On.val=nCoil5On.val
+                        coil5OffVoices.val=nCoil5Voices.val<<16
+                        coil5OffVoices.val+=nCoil5MinOff.val
+                        coil5Duty.val=nCoil5Duty.val
+                        if(coil5On.val>sys0)
+                        {
+                            sys0=coil5On.val
+                        }
+                        if(coil5Duty.val>sys1)
+                        {
+                            sys1=coil5Duty.val
+                        }
+                    }
+                    if(maxCoilCount.val>=6)
+                    {
+                        coil6On.val=nCoil6On.val
+                        coil6OffVoices.val=nCoil6Voices.val<<16
+                        coil6OffVoices.val+=nCoil6MinOff.val
+                        coil6Duty.val=nCoil6Duty.val
+                        if(coil6On.val>sys0)
+                        {
+                            sys0=coil6On.val
+                        }
+                        if(coil6Duty.val>sys1)
+                        {
+                            sys1=coil6Duty.val
+                        }
+                    }
+                    User_Settings.u2Ontime.val=sys0
+                    User_Settings.u2Duty.val=sys1
+                    // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
+                    // Data byte 1:
+                    //    Bit 6-7: 1 = Coil settings.
+                    //    Bit 0-5:Tesla Coil whose limits are being set (1, 2, 3, 4, 5 or 6)
+                    // Data byte 2-5: Bit field with settings
+                    //    Bit  0-11: Maximum allowed ontime [10us]
+                    //    Bit 12-15: Maximum number of simultaneous voices in MIDI playback minus one.
+                    //    Bit 16-22: Minimum offtime after each ontime [10us]
+                    //    Bit 23-31: Maximum allowed duty [1/1000]
+                    //
+                    // sys0 will contain the bit field (a.k.a. the data bytes 2-5)
+                    // sys1 is used as temp variable
+                    // sys2 is data byte 1
+                    if(maxCoilCount.val>=1)
+                    {
+                        sys0=coil1On.val/10
+                        sys1=coil1OffVoices.val&0xffff0000
+                        sys1=sys1>>16
+                        sys1-=1
+                        sys1=sys1<<12
+                        sys0+=sys1
+                        sys1=coil1OffVoices.val&0x0000ffff
+                        sys1/=10
+                        sys1=sys1<<16
+                        sys0+=sys1
+                        sys1=coil1Duty.val<<23
+                        sys0+=sys1
+                        sys2=1<<6
+                        sys2+=1
+                        prints "d",1
+                        prints sys2,1
+                        prints sys0,4
+                    }
+                    if(maxCoilCount.val>=2)
+                    {
+                        sys0=coil2On.val/10
+                        sys1=coil2OffVoices.val&0xffff0000
+                        sys1=sys1>>16
+                        sys1-=1
+                        sys1=sys1<<12
+                        sys0+=sys1
+                        sys1=coil2OffVoices.val&0x0000ffff
+                        sys1/=10
+                        sys1=sys1<<16
+                        sys0+=sys1
+                        sys1=coil2Duty.val<<23
+                        sys0+=sys1
+                        sys2=1<<6
+                        sys2+=2
+                        prints "d",1
+                        prints sys2,1
+                        prints sys0,4
+                    }
+                    if(maxCoilCount.val>=3)
+                    {
+                        sys0=coil3On.val/10
+                        sys1=coil3OffVoices.val&0xffff0000
+                        sys1=sys1>>16
+                        sys1-=1
+                        sys1=sys1<<12
+                        sys0+=sys1
+                        sys1=coil3OffVoices.val&0x0000ffff
+                        sys1/=10
+                        sys1=sys1<<16
+                        sys0+=sys1
+                        sys1=coil3Duty.val<<23
+                        sys0+=sys1
+                        prints "d",1
+                        sys2=1<<6
+                        sys2+=3
+                        prints sys2,1
+                        prints sys0,4
+                    }
+                    if(maxCoilCount.val>=4)
+                    {
+                        sys0=coil4On.val/10
+                        sys1=coil4OffVoices.val&0xffff0000
+                        sys1=sys1>>16
+                        sys1-=1
+                        sys1=sys1<<12
+                        sys0+=sys1
+                        sys1=coil4OffVoices.val&0x0000ffff
+                        sys1/=10
+                        sys1=sys1<<16
+                        sys0+=sys1
+                        sys1=coil4Duty.val<<23
+                        sys0+=sys1
+                        sys2=1<<6
+                        sys2+=4
+                        prints "d",1
+                        prints sys2,1
+                        prints sys0,4
+                    }
+                    if(maxCoilCount.val>=5)
+                    {
+                        sys0=coil5On.val/10
+                        sys1=coil5OffVoices.val&0xffff0000
+                        sys1=sys1>>16
+                        sys1-=1
+                        sys1=sys1<<12
+                        sys0+=sys1
+                        sys1=coil5OffVoices.val&0x0000ffff
+                        sys1/=10
+                        sys1=sys1<<16
+                        sys0+=sys1
+                        sys1=coil5Duty.val<<23
+                        sys0+=sys1
+                        sys2=1<<6
+                        sys2+=5
+                        prints "d",1
+                        prints sys2,1
+                        prints sys0,4
+                    }
+                    if(maxCoilCount.val>=6)
+                    {
+                        sys0=coil6On.val/10
+                        sys1=coil6OffVoices.val&0xffff0000
+                        sys1=sys1>>16
+                        sys1-=1
+                        sys1=sys1<<12
+                        sys0+=sys1
+                        sys1=coil6OffVoices.val&0x0000ffff
+                        sys1/=10
+                        sys1=sys1<<16
+                        sys0+=sys1
+                        sys1=coil6Duty.val<<23
+                        sys0+=sys1
+                        sys2=1<<6
+                        sys2+=6
+                        prints "d",1
+                        prints sys2,1
+                        prints sys0,4
+                    }
+                
+                Touch Release Event
+                    page Settings
+                
+        Text tUser
+            Properties
+                Scope       : Local
+                Initial Text: " Guest"
+                Max. length : 32
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Variable coil1Chn
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 3208642559
+            
+        Variable coil2Chn
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 3208642559
+            
+        Variable coil3Chn
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 3208642559
+            
+        Variable coil4Chn
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 3208642559
+            
+        Variable coil5Chn
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 3208642559
+            
+        Variable coil6Chn
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 3208642559
+            
+        Variable activeCoils
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 63
+            
+        Text tCoil1
+            Properties
+                Scope       : Local
+                Initial Text: "Tesla Coil 1:"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Number nCoil1On
+            Properties
+                Scope        : Local
+                Initial Value: 301
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil1On.bco=idle.pco
+                    nCoil1On.pco=idle.bco
+                    newValTargetId.val=nCoil1On.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Text tMaxOn
+            Properties
+                Scope       : Local
+                Initial Text: "max. Ontime [µs]"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tMinOff
+            Properties
+                Scope       : Local
+                Initial Text: "min. Offtime [µs]"
+                Max. length : 17
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tMaxDuty
+            Properties
+                Scope       : Local
+                Initial Text: "max. Duty [%]"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tCoil2
+            Properties
+                Scope       : Local
+                Initial Text: "Tesla Coil 2:"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tCoil3
+            Properties
+                Scope       : Local
+                Initial Text: "Tesla Coil 3:"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tCoil4
+            Properties
+                Scope       : Local
+                Initial Text: "Tesla Coil 4:"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tCoil5
+            Properties
+                Scope       : Local
+                Initial Text: "Tesla Coil 5:"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tCoil6
+            Properties
+                Scope       : Local
+                Initial Text: "Tesla Coil 6:"
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Variable maxCoilCount
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 6
+            
+        Number nCoil1MinOff
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil1MinOff.bco=idle.pco
+                    nCoil1MinOff.pco=idle.bco
+                    newValTargetId.val=nCoil1MinOff.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Float nCoil1Duty
+            Properties
+                Scope           : Local
+                Initial Value   : 0
+                Divide by [10^x]: 1
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil1Duty.bco=idle.pco
+                    nCoil1Duty.pco=idle.bco
+                    newValTargetId.val=nCoil1Duty.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nCoil2On
+            Properties
+                Scope        : Local
+                Initial Value: 302
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil2On.bco=idle.pco
+                    nCoil2On.pco=idle.bco
+                    newValTargetId.val=nCoil2On.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nCoil2MinOff
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil2MinOff.bco=idle.pco
+                    nCoil2MinOff.pco=idle.bco
+                    newValTargetId.val=nCoil2MinOff.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Float nCoil2Duty
+            Properties
+                Scope           : Local
+                Initial Value   : 0
+                Divide by [10^x]: 1
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil2Duty.bco=idle.pco
+                    nCoil2Duty.pco=idle.bco
+                    newValTargetId.val=nCoil2Duty.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nCoil3On
+            Properties
+                Scope        : Local
+                Initial Value: 303
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil3On.bco=idle.pco
+                    nCoil3On.pco=idle.bco
+                    newValTargetId.val=nCoil3On.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nCoil3MinOff
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil3MinOff.bco=idle.pco
+                    nCoil3MinOff.pco=idle.bco
+                    newValTargetId.val=nCoil3MinOff.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Float nCoil3Duty
+            Properties
+                Scope           : Local
+                Initial Value   : 0
+                Divide by [10^x]: 1
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil3Duty.bco=idle.pco
+                    nCoil3Duty.pco=idle.bco
+                    newValTargetId.val=nCoil3Duty.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nCoil4On
+            Properties
+                Scope        : Local
+                Initial Value: 304
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil4On.bco=idle.pco
+                    nCoil4On.pco=idle.bco
+                    newValTargetId.val=nCoil4On.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nCoil4MinOff
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil4MinOff.bco=idle.pco
+                    nCoil4MinOff.pco=idle.bco
+                    newValTargetId.val=nCoil4MinOff.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Float nCoil4Duty
+            Properties
+                Scope           : Local
+                Initial Value   : 0
+                Divide by [10^x]: 1
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil4Duty.bco=idle.pco
+                    nCoil4Duty.pco=idle.bco
+                    newValTargetId.val=nCoil4Duty.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nCoil5On
+            Properties
+                Scope        : Local
+                Initial Value: 305
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil5On.bco=idle.pco
+                    nCoil5On.pco=idle.bco
+                    newValTargetId.val=nCoil5On.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nCoil5MinOff
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil5MinOff.bco=idle.pco
+                    nCoil5MinOff.pco=idle.bco
+                    newValTargetId.val=nCoil5MinOff.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Float nCoil5Duty
+            Properties
+                Scope           : Local
+                Initial Value   : 0
+                Divide by [10^x]: 1
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil5Duty.bco=idle.pco
+                    nCoil5Duty.pco=idle.bco
+                    newValTargetId.val=nCoil5Duty.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nCoil6On
+            Properties
+                Scope        : Local
+                Initial Value: 306
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil6On.bco=idle.pco
+                    nCoil6On.pco=idle.bco
+                    newValTargetId.val=nCoil6On.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nCoil6MinOff
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil6MinOff.bco=idle.pco
+                    nCoil6MinOff.pco=idle.bco
+                    newValTargetId.val=nCoil6MinOff.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Float nCoil6Duty
+            Properties
+                Scope           : Local
+                Initial Value   : 0
+                Divide by [10^x]: 1
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil6Duty.bco=idle.pco
+                    nCoil6Duty.pco=idle.bco
+                    newValTargetId.val=nCoil6Duty.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Button b0
+            Properties
+                Scope      : Local
+                Caption    : "0"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                
+        Button b1
+            Properties
+                Scope      : Local
+                Caption    : "1"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=1
+                
+        Button b2
+            Properties
+                Scope      : Local
+                Caption    : "2"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=2
+                
+        Button b3
+            Properties
+                Scope      : Local
+                Caption    : "3"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=3
+                
+        Button b4
+            Properties
+                Scope      : Local
+                Caption    : "4"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=4
+                
+        Button b5
+            Properties
+                Scope      : Local
+                Caption    : "5"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=5
+                
+        Button b6
+            Properties
+                Scope      : Local
+                Caption    : "6"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=6
+                
+        Button b7
+            Properties
+                Scope      : Local
+                Caption    : "7"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=7
+                
+        Button b8
+            Properties
+                Scope      : Local
+                Caption    : "8"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=8
+                
+        Button b9
+            Properties
+                Scope      : Local
+                Caption    : "9"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(newSelect.val!=0)
+                    {
+                        newSelect.val=0
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        b[newValTargetId.val].val*=10
+                    }
+                    b[newValTargetId.val].val+=9
+                
+        Button bClear
+            Properties
+                Scope      : Local
+                Caption    : "X"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    b[newValTargetId.val].val=0
+                
+        Button bOK
+            Properties
+                Scope      : Local
+                Caption    : "ok"
+                Max. length: 2
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    newValTargetId.val=idle.id
+                    click fCheck,0
+                
+        Float idle
+            Properties
+                Scope           : Local
+                Initial Value   : 0
+                Divide by [10^x]: 0
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Variable newValTargetId
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 68
+            
+        Variable newSelect
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
+        Text tSelToMod
+            Properties
+                Scope       : Local
+                Initial Text: "Select any value to modify."
+                Max. length : 30
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Variable coil1On
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable coil1OffVoices
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 786432
+            
+        Variable coil1Duty
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable coil2On
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable coil2OffVoices
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 786432
+            
+        Variable coil2Duty
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable coil3On
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable coil3OffVoices
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 786432
+            
+        Variable coil3Duty
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable coil4On
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable coil4OffVoices
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 786432
+            
+        Variable coil4Duty
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable coil5On
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable coil5OffVoices
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 786432
+            
+        Variable coil5Duty
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable coil6On
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable coil6OffVoices
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 786432
+            
+        Variable coil6Duty
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Text fCheck
+            Properties
+                Scope       : Local
+                Initial Text: " "
+                Max. length : 10
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    // Settings must stay in certain ranges. this function checks and fixes them.
+                    // Code order: check all coil 1 settings, then repeat for coils 2-6.
+                    //
+                    sys0=nCoil1On.val/10
+                    if(sys0>4095)
+                    {
+                        // Ontime / 10 must be smaller than 4096 (12 bits)
+                        sys0=4095
+                    }
+                    // Floor ontime to multiple of 10
+                    nCoil1On.val=sys0*10
+                    //
+                    sys0=nCoil1MinOff.val+9
+                    sys0/=10
+                    if(sys0>127)
+                    {
+                        sys0=127
+                    }
+                    // Ceil min offtime to multiple of 10
+                    nCoil1MinOff.val=sys0*10
+                    //
+                    if(nCoil1Duty.val>511)
+                    {
+                        nCoil1Duty.val=511
+                    }
+                    //
+                    if(nCoil1Voices.val==0)
+                    {
+                        nCoil1Voices.val=1
+                    }
+                    if(nCoil1Voices.val>maxVoices.val)
+                    {
+                        nCoil1Voices.val=maxVoices.val
+                    }
+                    //
+                    //
+                    sys0=nCoil2On.val/10
+                    if(sys0>4095)
+                    {
+                        // Ontime / 10 must be smaller than 4096 (12 bits)
+                        sys0=4095
+                    }
+                    // Floor ontime to multiple of 10
+                    nCoil2On.val=sys0*10
+                    //
+                    sys0=nCoil2MinOff.val+9
+                    sys0/=10
+                    if(sys0>127)
+                    {
+                        sys0=127
+                    }
+                    // Ceil min offtime to multiple of 10
+                    nCoil2MinOff.val=sys0*10
+                    //
+                    if(nCoil2Duty.val>511)
+                    {
+                        nCoil2Duty.val=511
+                    }
+                    //
+                    if(nCoil2Voices.val==0)
+                    {
+                        nCoil2Voices.val=1
+                    }
+                    if(nCoil2Voices.val>maxVoices.val)
+                    {
+                        nCoil2Voices.val=maxVoices.val
+                    }
+                    //
+                    //
+                    sys0=nCoil3On.val/10
+                    if(sys0>4095)
+                    {
+                        // Ontime / 10 must be smaller than 4096 (12 bits)
+                        sys0=4095
+                    }
+                    // Floor ontime to multiple of 10
+                    nCoil3On.val=sys0*10
+                    //
+                    sys0=nCoil3MinOff.val+9
+                    sys0/=10
+                    if(sys0>127)
+                    {
+                        sys0=127
+                    }
+                    // Ceil min offtime to multiple of 10
+                    nCoil3MinOff.val=sys0*10
+                    //
+                    if(nCoil3Duty.val>511)
+                    {
+                        nCoil3Duty.val=511
+                    }
+                    //
+                    if(nCoil3Voices.val==0)
+                    {
+                        nCoil3Voices.val=1
+                    }
+                    if(nCoil3Voices.val>maxVoices.val)
+                    {
+                        nCoil3Voices.val=maxVoices.val
+                    }
+                    //
+                    //
+                    sys0=nCoil4On.val/10
+                    if(sys0>4095)
+                    {
+                        // Ontime / 10 must be smaller than 4096 (12 bits)
+                        sys0=4095
+                    }
+                    // Floor ontime to multiple of 10
+                    nCoil4On.val=sys0*10
+                    //
+                    sys0=nCoil4MinOff.val+9
+                    sys0/=10
+                    if(sys0>127)
+                    {
+                        sys0=127
+                    }
+                    // Ceil min offtime to multiple of 10
+                    nCoil4MinOff.val=sys0*10
+                    //
+                    if(nCoil4Duty.val>511)
+                    {
+                        nCoil4Duty.val=511
+                    }
+                    //
+                    if(nCoil4Voices.val==0)
+                    {
+                        nCoil4Voices.val=1
+                    }
+                    if(nCoil4Voices.val>maxVoices.val)
+                    {
+                        nCoil4Voices.val=maxVoices.val
+                    }
+                    //
+                    //
+                    sys0=nCoil5On.val/10
+                    if(sys0>4095)
+                    {
+                        // Ontime / 10 must be smaller than 4096 (12 bits)
+                        sys0=4095
+                    }
+                    // Floor ontime to multiple of 10
+                    nCoil5On.val=sys0*10
+                    //
+                    sys0=nCoil5MinOff.val+9
+                    sys0/=10
+                    if(sys0>127)
+                    {
+                        sys0=127
+                    }
+                    // Ceil min offtime to multiple of 10
+                    nCoil5MinOff.val=sys0*10
+                    //
+                    if(nCoil5Duty.val>511)
+                    {
+                        nCoil5Duty.val=511
+                    }
+                    //
+                    if(nCoil5Voices.val==0)
+                    {
+                        nCoil5Voices.val=1
+                    }
+                    if(nCoil5Voices.val>maxVoices.val)
+                    {
+                        nCoil5Voices.val=maxVoices.val
+                    }
+                    //
+                    //
+                    sys0=nCoil6On.val/10
+                    if(sys0>4095)
+                    {
+                        // Ontime / 10 must be smaller than 4096 (12 bits)
+                        sys0=4095
+                    }
+                    // Floor ontime to multiple of 10
+                    nCoil6On.val=sys0*10
+                    //
+                    sys0=nCoil6MinOff.val+9
+                    sys0/=10
+                    if(sys0>127)
+                    {
+                        sys0=127
+                    }
+                    // Ceil min offtime to multiple of 10
+                    nCoil6MinOff.val=sys0*10
+                    //
+                    if(nCoil6Duty.val>511)
+                    {
+                        nCoil6Duty.val=511
+                    }
+                    //
+                    if(nCoil6Voices.val==0)
+                    {
+                        nCoil6Voices.val=1
+                    }
+                    if(nCoil6Voices.val>maxVoices.val)
+                    {
+                        nCoil6Voices.val=maxVoices.val
+                    }
+                    //
+                    //
+                
+        Text tMaxVoices
+            Properties
+                Scope       : Local
+                Initial Text: "max. MIDI Voices"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Number nCoil1Voices
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil1Voices.bco=idle.pco
+                    nCoil1Voices.pco=idle.bco
+                    newValTargetId.val=nCoil1Voices.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nCoil2Voices
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil2Voices.bco=idle.pco
+                    nCoil2Voices.pco=idle.bco
+                    newValTargetId.val=nCoil2Voices.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nCoil3Voices
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil3Voices.bco=idle.pco
+                    nCoil3Voices.pco=idle.bco
+                    newValTargetId.val=nCoil3Voices.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nCoil4Voices
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil4Voices.bco=idle.pco
+                    nCoil4Voices.pco=idle.bco
+                    newValTargetId.val=nCoil4Voices.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nCoil5Voices
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil5Voices.bco=idle.pco
+                    nCoil5Voices.pco=idle.bco
+                    newValTargetId.val=nCoil5Voices.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Number nCoil6Voices
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Check if values are legal
+                    click fCheck,0
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    nCoil6Voices.bco=idle.pco
+                    nCoil6Voices.pco=idle.bco
+                    newValTargetId.val=nCoil6Voices.id
+                    // A new value has been selected
+                    newSelect.val=1
+                
+                Touch Release Event
+                    
+        Variable maxVoices
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 10
+            

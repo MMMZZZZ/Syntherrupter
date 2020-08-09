@@ -1,0 +1,60 @@
+Page TC_Out_Map_Set
+    Events
+        Preinitialize Event
+            // Display username
+            if(User_Settings.userNum.val==0)
+            {
+                tUser.txt=" "+User_Settings.u0Name.txt
+            }else if(User_Settings.userNum.val==1)
+            {
+                tUser.txt=" "+User_Settings.u1Name.txt
+            }else if(User_Settings.userNum.val==2)
+            {
+                tUser.txt=" "+User_Settings.u2Name.txt
+            }
+        
+        Postinitialize Event
+            
+        Touch Press Event
+            
+        Touch Release Event
+            
+        Page Exit Event
+            
+    Components
+        Text tTitle
+            Properties
+                Scope       : Local
+                Initial Text: "About Syntherrupter"
+                Max. length : 22
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tUser
+            Properties
+                Scope       : Local
+                Initial Text: " Guest"
+                Max. length : 32
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Button bReturn
+            Properties
+                Scope      : Local
+                Caption    : "Return"
+                Max. length: 10
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    // Mode: EXit.
+                    prints "mex",0
+                    page Menu
+                
