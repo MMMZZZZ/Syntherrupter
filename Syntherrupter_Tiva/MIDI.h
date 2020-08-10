@@ -75,9 +75,9 @@ private:
                                               {SYSCTL_PERIPH_UART2, UART2_BASE, SYSCTL_PERIPH_GPIOA, GPIO_PORTA_BASE, GPIO_PA6_U2RX, GPIO_PA7_U2TX, GPIO_PIN_6, GPIO_PIN_7, INT_UART2},
                                               {SYSCTL_PERIPH_UART3, UART3_BASE, SYSCTL_PERIPH_GPIOA, GPIO_PORTA_BASE, GPIO_PA4_U3RX, GPIO_PA5_U3TX, GPIO_PIN_4, GPIO_PIN_5, INT_UART3},
                                               {SYSCTL_PERIPH_UART4, UART4_BASE, SYSCTL_PERIPH_GPIOK, GPIO_PORTK_BASE, GPIO_PK0_U4RX, GPIO_PK1_U4TX, GPIO_PIN_0, GPIO_PIN_1, INT_UART4},
-                                              {SYSCTL_PERIPH_UART5, UART5_BASE, SYSCTL_PERIPH_GPIOC, GPIO_PORTC_BASE, GPIO_PC6_U5RX, GPIO_PC7_U5TX, GPIO_PIN_0, GPIO_PIN_1, INT_UART5},
+                                              {SYSCTL_PERIPH_UART5, UART5_BASE, SYSCTL_PERIPH_GPIOC, GPIO_PORTC_BASE, GPIO_PC6_U5RX, GPIO_PC7_U5TX, GPIO_PIN_6, GPIO_PIN_7, INT_UART5},
                                               {SYSCTL_PERIPH_UART6, UART6_BASE, SYSCTL_PERIPH_GPIOP, GPIO_PORTP_BASE, GPIO_PP0_U6RX, GPIO_PP1_U6TX, GPIO_PIN_0, GPIO_PIN_1, INT_UART6},
-                                              {SYSCTL_PERIPH_UART7, UART7_BASE, SYSCTL_PERIPH_GPIOC, GPIO_PORTC_BASE, GPIO_PC4_U7RX, GPIO_PC5_U7TX, GPIO_PIN_0, GPIO_PIN_1, INT_UART7}};
+                                              {SYSCTL_PERIPH_UART7, UART7_BASE, SYSCTL_PERIPH_GPIOC, GPIO_PORTC_BASE, GPIO_PC4_U7RX, GPIO_PC5_U7TX, GPIO_PIN_4, GPIO_PIN_5, INT_UART7}};
 
     static constexpr uint32_t MIDI_ADSR_MODE_ATTACK  = 0;
     static constexpr uint32_t MIDI_ADSR_MODE_DECAY   = 1;
@@ -141,8 +141,8 @@ private:
     bool midiADSREnabled  = false;
     float midiADSRTimeUS = 0.0f;
     bool midiPlaying = false;
-    uint32_t midiUSBUARTNum, midiMIDIUARTNum;
-    uint32_t midiUSBUARTBase, midiMIDIUARTBase;
+    uint32_t midiUSBUARTNum, midiMIDUARTNum;
+    uint32_t midiUSBUARTBase, midiMIDUARTBase;
     float midiLFOPeriodUS          = 200000.0f;
 };
 
