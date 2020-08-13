@@ -53,5 +53,7 @@ German: http://forum.mosfetkiller.de/viewtopic.php?f=9&t=64458
 
 ### Credits
 [Netzpfuscher and his awesome UD3](https://highvoltageforum.net/index.php?topic=188.0)
+
 [TMaxElectronics for many interesting discussions](https://tmax-electronics.de/easteregg/)
+
 [highvoltageforum for great ideas and support](https://highvoltageforum.net)
