@@ -40,121 +40,139 @@ void GUI::init(System* sys, void (*midiUsbISR)(void), void (*midiMidiISR)(void))
         coils[i].filteredOntimeUS.init(guiSys, 2.0f, 30.0f);
     }
 
-    // Try to modify and read a Nextion value. If this works we know the
-    // Nextion is ready.
-    while (guiNxt.getVal("comOk") != 1)
+    /* Try to modify and read a Nextion value. If this works we know the
+     * Nextion is ready. If this doesn't work, something is wrong with
+     * the display. Could be a bad connection or a bad firmware. Because of
+     * the latter one we'll enter FW Update mode to allow to change the
+     * Nextion firmware (which normally requires a working firmware to access
+     * that mode).
+     */
+    uint32_t startTime = guiSys->getSystemTimeUS();
+    bool nxtOK = false;
+    while ((guiSys->getSystemTimeUS() - startTime) < guiNxtStartTimeoutUS && !nxtOK)
     {
         guiNxt.sendCmd("rest");
         guiSys->delayUS(700000);
         guiNxt.setVal("comOk", 1);
         guiSys->delayUS(20000);
+        if (guiNxt.getVal("comOk") == 1)
+        {
+            nxtOK = true;
+        }
     }
 
-    /*
-     * If there is a valid configuration in the EEPROM, load it and send it to
-     * the Nextion GUI. Note: While the Nextion class has methods for setting
-     * component values without knowing the Nextion command structure, it is
-     * easier here to create the commands directly.
-     * Data format is equal to the microcontroller command format and
-     * documented in a separate file.
-     */
-    if (cfgInEEPROM)
+    if (!nxtOK)
     {
-        // User 2 ontime and duty are determined by the max coil settings.
-        uint32_t allCoilsMaxOntimeUS = 0;
-        uint32_t allCoilsMaxDutyPerm = 0;
-
-        // Settings of all coils
-        const char *AllCoilSettings = "TC_Settings";
-        for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
-        {
-            // Load settings
-            uint32_t maxOntimeUS = guiCfg.getCoilsMaxOntimeUS(coil);
-            uint32_t minOffUS    = guiCfg.getCoilsMinOffUS(coil);
-            uint32_t maxVoices   = guiCfg.getCoilsMaxVoices(coil);
-            uint32_t maxDutyPerm = guiCfg.getCoilsMaxDutyPerm(coil);
-
-            if (maxOntimeUS > allCoilsMaxOntimeUS)
-            {
-                allCoilsMaxOntimeUS = maxOntimeUS;
-            }
-            if (maxDutyPerm > allCoilsMaxDutyPerm)
-            {
-                allCoilsMaxDutyPerm = maxDutyPerm;
-            }
-
-            // Apply to coil objects
-            guiMidi.setTotalMaxDutyPerm(coil, maxDutyPerm);
-            guiMidi.setMaxVoices(coil, maxVoices);
-            coils[coil].out.setMaxDutyPerm(maxDutyPerm);
-            coils[coil].out.setMaxOntimeUS(maxOntimeUS);
-            coils[coil].one.setMaxOntimeUS(maxOntimeUS);
-            coils[coil].minOffUS = minOffUS;
-
-            // Send to Nextion
-            guiNxt.printf("%s.coil%iOn.val=%i\xff\xff\xff",
-                          AllCoilSettings, coil + 1, maxOntimeUS);
-            guiNxt.printf("%s.coil%iOffVoices.val=%i\xff\xff\xff",
-                          AllCoilSettings, coil + 1, (maxVoices << 16) + minOffUS);
-            guiNxt.printf("%s.coil%iDuty.val=%i\xff\xff\xff",
-                          AllCoilSettings, coil + 1, maxDutyPerm);
-            // Give time to the UART to send the data
-            guiSys->delayUS(20000);
-        }
-
-        // Settings of the 3 users
-        const char *AllUsersPage = "User_Settings";
-        for (uint32_t user = 0; user < 3; user++)
-        {
-            uint32_t maxOntimeUS = guiCfg.getUsersMaxOntimeUS(user);
-            uint32_t maxBPS      = guiCfg.getUsersMaxBPS(user);
-            uint32_t maxDutyPerm = guiCfg.getUsersMaxDutyPerm(user);
-
-            if (user == 2)
-            {
-                maxOntimeUS = allCoilsMaxOntimeUS;
-                maxDutyPerm = allCoilsMaxDutyPerm;
-            }
-
-            guiNxt.printf("%s.u%iName.txt=\"%s\"\xff\xff\xff",
-                          AllUsersPage, user, guiCfg.userNames[user]);
-            guiNxt.printf("%s.u%iCode.txt=\"%s\"\xff\xff\xff",
-                          AllUsersPage, user, guiCfg.userPwds[user]);
-            guiNxt.printf("%s.u%iOntime.val=%i\xff\xff\xff",
-                          AllUsersPage, user, maxOntimeUS);
-            guiNxt.printf("%s.u%iBPS.val=%i\xff\xff\xff",
-                          AllUsersPage, user, maxBPS);
-            guiNxt.printf("%s.u%iDuty.val=%i\xff\xff\xff",
-                          AllUsersPage, user, maxDutyPerm);
-            // Give time to the UART to send the data
-            guiSys->delayUS(20000);
-        }
-
-        // Other Settings
-        uint32_t buttonHoldTime =  guiCfg.otherSettings[0] & 0x0000ffff;
-        uint32_t sleepDelay     = (guiCfg.otherSettings[0] & 0xffff0000) >> 16;
-        uint32_t dispBrightness =  guiCfg.otherSettings[1] & 0xff;
-        guiNxt.printf("Other_Settings.nHoldTime.val=%i\xff\xff\xff",
-                      buttonHoldTime);
-        guiNxt.printf("thsp=%i\xff\xff\xff", sleepDelay);
-        guiNxt.printf("dim=%i\xff\xff\xff", dispBrightness);
+        guiMode = Mode::nxtFWUpdate;
     }
-    guiNxt.setVal("TC_Settings.maxCoilCount", COIL_COUNT);
-    guiNxt.setVal("TC_Settings.maxVoices", MAX_VOICES);
-
-    // Give time to the UART to send the data
-    guiSys->delayUS(20000);
-
-    // Display Tiva firmware versions
-    guiNxt.setTxt("tTivaFWVersion", TIVA_FW_VERSION);
-
-    // Initialization completed.
-    guiNxt.sendCmd("vis 255,1");
-
-    // Show warning if no valid config is present in EEPROM. Warning is one layer below normal startup picture.
-    if (!cfgInEEPROM)
+    else
     {
-        guiNxt.sendCmd("vis pStartup,0");
+        /*
+         * If there is a valid configuration in the EEPROM, load it and send it to
+         * the Nextion GUI. Note: While the Nextion class has methods for setting
+         * component values without knowing the Nextion command structure, it is
+         * easier here to create the commands directly.
+         * Data format is equal to the microcontroller command format and
+         * documented in a separate file.
+         */
+        if (cfgInEEPROM)
+        {
+            // User 2 ontime and duty are determined by the max coil settings.
+            uint32_t allCoilsMaxOntimeUS = 0;
+            uint32_t allCoilsMaxDutyPerm = 0;
+
+            // Settings of all coils
+            const char *AllCoilSettings = "TC_Settings";
+            for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+            {
+                // Load settings
+                uint32_t maxOntimeUS = guiCfg.getCoilsMaxOntimeUS(coil);
+                uint32_t minOffUS    = guiCfg.getCoilsMinOffUS(coil);
+                uint32_t maxVoices   = guiCfg.getCoilsMaxVoices(coil);
+                uint32_t maxDutyPerm = guiCfg.getCoilsMaxDutyPerm(coil);
+
+                if (maxOntimeUS > allCoilsMaxOntimeUS)
+                {
+                    allCoilsMaxOntimeUS = maxOntimeUS;
+                }
+                if (maxDutyPerm > allCoilsMaxDutyPerm)
+                {
+                    allCoilsMaxDutyPerm = maxDutyPerm;
+                }
+
+                // Apply to coil objects
+                guiMidi.setTotalMaxDutyPerm(coil, maxDutyPerm);
+                guiMidi.setMaxVoices(coil, maxVoices);
+                coils[coil].out.setMaxDutyPerm(maxDutyPerm);
+                coils[coil].out.setMaxOntimeUS(maxOntimeUS);
+                coils[coil].one.setMaxOntimeUS(maxOntimeUS);
+                coils[coil].minOffUS = minOffUS;
+
+                // Send to Nextion
+                guiNxt.printf("%s.coil%iOn.val=%i\xff\xff\xff",
+                              AllCoilSettings, coil + 1, maxOntimeUS);
+                guiNxt.printf("%s.coil%iOffVoices.val=%i\xff\xff\xff",
+                              AllCoilSettings, coil + 1, (maxVoices << 16) + minOffUS);
+                guiNxt.printf("%s.coil%iDuty.val=%i\xff\xff\xff",
+                              AllCoilSettings, coil + 1, maxDutyPerm);
+                // Give time to the UART to send the data
+                guiSys->delayUS(20000);
+            }
+
+            // Settings of the 3 users
+            const char *AllUsersPage = "User_Settings";
+            for (uint32_t user = 0; user < 3; user++)
+            {
+                uint32_t maxOntimeUS = guiCfg.getUsersMaxOntimeUS(user);
+                uint32_t maxBPS      = guiCfg.getUsersMaxBPS(user);
+                uint32_t maxDutyPerm = guiCfg.getUsersMaxDutyPerm(user);
+
+                if (user == 2)
+                {
+                    maxOntimeUS = allCoilsMaxOntimeUS;
+                    maxDutyPerm = allCoilsMaxDutyPerm;
+                }
+
+                guiNxt.printf("%s.u%iName.txt=\"%s\"\xff\xff\xff",
+                              AllUsersPage, user, guiCfg.userNames[user]);
+                guiNxt.printf("%s.u%iCode.txt=\"%s\"\xff\xff\xff",
+                              AllUsersPage, user, guiCfg.userPwds[user]);
+                guiNxt.printf("%s.u%iOntime.val=%i\xff\xff\xff",
+                              AllUsersPage, user, maxOntimeUS);
+                guiNxt.printf("%s.u%iBPS.val=%i\xff\xff\xff",
+                              AllUsersPage, user, maxBPS);
+                guiNxt.printf("%s.u%iDuty.val=%i\xff\xff\xff",
+                              AllUsersPage, user, maxDutyPerm);
+                // Give time to the UART to send the data
+                guiSys->delayUS(20000);
+            }
+
+            // Other Settings
+            uint32_t buttonHoldTime =  guiCfg.otherSettings[0] & 0x0000ffff;
+            uint32_t sleepDelay     = (guiCfg.otherSettings[0] & 0xffff0000) >> 16;
+            uint32_t dispBrightness =  guiCfg.otherSettings[1] & 0xff;
+            guiNxt.printf("Other_Settings.nHoldTime.val=%i\xff\xff\xff",
+                          buttonHoldTime);
+            guiNxt.printf("thsp=%i\xff\xff\xff", sleepDelay);
+            guiNxt.printf("dim=%i\xff\xff\xff", dispBrightness);
+        }
+        guiNxt.setVal("TC_Settings.maxCoilCount", COIL_COUNT);
+        guiNxt.setVal("TC_Settings.maxVoices", MAX_VOICES);
+
+        // Give time to the UART to send the data
+        guiSys->delayUS(20000);
+
+        // Display Tiva firmware versions
+        guiNxt.setTxt("tTivaFWVersion", TIVA_FW_VERSION);
+
+        // Initialization completed.
+        guiNxt.sendCmd("vis 255,1");
+
+        // Show warning if no valid config is present in EEPROM. Warning is one layer below normal startup picture.
+        if (!cfgInEEPROM)
+        {
+            guiNxt.sendCmd("vis pStartup,0");
+        }
     }
 }
 
