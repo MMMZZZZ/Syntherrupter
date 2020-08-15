@@ -67,7 +67,7 @@ Page Startup
         Text tNxtFWVersion
             Properties
                 Scope       : Local
-                Initial Text: "v3.1.0"
+                Initial Text: "v3.1.1"
                 Max. length : 20
             
             Events
