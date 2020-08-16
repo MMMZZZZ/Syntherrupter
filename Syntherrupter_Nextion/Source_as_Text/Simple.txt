@@ -1281,39 +1281,111 @@ Page Simple
                         // Update Info below coil buttons
                         if(btCoil1.val==1)
                         {
-                            nOn1.val=nOn.val
+                            if(nOn.val<TC_Settings.coil1On.val)
+                            {
+                                nOn1.val=nOn.val
+                            }else
+                            {
+                                nOn1.val=TC_Settings.coil1On.val
+                            }
+                            if(nDuty.val<TC_Settings.coil1Duty.val)
+                            {
+                                nDuty1.val=nDuty.val
+                            }else
+                            {
+                                nDuty1.val=TC_Settings.coil1Duty.val
+                            }
                             nBPS1.val=nBPS.val
-                            nDuty1.val=nDuty.val
                         }
                         if(btCoil2.val==1)
                         {
-                            nOn2.val=nOn.val
+                            if(nOn.val<TC_Settings.coil2On.val)
+                            {
+                                nOn2.val=nOn.val
+                            }else
+                            {
+                                nOn2.val=TC_Settings.coil2On.val
+                            }
+                            if(nDuty.val<TC_Settings.coil2Duty.val)
+                            {
+                                nDuty2.val=nDuty.val
+                            }else
+                            {
+                                nDuty2.val=TC_Settings.coil2Duty.val
+                            }
                             nBPS2.val=nBPS.val
-                            nDuty2.val=nDuty.val
                         }
                         if(btCoil3.val==1)
                         {
-                            nOn3.val=nOn.val
+                            if(nOn.val<TC_Settings.coil3On.val)
+                            {
+                                nOn3.val=nOn.val
+                            }else
+                            {
+                                nOn3.val=TC_Settings.coil3On.val
+                            }
+                            if(nDuty.val<TC_Settings.coil3Duty.val)
+                            {
+                                nDuty3.val=nDuty.val
+                            }else
+                            {
+                                nDuty3.val=TC_Settings.coil3Duty.val
+                            }
                             nBPS3.val=nBPS.val
-                            nDuty3.val=nDuty.val
                         }
                         if(btCoil4.val==1)
                         {
-                            nOn4.val=nOn.val
+                            if(nOn.val<TC_Settings.coil4On.val)
+                            {
+                                nOn4.val=nOn.val
+                            }else
+                            {
+                                nOn4.val=TC_Settings.coil4On.val
+                            }
+                            if(nDuty.val<TC_Settings.coil4Duty.val)
+                            {
+                                nDuty4.val=nDuty.val
+                            }else
+                            {
+                                nDuty4.val=TC_Settings.coil4Duty.val
+                            }
                             nBPS4.val=nBPS.val
-                            nDuty4.val=nDuty.val
                         }
                         if(btCoil5.val==1)
                         {
-                            nOn5.val=nOn.val
+                            if(nOn.val<TC_Settings.coil5On.val)
+                            {
+                                nOn5.val=nOn.val
+                            }else
+                            {
+                                nOn5.val=TC_Settings.coil5On.val
+                            }
+                            if(nDuty.val<TC_Settings.coil5Duty.val)
+                            {
+                                nDuty5.val=nDuty.val
+                            }else
+                            {
+                                nDuty5.val=TC_Settings.coil5Duty.val
+                            }
                             nBPS5.val=nBPS.val
-                            nDuty5.val=nDuty.val
                         }
                         if(btCoil6.val==1)
                         {
-                            nOn6.val=nOn.val
+                            if(nOn.val<TC_Settings.coil6On.val)
+                            {
+                                nOn6.val=nOn.val
+                            }else
+                            {
+                                nOn6.val=TC_Settings.coil6On.val
+                            }
+                            if(nDuty.val<TC_Settings.coil6Duty.val)
+                            {
+                                nDuty6.val=nDuty.val
+                            }else
+                            {
+                                nDuty6.val=TC_Settings.coil6Duty.val
+                            }
                             nBPS6.val=nBPS.val
-                            nDuty6.val=nDuty.val
                         }
                         prints "d",0
                         prints TC_Settings.activeCoils.val,1
