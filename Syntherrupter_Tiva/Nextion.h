@@ -27,12 +27,15 @@
 #include "System.h"
 
 
+extern System sys;
+
+
 class Nextion
 {
 public:
     Nextion();
     virtual ~Nextion();
-    void init(System* sys, uint32_t portNumber, uint32_t baudRate, uint32_t timeoutUS = 300000);
+    void init(uint32_t portNumber, uint32_t baudRate, uint32_t timeoutUS = 300000);
     void sendCmd(const char* cmd);
     void setTxt(const char* comp, const char* txt);
     void setVal(const char* comp, uint32_t val);
@@ -55,44 +58,43 @@ public:
 
 private:
     // UART mapping
-    static constexpr uint32_t NXT_UART_SYSCTL_PERIPH      = 0;
-    static constexpr uint32_t NXT_UART_BASE               = 1;
-    static constexpr uint32_t NXT_UART_PORT_SYSCTL_PERIPH = 2;
-    static constexpr uint32_t NXT_UART_PORT_BASE          = 3;
-    static constexpr uint32_t NXT_UART_RX_PIN_CFG         = 4;
-    static constexpr uint32_t NXT_UART_TX_PIN_CFG         = 5;
-    static constexpr uint32_t NXT_UART_RX_PIN             = 6;
-    static constexpr uint32_t NXT_UART_TX_PIN             = 7;
-    static constexpr uint32_t NXT_UART_INT                = 8;
-    const uint32_t NXT_UART_MAPPING[8][9] = {{SYSCTL_PERIPH_UART0, UART0_BASE, SYSCTL_PERIPH_GPIOA, GPIO_PORTA_BASE, GPIO_PA0_U0RX, GPIO_PA1_U0TX, GPIO_PIN_0, GPIO_PIN_1, INT_UART0},
-                                             {SYSCTL_PERIPH_UART1, UART1_BASE, SYSCTL_PERIPH_GPIOA, GPIO_PORTB_BASE, GPIO_PB0_U1RX, GPIO_PB1_U1TX, GPIO_PIN_0, GPIO_PIN_1, INT_UART1},
-                                             {SYSCTL_PERIPH_UART2, UART2_BASE, SYSCTL_PERIPH_GPIOA, GPIO_PORTA_BASE, GPIO_PA6_U2RX, GPIO_PA7_U2TX, GPIO_PIN_6, GPIO_PIN_7, INT_UART2},
-                                             {SYSCTL_PERIPH_UART3, UART3_BASE, SYSCTL_PERIPH_GPIOA, GPIO_PORTA_BASE, GPIO_PA4_U3RX, GPIO_PA5_U3TX, GPIO_PIN_4, GPIO_PIN_5, INT_UART3},
-                                             {SYSCTL_PERIPH_UART4, UART4_BASE, SYSCTL_PERIPH_GPIOK, GPIO_PORTK_BASE, GPIO_PK0_U4RX, GPIO_PK1_U4TX, GPIO_PIN_0, GPIO_PIN_1, INT_UART4},
-                                             {SYSCTL_PERIPH_UART5, UART5_BASE, SYSCTL_PERIPH_GPIOC, GPIO_PORTC_BASE, GPIO_PC6_U5RX, GPIO_PC7_U5TX, GPIO_PIN_6, GPIO_PIN_7, INT_UART5},
-                                             {SYSCTL_PERIPH_UART6, UART6_BASE, SYSCTL_PERIPH_GPIOP, GPIO_PORTP_BASE, GPIO_PP0_U6RX, GPIO_PP1_U6TX, GPIO_PIN_0, GPIO_PIN_1, INT_UART6},
-                                             {SYSCTL_PERIPH_UART7, UART7_BASE, SYSCTL_PERIPH_GPIOC, GPIO_PORTC_BASE, GPIO_PC4_U7RX, GPIO_PC5_U7TX, GPIO_PIN_4, GPIO_PIN_5, INT_UART7}};
+    static constexpr uint32_t UART_SYSCTL_PERIPH      = 0;
+    static constexpr uint32_t UART_BASE               = 1;
+    static constexpr uint32_t UART_PORT_SYSCTL_PERIPH = 2;
+    static constexpr uint32_t UART_PORT_BASE          = 3;
+    static constexpr uint32_t UART_RX_PIN_CFG         = 4;
+    static constexpr uint32_t UART_TX_PIN_CFG         = 5;
+    static constexpr uint32_t UART_RX_PIN             = 6;
+    static constexpr uint32_t UART_TX_PIN             = 7;
+    static constexpr uint32_t UART_INT                = 8;
+    const uint32_t UART_MAPPING[8][9] = {{SYSCTL_PERIPH_UART0, UART0_BASE, SYSCTL_PERIPH_GPIOA, GPIO_PORTA_BASE, GPIO_PA0_U0RX, GPIO_PA1_U0TX, GPIO_PIN_0, GPIO_PIN_1, INT_UART0},
+                                         {SYSCTL_PERIPH_UART1, UART1_BASE, SYSCTL_PERIPH_GPIOA, GPIO_PORTB_BASE, GPIO_PB0_U1RX, GPIO_PB1_U1TX, GPIO_PIN_0, GPIO_PIN_1, INT_UART1},
+                                         {SYSCTL_PERIPH_UART2, UART2_BASE, SYSCTL_PERIPH_GPIOA, GPIO_PORTA_BASE, GPIO_PA6_U2RX, GPIO_PA7_U2TX, GPIO_PIN_6, GPIO_PIN_7, INT_UART2},
+                                         {SYSCTL_PERIPH_UART3, UART3_BASE, SYSCTL_PERIPH_GPIOA, GPIO_PORTA_BASE, GPIO_PA4_U3RX, GPIO_PA5_U3TX, GPIO_PIN_4, GPIO_PIN_5, INT_UART3},
+                                         {SYSCTL_PERIPH_UART4, UART4_BASE, SYSCTL_PERIPH_GPIOK, GPIO_PORTK_BASE, GPIO_PK0_U4RX, GPIO_PK1_U4TX, GPIO_PIN_0, GPIO_PIN_1, INT_UART4},
+                                         {SYSCTL_PERIPH_UART5, UART5_BASE, SYSCTL_PERIPH_GPIOC, GPIO_PORTC_BASE, GPIO_PC6_U5RX, GPIO_PC7_U5TX, GPIO_PIN_6, GPIO_PIN_7, INT_UART5},
+                                         {SYSCTL_PERIPH_UART6, UART6_BASE, SYSCTL_PERIPH_GPIOP, GPIO_PORTP_BASE, GPIO_PP0_U6RX, GPIO_PP1_U6TX, GPIO_PIN_0, GPIO_PIN_1, INT_UART6},
+                                         {SYSCTL_PERIPH_UART7, UART7_BASE, SYSCTL_PERIPH_GPIOC, GPIO_PORTC_BASE, GPIO_PC4_U7RX, GPIO_PC5_U7TX, GPIO_PIN_4, GPIO_PIN_5, INT_UART7}};
 
 
-    static constexpr char* nxtEndStr = "\xff\xff\xff";
+    static constexpr char* endStr = "\xff\xff\xff";
 
     // Constants for communication with the nextion touch display
-    static constexpr uint32_t NXT_TOUCH_EVENT_DATA    = 0x65;
-    static constexpr uint32_t NXT_PAGE_ID             = 0x66;
-    static constexpr uint32_t NXT_TOUCH_COORD         = 0x67;
-    static constexpr uint32_t NXT_TOUCH_EVENT_SLEEP   = 0x68;
-    static constexpr uint32_t NXT_STRING_DATA         = 0x70;
-    static constexpr uint32_t NXT_INT_DATA            = 0x71;
-    static constexpr uint32_t NXT_ENTER_SLEEP         = 0x86;
-    static constexpr uint32_t NXT_WAKE_UP             = 0x87;
-    static constexpr uint32_t NXT_STARTUP_OK          = 0x88;
+    static constexpr uint32_t TOUCH_EVENT_DATA    = 0x65;
+    static constexpr uint32_t PAGE_ID             = 0x66;
+    static constexpr uint32_t TOUCH_COORD         = 0x67;
+    static constexpr uint32_t TOUCH_EVENT_SLEEP   = 0x68;
+    static constexpr uint32_t STRING_DATA         = 0x70;
+    static constexpr uint32_t INT_DATA            = 0x71;
+    static constexpr uint32_t ENTER_SLEEP         = 0x86;
+    static constexpr uint32_t WAKE_UP             = 0x87;
+    static constexpr uint32_t STARTUP_OK          = 0x88;
 
-    System* nxtSys;
-    uint32_t nxtTimeoutUS = 300000;
-    uint32_t nxtUARTNum = 0;
-    uint32_t nxtBaudRate = 0;
-    static constexpr uint32_t nxtReadDataSize = 100;
-    char nxtReadData[nxtReadDataSize];
+    uint32_t timeoutUS = 300000;
+    uint32_t UARTNum = 0;
+    uint32_t baudRate = 0;
+    static constexpr uint32_t readDataSize = 100;
+    char readData[readDataSize];
 };
 
 #endif /* NEXTION_H_ */

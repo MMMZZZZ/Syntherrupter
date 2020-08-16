@@ -6,6 +6,8 @@
  */
 
 
+#include <stdint.h>
+#include <stdbool.h>
 #include "InterrupterConfig.h"
 #include "System.h"
 #include "GUI.h"
@@ -13,6 +15,7 @@
 
 System sys;
 GUI gui;
+Coil coils[COIL_COUNT];
 
 
 /*
@@ -37,7 +40,7 @@ int main(void)
 {
     sys.init(120000000, sysTickISR);
     sys.setSystemTimeResUS(10);
-    gui.init(&sys, midiUsbUartISR, midiMidiUartISR);
+    gui.init(midiUsbUartISR, midiMidiUartISR);
 
     while (42)
     {

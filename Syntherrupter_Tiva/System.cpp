@@ -20,15 +20,14 @@ System::~System()
 
 void System::init(uint32_t clockFreq, void (*ISR)(void))
 {
-     uint32_t clock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ |SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), sysClockFreq);
+     uint32_t clock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ |SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), clockFreq);
 
-     if (clock != sysClockFreq)
+     if (clock != clockFreq)
      {
          error();
      }
 
-     sysExactTime = 0;
-     sysTime = 0;
+     timeUS = 0;
 
 
     FPULazyStackingEnable();
@@ -46,11 +45,11 @@ void System::init(uint32_t clockFreq, void (*ISR)(void))
 
 uint32_t System::getClockFreq()
 {
-    return sysClockFreq;
+    return clockFreq;
 }
 uint32_t System::getPIOSCFreq()
 {
-    return sysPIOSCFreq;
+    return PIOSCFreq;
 }
 
 void System::error()
@@ -59,10 +58,10 @@ void System::error()
     // IntMasterDisable();
 
     // Stop all peripherals
-    for (uint_fast8_t i = 0; i < sysPeripheralsCount; i++)
+    for (uint_fast8_t i = 0; i < peripheralsCount; i++)
     {
-        SysCtlPeripheralReset(sysPeripherals[i]);
-        SysCtlPeripheralDisable(sysPeripherals[i]);
+        SysCtlPeripheralReset(peripherals[i]);
+        SysCtlPeripheralDisable(peripherals[i]);
     }
 
     while (42);
@@ -72,7 +71,7 @@ void System::setSystemTimeResUS(uint32_t us)
 {
     sysTickResUS = us;
     sysTickHalfRes = sysTickResUS / 2;
-    SysTickPeriodSet(sysClockTicksUS * sysTickResUS);
+    SysTickPeriodSet(clockTicksUS * sysTickResUS);
 }
 
 uint32_t System::getSystemTimeResUS()
@@ -82,15 +81,15 @@ uint32_t System::getSystemTimeResUS()
 
 void System::systemTimeIncrement()
 {
-    sysTime += sysTickResUS;
+    timeUS += sysTickResUS;
 }
 
 uint32_t System::getSystemTimeUS()
 {
-    return sysTime;
+    return timeUS;
 }
 
 void System::delayUS(uint32_t us)
 {
-    SysCtlDelay((sysClockTicksUS * us) / 3);
+    SysCtlDelay((clockTicksUS * us) / 3);
 }

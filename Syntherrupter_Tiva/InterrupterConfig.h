@@ -5,6 +5,10 @@
  *      Author: Max Zuidberg
  */
 
+#ifndef INTERRUPTER_CONFIG_H_
+#define INTERRUPTER_CONFIG_H_
+
+
 #define TIVA_FW_VERSION "v3.1.1"
 
 #ifdef COIL_COUNT_1
@@ -30,3 +34,6 @@
 #endif
 
 #define MAX_VOICES 16
+
+
+#endif /* INTERRUPTER_CONFIG_H_ */

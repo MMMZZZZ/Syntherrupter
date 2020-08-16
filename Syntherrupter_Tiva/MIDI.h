@@ -28,12 +28,15 @@
 #include "Channel.h"
 
 
+extern System sys;
+
+
 class MIDI
 {
 public:
     MIDI();
     virtual ~MIDI();
-    void init(System* sys, uint32_t usbUartNum, uint32_t baudRate, void (*usbISR)(void), uint32_t midiUartNum, void (*MIDIISR)(void));
+    void init(uint32_t usbUartNum, uint32_t baudRate, void (*usbISR)(void), uint32_t uartNum, void (*MIDIISR)(void));
     void usbUartISR();
     void midiUartISR();
     void addData(uint8_t data);
@@ -61,16 +64,16 @@ private:
     float getLFOVal(uint32_t channel);
     void removeDeadNotes();
     void resetNote(uint32_t coil, uint32_t note);
-    static constexpr uint32_t MIDI_UART_SYSCTL_PERIPH      = 0;
-    static constexpr uint32_t MIDI_UART_BASE               = 1;
-    static constexpr uint32_t MIDI_UART_PORT_SYSCTL_PERIPH = 2;
-    static constexpr uint32_t MIDI_UART_PORT_BASE          = 3;
-    static constexpr uint32_t MIDI_UART_RX_PIN_CFG         = 4;
-    static constexpr uint32_t MIDI_UART_TX_PIN_CFG         = 5;
-    static constexpr uint32_t MIDI_UART_RX_PIN             = 6;
-    static constexpr uint32_t MIDI_UART_TX_PIN             = 7;
-    static constexpr uint32_t MIDI_UART_INT                = 8;
-    const uint32_t MIDI_UART_MAPPING[8][9] = {{SYSCTL_PERIPH_UART0, UART0_BASE, SYSCTL_PERIPH_GPIOA, GPIO_PORTA_BASE, GPIO_PA0_U0RX, GPIO_PA1_U0TX, GPIO_PIN_0, GPIO_PIN_1, INT_UART0},
+    static constexpr uint32_t UART_SYSCTL_PERIPH      = 0;
+    static constexpr uint32_t UART_BASE               = 1;
+    static constexpr uint32_t UART_PORT_SYSCTL_PERIPH = 2;
+    static constexpr uint32_t UART_PORT_BASE          = 3;
+    static constexpr uint32_t UART_RX_PIN_CFG         = 4;
+    static constexpr uint32_t UART_TX_PIN_CFG         = 5;
+    static constexpr uint32_t UART_RX_PIN             = 6;
+    static constexpr uint32_t UART_TX_PIN             = 7;
+    static constexpr uint32_t UART_INT                = 8;
+    const uint32_t UART_MAPPING[8][9] = {{SYSCTL_PERIPH_UART0, UART0_BASE, SYSCTL_PERIPH_GPIOA, GPIO_PORTA_BASE, GPIO_PA0_U0RX, GPIO_PA1_U0TX, GPIO_PIN_0, GPIO_PIN_1, INT_UART0},
                                               {SYSCTL_PERIPH_UART1, UART1_BASE, SYSCTL_PERIPH_GPIOA, GPIO_PORTB_BASE, GPIO_PB0_U1RX, GPIO_PB1_U1TX, GPIO_PIN_0, GPIO_PIN_1, INT_UART1},
                                               {SYSCTL_PERIPH_UART2, UART2_BASE, SYSCTL_PERIPH_GPIOA, GPIO_PORTA_BASE, GPIO_PA6_U2RX, GPIO_PA7_U2TX, GPIO_PIN_6, GPIO_PIN_7, INT_UART2},
                                               {SYSCTL_PERIPH_UART3, UART3_BASE, SYSCTL_PERIPH_GPIOA, GPIO_PORTA_BASE, GPIO_PA4_U3RX, GPIO_PA5_U3TX, GPIO_PIN_4, GPIO_PIN_5, INT_UART3},
@@ -79,20 +82,20 @@ private:
                                               {SYSCTL_PERIPH_UART6, UART6_BASE, SYSCTL_PERIPH_GPIOP, GPIO_PORTP_BASE, GPIO_PP0_U6RX, GPIO_PP1_U6TX, GPIO_PIN_0, GPIO_PIN_1, INT_UART6},
                                               {SYSCTL_PERIPH_UART7, UART7_BASE, SYSCTL_PERIPH_GPIOC, GPIO_PORTC_BASE, GPIO_PC4_U7RX, GPIO_PC5_U7TX, GPIO_PIN_4, GPIO_PIN_5, INT_UART7}};
 
-    static constexpr uint32_t MIDI_ADSR_MODE_ATTACK  = 0;
-    static constexpr uint32_t MIDI_ADSR_MODE_DECAY   = 1;
-    static constexpr uint32_t MIDI_ADSR_MODE_SUSTAIN = 2;
-    static constexpr uint32_t MIDI_ADSR_MODE_RELEASE = 3;
+    static constexpr uint32_t ADSR_MODE_ATTACK  = 0;
+    static constexpr uint32_t ADSR_MODE_DECAY   = 1;
+    static constexpr uint32_t ADSR_MODE_SUSTAIN = 2;
+    static constexpr uint32_t ADSR_MODE_RELEASE = 3;
 
-    static constexpr uint32_t MIDI_ADSR_ATTACK_AMP        = 0;
-    static constexpr uint32_t MIDI_ADSR_ATTACK_INVDUR_US  = 1;
-    static constexpr uint32_t MIDI_ADSR_DECAY_AMP         = 2;
-    static constexpr uint32_t MIDI_ADSR_DECAY_INVDUR_US   = 3;
-    static constexpr uint32_t MIDI_ADSR_SUSTAIN_AMP       = 4;
-    static constexpr uint32_t MIDI_ADSR_SUSTAIN_INVDUR_US = 5;
-    static constexpr uint32_t MIDI_ADSR_RELEASE_AMP       = 6;
-    static constexpr uint32_t MIDI_ADSR_RELEASE_INVDUR_US = 7;
-    static constexpr uint32_t MIDI_ADSR_PROGRAM_COUNT     = 9;
+    static constexpr uint32_t ADSR_ATTACK_AMP        = 0;
+    static constexpr uint32_t ADSR_ATTACK_INVDUR_US  = 1;
+    static constexpr uint32_t ADSR_DECAY_AMP         = 2;
+    static constexpr uint32_t ADSR_DECAY_INVDUR_US   = 3;
+    static constexpr uint32_t ADSR_SUSTAIN_AMP       = 4;
+    static constexpr uint32_t ADSR_SUSTAIN_INVDUR_US = 5;
+    static constexpr uint32_t ADSR_RELEASE_AMP       = 6;
+    static constexpr uint32_t ADSR_RELEASE_INVDUR_US = 7;
+    static constexpr uint32_t ADSR_PROGRAM_COUNT     = 9;
     // TODO: The following list is missing the newer sounds.
     // Note Durations cant be 0. To "skip" D/S/R set Duration to 1.0f (any very small value) and Amplitude to exactly the previous one.
     // 0: No ADSR
@@ -103,7 +106,7 @@ private:
     // 5: Staccato (no long notes possible. They're short. Always.
     // 6: Legator (release = prolonged sustain)
     //                                                                 Attack Amp/Invers Dur.       Decay Amp/Invers Dur.        Sustain Amp/Invers Dur.       Release Amp/Invers Dur.
-    const float MIDI_ADSR_PROGRAMS[MIDI_ADSR_PROGRAM_COUNT + 1][9] = {{1.0f,              1.0f,     1.0f,              1.0f,     1.0f,               1.0f,      0.0f,              1.0f},
+    const float ADSR_PROGRAMS[ADSR_PROGRAM_COUNT + 1][9] = {{1.0f,              1.0f,     1.0f,              1.0f,     1.0f,               1.0f,      0.0f,              1.0f},
 
                                                                       {1.0f, 1.0f /   30000.0f,     0.5f, 1.0f /   10000.0f,     0.10f, 1.0f /  3500000.0f,     0.0f, 1.0f /   10000.0f},
                                                                       {1.0f, 1.0f / 4000000.0f,     1.0f, 1.0f /       1.0f,     1.00f, 1.0f /        1.0f,     0.0f, 1.0f / 1000000.0f},
@@ -115,35 +118,34 @@ private:
                                                                       {2.0f, 1.0f /   30000.0f,     1.0f, 1.0f /    2500.0f,     0.10f, 1.0f /  3500000.0f,     0.0f, 1.0f /   10000.0f},
                                                                       {3.0f, 1.0f /    3000.0f,     1.0f, 1.0f /   27000.0f,     0.00f, 1.0f /   400000.0f,     0.0f, 1.0f /       1.0f},
     };
-    static constexpr uint32_t midiEffectResolutionUS = 1000;
+    static constexpr uint32_t effectResolutionUS = 1000;
 
-    System* midiSys;
     Note notes[COIL_COUNT][MAX_VOICES];
-    float midiAbsFreq[COIL_COUNT];
-    float midiSingleNoteMaxDuty[COIL_COUNT];
-    float midiSingleNoteMaxOntimeUS[COIL_COUNT];
-    float midiTotalMaxDutyUS[COIL_COUNT];
-    float midiCoilPan[COIL_COUNT];
-    float midiInversPanReach[COIL_COUNT];
-    uint8_t midiVolMode[COIL_COUNT];
-    uint32_t midiCoilMaxVoices[COIL_COUNT];
-    bool midiCoilChange[COIL_COUNT];
-    bool midiPanConstVol[COIL_COUNT];
-    static constexpr uint32_t midiUARTBufferSize = 1024;
-    volatile uint8_t midiUARTBuffer[midiUARTBufferSize];
-    volatile uint32_t midiUARTBufferWriteIndex = 0;
-    volatile uint32_t midiUARTBufferReadIndex = 0;
+    float absFreq[COIL_COUNT];
+    float singleNoteMaxDuty[COIL_COUNT];
+    float singleNoteMaxOntimeUS[COIL_COUNT];
+    float totalMaxDutyUS[COIL_COUNT];
+    float coilPan[COIL_COUNT];
+    float inversPanReach[COIL_COUNT];
+    uint8_t volMode[COIL_COUNT];
+    uint32_t coilMaxVoices[COIL_COUNT];
+    bool coilChange[COIL_COUNT];
+    bool panConstVol[COIL_COUNT];
+    static constexpr uint32_t UARTBufferSize = 1024;
+    volatile uint8_t UARTBuffer[UARTBufferSize];
+    volatile uint32_t UARTBufferWriteIndex = 0;
+    volatile uint32_t UARTBufferReadIndex = 0;
 
-    uint8_t  midiData[3]   = {0, 0, 0};
-    uint8_t  midiDataIndex = 0;
-    uint32_t midiChannel = 0;
+    uint8_t  data[3]   = {0, 0, 0};
+    uint8_t  dataIndex = 0;
+    uint32_t channel = 0;
 
-    bool midiADSREnabled  = false;
-    float midiADSRTimeUS = 0.0f;
-    bool midiPlaying = false;
-    uint32_t midiUSBUARTNum, midiMIDUARTNum;
-    uint32_t midiUSBUARTBase, midiMIDUARTBase;
-    float midiLFOPeriodUS          = 200000.0f;
+    bool ADSREnabled  = false;
+    float ADSRTimeUS = 0.0f;
+    bool playing = false;
+    uint32_t uSBUARTNum, MIDUARTNum;
+    uint32_t uSBUARTBase, MIDUARTBase;
+    float LFOPeriodUS          = 200000.0f;
 };
 
-#endif /* MIDI_H_ */
+#endif /* H_ */
