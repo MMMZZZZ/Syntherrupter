@@ -13,7 +13,25 @@ Page MIDI_Live
                 tUser.txt=" "+User_Settings.u2Name.txt
             }
             //
+            // Entered MIDI Live Mode. MIDI Live Mode is now active
+            Settings.activeModes.val=Settings.activeModes.val|2
+            //
+            // Display all active modes
+            sys0=Settings.activeModes.val&1
+            if(sys0!=0)
+            {
+                // Simple Mode is active
+                tMSI.bco=6900
+            }
+            sys0=Settings.activeModes.val&2
+            if(sys0!=0)
+            {
+                // MIDI Live Mode is active
+                tMML.bco=6900
+            }
+            //
             tmTCButtonHold.tim=Other_Settings.nHoldTime.val
+            tmReturn.tim=Other_Settings.nHoldTime.val
             // Default update mode is on release.
             vis bModeImmediate,0
             vis bModeManual,0
@@ -397,10 +415,15 @@ Page MIDI_Live
             
             Events
                 Touch Press Event
-                    // Set outputs to 0
-                    click MIDI_Live,1
+                    // If button is hold, return without "exiting" MIDI Live mode (keep it running in background.
+                    tmReturn.en=1
                 
                 Touch Release Event
+                    tmReturn.en=0
+                    // Set outputs to 0
+                    click dp,1
+                    // Leaving MIDI Live Mode. Mode is now inactive
+                    Settings.activeModes.val=Settings.activeModes.val^2
                     // Mode: EXit.
                     prints "mex",0
                     page Menu
@@ -731,7 +754,7 @@ Page MIDI_Live
         Timer tmTCButtonHold
             Properties
                 Scope      : Local
-                Period [ms]: 800
+                Period [ms]: 250
                 Running    : No
             
             Events
@@ -1280,5 +1303,42 @@ Page MIDI_Live
                     // Make this object "transparent" for clicks and click background.
                     click MIDI_Live,1
                 
+                Touch Release Event
+                    
+        Timer tmReturn
+            Properties
+                Scope      : Local
+                Period [ms]: 250
+                Running    : No
+            
+            Events
+                Touch Press Event
+                    p
+                    e
+                
+                Touch Release Event
+                    p
+                    e
+                
+        Text tMML
+            Properties
+                Scope       : Local
+                Initial Text: "MIDI Live"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tMSI
+            Properties
+                Scope       : Local
+                Initial Text: "Simple"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    
                 Touch Release Event
                     

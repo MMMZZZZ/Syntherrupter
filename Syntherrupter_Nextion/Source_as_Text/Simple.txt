@@ -13,6 +13,25 @@ Page Simple
                 tUser.txt=" "+User_Settings.u2Name.txt
             }
             //
+            // Entered Simple Mode. MIDI Simple is now active
+            Settings.activeModes.val=Settings.activeModes.val|1
+            //
+            // Display all active modes
+            sys0=Settings.activeModes.val&1
+            if(sys0!=0)
+            {
+                // Simple Mode is active
+                tMSI.bco=6900
+            }
+            sys0=Settings.activeModes.val&2
+            if(sys0!=0)
+            {
+                // MIDI Live Mode is active
+                tMML.bco=6900
+            }
+            //
+            tmReturn.tim=Other_Settings.nHoldTime.val
+            //
             ref bReturn
             // Default mode is on release.
             vis bModeImmediate,0
@@ -556,10 +575,15 @@ Page Simple
             
             Events
                 Touch Press Event
-                    // Set outputs to 0
-                    click Simple,1
+                    // If button is hold, return without "exiting" simple mode (keep it running in background.
+                    tmReturn.en=1
                 
                 Touch Release Event
+                    tmReturn.en=0
+                    // Set outputs to 0
+                    click dp,1
+                    // Leaving MIDI Live Mode. Mode is now inactive
+                    Settings.activeModes.val=Settings.activeModes.val^1
                     // Mode: EXit.
                     prints "mex",0
                     page Menu
@@ -1476,4 +1500,46 @@ Page Simple
                     fSqrt.val*=fSliderInput.val
                     sys0=2*fSliderOutput.val
                     fSlider.val=fSqrt.val/sys0
+                
+        Text tMSI
+            Properties
+                Scope       : Local
+                Initial Text: "Simple"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    // If not already active, go to page.
+                    //if(dp!=MIDI_Live.id)
+                    //{
+                    //  page MIDI_Live
+                    //}
+                
+        Text tMML
+            Properties
+                Scope       : Local
+                Initial Text: "MIDI Live"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Timer tmReturn
+            Properties
+                Scope      : Local
+                Period [ms]: 250
+                Running    : No
+            
+            Events
+                Touch Press Event
+                    p
+                    e
+                
+                Touch Release Event
+                    p
+                    e
                 

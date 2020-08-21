@@ -115,3 +115,9 @@ Page Settings
                 Touch Release Event
                     page User_Settings
                 
+        Variable activeModes
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            

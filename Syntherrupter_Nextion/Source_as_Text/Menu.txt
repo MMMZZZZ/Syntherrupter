@@ -12,6 +12,20 @@ Page Menu
             {
                 tUser.txt=" "+User_Settings.u2Name.txt
             }
+            //
+            // Display all active modes
+            sys0=Settings.activeModes.val&1
+            if(sys0!=0)
+            {
+                // Simple Mode is active
+                tMSI.bco=6900
+            }
+            sys0=Settings.activeModes.val&2
+            if(sys0!=0)
+            {
+                // MIDI Live Mode is active
+                tMML.bco=6900
+            }
         
         Postinitialize Event
             
@@ -92,3 +106,30 @@ Page Menu
                 Touch Release Event
                     page Identification
                 
+        Text tMSI
+            Properties
+                Scope       : Local
+                Initial Text: "Simple"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    // If not already active, go to page.
+                    //if(dp!=MIDI_Live.id)
+                    //{
+                    //  page MIDI_Live
+                    //}
+                
+        Text tMML
+            Properties
+                Scope       : Local
+                Initial Text: "MIDI Live"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
