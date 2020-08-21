@@ -98,6 +98,11 @@ uint32_t Nextion::getUARTBase()
     return UART_MAPPING[UARTNum][UART_BASE];
 }
 
+uint32_t Nextion::getUARTPeriph()
+{
+    return UART_MAPPING[UARTNum][UART_SYSCTL_PERIPH];
+}
+
 uint32_t Nextion::getBaudRate()
 {
     return baudRate;

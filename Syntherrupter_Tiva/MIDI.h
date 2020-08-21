@@ -24,8 +24,11 @@
 #include "driverlib/uart.h"             // Defines and macros for UART API of driverLib.
 #include "InterrupterConfig.h"
 #include "System.h"
-#include "Note.h"
+#include "Coil.h"
 #include "Channel.h"
+#include "UART.h"
+#include "ByteBuffer.h"
+#include "Note.h"
 
 
 extern System sys;
@@ -36,34 +39,27 @@ class MIDI
 public:
     MIDI();
     virtual ~MIDI();
-    void init(uint32_t usbUartNum, uint32_t baudRate, void (*usbISR)(void), uint32_t uartNum, void (*MIDIISR)(void));
-    void usbUartISR();
-    void midiUartISR();
-    void addData(uint8_t data);
-    void UARTEnable(bool usbUart = true);
-    void UARTDisable(bool usbUart = true);
-    void start();
-    void stop();
-    void newData(uint32_t c);
-    void setVolSettings(uint32_t coil, float ontimeUSMax, float dutyMax);
-    void setChannels(uint32_t coil, uint32_t chns);
-    void setPan(uint32_t coil, uint32_t pan);
-    void setPanReach(uint32_t coil, uint32_t reach);
-    void setTotalMaxDutyPerm(uint32_t coil, float maxDuty);
-    void setMaxVoices(uint32_t coil, uint32_t maxVoices);
-    void resetNRPs(uint32_t chns = 0xffff);
-    bool isPlaying();
+    static void init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPort, uint32_t midiUartRx, uint32_t midiUartTx, void (*midiISR)(void));
+    void setCoilNum(uint32_t num);
+    static void start();
+    static void stop();
+    static bool processBuffer(uint32_t b);
+    static void resetNRPs(uint32_t chns = 0xffff);
+    void setVolSettings(float ontimeUSMax, float dutyMax);
+    void setChannels(uint32_t chns);
+    void setPan(uint32_t pan);
+    void setPanReach(uint32_t reach);
+    void setMaxVoices(uint32_t maxVoices);
+    static bool isPlaying();
     void process();
-    void setADSR(bool enable);
-    uint32_t activeNotes[COIL_COUNT];
-    Note *orderedNotes[COIL_COUNT][MAX_VOICES];
-    Channel channels[16];
+    static Channel channels[16];
+    static UART usbUart, midiUart;
+    static ByteBuffer otherBuffer;
 
 private:
     void updateEffects();
-    float getLFOVal(uint32_t channel);
-    void removeDeadNotes();
-    void resetNote(uint32_t coil, uint32_t note);
+    static float getLFOVal(uint32_t channel);
+    static void removeDeadNotes();
     static constexpr uint32_t UART_SYSCTL_PERIPH      = 0;
     static constexpr uint32_t UART_BASE               = 1;
     static constexpr uint32_t UART_PORT_SYSCTL_PERIPH = 2;
@@ -120,17 +116,25 @@ private:
     };
     static constexpr uint32_t effectResolutionUS = 1000;
 
-    Note notes[COIL_COUNT][MAX_VOICES];
-    float absFreq[COIL_COUNT];
-    float singleNoteMaxDuty[COIL_COUNT];
-    float singleNoteMaxOntimeUS[COIL_COUNT];
-    float totalMaxDutyUS[COIL_COUNT];
-    float coilPan[COIL_COUNT];
-    float inversPanReach[COIL_COUNT];
-    uint8_t volMode[COIL_COUNT];
-    uint32_t coilMaxVoices[COIL_COUNT];
-    bool coilChange[COIL_COUNT];
-    bool panConstVol[COIL_COUNT];
+    static constexpr uint32_t totalNotesLimit = 64;
+    static constexpr uint32_t bufferCount = 3;
+    static constexpr ByteBuffer* bufferList[bufferCount] = {&(usbUart.buffer), &(midiUart.buffer), &otherBuffer};
+    static uint8_t bufferMidiStatus[bufferCount];
+    static Note notes[totalNotesLimit];
+    static Note * orderedNotes[totalNotesLimit];
+    static uint32_t notesCount;
+    float absFreq               =  0.0f;
+    float singleNoteMaxDuty     =  0.0f;
+    float singleNoteMaxOntimeUS =  0.0f;
+    float coilPan               = -1.0f;
+    float inversPanReach        =  0.0f;
+    uint8_t volMode             =  3;
+    uint16_t activeChannels     =  0xffff;
+    uint32_t coilMaxVoices      =  0;
+    uint32_t rawOntime          =  0;
+    uint32_t coilNum            =  0;
+    bool coilChange             = false;
+    bool panConstVol            = false;
     static constexpr uint32_t UARTBufferSize = 1024;
     volatile uint8_t UARTBuffer[UARTBufferSize];
     volatile uint32_t UARTBufferWriteIndex = 0;
@@ -142,10 +146,10 @@ private:
 
     bool ADSREnabled  = false;
     float ADSRTimeUS = 0.0f;
-    bool playing = false;
-    uint32_t uSBUARTNum, MIDUARTNum;
-    uint32_t uSBUARTBase, MIDUARTBase;
-    float LFOPeriodUS          = 200000.0f;
+    static bool playing;
+    uint32_t USBUARTNum, MIDUARTNum;
+    uint32_t USBUARTBase, MIDUARTBase;
+    static const float LFOPeriodUS          = 200000.0f;
 };
 
 #endif /* H_ */

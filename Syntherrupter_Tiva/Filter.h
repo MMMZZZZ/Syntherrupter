@@ -24,12 +24,12 @@ public:
     Filter();
     virtual ~Filter();
     void init(float factor = 2.0f, float constant = 1.0f);
-    void setTarget(float a);
+    void setTarget(float target, bool force = false);
     float getFiltered();
 private:
     bool     targetReached = false;
-    float    minTimestep   = 0.0f;
-    uint32_t timeUS        = 0;
+    float    minTimestepUS   = 0.0f;
+    uint32_t lastTimeUS        = 0;
     float    value         = 0.0f;
     float    factor        = 0.0f;
     float    constant      = 0.0f;

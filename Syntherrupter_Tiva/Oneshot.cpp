@@ -62,18 +62,18 @@ void Oneshot::rearmISR()
 
 void Oneshot::setMaxOntimeUS(uint32_t maxOntimeUS)
 {
-    this->maxOnValue = maxOntimeUS * (sys.getPIOSCFreq() / 1000000);
+    maxOnValue = maxOntimeUS * (sys.getPIOSCFreq() / 1000000);
 }
 
 void Oneshot::setMinOfftimeUS(uint32_t minOfftimeUS)
 {
     if (minOfftimeUS)
     {
-        this->minOffValue = minOfftimeUS * (sys.getPIOSCFreq() / 1000000);
+        minOffValue = minOfftimeUS * (sys.getPIOSCFreq() / 1000000);
     }
     else
     {
-        this->minOffValue = 1;
+        minOffValue = 1;
     }
 }
 
@@ -82,9 +82,9 @@ void Oneshot::shot(uint32_t ontimeUS)
     uint32_t matchValue = ontimeUS * (sys.getPIOSCFreq() / 1000000);
     if (matchValue)
     {
-        if (matchValue > this->maxOnValue)
+        if (matchValue > maxOnValue)
         {
-            matchValue = this->maxOnValue;
+            matchValue = maxOnValue;
         }
 
         // Copied from the TivaWare timer.c, reduced to the minimum, skipping argument checks and platform checks. Big speed increase.

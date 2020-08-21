@@ -23,10 +23,6 @@ public:
     uint8_t number         = 0;
     uint8_t velocity       = 0;
     uint8_t afterTouch     = 0;
-    uint32_t periodUS       = 0;
-    uint32_t periodTolUS    = 0;
-    uint32_t nextFireUS     = 0;
-    uint32_t nextFireEndUS  = 0;
     float rawOntimeUS       = 0.0f;
     float ADSROntimeUS      = 0.0f;
     float finishedOntimeUS  = 0.0f;

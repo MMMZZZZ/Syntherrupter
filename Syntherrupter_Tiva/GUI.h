@@ -17,7 +17,6 @@
 #include "System.h"
 #include "Nextion.h"
 #include "Coil.h"
-#include "MIDI.h"
 
 
 extern System sys;
@@ -45,15 +44,13 @@ class GUI
 public:
     GUI();
     virtual ~GUI();
-    void init(void (*midiUsbISR)(void), void (*midiMidiISR)(void));
-    void update();
+    void init();
+    uint32_t update();
     void applyOutput();
     void setError(const char* err);
     void showError();
-    void midiUsbUartISR();
-    void midiMidiUartISR();
+
 private:
-    void exit();
     void idle();
     void simpleEnter();
     void simple();
@@ -69,8 +66,10 @@ private:
 
     Nextion nxt;
     EEPROMSettings cfg;
-    MIDI midi;
 
+    Tone* simpleTone;
+
+    uint32_t state = 0;
     uint32_t userMaxOntimeUS = 0;
     uint32_t userMaxBPS = 0;
     uint32_t userMaxDutyPerm = 0;

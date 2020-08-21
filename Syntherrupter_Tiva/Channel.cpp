@@ -11,7 +11,7 @@ Channel::Channel()
 {
     resetControllers();
     program = 0;
-    coils = 0;
+    coils   = 0xff; // Startup default: play every channel on every coil.
 }
 
 Channel::~Channel()

@@ -18,7 +18,7 @@ System::~System()
     // TODO Auto-generated destructor stub
 }
 
-void System::init(uint32_t clockFreq, void (*ISR)(void))
+void System::init(void (*ISR)(void))
 {
      uint32_t clock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ |SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), clockFreq);
 
@@ -92,4 +92,9 @@ uint32_t System::getSystemTimeUS()
 void System::delayUS(uint32_t us)
 {
     SysCtlDelay((clockTicksUS * us) / 3);
+}
+
+uint32_t System::rand(uint32_t lower, uint32_t upper)
+{
+    return ((timeUS + SysTickValueGet()) % (upper - lower) + lower);
 }

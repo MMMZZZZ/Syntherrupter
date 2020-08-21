@@ -14,37 +14,59 @@
 
 
 System sys;
-GUI gui;
 Coil coils[COIL_COUNT];
 
-
-/*
- * Awful. Still coudn't find a better way to use ISRs in C++.
- */
+extern "C"
+{
 void sysTickISR()
 {
     sys.systemTimeIncrement();
 }
 
-void midiUsbUartISR()
+void uartUsbISR()
 {
-    gui.midiUsbUartISR();
+    coils->midi.usbUart.ISR();
 }
 
-void midiMidiUartISR()
+void uartMidiISR()
 {
-    gui.midiMidiUartISR();
+    coils->midi.midiUart.ISR();
+}
 }
 
 int main(void)
 {
-    sys.init(120000000, sysTickISR);
+    GUI gui;
+    sys.init(sysTickISR);
     sys.setSystemTimeResUS(10);
-    gui.init(midiUsbUartISR, midiMidiUartISR);
+    gui.init();
+
+    // Initialize Coil objects
+    for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+    {
+        coils[coil].init(coil);
+    }
+    coils->midi.init(115200, uartUsbISR, GPIO_PORTC_BASE, GPIO_PIN_4, GPIO_PIN_5, uartMidiISR);
 
     while (42)
     {
-        gui.update();
+        uint32_t state = gui.update();
+        if (state)
+        {
+            // Use coils[0] objects for calling their static methods.
+            coils->midi.process();
+
+            // Run non-static coil object methods
+            for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+            {
+                coils[coil].output();
+            }
+            // Generate output
+            for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+            {
+                coils[coil].output();
+            }
+        }
     }
 }
 

@@ -140,7 +140,7 @@ bool EEPROMSettings::updateBank()
         for (uint32_t i = 0; i < BANK_COUNT; i++)
         {
             uint32_t data = 0;
-            EEPROMRead(&data, BANK_STARTS[i], 4);
+            EEPROMRead(&data, BANK_STARTS[i], 4); // @suppress("Invalid arguments")
             // Check if bank contains data and config version matches
             if ((data & 0xffff0000) == (PRESENT & 0xffff0000))
             {
@@ -158,21 +158,21 @@ bool EEPROMSettings::updateBank()
     {
         // Check bank wear level and switch to next one if necessary
         uint32_t data = 0;
-        EEPROMRead(&data, BANK_STARTS[bank], 4);
+        EEPROMRead(&data, BANK_STARTS[bank], 4); // @suppress("Invalid arguments")
         data &= 0x0000ffff;
         if (data == 0xffff)
         {
             // Time to switch bank
             data = PRESENT;
             // Mark bank as unused
-            EEPROMProgram(&data, BANK_STARTS[bank], 4);
+            EEPROMProgram(&data, BANK_STARTS[bank], 4); // @suppress("Invalid arguments")
             // Select and initialize next bank
             if (++bank >= BANK_COUNT)
             {
                 bank = 0;
             }
             data = PRESENT + 1;
-            EEPROMProgram(&data, BANK_STARTS[bank], 4);
+            EEPROMProgram(&data, BANK_STARTS[bank], 4); // @suppress("Invalid arguments")
             return true;
         }
     }
@@ -205,7 +205,7 @@ void EEPROMSettings::rwuAll(uint32_t mode)
         if (mode != READ_EEPROM)
         {
             uint32_t data = PRESENT + 1;
-            EEPROMProgram(&data, BANK_STARTS[0], 4);
+            EEPROMProgram(&data, BANK_STARTS[0], 4); // @suppress("Invalid arguments")
         }
     }
     byteAddress = BANK_STARTS[bank] + 4;
@@ -251,7 +251,7 @@ void EEPROMSettings::readSequence(void *newData, uint32_t byteSize)
     // Make sure byteSize is a multiple of 4
     byteSize = byteSize >> 2;
     byteSize = byteSize << 2;
-    EEPROMRead((uint32_t *)newData, byteAddress, byteSize);
+    EEPROMRead((uint32_t *)newData, byteAddress, byteSize); // @suppress("Invalid arguments")
     byteAddress += byteSize;
 }
 
@@ -260,7 +260,7 @@ void EEPROMSettings::writeSequence(void *newData, uint32_t byteSize)
     // Make sure byteSize is a multiple of 4
     byteSize = byteSize >> 2;
     byteSize = byteSize << 2;
-    uint32_t error = EEPROMProgram((uint32_t *)newData, byteAddress, byteSize);
+    uint32_t error = EEPROMProgram((uint32_t *)newData, byteAddress, byteSize); // @suppress("Invalid arguments")
     if (error)
     {
         sys.error();

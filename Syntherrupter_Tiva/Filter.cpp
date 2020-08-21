@@ -23,23 +23,24 @@ void Filter::init(float factor, float constant)
     this->value = 0.0f;
     this->factor = factor;
     this->constant = constant;
-    this->minTimestep = float(sys.getSystemTimeResUS()) / 2000000.0f;
+    this->minTimestepUS = 1000.0f;
 }
 
-void Filter::setTarget(float target)
+void Filter::setTarget(float target, bool force)
 {
+    if (target < 0.0f)
+    {
+        target = 0.0f;
+    }
+    if (force)
+    {
+        value = target;
+    }
     if (this->target != target)
     {
-        timeUS = sys.getSystemTimeUS();
+        lastTimeUS = sys.getSystemTimeUS();
         targetReached = false;
-        if (target < 0.0f)
-        {
-            this->target = 0.0f;
-        }
-        else
-        {
-            this->target = target;
-        }
+        this->target = target;
         if (this->target > value)
         {
             dir = 1;
@@ -56,11 +57,12 @@ float Filter::getFiltered()
     if (!targetReached)
     {
         uint32_t currentTimeUS = sys.getSystemTimeUS();
-        float timestep = float(currentTimeUS - timeUS) / 1000000.0f;
+        float timestep = currentTimeUS - lastTimeUS;
 
-        if (timestep > minTimestep)
+        if (timestep > minTimestepUS)
         {
-            timeUS = currentTimeUS;
+            lastTimeUS = currentTimeUS;
+            timestep /= 1000000.0f;
             timestep *= dir;
             value = value * powf(factor, timestep) + constant * timestep;
             if ((dir > 0 && value >= this->target) || (dir < 0 && value <= this->target))

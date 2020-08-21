@@ -26,7 +26,7 @@ class System
 public:
     System();
     virtual ~System();
-    void init(uint32_t clockFreq, void (*ISR)(void));
+    void init(void (*ISR)(void));
     uint32_t getClockFreq();
     uint32_t getPIOSCFreq();
     void error();
@@ -36,6 +36,7 @@ public:
     void setSystemTimeResUS(uint32_t us);
     uint32_t getSystemTimeResUS();
     void delayUS(uint32_t us);
+    uint32_t rand(uint32_t lower, uint32_t upper);
 private:
     static constexpr uint32_t clockFreq = 120000000;
     static constexpr uint32_t clockTicksUS = clockFreq / 1000000;

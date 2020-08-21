@@ -1,18 +1,17 @@
 /*
- * Nextion.h
+ * UART.h
  *
- *  Created on: 26.03.2020
- *      Author: Max Zuidberg
+ *  Created on: 20.08.2020
+ *      Author: Max
  */
 
-#ifndef NEXTION_H_
-#define NEXTION_H_
+#ifndef UART_H_
+#define UART_H_
 
 
-
-#include <stdbool.h>
+#include <ByteBuffer.h>
 #include <stdint.h>
-#include <stdarg.h>
+#include <stdbool.h>
 #include "inc/hw_memmap.h"              // Macros defining the memory map of the Tiva C Series device. This includes defines such as peripheral base address locations such as GPIO_PORTF_BASE.
 #include "inc/hw_types.h"               // Defines common types and macros.
 #include "inc/hw_gpio.h"                // Defines and Macros for GPIO hardware.
@@ -23,42 +22,29 @@
 #include "driverlib/gpio.h"             // Defines and macros for GPIO API of DriverLib. This includes API functions such as GPIOPinWrite.
 #include "driverlib/interrupt.h"        // Defines and macros for NVIC Controller (Interrupt) API of driverLib. This includes API functions such as IntEnable and IntPrioritySet.
 #include "driverlib/uart.h"             // Defines and macros for UART API of driverLib.
-#include "uartstdio.h"
 #include "System.h"
 
 
 extern System sys;
 
 
-class Nextion
+class UART
 {
 public:
-    Nextion();
-    virtual ~Nextion();
-    void init(uint32_t portNumber, uint32_t baudRate, uint32_t timeoutUS = 300000);
-    void sendCmd(const char* cmd);
-    void setTxt(const char* comp, const char* txt);
-    void setVal(const char* comp, uint32_t val);
-    void setPage(const char* page);
-    void setPage(uint32_t page);
-    void setTimeoutUS(uint32_t us);
-    void flushRx();
-    void printf(const char *pcString, ...);
-    void disableStdio();
-    void enableStdio();
-    uint32_t getUARTBase();
-    uint32_t getUARTPeriph();
-    uint32_t getBaudRate();
-    uint32_t charsAvail();
-    uint32_t peek(const char c);
-    char getChar();
-    uint32_t getVal(const char* comp);
-    char* getTxt(const char* comp);
-    static constexpr uint32_t receiveErrorVal   = 424242420;
-    static constexpr uint32_t receiveTimeoutVal = 424242421;
+    UART();
+    virtual ~UART();
+    void init(uint32_t port, uint32_t rxPin, uint32_t txPin, uint32_t baudRate, void (*rxISR)(void),
+              uint32_t intPriority = DEFAULT_INT_PRIO, bool buffered = true);
+    void init(uint32_t uartNum, uint32_t baudRate, void (*rxISR)(void),
+              uint32_t intPriority = DEFAULT_INT_PRIO, bool buffered = true);
+    void sendChar(uint8_t chr);
+    void ISR();
+    ByteBuffer buffer;
+    static constexpr uint32_t DEFAULT_INT_PRIO = 42424242;
 
 private:
-    // UART mapping
+    uint32_t uartNum  = 0;
+    uint32_t uartBase = 0;
     static constexpr uint32_t UART_SYSCTL_PERIPH      = 0;
     static constexpr uint32_t UART_BASE               = 1;
     static constexpr uint32_t UART_PORT_SYSCTL_PERIPH = 2;
@@ -76,26 +62,6 @@ private:
                                          {SYSCTL_PERIPH_UART5, UART5_BASE, SYSCTL_PERIPH_GPIOC, GPIO_PORTC_BASE, GPIO_PC6_U5RX, GPIO_PC7_U5TX, GPIO_PIN_6, GPIO_PIN_7, INT_UART5},
                                          {SYSCTL_PERIPH_UART6, UART6_BASE, SYSCTL_PERIPH_GPIOP, GPIO_PORTP_BASE, GPIO_PP0_U6RX, GPIO_PP1_U6TX, GPIO_PIN_0, GPIO_PIN_1, INT_UART6},
                                          {SYSCTL_PERIPH_UART7, UART7_BASE, SYSCTL_PERIPH_GPIOC, GPIO_PORTC_BASE, GPIO_PC4_U7RX, GPIO_PC5_U7TX, GPIO_PIN_4, GPIO_PIN_5, INT_UART7}};
-
-
-    static constexpr char* endStr = "\xff\xff\xff";
-
-    // Constants for communication with the nextion touch display
-    static constexpr uint32_t TOUCH_EVENT_DATA    = 0x65;
-    static constexpr uint32_t PAGE_ID             = 0x66;
-    static constexpr uint32_t TOUCH_COORD         = 0x67;
-    static constexpr uint32_t TOUCH_EVENT_SLEEP   = 0x68;
-    static constexpr uint32_t STRING_DATA         = 0x70;
-    static constexpr uint32_t INT_DATA            = 0x71;
-    static constexpr uint32_t ENTER_SLEEP         = 0x86;
-    static constexpr uint32_t WAKE_UP             = 0x87;
-    static constexpr uint32_t STARTUP_OK          = 0x88;
-
-    uint32_t timeoutUS = 300000;
-    uint32_t UARTNum = 0;
-    uint32_t baudRate = 0;
-    static constexpr uint32_t readDataSize = 100;
-    char readData[readDataSize];
 };
 
-#endif /* NEXTION_H_ */
+#endif /* UART_H_ */
