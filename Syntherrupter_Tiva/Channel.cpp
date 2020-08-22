@@ -38,6 +38,7 @@ void Channel::resetControllers()
     coarseTuning                 = 0;
     RPN                          = 0x7f7f;
     NRPN                         = 0x7f7f;
+    changed                      = true;
 }
 
 void Channel::resetNRPs()
@@ -48,4 +49,5 @@ void Channel::resetNRPs()
     notePanTargetRangeHigh = 1.0f;
     notePanEnabled         = false;
     notePanOmniMode        = false;
+    changed                      = true;
 }

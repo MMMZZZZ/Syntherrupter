@@ -26,6 +26,7 @@ void Coil::init(uint32_t coilNum)
     filteredOntimeUS.init(2.0f, 30.0f);
     one.init(num);
     midi.setCoilNum(num);
+    midi.setCoilsToneList(&toneList);
 }
 
 void Coil::setMaxDutyPerm(uint32_t dutyPerm)
@@ -63,14 +64,12 @@ void Coil::output()
         }
     }
     /*
-     * Overflow detection. No ontime or min offtime is larger than 10
-     * seconds.
-     * Note: In theory you'd need a similar detection for the
-     * currentNote->nextFireUS variables above. In practice this means that
-     * the notes playing during the overflow will stop playing but the next
-     * notes will be fine. Therefore it is not worth the additional CPU
-     * time to check each time for an overflow. Remember, it only happens
-     * less than once an hour.
+     * Overflow detection. No ontime or min offtime is larger than 10 seconds.
+     * Note: In theory you'd need a similar detection for the tone.nextFireUS
+     * variables. In practice this means that the tones playing during the
+     * overflow will stop playing but the next tones will be fine. Therefore
+     * it is not worth the additional CPU time to check each time for an
+     * overflow. Remember, it only happens less than once an hour.
      */
     else if (nextAllowedFireUS - timeUS > 10000000)
     {

@@ -5,7 +5,13 @@
  *      Author: Max Zuidberg
  */
 
+
 #include <GUI.h>
+
+
+constexpr uint32_t GUI::EES;
+constexpr uint8_t  GUI::EED[GUI::EES][4];
+
 
 GUI::GUI()
 {
@@ -14,6 +20,7 @@ GUI::GUI()
 
 GUI::~GUI()
 {
+
 }
 
 void GUI::init()

@@ -12,23 +12,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <math.h>
-#include "inc/hw_memmap.h"              // Macros defining the memory map of the Tiva C Series device. This includes defines such as peripheral base address locations such as GPIO_PORTF_BASE.
-#include "inc/hw_types.h"               // Defines common types and macros.
-#include "inc/hw_gpio.h"                // Defines and Macros for GPIO hardware.
-#include "inc/hw_uart.h"                // Defines and macros used when accessing the UART.
-#include "inc/hw_ints.h"
-#include "driverlib/pin_map.h"          // Mapping of peripherals to pins for all parts.
-#include "driverlib/sysctl.h"           // Defines and macros for System Control API of DriverLib. This includes API functions such as SysCtlClockSet.
-#include "driverlib/gpio.h"             // Defines and macros for GPIO API of DriverLib. This includes API functions such as GPIOPinWrite.
-#include "driverlib/interrupt.h"        // Defines and macros for NVIC Controller (Interrupt) API of driverLib. This includes API functions such as IntEnable and IntPrioritySet.
-#include "driverlib/uart.h"             // Defines and macros for UART API of driverLib.
 #include "InterrupterConfig.h"
 #include "System.h"
-#include "Coil.h"
 #include "Channel.h"
 #include "UART.h"
 #include "ByteBuffer.h"
 #include "Note.h"
+#include "ToneList.h"
 
 
 extern System sys;
@@ -40,10 +30,11 @@ public:
     MIDI();
     virtual ~MIDI();
     static void init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPort, uint32_t midiUartRx, uint32_t midiUartTx, void (*midiISR)(void));
+    void updateToneList();
+    void setCoilsToneList(ToneList* tonelist);
     void setCoilNum(uint32_t num);
     static void start();
     static void stop();
-    static bool processBuffer(uint32_t b);
     static void resetNRPs(uint32_t chns = 0xffff);
     void setVolSettings(float ontimeUSMax, float dutyMax);
     void setChannels(uint32_t chns);
@@ -51,13 +42,15 @@ public:
     void setPanReach(uint32_t reach);
     void setMaxVoices(uint32_t maxVoices);
     static bool isPlaying();
-    void process();
+    static void process(bool force = false);
     static Channel channels[16];
     static UART usbUart, midiUart;
     static ByteBuffer otherBuffer;
 
 private:
-    void updateEffects();
+    static bool processBuffer(uint32_t b);
+    static void updateEffects();
+    void setPanVol(Note* note);
     static float getLFOVal(uint32_t channel);
     static void removeDeadNotes();
     static constexpr uint32_t UART_SYSCTL_PERIPH      = 0;
@@ -102,7 +95,7 @@ private:
     // 5: Staccato (no long notes possible. They're short. Always.
     // 6: Legator (release = prolonged sustain)
     //                                                                 Attack Amp/Invers Dur.       Decay Amp/Invers Dur.        Sustain Amp/Invers Dur.       Release Amp/Invers Dur.
-    const float ADSR_PROGRAMS[ADSR_PROGRAM_COUNT + 1][9] = {{1.0f,              1.0f,     1.0f,              1.0f,     1.0f,               1.0f,      0.0f,              1.0f},
+    static constexpr float ADSR_PROGRAMS[ADSR_PROGRAM_COUNT + 1][9] = {{1.0f,              1.0f,     1.0f,              1.0f,     1.0f,               1.0f,      0.0f,              1.0f},
 
                                                                       {1.0f, 1.0f /   30000.0f,     0.5f, 1.0f /   10000.0f,     0.10f, 1.0f /  3500000.0f,     0.0f, 1.0f /   10000.0f},
                                                                       {1.0f, 1.0f / 4000000.0f,     1.0f, 1.0f /       1.0f,     1.00f, 1.0f /        1.0f,     0.0f, 1.0f / 1000000.0f},
@@ -116,13 +109,14 @@ private:
     };
     static constexpr uint32_t effectResolutionUS = 1000;
 
+    static constexpr uint32_t    bufferCount = 3;
+    static constexpr ByteBuffer* bufferList[bufferCount] = {&(usbUart.buffer), &(midiUart.buffer), &otherBuffer};;
+    static uint8_t               bufferMidiStatus[bufferCount];
     static constexpr uint32_t totalNotesLimit = 64;
-    static constexpr uint32_t bufferCount = 3;
-    static constexpr ByteBuffer* bufferList[bufferCount] = {&(usbUart.buffer), &(midiUart.buffer), &otherBuffer};
-    static uint8_t bufferMidiStatus[bufferCount];
-    static Note notes[totalNotesLimit];
-    static Note * orderedNotes[totalNotesLimit];
-    static uint32_t notesCount;
+    static Note               notes[totalNotesLimit];
+    static Note*              orderedNotes[totalNotesLimit];
+    static uint32_t           notesCount;
+    ToneList* tonelist;
     float absFreq               =  0.0f;
     float singleNoteMaxDuty     =  0.0f;
     float singleNoteMaxOntimeUS =  0.0f;
@@ -133,23 +127,14 @@ private:
     uint32_t coilMaxVoices      =  0;
     uint32_t rawOntime          =  0;
     uint32_t coilNum            =  0;
+    uint8_t  coilBit            =  0;
     bool coilChange             = false;
+    bool coilPanChanged         = false;
     bool panConstVol            = false;
-    static constexpr uint32_t UARTBufferSize = 1024;
-    volatile uint8_t UARTBuffer[UARTBufferSize];
-    volatile uint32_t UARTBufferWriteIndex = 0;
-    volatile uint32_t UARTBufferReadIndex = 0;
 
-    uint8_t  data[3]   = {0, 0, 0};
-    uint8_t  dataIndex = 0;
-    uint32_t channel = 0;
-
-    bool ADSREnabled  = false;
-    float ADSRTimeUS = 0.0f;
+    static float ADSRTimeUS;
     static bool playing;
-    uint32_t USBUARTNum, MIDUARTNum;
-    uint32_t USBUARTBase, MIDUARTBase;
-    static const float LFOPeriodUS          = 200000.0f;
+    static constexpr float LFOPeriodUS          = 200000.0f;
 };
 
 #endif /* H_ */

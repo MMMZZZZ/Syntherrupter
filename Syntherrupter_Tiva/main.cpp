@@ -59,12 +59,24 @@ int main(void)
             // Run non-static coil object methods
             for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
-                coils[coil].output();
+                coils[coil].midi.updateToneList();
             }
+
             // Generate output
             for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
                 coils[coil].output();
+            }
+        }
+        else
+        {
+            for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+            {
+                for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
+                {
+                    ToneList* tl = &(coils[coil].toneList);
+                    tl->deleteTone(tl->tones[tone]);
+                }
             }
         }
     }

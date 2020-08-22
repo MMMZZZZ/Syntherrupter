@@ -46,6 +46,7 @@ public:
     bool notePanOmniMode         = false;
     bool sustainPedal            = false;
     bool damperPedal             = false;
+    bool changed                 = true;
 };
 
 #endif /* CHANNEL_H_ */

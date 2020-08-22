@@ -32,6 +32,13 @@ void Tone::update(uint32_t timeUS)
             periodTolUS   = periodUS >> periodTolShift;
             break;
         }
+        case Type::newdflt:
+        {
+            periodTolUS   = periodUS >> periodTolShift;
+            nextFireUS    = 0;
+            type          = Type::dflt;
+            break;
+        }
     }
     if (nextFireUS)
     {
@@ -43,4 +50,5 @@ void Tone::update(uint32_t timeUS)
         // New note
         nextFireUS = timeUS;
     }
+    nextFireEndUS = nextFireUS + periodTolUS;
 }

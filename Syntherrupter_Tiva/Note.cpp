@@ -10,7 +10,10 @@
 Note::Note()
 {
     // TODO Auto-generated constructor stub
-
+    for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+    {
+        panVol[coil] = 1.0f;
+    }
 }
 
 Note::~Note()
@@ -18,3 +21,7 @@ Note::~Note()
     // TODO Auto-generated destructor stub
 }
 
+bool Note::isDead()
+{
+    return ((ADSRMode != 'A' && ADSRVolume < 0.1f) || number > 127);
+}

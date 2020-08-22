@@ -33,11 +33,11 @@ void ToneList::removeDeadTones()
         {
             break;
         }
-        if ((tones[tone]->ADSRMode != 'A' && tones[tone]->ADSROntimeUS < 0.1f)
-            || !tones[tone]->nextFireUS)
+        if (!tones[tone]->ontimeUS || !tones[tone]->nextFireUS)
         {
             deadTones++;
-            tones[tone]->number     = 0;
+            tones[tone]->owner      = 0;
+            tones[tone]->origin     = 0;
             tones[tone]->nextFireUS = 0;
         }
         else if (deadTones)
@@ -50,16 +50,46 @@ void ToneList::removeDeadTones()
     activeTones -= deadTones;
 }
 
-/*
-Tone* ToneList::getFreeTone()
+uint32_t ToneList::available()
 {
-    if (activeTones < MAX_VOICES)
-    {
-        newToneIndex = ++activeTones;
-    }
-    newTone = tones[activeTones];
+    return (MAX_VOICES - activeTones);
 }
-*/
+
+Tone* ToneList::updateTone(uint32_t ontimeUS, uint32_t periodUS, void* owner, void* origin, Tone* tone)
+{
+    Tone* targetTone = 0;
+    if (tone)
+    {
+        if ((uint32_t) tone >= (uint32_t) tones && (uint32_t) tone <= (uint32_t) tones + MAX_VOICES)
+        {
+            targetTone = tone;
+        }
+    }
+    else if (activeTones < MAX_VOICES)
+    {
+        newToneIndex     = activeTones++;
+        targetTone       = tones[activeTones];
+        targetTone->type = Tone::Type::newdflt;
+    }
+    if (targetTone)
+    {
+        targetTone->ontimeUS = ontimeUS;
+        targetTone->periodUS = periodUS;
+        targetTone->owner    = owner;
+        targetTone->origin   = origin;
+        return targetTone;
+    }
+    return 0;
+}
+
+void ToneList::deleteTone(Tone* tone)
+{
+    if ((uint32_t) tone >= (uint32_t) tones && (uint32_t) tone <= (uint32_t) tones + MAX_VOICES)
+    {
+        tone->ontimeUS = 0;
+        removeDeadTones();
+    }
+}
 
 void ToneList::saveNewTone()
 {
