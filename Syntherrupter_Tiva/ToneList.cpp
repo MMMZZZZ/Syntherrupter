@@ -15,8 +15,6 @@ ToneList::ToneList()
     {
         tones[tone] = &(unorderedTones[tone]);
     }
-    newTone = tones[0];
-    simpleTone = 0;
 }
 
 ToneList::~ToneList()
@@ -58,25 +56,28 @@ uint32_t ToneList::available()
 Tone* ToneList::updateTone(uint32_t ontimeUS, uint32_t periodUS, void* owner, void* origin, Tone* tone)
 {
     Tone* targetTone = 0;
-    if (tone)
+    if (tone != ((Tone*) 0))
     {
-        if ((uint32_t) tone >= (uint32_t) tones && (uint32_t) tone <= (uint32_t) tones + MAX_VOICES)
+        if (tone->owner == owner)
         {
             targetTone = tone;
         }
     }
-    else if (activeTones < MAX_VOICES)
+    else if (activeTones < maxVoices)
     {
-        newToneIndex     = activeTones++;
-        targetTone       = tones[activeTones];
+        targetTone       = tones[activeTones++];
         targetTone->type = Tone::Type::newdflt;
     }
     if (targetTone)
     {
         targetTone->ontimeUS = ontimeUS;
-        targetTone->periodUS = periodUS;
         targetTone->owner    = owner;
         targetTone->origin   = origin;
+        if (periodUS != targetTone->periodUS)
+        {
+            targetTone->periodUS = periodUS;
+            targetTone->update(sys.getSystemTimeUS());
+        }
         return targetTone;
     }
     return 0;
@@ -84,20 +85,11 @@ Tone* ToneList::updateTone(uint32_t ontimeUS, uint32_t periodUS, void* owner, vo
 
 void ToneList::deleteTone(Tone* tone)
 {
-    if ((uint32_t) tone >= (uint32_t) tones && (uint32_t) tone <= (uint32_t) tones + MAX_VOICES)
+    if (tone != ((Tone*) 0))
     {
         tone->ontimeUS = 0;
         removeDeadTones();
     }
-}
-
-void ToneList::saveNewTone()
-{
-    if (activeTones < MAX_VOICES)
-    {
-        newToneIndex = ++activeTones;
-    }
-    newTone = tones[activeTones];
 }
 
 void ToneList::setMaxOntimeUS(float maxOntimeUS)
@@ -110,21 +102,31 @@ void ToneList::setMaxDuty(float maxDuty)
     this->maxDuty = maxDuty;
 }
 
+void ToneList::setMaxVoices(uint32_t maxVoices)
+{
+    if (maxVoices > MAX_VOICES)
+    {
+        maxVoices = MAX_VOICES;
+    }
+    this->maxVoices = maxVoices;
+}
+
 void ToneList::limit()
 {
     float totalDuty = 0.0f;
     for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
     {
-        if (tone < activeTones)
+        if (tone >= activeTones)
         {
-            float ontimeUS = tones[tone]->ontimeUS;
-            if (ontimeUS > maxOntimeUS)
-            {
-                tones[tone]->ontimeUS = maxOntimeUS;
-                ontimeUS = maxOntimeUS;
-            }
-            totalDuty += ontimeUS / float(tones[tone]->periodUS);
+            break;
         }
+        float ontimeUS = tones[tone]->ontimeUS;
+        if (ontimeUS > maxOntimeUS)
+        {
+            tones[tone]->ontimeUS = maxOntimeUS;
+            ontimeUS = maxOntimeUS;
+        }
+        totalDuty += ontimeUS / float(tones[tone]->periodUS);
     }
     if (totalDuty > maxDuty)
     {
@@ -132,33 +134,14 @@ void ToneList::limit()
 
         // Factor by which ontimes must be reduced.
         totalDuty = maxDuty / totalDuty;
-        for (uint32_t tone = 0; tone < activeTones; tone++)
+        for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
         {
+            if (tone >= activeTones)
+            {
+                break;
+            }
             tones[tone]->ontimeUS *= totalDuty;
         }
-    }
-}
-
-void ToneList::setSimpleTone(float ontimeUS, float frequency)
-{
-    if (!ontimeUS)
-    {
-        if (simpleTone)
-        {
-            simpleTone->nextFireUS = 0;
-            removeDeadTones();
-        }
-    }
-    else
-    {
-        if (!simpleTone)
-        {
-            simpleTone = newTone;
-            saveNewTone();
-        }
-        simpleTone->periodUS = 1e6f / frequency;
-        simpleTone->ontimeUS = ontimeUS;
-        simpleTone->update(sys.getSystemTimeUS());
     }
 }
 
@@ -171,20 +154,21 @@ uint32_t ToneList::getOntimeUS(uint32_t timeUS)
     uint32_t highestOntimeUS = 0;
     for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
     {
-        if (tone < activeTones)
+        if (tone >= activeTones)
         {
-            Tone *currentTone = tones[tone];
-            if (timeUS >= currentTone->nextFireUS)
+            break;
+        }
+        Tone *currentTone = tones[tone];
+        if (timeUS >= currentTone->nextFireUS)
+        {
+            if (timeUS < currentTone->nextFireEndUS)
             {
-                if (timeUS < currentTone->nextFireEndUS)
+                if (currentTone->ontimeUS > highestOntimeUS)
                 {
-                    if (currentTone->ontimeUS > highestOntimeUS)
-                    {
-                        highestOntimeUS = currentTone->ontimeUS;
-                    }
+                    highestOntimeUS = currentTone->ontimeUS;
                 }
-                currentTone->update(timeUS);
             }
+            currentTone->update(timeUS);
         }
     }
     return highestOntimeUS;

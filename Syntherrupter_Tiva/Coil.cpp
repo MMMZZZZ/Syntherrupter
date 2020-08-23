@@ -22,8 +22,7 @@ void Coil::init(uint32_t coilNum)
     num = coilNum;
     // As of now all coils share the same filter settings. However this is
     // not mandatory.
-    filteredFrequency.init(1.8f, 5.0f);
-    filteredOntimeUS.init(2.0f, 30.0f);
+    simple.init(&toneList, 2.0f, 30.0f, 1.8f, 5.0f);
     one.init(num);
     midi.setCoilNum(num);
     midi.setCoilsToneList(&toneList);
@@ -36,6 +35,7 @@ void Coil::setMaxDutyPerm(uint32_t dutyPerm)
 
 void Coil::setMaxVoices(uint32_t maxVoices)
 {
+    toneList.setMaxVoices(maxVoices);
 }
 
 void Coil::setMaxOntimeUS(uint32_t ontimeUS)
@@ -44,11 +44,10 @@ void Coil::setMaxOntimeUS(uint32_t ontimeUS)
     toneList.setMaxOntimeUS(ontimeUS);
 }
 
-void Coil::simpleToneUpdate()
+void Coil::update()
 {
-    float o = filteredOntimeUS.getFiltered();
-    float f = filteredFrequency.getFiltered();
-    toneList.setSimpleTone(o, f);
+    simple.updateToneList();
+    midi.updateToneList();
 }
 
 void Coil::output()

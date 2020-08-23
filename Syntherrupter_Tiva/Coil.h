@@ -13,9 +13,9 @@
 #include <stdbool.h>
 #include "InterrupterConfig.h"
 #include "Oneshot.h"
-#include "Filter.h"
 #include "ToneList.h"
 #include "MIDI.h"
+#include "Simple.h"
 
 
 class Coil
@@ -28,11 +28,11 @@ public:
     void setMaxDutyPerm(uint32_t dutyPerm);
     void setMaxOntimeUS(uint32_t ontimeUS);
     void setMaxVoices(uint32_t voices);
+    void update();
     Oneshot  one;
-    Filter   filteredOntimeUS;
-    Filter   filteredFrequency;
     ToneList toneList;
     MIDI midi;
+    Simple simple;
 
     uint32_t minOffUS          = 50;
     uint32_t maxOntimeUS       = 10;
@@ -41,7 +41,6 @@ public:
 
 private:
     uint32_t num = 0;
-    void simpleToneUpdate();
 };
 
 #endif /* COIL_H_ */

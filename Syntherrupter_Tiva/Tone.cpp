@@ -40,15 +40,15 @@ void Tone::update(uint32_t timeUS)
             break;
         }
     }
-    if (nextFireUS)
+    if (!nextFireUS || (timeUS + 4 * periodUS) < nextFireUS)
     {
-        // Note that is already playing
-        nextFireUS += periodUS;
+        // New note or at least different period
+        nextFireUS = timeUS;
     }
     else
     {
-        // New note
-        nextFireUS = timeUS;
+        // Note that is already playing
+        nextFireUS += periodUS;
     }
     nextFireEndUS = nextFireUS + periodTolUS;
 }

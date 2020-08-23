@@ -442,8 +442,8 @@ void GUI::simple()
             {
                 uint32_t ontimeUS  = (commandData[2] << 8) + commandData[1];
                 uint32_t frequency = (commandData[4] << 8) + commandData[3];
-                coils[i].filteredOntimeUS.setTarget(ontimeUS);
-                coils[i].filteredFrequency.setTarget(frequency);
+                coils[i].simple.setOntimeUS(ontimeUS);
+                coils[i].simple.setFrequency(frequency);
             }
         }
         // Data applied; clear command byte.
@@ -455,7 +455,7 @@ void GUI::simpleExit()
 {
     for (uint32_t i = 0; i < COIL_COUNT; i++)
     {
-        coils[i].filteredOntimeUS.setTarget(0.0f);
+        coils[i].simple.setOntimeUS(0.0f, true);
     }
 }
 

@@ -16,8 +16,7 @@
 System sys;
 Coil coils[COIL_COUNT];
 
-extern "C"
-{
+
 void sysTickISR()
 {
     sys.systemTimeIncrement();
@@ -32,7 +31,7 @@ void uartMidiISR()
 {
     coils->midi.midiUart.ISR();
 }
-}
+
 
 int main(void)
 {
@@ -51,6 +50,7 @@ int main(void)
     while (42)
     {
         uint32_t state = gui.update();
+
         if (state)
         {
             // Use coils[0] objects for calling their static methods.
@@ -59,7 +59,7 @@ int main(void)
             // Run non-static coil object methods
             for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
-                coils[coil].midi.updateToneList();
+                coils[coil].update();
             }
 
             // Generate output
@@ -70,6 +70,8 @@ int main(void)
         }
         else
         {
+            // Emergency stop or something similar. Don't generate outputs
+            // and delete all tones
             for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
                 for (uint32_t tone = 0; tone < MAX_VOICES; tone++)

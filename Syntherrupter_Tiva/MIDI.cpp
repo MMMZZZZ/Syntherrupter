@@ -595,6 +595,7 @@ void MIDI::process(bool force)
                     note->rawVolume *= 0.6f;
                 }
 
+                float oldPan = note->pan;
                 if (channel->notePanEnabled)
                 {
                     /*
@@ -623,6 +624,11 @@ void MIDI::process(bool force)
                 {
                     note->pan = channel->pan;
                 }
+                if (note->pan != oldPan)
+                {
+                    note->panChanged = COIL_COUNT;
+                }
+
                 note->rawVolume *= channel->volume * channel->expression;
             }
             else if (!channel->sustainPedal)

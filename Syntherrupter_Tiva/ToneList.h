@@ -28,22 +28,19 @@ public:
     Tone* updateTone(uint32_t ontimeUS, uint32_t periodUS, void* owner, void* origin, Tone* tone);
     void deleteTone(Tone* tone);
     void removeDeadTones();
-    void saveNewTone();
     void setMaxOntimeUS(float ontimeUSLimit);
     void setMaxDuty(float maxDuty);
+    void setMaxVoices(uint32_t maxVoices);
     void limit();
-    void setSimpleTone(float ontimeUS, float frequency);
     uint32_t getOntimeUS(uint32_t timeUS = 0);
-    Tone* newTone;
     Tone* tones[MAX_VOICES];
-    Tone* simpleTone;
-    uint32_t activeTones = 0;
 
 private:
     float maxOntimeUS = 10;
     float maxDuty = 0.01f;
+    uint32_t maxVoices = 8;
+    uint32_t activeTones = 0;
     Tone unorderedTones[MAX_VOICES];
-    uint32_t newToneIndex = 0;
 };
 
 #endif /* TONES_H_ */
