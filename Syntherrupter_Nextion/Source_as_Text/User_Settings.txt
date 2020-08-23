@@ -1260,7 +1260,7 @@ Page User_Settings
                     if(user0Duty.val>511)
                     {
                         // Duty [in 1/1000] must be smaller than 512 (9 bits)
-                        sys0=511
+                        user0Duty.val=511
                     }
                     //
                     sys0=user1Ontime.val/10
@@ -1282,7 +1282,7 @@ Page User_Settings
                     if(user1Duty.val>511)
                     {
                         // Duty [in 1/1000] must be smaller than 512 (9 bits)
-                        sys0=511
+                        user1Duty.val=511
                     }
                     //
                     sys0=user2Ontime.val/10
@@ -1304,6 +1304,6 @@ Page User_Settings
                     if(user2Duty.val>511)
                     {
                         // Duty [in 1/1000] must be smaller than 512 (9 bits)
-                        sys0=511
+                        user2Duty.val=511
                     }
                 
