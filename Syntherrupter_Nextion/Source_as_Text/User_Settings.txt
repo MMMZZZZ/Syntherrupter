@@ -308,7 +308,7 @@ Page User_Settings
                 Touch Press Event
                     
                 Touch Release Event
-                    if(tUser.txt!=u0Name.txt)
+                    if(userNum.val!=0)
                     {
                         Keyboard.origin.val=dp
                         Keyboard.target.val=u0Name.id
@@ -328,7 +328,7 @@ Page User_Settings
                 
                 Touch Release Event
                     tU0Code.pw=1
-                    if(tUser.txt!=u0Name.txt)
+                    if(userNum.val!=0)
                     {
                         Keyboard.origin.val=dp
                         Keyboard.target.val=u0Code.id
@@ -357,7 +357,7 @@ Page User_Settings
                 Touch Press Event
                     
                 Touch Release Event
-                    if(tUser.txt!=u0Name.txt)
+                    if(userNum.val!=0)
                     {
                         Keyboard.origin.val=dp
                         Keyboard.target.val=u1Name.id
@@ -377,7 +377,7 @@ Page User_Settings
                 
                 Touch Release Event
                     tU1Code.pw=1
-                    if(tUser.txt!=u0Name.txt)
+                    if(userNum.val!=0)
                     {
                         Keyboard.origin.val=dp
                         Keyboard.target.val=u1Code.id
@@ -417,7 +417,7 @@ Page User_Settings
                 Touch Press Event
                     
                 Touch Release Event
-                    if(tUser.txt==u2Name.txt)
+                    if(userNum.val==2)
                     {
                         Keyboard.origin.val=dp
                         Keyboard.target.val=u2Name.id
@@ -437,7 +437,7 @@ Page User_Settings
                 
                 Touch Release Event
                     tU2Code.pw=1
-                    if(tUser.txt==u2Name.txt)
+                    if(userNum.val==2)
                     {
                         Keyboard.origin.val=dp
                         Keyboard.target.val=u2Code.id
@@ -678,7 +678,7 @@ Page User_Settings
                 Touch Press Event
                     // Check if values are legal
                     click fCheck,0
-                    if(tUser.txt==u2Name.txt)
+                    if(userNum.val==2)
                     {
                         // Reset push state of last selected value
                         b[newValTargetId.val].bco=idle.bco
