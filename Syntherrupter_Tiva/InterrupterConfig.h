@@ -29,8 +29,8 @@
 #ifdef COIL_COUNT_6
 #define COIL_COUNT 6
 #endif
-#ifdef DEBUG
-#define COIL_COUNT 6
+#ifdef TEABUG
+#define COIL_COUNT 1
 #endif
 
 #define MAX_VOICES 16
