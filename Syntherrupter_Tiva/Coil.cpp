@@ -35,6 +35,7 @@ void Coil::setMaxDutyPerm(uint32_t dutyPerm)
 
 void Coil::setMaxVoices(uint32_t maxVoices)
 {
+    midi.setMaxVoices(maxVoices);
     toneList.setMaxVoices(maxVoices);
 }
 

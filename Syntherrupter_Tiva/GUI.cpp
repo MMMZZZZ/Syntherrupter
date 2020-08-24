@@ -577,7 +577,6 @@ void GUI::midiLive()
             }
         }
     }
-    coils->midi.process();
 }
 
 void GUI::midiLiveExit()

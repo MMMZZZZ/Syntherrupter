@@ -89,6 +89,7 @@ bool MIDI::processBuffer(uint32_t b)
         {
             bufferMidiStatus[b] = c1;
         }
+        buffer->remove();
     }
     else
     {
@@ -106,14 +107,18 @@ bool MIDI::processBuffer(uint32_t b)
                     {
                         break;
                     }
-                    if (c1 == notes[note].number && channel == notes[note].channel)
+                    if (c1 == orderedNotes[note]->number && channel == orderedNotes[note]->channel)
                     {
-                        notes[note].velocity = 0;
-                        notes[note].changed  = true;
+                        orderedNotes[note]->velocity = 0;
+                        orderedNotes[note]->changed  = true;
                         break;
                     }
                 }
                 buffer->remove(2);
+            }
+            else
+            {
+                return false;
             }
             break;
         case 0x90: // Note on
@@ -170,7 +175,6 @@ bool MIDI::processBuffer(uint32_t b)
                         orderedNotes[targetNote]->velocity = c2;
                         orderedNotes[targetNote]->ADSRMode = 'A';
                         orderedNotes[targetNote]->channel  = channel;
-                        orderedNotes[targetNote]->assignedTone = 0;
                         orderedNotes[targetNote]->changed  = true;
                     }
                 }
@@ -182,15 +186,19 @@ bool MIDI::processBuffer(uint32_t b)
                         {
                             break;
                         }
-                        if (c1 == notes[note].number && channel == notes[note].channel)
+                        if (c1 == orderedNotes[note]->number && channel == orderedNotes[note]->channel)
                         {
-                            notes[note].velocity = 0;
-                            notes[note].changed  = true;
+                            orderedNotes[note]->velocity = 0;
+                            orderedNotes[note]->changed  = true;
                             break;
                         }
                     }
                 }
                 buffer->remove(2);
+            }
+            else
+            {
+                return false;
             }
             break;
         case 0xA0: // Polyphonic Aftertouch
@@ -210,6 +218,10 @@ bool MIDI::processBuffer(uint32_t b)
                     }
                 }
                 buffer->remove(2);
+            }
+            else
+            {
+                return false;;
             }
             break;
         case 0xB0: // Control Change / Channel Mode
@@ -407,6 +419,10 @@ bool MIDI::processBuffer(uint32_t b)
                 }
                 buffer->remove(2);
             }
+            else
+            {
+                return false;
+            }
             break;
         case 0xE0: // Pitch Bend
             if (bufferLevel >= 2)
@@ -416,6 +432,10 @@ bool MIDI::processBuffer(uint32_t b)
                 channels[channel].pitchBend -= 8192.0f;
                 channels[channel].changed = true;
                 buffer->remove(2);
+            }
+            else
+            {
+                return false;
             }
             break;
         case 0xD0: // Channel Aftertouch
@@ -566,7 +586,8 @@ void MIDI::process(bool force)
     // Process all data that's in the buffer.
     for (uint32_t i = 0; i < bufferCount; i++)
     {
-        processBuffer(i);
+        // As long as there's data left to process in the buffer, do it.
+        while (processBuffer(i));
     }
 
     for (uint32_t noteNum = 0; noteNum < totalNotesLimit; noteNum++)
@@ -839,9 +860,9 @@ void MIDI::updateToneList()
             else
             {
                 setPanVol(note);
-                if (lastTone && voicesLeft--)
+                if (lastTone/* && voicesLeft--*/)
                 {
-                    float periodUS = 1.0f / note->frequency;
+                    float periodUS = 1e6f / note->frequency;
                     float ontimeUS = note->finishedVolume * note->panVol[coilNum];
                     if (note->frequency >= absFreq)
                     {

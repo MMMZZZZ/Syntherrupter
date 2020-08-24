@@ -70,14 +70,10 @@ Tone* ToneList::updateTone(uint32_t ontimeUS, uint32_t periodUS, void* owner, vo
     }
     if (targetTone)
     {
+        targetTone->periodUS = periodUS;
         targetTone->ontimeUS = ontimeUS;
         targetTone->owner    = owner;
         targetTone->origin   = origin;
-        if (periodUS != targetTone->periodUS)
-        {
-            targetTone->periodUS = periodUS;
-            targetTone->update(sys.getSystemTimeUS());
-        }
         return targetTone;
     }
     return 0;
