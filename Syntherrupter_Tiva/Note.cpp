@@ -23,5 +23,5 @@ Note::~Note()
 
 bool Note::isDead()
 {
-    return ((ADSRMode != 'A' && ADSRVolume < 0.1f) || number > 127);
+    return ((ADSRStep && ADSRVolume < 0.1f) || number > 127);
 }

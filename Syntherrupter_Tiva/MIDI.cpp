@@ -11,15 +11,16 @@
 UART                  MIDI::usbUart;
 UART                  MIDI::midiUart;
 ByteBuffer            MIDI::otherBuffer;
-constexpr ByteBuffer* MIDI::bufferList[];
+constexpr ByteBuffer* MIDI::BUFFER_LIST[];
 uint8_t               MIDI::bufferMidiStatus[] = {0, 0, 0};
 Channel               MIDI::channels[];
-Note                  MIDI::notes[];
-Note*                 MIDI::orderedNotes[];
+Note                  MIDI::unorderedNotes[];
+Note*                 MIDI::notes[];
 uint32_t              MIDI::notesCount         = 0;
 bool                  MIDI::playing            = false;
-constexpr float       MIDI::ADSR_PROGRAMS[ADSR_PROGRAM_COUNT + 1][9];
 float                 MIDI::ADSRTimeUS;
+MIDIProgram           MIDI::programs[MAX_PROGRAMS];
+constexpr float       MIDI::ADSR_LEGACY_PROGRAMS[MIDI::ADSR_PROGRAM_COUNT + 1][8];
 
 
 MIDI::MIDI()
@@ -41,9 +42,18 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPor
     otherBuffer.init(128); // default buffer size, used in UART class, too.
 
     // Initialize static class variables
-    for (uint32_t note = 0; note < totalNotesLimit; note++)
+    for (uint32_t note = 0; note < MAX_NOTES_COUNT; note++)
     {
-        orderedNotes[note] = &(notes[note]);
+        notes[note] = &(unorderedNotes[note]);
+    }
+
+    for (uint32_t prog = 0; prog < ADSR_PROGRAM_COUNT + 1; prog++)
+    {
+        for (uint32_t datapnt = 0; datapnt < 4; datapnt++)
+        {
+            programs[prog].setMode(MIDIProgram::Mode::lin);
+            programs[prog].setDataPoint(datapnt, ADSR_LEGACY_PROGRAMS[prog][datapnt*2], ADSR_LEGACY_PROGRAMS[prog][datapnt*2+1]);
+        }
     }
 }
 
@@ -59,7 +69,7 @@ bool MIDI::processBuffer(uint32_t b)
      * Returns if valid data has been found.
      */
 
-    ByteBuffer* buffer = bufferList[b];
+    ByteBuffer* buffer = BUFFER_LIST[b];
     uint32_t bufferLevel = buffer->level();
 
     if (!bufferLevel)
@@ -101,16 +111,16 @@ bool MIDI::processBuffer(uint32_t b)
             {
                 uint8_t c1 = buffer->read();
                 buffer->read();
-                for (uint32_t note = 0; note < totalNotesLimit; note++)
+                for (uint32_t note = 0; note < MAX_NOTES_COUNT; note++)
                 {
                     if (note >= notesCount)
                     {
                         break;
                     }
-                    if (c1 == orderedNotes[note]->number && channel == orderedNotes[note]->channel)
+                    if (c1 == notes[note]->number && channel == notes[note]->channel)
                     {
-                        orderedNotes[note]->velocity = 0;
-                        orderedNotes[note]->changed  = true;
+                        notes[note]->velocity = 0;
+                        notes[note]->changed  = true;
                         break;
                     }
                 }
@@ -133,14 +143,14 @@ bool MIDI::processBuffer(uint32_t b)
                     {
                         uint32_t targetNote = notesCount;
                         bool foundNote = false;
-                        for (uint32_t note = 0; note < totalNotesLimit; note++)
+                        for (uint32_t note = 0; note < MAX_NOTES_COUNT; note++)
                         {
                             if (note >= notesCount)
                             {
                                 break;
                             }
-                            if (c1 == orderedNotes[note]->number
-                                    && channel == orderedNotes[note]->channel)
+                            if (c1 == notes[note]->number
+                                    && channel == notes[note]->channel)
                             {
                                 targetNote = note;
                                 foundNote = true;
@@ -149,23 +159,23 @@ bool MIDI::processBuffer(uint32_t b)
                         }
                         if (!foundNote)
                         {
-                            if (targetNote == totalNotesLimit)
+                            if (targetNote == MAX_NOTES_COUNT)
                             {
-                                targetNote = totalNotesLimit - 1;
-                                Note * tempNote = orderedNotes[0];
-                                for (uint32_t note = 1; note < totalNotesLimit; note++)
+                                targetNote = MAX_NOTES_COUNT - 1;
+                                Note * tempNote = notes[0];
+                                for (uint32_t note = 1; note < MAX_NOTES_COUNT; note++)
                                 {
-                                    if (note >= totalNotesLimit)
+                                    if (note >= MAX_NOTES_COUNT)
                                     {
                                         break;
                                     }
-                                    orderedNotes[note - 1] = orderedNotes[note];
+                                    notes[note - 1] = notes[note];
                                 }
                                 // The other values will be overwritten anyway.
-                                orderedNotes[targetNote] = tempNote;
-                                orderedNotes[targetNote]->afterTouch = 0;
-                                orderedNotes[targetNote]->rawVolume  = 0.0f;
-                                orderedNotes[targetNote]->ADSRVolume = 0.0f;
+                                notes[targetNote] = tempNote;
+                                notes[targetNote]->afterTouch = 0;
+                                notes[targetNote]->rawVolume  = 0.0f;
+                                notes[targetNote]->ADSRVolume = 0.0f;
                             }
                             else
                             {
@@ -173,25 +183,25 @@ bool MIDI::processBuffer(uint32_t b)
                             }
                         }
 
-                        orderedNotes[targetNote]->number   = c1;
-                        orderedNotes[targetNote]->velocity = c2;
-                        orderedNotes[targetNote]->ADSRMode = 'A';
-                        orderedNotes[targetNote]->channel  = channel;
-                        orderedNotes[targetNote]->changed  = true;
+                        notes[targetNote]->number   = c1;
+                        notes[targetNote]->velocity = c2;
+                        notes[targetNote]->ADSRStep = 0;
+                        notes[targetNote]->channel  = channel;
+                        notes[targetNote]->changed  = true;
                     }
                 }
                 else // Note has no velocity = note off. Code copy pasted from note off command.
                 {
-                    for (uint32_t note = 0; note < totalNotesLimit; note++)
+                    for (uint32_t note = 0; note < MAX_NOTES_COUNT; note++)
                     {
                         if (note >= notesCount)
                         {
                             break;
                         }
-                        if (c1 == orderedNotes[note]->number && channel == orderedNotes[note]->channel)
+                        if (c1 == notes[note]->number && channel == notes[note]->channel)
                         {
-                            orderedNotes[note]->velocity = 0;
-                            orderedNotes[note]->changed  = true;
+                            notes[note]->velocity = 0;
+                            notes[note]->changed  = true;
                             break;
                         }
                     }
@@ -211,12 +221,12 @@ bool MIDI::processBuffer(uint32_t b)
                 uint8_t c2 = buffer->read();
                 if (channels[channel].coils)
                 {
-                    for (uint32_t note = 0; note < totalNotesLimit; note++)
+                    for (uint32_t note = 0; note < MAX_NOTES_COUNT; note++)
                     {
-                        if (c1 == notes[note].number && channel == notes[note].channel)
+                        if (c1 == unorderedNotes[note].number && channel == unorderedNotes[note].channel)
                         {
-                            notes[note].afterTouch = c2;
-                            notes[note].changed = true;
+                            unorderedNotes[note].afterTouch = c2;
+                            unorderedNotes[note].changed = true;
                             break;
                         }
                     }
@@ -398,11 +408,11 @@ bool MIDI::processBuffer(uint32_t b)
                 case 0x78: // All Sounds off
                     if (channels[channel].coils)
                     {
-                        for (uint32_t note = 0; note < totalNotesLimit; note++)
+                        for (uint32_t note = 0; note < MAX_NOTES_COUNT; note++)
                         {
-                            if (notes[note].channel == channel)
+                            if (unorderedNotes[note].channel == channel)
                             {
-                                notes[note].number = 128;
+                                unorderedNotes[note].number = 128;
                             }
                         }
                     }
@@ -413,11 +423,11 @@ bool MIDI::processBuffer(uint32_t b)
                 case 0x7B: // All Notes off
                     if (channels[channel].coils)
                     {
-                        for (uint32_t note = 0; note < totalNotesLimit; note++)
+                        for (uint32_t note = 0; note < MAX_NOTES_COUNT; note++)
                         {
-                            if (notes[note].channel == channel)
+                            if (unorderedNotes[note].channel == channel)
                             {
-                                notes[note].ADSRMode = 'R';
+                                unorderedNotes[note].ADSRStep = MIDIProgram::DATA_POINTS - 1;
                             }
                         }
                     }
@@ -491,13 +501,13 @@ void MIDI::start()
 void MIDI::stop()
 {
     playing = false;
-    for (uint32_t noteNum = 0; noteNum < totalNotesLimit; noteNum++)
+    for (uint32_t noteNum = 0; noteNum < MAX_NOTES_COUNT; noteNum++)
     {
         if (noteNum >= notesCount)
         {
             break;
         }
-        Note* note = orderedNotes[noteNum];
+        Note* note = notes[noteNum];
         note->number = 128;
     }
 }
@@ -606,88 +616,96 @@ bool MIDI::isPlaying()
     return playing;
 }
 
-void MIDI::process(bool force)
+void MIDI::process()
 {
     if (playing)
     {
         // Process all data that's in the buffer.
-        for (uint32_t i = 0; i < bufferCount; i++)
+
+        static uint32_t bufferNum{0};
+        if (processBuffer(bufferNum))
         {
-            // As long as there's data left to process in the buffer, do it.
-            while (processBuffer(i));
+            return;
+        }
+        else if (++bufferNum < BUFFER_COUNT)
+        {
+            return;
+        }
+        else
+        {
+            bufferNum = 0;
         }
 
-        for (uint32_t noteNum = 0; noteNum < totalNotesLimit; noteNum++)
+        static uint32_t noteNum{0};
+        if (noteNum >= notesCount)
         {
-            if (noteNum >= notesCount)
+            noteNum = 0;
+            for (uint32_t channel = 0; channel < 16; channel++)
             {
-                break;
+                channels[channel].changed = false;
             }
-            Note* note =  orderedNotes[noteNum];
-            Channel* channel = &(channels[note->channel]);
-            if (force || note->changed || channel->changed)
+            return;
+        }
+        Note* note =  notes[noteNum++];
+        Channel* channel = &(channels[note->channel]);
+        if (note->changed || channel->changed)
+        {
+            note->changed = false;
+
+            if (note->number <= 127 && note->velocity)
             {
-                note->changed = false;
+                float noteNumFloat =   float(note->number)
+                                     + channel->pitchBend * channel->pitchBendRange
+                                     + channel->tuning;
+                note->frequency = exp2f((noteNumFloat - 69.0f) / 12.0f) * 440.0f;
 
-                if (noteNum <= 127 && note->velocity)
+                // Determine MIDI volume, including all effects that are not time-dependant.
+                note->rawVolume = note->velocity / 128.0f;
+                if (channel->damperPedal)
                 {
-                    float noteNumFloat =   float(note->number)
-                                         + channel->pitchBend * channel->pitchBendRange
-                                         + channel->tuning;
-                    note->frequency = exp2f((noteNumFloat - 69.0f) / 12.0f) * 440.0f;
+                    note->rawVolume *= 0.6f;
+                }
 
-                    // Determine MIDI volume, including all effects that are not time-dependant.
-                    note->rawVolume = note->velocity / 128.0f;
-                    if (channel->damperPedal)
+                float oldPan = note->pan;
+                if (channel->notePanEnabled)
+                {
+                    /*
+                     * In this mode the note number determines the pan position of the note.
+                     * This is done with a mapping. A source range, convering any part of
+                     * the [0..127] note number range, will be mapped to a target range,
+                     * covering any part of the [0..1] pan position range.
+                     */
+                    if (noteNumFloat <= channel->notePanSourceRangeLow)
                     {
-                        note->rawVolume *= 0.6f;
+                        note->pan = channel->notePanTargetRangeLow;
                     }
-
-                    float oldPan = note->pan;
-                    if (channel->notePanEnabled)
+                    else if (noteNumFloat >= channel->notePanSourceRangeHigh)
                     {
-                        /*
-                         * In this mode the note number determines the pan position of the note.
-                         * This is done with a mapping. A source range, convering any part of
-                         * the [0..127] note number range, will be mapped to a target range,
-                         * covering any part of the [0..1] pan position range.
-                         */
-                        if (noteNumFloat <= channel->notePanSourceRangeLow)
-                        {
-                            note->pan = channel->notePanTargetRangeLow;
-                        }
-                        else if (noteNumFloat >= channel->notePanSourceRangeHigh)
-                        {
-                            note->pan = channel->notePanTargetRangeHigh;
-                        }
-                        else
-                        {
-                            note->pan =   (noteNumFloat - channel->notePanSourceRangeLow)
-                                        * (channel->notePanTargetRangeHigh - channel->notePanTargetRangeLow)
-                                        / (channel->notePanSourceRangeHigh - channel->notePanSourceRangeLow)
-                                        +  channel->notePanTargetRangeLow;
-                        }
+                        note->pan = channel->notePanTargetRangeHigh;
                     }
                     else
                     {
-                        note->pan = channel->pan;
+                        note->pan =   (noteNumFloat - channel->notePanSourceRangeLow)
+                                    * (channel->notePanTargetRangeHigh - channel->notePanTargetRangeLow)
+                                    / (channel->notePanSourceRangeHigh - channel->notePanSourceRangeLow)
+                                    +  channel->notePanTargetRangeLow;
                     }
-                    if (note->pan != oldPan)
-                    {
-                        note->panChanged = COIL_COUNT;
-                    }
-
-                    note->rawVolume *= channel->volume * channel->expression;
                 }
-                else if (!channel->sustainPedal)
+                else
                 {
-                    note->ADSRMode = 'R';
+                    note->pan = channel->pan;
                 }
+                if (note->pan != oldPan)
+                {
+                    note->panChanged = COIL_COUNT;
+                }
+
+                note->rawVolume *= channel->volume * channel->expression;
             }
-        }
-        for (uint32_t channel = 0; channel < 16; channel++)
-        {
-            channels[channel].changed = false;
+            else if (!channel->sustainPedal)
+            {
+                note->ADSRStep = MIDIProgram::DATA_POINTS - 1;
+            }
         }
 
         updateEffects();
@@ -736,7 +754,7 @@ float MIDI::getLFOVal(uint32_t channel)
          *
          * sine wave between 0 and 1 mapped to the desired modulation depth (50% max).
          */
-        return (sinf(6.283185307179586f * float(sys.getSystemTimeUS()) / LFOPeriodUS) + 1) / 4.0f
+        return (sinf(6.283185307179586f * float(sys.getSystemTimeUS()) / LFO_PERIOD_US) + 1) / 4.0f
                 * channels[channel].modulation;
     }
     else
@@ -748,14 +766,12 @@ float MIDI::getLFOVal(uint32_t channel)
 void MIDI::updateEffects()
 {
     // Needed for ADSR
-    float targetAmp;
-    float lastAmp;
-    float inversDurationUS;
-    float ampDiff;
     float currentTime = sys.getSystemTimeUS();
     float timeDiffUS = currentTime - ADSRTimeUS;
     if (timeDiffUS > effectResolutionUS)
     {
+        static uint32_t noteNum{0};
+        //if ()
         ADSRTimeUS = currentTime;
         for (uint32_t note = 0; note < MAX_VOICES; note++)
         {
@@ -763,58 +779,32 @@ void MIDI::updateEffects()
             {
                 break;
             }
-            uint32_t program = channels[orderedNotes[note]->channel].program;
-            Note* currentNote = orderedNotes[note];
+            uint32_t program = channels[notes[note]->channel].program;
+            Note* currentNote = notes[note];
             if (program)
             {
-                switch (currentNote->ADSRMode)
-                {
-                case 'A':
-                    targetAmp         = ADSR_PROGRAMS[program][ADSR_ATTACK_AMP];
-                    lastAmp           = ADSR_PROGRAMS[program][ADSR_RELEASE_AMP];
-                    inversDurationUS  = ADSR_PROGRAMS[program][ADSR_ATTACK_INVDUR_US];
-                    break;
-                case 'D':
-                    targetAmp         = ADSR_PROGRAMS[program][ADSR_DECAY_AMP];
-                    lastAmp           = ADSR_PROGRAMS[program][ADSR_ATTACK_AMP];
-                    inversDurationUS  = ADSR_PROGRAMS[program][ADSR_DECAY_INVDUR_US];
-                    break;
-                case 'S':
-                    targetAmp         = ADSR_PROGRAMS[program][ADSR_SUSTAIN_AMP];
-                    lastAmp           = ADSR_PROGRAMS[program][ADSR_DECAY_AMP];
-                    inversDurationUS  = ADSR_PROGRAMS[program][ADSR_SUSTAIN_INVDUR_US];
-                    break;
-                case 'R':
-                    targetAmp         = ADSR_PROGRAMS[program][ADSR_RELEASE_AMP];
-                    lastAmp           = ADSR_PROGRAMS[program][ADSR_SUSTAIN_AMP];
-                    inversDurationUS  = ADSR_PROGRAMS[program][ADSR_RELEASE_INVDUR_US];
-                    break;
-                }
+                float targetAmp = programs[program].amplitude[currentNote->ADSRStep];
+                float coefficient = programs[program].coefficient[currentNote->ADSRStep];
 
-                ampDiff = targetAmp - lastAmp;
+                currentNote->ADSRVolume += programs[program].coefficient[currentNote->ADSRStep] * timeDiffUS;
 
-                currentNote->ADSRVolume += ampDiff * timeDiffUS * inversDurationUS;
-                if (    (currentNote->ADSRVolume >= targetAmp && ampDiff >= 0)
-                     || (currentNote->ADSRVolume <= targetAmp && ampDiff <= 0))
+                if (    (currentNote->ADSRVolume >= targetAmp && coefficient >= 0)
+                     || (currentNote->ADSRVolume <= targetAmp && coefficient <= 0))
                 {
-                    if (currentNote->ADSRMode == 'A')
+                    currentNote->ADSRVolume = programs[program].amplitude[currentNote->ADSRStep];
+                    if (currentNote->ADSRStep < MIDIProgram::DATA_POINTS - 1)
                     {
-                        currentNote->ADSRMode = 'D';
+                        currentNote->ADSRStep++;
                     }
-                    else if (currentNote->ADSRMode == 'D')
-                    {
-                        currentNote->ADSRMode = 'S';
-                    }
-                    currentNote->ADSRVolume = targetAmp;
                 }
             }
             else
             {
-                // No ADSR calculations. A/D/S = on, R = off
-                if (currentNote->ADSRMode != 'R')
+                // No ADSR calculations. Last data point is off, others are on.
+                if (currentNote->ADSRStep < MIDIProgram::DATA_POINTS - 1)
                 {
-                    // ADSRMode must not be 'A' otherwise it will not be removed by MIDI::removeDeadNotes
-                    currentNote->ADSRMode = 'S';
+                    // ADSRStep must not be 0 otherwise it will not be removed by MIDI::removeDeadNotes
+                    currentNote->ADSRStep = 1;
 
                     currentNote->ADSRVolume = 1.0f;
                 }
@@ -841,26 +831,26 @@ void MIDI::updateEffects()
 void MIDI::removeDeadNotes()
 {
     uint32_t deadNotes = 0;
-    for (uint32_t note = 0; note < totalNotesLimit; note++)
+    for (uint32_t note = 0; note < MAX_NOTES_COUNT; note++)
     {
         if (note >= notesCount)
         {
             break;
         }
-        if (orderedNotes[note]->number >= 128)
+        if (notes[note]->number >= 128)
         {
             deadNotes++;
-            orderedNotes[note]->number       = 0;
+            notes[note]->number = 0;
             for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
-                orderedNotes[note]->assignedTones[coil] = 0;
+                notes[note]->assignedTones[coil] = 0;
             }
         }
         else if (deadNotes)
         {
-            Note *tempNote                 = orderedNotes[note - deadNotes];
-            orderedNotes[note - deadNotes] = orderedNotes[note];
-            orderedNotes[note]             = tempNote;
+            Note *tempNote          = notes[note - deadNotes];
+            notes[note - deadNotes] = notes[note];
+            notes[note]             = tempNote;
         }
     }
     notesCount -= deadNotes;
@@ -869,13 +859,13 @@ void MIDI::removeDeadNotes()
 void MIDI::updateToneList()
 {
     Tone* lastTone = (Tone*) 1;
-    for (uint32_t i = 0; i < totalNotesLimit; i++)
+    for (uint32_t i = 0; i < MAX_NOTES_COUNT; i++)
     {
         if (i >= notesCount)
         {
             break;
         }
-        Note* note = orderedNotes[i];
+        Note* note = notes[i];
         if (channels[note->channel].coils & coilBit)
         {
             if (note->isDead())

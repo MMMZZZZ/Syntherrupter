@@ -21,7 +21,7 @@ public:
     Note();
     virtual ~Note();
     bool isDead();
-    uint8_t ADSRMode       = 'A';
+    uint32_t ADSRStep      = 0;
     uint8_t channel        = 0;
     uint8_t number         = 0;
     uint8_t velocity       = 0;
