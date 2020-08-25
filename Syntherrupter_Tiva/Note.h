@@ -34,7 +34,7 @@ public:
     float panVol[COIL_COUNT]; // Dont like this at all but it was by far the easiest fix.
     uint8_t  panChanged     = COIL_COUNT;
     bool  changed           = true;
-    Tone* assignedTone      = 0;
+    Tone* assignedTones[COIL_COUNT];
 };
 
 #endif /* NOTE_H_ */
