@@ -22,7 +22,7 @@ public:
     void add(uint8_t data);
     void remove(uint32_t count = 1);
     uint32_t level();
-    uint8_t peek(uint32_t offset = 0);
+    uint8_t peek();
     uint8_t read();
 private:
     volatile uint8_t* buffer;

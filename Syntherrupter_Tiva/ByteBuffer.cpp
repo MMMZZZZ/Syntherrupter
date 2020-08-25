@@ -49,37 +49,22 @@ uint32_t ByteBuffer::level()
     }
 }
 
-uint8_t ByteBuffer::peek(uint32_t offset)
+uint8_t ByteBuffer::peek()
 {
-    if (offset)
-    {
-        offset += readIndex;
-        while (offset >= size)
-        {
-            offset -= size;
-        }
-        return buffer[offset];
-    }
     return buffer[readIndex];
 }
 
 uint8_t ByteBuffer::read()
 {
-    uint32_t data = peek();
-    if (level())
-    {
-        if (++readIndex >= size)
-        {
-            readIndex = 0;
-        }
-    }
+    uint8_t data = peek();
+    remove();
     return data;
 }
 
 void ByteBuffer::remove(uint32_t count)
 {
     readIndex += count;
-    while (readIndex >= size)
+    if (readIndex >= size)
     {
         readIndex -= size;
     }
