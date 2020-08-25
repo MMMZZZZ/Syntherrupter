@@ -56,15 +56,12 @@ int main(void)
             // Use coils[0] objects for calling their static methods.
             coils->midi.process();
 
-            // Run non-static coil object methods
             for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
+                // Run non-static coil object methods
                 coils[coil].update();
-            }
 
-            // Generate output
-            for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
-            {
+                // Generate output
                 coils[coil].output();
             }
         }
