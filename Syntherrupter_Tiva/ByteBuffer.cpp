@@ -22,9 +22,13 @@ void ByteBuffer::init(uint32_t size)
 {
     this->size = size;
     buffer = new uint8_t[size];
+    for (uint32_t i = 0; i < size; i++)
+    {
+        buffer[i] = 0;
+    }
 }
 
-void ByteBuffer::add(uint8_t data)
+void ByteBuffer::add(volatile uint8_t data)
 {
     buffer[writeIndex++] = data;
     if (writeIndex >= size)
@@ -61,7 +65,7 @@ uint8_t ByteBuffer::read()
     return data;
 }
 
-void ByteBuffer::remove(uint32_t count)
+void ByteBuffer::remove(volatile uint32_t count)
 {
     readIndex += count;
     if (readIndex >= size)

@@ -44,7 +44,7 @@ public:
 
 private:
     uint32_t uartNum  = 0;
-    uint32_t uartBase = 0;
+    volatile uint32_t uartBase = 0;
     static constexpr uint32_t UART_SYSCTL_PERIPH      = 0;
     static constexpr uint32_t UART_BASE               = 1;
     static constexpr uint32_t UART_PORT_SYSCTL_PERIPH = 2;

@@ -19,8 +19,8 @@ public:
     ByteBuffer();
     virtual ~ByteBuffer();
     void init(uint32_t size);
-    void add(uint8_t data);
-    void remove(uint32_t count = 1);
+    void add(volatile uint8_t data);
+    void remove(volatile uint32_t count = 1);
     uint32_t level();
     uint8_t peek();
     uint8_t read();
