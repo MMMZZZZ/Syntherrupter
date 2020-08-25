@@ -66,7 +66,7 @@ void UART::init(uint32_t uartNum, uint32_t baudRate,
     }
     if (buffered)
     {
-        buffer.init(128);
+        buffer.init(512);
     }
 }
 
