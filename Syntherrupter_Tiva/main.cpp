@@ -45,7 +45,7 @@ int main(void)
     {
         coils[coil].init(coil);
     }
-    coils->midi.init(115200, uartUsbISR, GPIO_PORTC_BASE, GPIO_PIN_4, GPIO_PIN_5, uartMidiISR);
+    MIDI::init(115200, uartUsbISR, GPIO_PORTC_BASE, GPIO_PIN_4, GPIO_PIN_5, uartMidiISR);
 
     while (42)
     {
@@ -54,7 +54,7 @@ int main(void)
         if (state)
         {
             // Use coils[0] objects for calling their static methods.
-            coils->midi.process();
+            MIDI::process();
 
             for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
