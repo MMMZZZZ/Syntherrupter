@@ -28,6 +28,7 @@ void Tone::update(uint32_t timeUS)
         case Type::rand:
         {
             uint32_t freq =  sys.rand(lowerFreq, upperFreq);
+            duty          = float(ontimeUS * freq) / 1e6f;
             periodUS      = 1000000 / freq;
             periodTolUS   = periodUS >> periodTolShift;
             break;
@@ -40,15 +41,15 @@ void Tone::update(uint32_t timeUS)
             break;
         }
     }
-    if (!nextFireUS || (timeUS + 4 * periodUS) < nextFireUS)
-    {
-        // New note or at least different period
-        nextFireUS = timeUS;
-    }
-    else
+    if (nextFireUS)
     {
         // Note that is already playing
         nextFireUS += periodUS;
+    }
+    else
+    {
+        // New note
+        nextFireUS = timeUS + periodUS;
     }
     nextFireEndUS = nextFireUS + periodTolUS;
 }

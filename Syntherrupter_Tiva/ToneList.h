@@ -36,9 +36,10 @@ public:
     Tone* tones[MAX_VOICES];
 
 private:
-    float maxOntimeUS = 10;
-    float maxDuty = 0.01f;
-    uint32_t maxVoices = 8;
+    float maxOntimeUS    = 10;
+    float maxDuty        = 0.01f;
+    bool limiterActive   = false;
+    uint32_t maxVoices   = 8;
     uint32_t activeTones = 0;
     Tone unorderedTones[MAX_VOICES];
 };

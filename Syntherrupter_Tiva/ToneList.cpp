@@ -70,8 +70,14 @@ Tone* ToneList::updateTone(uint32_t ontimeUS, uint32_t periodUS, void* owner, vo
     }
     if (targetTone)
     {
-        targetTone->periodUS = periodUS;
-        targetTone->ontimeUS = ontimeUS;
+        if (periodUS != targetTone->periodUS || ontimeUS != targetTone->ontimeUS)
+        {
+            targetTone->periodUS = periodUS;
+            targetTone->ontimeUS = ontimeUS;
+            targetTone->duty     = float(ontimeUS) / float(periodUS);
+            targetTone->limitedOntimeUS = ontimeUS;
+            limit();
+        }
         targetTone->owner    = owner;
         targetTone->origin   = origin;
         return targetTone;
@@ -109,6 +115,7 @@ void ToneList::setMaxVoices(uint32_t maxVoices)
 
 void ToneList::limit()
 {
+    bool stillActive = false;
     float totalDuty = 0.0f;
     for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
     {
@@ -116,13 +123,7 @@ void ToneList::limit()
         {
             break;
         }
-        float ontimeUS = tones[tone]->ontimeUS;
-        if (ontimeUS > maxOntimeUS)
-        {
-            tones[tone]->ontimeUS = maxOntimeUS;
-            ontimeUS = maxOntimeUS;
-        }
-        totalDuty += ontimeUS / float(tones[tone]->periodUS);
+        totalDuty += tones[tone]->duty;
     }
     if (totalDuty > maxDuty)
     {
@@ -130,15 +131,25 @@ void ToneList::limit()
 
         // Factor by which ontimes must be reduced.
         totalDuty = maxDuty / totalDuty;
+        limiterActive = true;
+        stillActive = true;
+    }
+    else
+    {
+        totalDuty = 1.0f;
+    }
+    if (limiterActive)
+    {
         for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
         {
             if (tone >= activeTones)
             {
                 break;
             }
-            tones[tone]->ontimeUS *= totalDuty;
+            tones[tone]->limitedOntimeUS = tones[tone]->ontimeUS * totalDuty;
         }
     }
+    limiterActive = stillActive;
 }
 
 uint32_t ToneList::getOntimeUS(uint32_t timeUS)
@@ -159,9 +170,9 @@ uint32_t ToneList::getOntimeUS(uint32_t timeUS)
         {
             if (timeUS < currentTone->nextFireEndUS)
             {
-                if (currentTone->ontimeUS > highestOntimeUS)
+                if (currentTone->limitedOntimeUS > highestOntimeUS)
                 {
-                    highestOntimeUS = currentTone->ontimeUS;
+                    highestOntimeUS = currentTone->limitedOntimeUS;
                 }
             }
             currentTone->update(timeUS);

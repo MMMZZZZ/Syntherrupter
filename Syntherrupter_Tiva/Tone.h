@@ -34,11 +34,13 @@ public:
 
     // Properties used to generate Output.
     static constexpr uint32_t periodTolShift = 1;
-    uint32_t ontimeUS       = 0;
-    uint32_t periodUS       = 0;
-    uint32_t periodTolUS    = 0;
-    uint32_t nextFireUS     = 0;
-    uint32_t nextFireEndUS  = 0;
+    float    duty            = 0.0f;
+    uint32_t ontimeUS        = 0;
+    uint32_t limitedOntimeUS = 0;
+    uint32_t periodUS        = 0;
+    uint32_t periodTolUS     = 0;
+    uint32_t nextFireUS      = 0;
+    uint32_t nextFireEndUS   = 0;
     enum class Type {dflt, rand, newdflt} type = Type::dflt;
 };
 
