@@ -204,10 +204,9 @@ uint32_t GUI::update()
 {
     /*
      * Return value:
-     *   0: Idle, outputs should be inactive
-     *   1: Not idle, outputs should be active.
+     *   0: Emergency, outputs should be inactive
+     *   1: Ok, outputs should be active.
      */
-    state = 1;
 
     // Used to detect timeouts
     uint32_t time = 0;
@@ -267,9 +266,12 @@ uint32_t GUI::update()
                 {
                     mode = Mode::settings;
                 }
+                else if (modeByte0 == 'e' && modeByte1 == 's')
+                {
+                    mode = Mode::emergency;
+                }
                 else
                 {
-                    // includes 'e' 's', emergency stop.
                     mode = Mode::idle;
                 }
                 break;
@@ -380,6 +382,7 @@ uint32_t GUI::update()
         break;
     case Mode::midiLiveExit:
         midiLiveExit();
+        mode = Mode::idle;
         break;
 
     case Mode::settings:
@@ -387,18 +390,23 @@ uint32_t GUI::update()
         break;
     case Mode::settingsExit:
         settingsExit();
+        mode = Mode::idle;
         break;
 
     case Mode::nxtFWUpdate:
         nxtFWUpdate();
         break;
 
+    case Mode::idle:
+        break;
+
     default:
-        idle();
+        mode = Mode::emergency;
+        return false;
         break;
     }
 
-    return state;
+    return true;
 }
 
 void GUI::idle()
@@ -426,7 +434,7 @@ void GUI::userSelect()
 
 void GUI::simpleEnter()
 {
-    ;
+    coils->simple.start();
 }
 
 void GUI::simple()
@@ -453,23 +461,11 @@ void GUI::simple()
 
 void GUI::simpleExit()
 {
-    for (uint32_t i = 0; i < COIL_COUNT; i++)
-    {
-        coils[i].simple.setOntimeUS(0.0f, true);
-    }
+    coils->simple.stop();
 }
 
 void GUI::midiLiveEnter()
 {
-    /*
-     * In midiLive mode we use the Oneshot class to generate polyphonic
-     * interrupter signals. While easier and more efficient to use,
-     * this is not possible with the Output class.
-     */
-    for (uint32_t i = 0; i < COIL_COUNT; i++)
-    {
-        coils[i].one.init(i);
-    }
     coils->midi.start();
 }
 

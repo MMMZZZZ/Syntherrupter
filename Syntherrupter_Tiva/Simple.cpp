@@ -7,6 +7,10 @@
 
 #include <Simple.h>
 
+
+bool Simple::started = false;
+
+
 Simple::Simple()
 {
     // TODO Auto-generated constructor stub
@@ -26,6 +30,16 @@ void Simple::init(ToneList* tonelist, float ontimeFact, float ontimeConst, float
     filteredFrequency.init(freqFact, freqConst);
 }
 
+void Simple::start()
+{
+    started = true;
+}
+
+void Simple::stop()
+{
+    started = false;
+}
+
 void Simple::setOntimeUS(float ontimeUS, bool force)
 {
     filteredOntimeUS.setTarget(ontimeUS, force);
@@ -39,19 +53,27 @@ void Simple::setFrequency(float freq, bool force)
 
 void Simple::updateToneList()
 {
-    if (sys.getSystemTimeUS() - lastUpdateUS > updatePeriodUS)
+    if (started)
     {
-        float o = filteredOntimeUS.getFiltered();
-        float f = filteredFrequency.getFiltered();
-        if (o > 1.0f && f > 1.0f)
+        if (sys.getSystemTimeUS() - lastUpdateUS > updatePeriodUS)
         {
-            f = 1e6f / f;
-            tone = tonelist->updateTone(o, f, this, this, tone);
+            float o = filteredOntimeUS.getFiltered();
+            float f = filteredFrequency.getFiltered();
+            if (o > 1.0f && f > 1.0f)
+            {
+                f = 1e6f / f;
+                tone = tonelist->updateTone(o, f, this, this, tone);
+            }
+            else
+            {
+                tonelist->deleteTone(tone);
+                tone = 0;
+            }
         }
-        else
-        {
-            tonelist->deleteTone(tone);
-            tone = 0;
-        }
+    }
+    else if (tone)
+    {
+        tonelist->deleteTone(tone);
+        tone = 0;
     }
 }

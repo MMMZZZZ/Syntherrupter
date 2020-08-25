@@ -25,6 +25,7 @@ extern Coil coils[];
 
 // Modes
 enum class Mode {
+    emergency,
     idle,
     simpleEnter,
     simple,

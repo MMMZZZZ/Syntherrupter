@@ -25,6 +25,8 @@ public:
     Simple();
     virtual ~Simple();
     void init(ToneList* tonelist, float ontimeFact, float ontimeConst, float freqFact, float freqConst, uint32_t updatePeriodUS = 10000);
+    static void start();
+    static void stop();
     void updateToneList();
     void setOntimeUS(float ontimeUS, bool force = false);
     void setFrequency(float periodUS, bool force = false);
@@ -33,6 +35,7 @@ private:
     ToneList* tonelist;
     Tone* tone;
     uint32_t updatePeriodUS = 10000, lastUpdateUS = 0;
+    static bool started;
 };
 
 #endif /* SIMPLE_H_ */
