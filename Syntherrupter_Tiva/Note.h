@@ -26,6 +26,7 @@ public:
     uint8_t number         = 0;
     uint8_t velocity       = 0;
     uint8_t afterTouch     = 0;
+    float ADSRTimeUS        = 0.0f;
     float rawVolume         = 0.0f;
     float ADSRVolume        = 0.0f;
     float finishedVolume    = 0.0f;

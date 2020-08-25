@@ -50,10 +50,11 @@ public:
 
 private:
     static bool processBuffer(uint32_t b);
-    static void updateEffects();
+    static void updateEffects(Note* note);
     void setPanVol(Note* note);
     static float getLFOVal(uint32_t channel);
     static void removeDeadNotes();
+    static uint32_t getNoteIndex(uint32_t channel, uint32_t noteNum);
 
     static constexpr uint32_t ADSR_PROGRAM_COUNT     = 9;
     // TODO: The following list is missing the newer sounds.
@@ -93,6 +94,7 @@ private:
     static Note               unorderedNotes[MAX_NOTES_COUNT];
     static Note*              notes[MAX_NOTES_COUNT];
     static uint32_t           notesCount;
+    static uint32_t dataBytes;
     ToneList* tonelist;
     float absFreq               =  0.0f;
     float singleNoteMaxDuty     =  0.0f;
@@ -102,7 +104,6 @@ private:
     uint8_t volMode             =  3;
     uint16_t activeChannels     =  0xffff;
     uint32_t coilMaxVoices      =  0;
-    uint32_t rawOntime          =  0;
     uint32_t coilNum            =  0;
     uint8_t  coilBit            =  0;
     bool coilChange             = false;
