@@ -16,20 +16,29 @@
 #include "System.h"
 
 
-extern System sys;
-
-
 class Simple
 {
 public:
     Simple();
     virtual ~Simple();
     void init(ToneList* tonelist, float ontimeFact, float ontimeConst, float freqFact, float freqConst, uint32_t updatePeriodUS = 10000);
-    static void start();
-    static void stop();
     void updateToneList();
-    void setOntimeUS(float ontimeUS, bool force = false);
-    void setFrequency(float periodUS, bool force = false);
+    static void start()
+    {
+        started = true;
+    };
+    static void stop()
+    {
+        started = false;
+    };
+    void setOntimeUS(float ontimeUS, bool force = false)
+    {
+        filteredOntimeUS.setTarget(ontimeUS, force);
+    };
+    void setFrequency(float freq, bool force = false)
+    {
+        filteredFrequency.setTarget(freq, force);
+    };
 private:
     Filter filteredOntimeUS, filteredFrequency;
     ToneList* tonelist;

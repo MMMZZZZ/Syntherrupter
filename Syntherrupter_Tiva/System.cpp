@@ -7,6 +7,15 @@
 
 #include <System.h>
 
+
+volatile uint32_t System::timeUS = 0;
+volatile uint32_t System::sysTickResUS = 50;
+//uint32_t System::sysTickHalfRes = sysTickResUS / 2;
+constexpr uint32_t System::peripheralsCount;
+constexpr uint32_t System::peripherals[peripheralsCount];
+
+
+
 System::System()
 {
     // TODO Auto-generated constructor stub
@@ -43,15 +52,6 @@ void System::init(void (*ISR)(void))
     SysTickEnable();
 }
 
-uint32_t System::getClockFreq()
-{
-    return clockFreq;
-}
-uint32_t System::getPIOSCFreq()
-{
-    return PIOSCFreq;
-}
-
 void System::error()
 {
     // Disable Interrupts
@@ -70,31 +70,6 @@ void System::error()
 void System::setSystemTimeResUS(uint32_t us)
 {
     sysTickResUS = us;
-    sysTickHalfRes = sysTickResUS / 2;
+    //sysTickHalfRes = sysTickResUS / 2;
     SysTickPeriodSet(clockTicksUS * sysTickResUS);
-}
-
-uint32_t System::getSystemTimeResUS()
-{
-    return sysTickResUS;
-}
-
-void System::systemTimeIncrement()
-{
-    timeUS += sysTickResUS;
-}
-
-uint32_t System::getSystemTimeUS()
-{
-    return timeUS;
-}
-
-void System::delayUS(uint32_t us)
-{
-    SysCtlDelay((clockTicksUS * us) / 3);
-}
-
-uint32_t System::rand(uint32_t lower, uint32_t upper)
-{
-    return ((timeUS + SysTickValueGet()) % (upper - lower) + lower);
 }

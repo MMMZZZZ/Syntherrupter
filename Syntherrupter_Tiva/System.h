@@ -26,28 +26,47 @@ class System
 public:
     System();
     virtual ~System();
-    void init(void (*ISR)(void));
-    uint32_t getClockFreq();
-    uint32_t getPIOSCFreq();
-    void error();
-    void systemTimeIncrement();
-    void systemTimeReset();
-    uint32_t getSystemTimeUS();
-    void setSystemTimeResUS(uint32_t us);
-    uint32_t getSystemTimeResUS();
-    void delayUS(uint32_t us);
-    uint32_t rand(uint32_t lower, uint32_t upper);
+    static void init(void (*ISR)(void));
+    static void error();
+    static void setSystemTimeResUS(uint32_t us);
+    static uint32_t getClockFreq()
+    {
+        return clockFreq;
+    };
+    static uint32_t getPIOSCFreq()
+    {
+        return PIOSCFreq;
+    };
+    static void systemTimeIncrement()
+    {
+        timeUS += sysTickResUS;
+    };
+    static uint32_t getSystemTimeUS()
+    {
+        return timeUS;
+    };
+    static uint32_t getSystemTimeResUS()
+    {
+        return sysTickResUS;
+    }
+    static void delayUS(uint32_t us)
+    {
+        SysCtlDelay((clockTicksUS * us) / 3);
+    };
+    static uint32_t rand(uint32_t lower, uint32_t upper)
+    {
+        return ((timeUS + SysTickValueGet()) % (upper - lower) + lower);
+    };
 private:
     static constexpr uint32_t clockFreq = 120000000;
     static constexpr uint32_t clockTicksUS = clockFreq / 1000000;
     static constexpr uint32_t PIOSCFreq = 16000000;
-    volatile uint32_t timeUS = 0;
-    volatile uint32_t sysTickResUS = 50;
-    uint32_t sysTickHalfRes = sysTickResUS / 2;
+    static volatile uint32_t timeUS;
+    static volatile uint32_t sysTickResUS;
 
     // Peripherals that should be turned off in case of an error
-    static constexpr uint_fast8_t peripheralsCount = 43;
-    const uint32_t peripherals[peripheralsCount] = { SYSCTL_PERIPH_EMAC0,
+    static constexpr uint32_t peripheralsCount = 43;
+    static constexpr uint32_t peripherals[peripheralsCount] = { SYSCTL_PERIPH_EMAC0,
                                                      SYSCTL_PERIPH_EPHY0,
                                                      SYSCTL_PERIPH_EPI0,
                                                      SYSCTL_PERIPH_GPIOB,

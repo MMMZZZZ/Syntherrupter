@@ -5,7 +5,9 @@
  *      Author: Max Zuidberg
  */
 
+
 #include <Filter.h>
+
 
 Filter::Filter()
 {
@@ -38,7 +40,7 @@ void Filter::setTarget(float target, bool force)
     }
     if (this->target != target)
     {
-        lastTimeUS = sys.getSystemTimeUS();
+        lastTimeUS = System::getSystemTimeUS();
         targetReached = false;
         this->target = target;
         if (this->target > value)
@@ -56,7 +58,7 @@ float Filter::getFiltered()
 {
     if (!targetReached)
     {
-        uint32_t currentTimeUS = sys.getSystemTimeUS();
+        uint32_t currentTimeUS = System::getSystemTimeUS();
         float timestep = currentTimeUS - lastTimeUS;
 
         if (timestep > minTimestepUS)

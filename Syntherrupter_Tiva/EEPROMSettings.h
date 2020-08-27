@@ -16,9 +16,6 @@
 #include "System.h"
 
 
-extern System sys;
-
-
 class EEPROMSettings
 {
 public:

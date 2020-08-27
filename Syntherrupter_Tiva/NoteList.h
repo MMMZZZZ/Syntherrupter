@@ -2,7 +2,7 @@
  * NoteList.h
  *
  *  Created on: 21.08.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #ifndef NOTELIST_H_

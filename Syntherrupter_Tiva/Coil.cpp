@@ -49,18 +49,14 @@ void Coil::update()
 {
     simple.updateToneList();
     midi.updateToneList();
-}
 
-void Coil::output()
-{
     uint32_t timeUS = sys.getSystemTimeUS();
     if (timeUS > nextAllowedFireUS)
     {
-        uint32_t ontimeUS = toneList.getOntimeUS(timeUS);
-        if (ontimeUS)
+        nextOntimeUS = toneList.getOntimeUS(timeUS);
+        if (nextOntimeUS)
         {
-            one.shot(ontimeUS);
-            nextAllowedFireUS = timeUS + ontimeUS + minOffUS;
+            nextAllowedFireUS = timeUS + nextOntimeUS + minOffUS;
         }
     }
     /*
@@ -76,3 +72,5 @@ void Coil::output()
         nextAllowedFireUS = 0;
     }
 }
+
+//void Coil::output()

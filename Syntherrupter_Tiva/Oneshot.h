@@ -24,9 +24,6 @@
 #include "System.h"
 
 
-extern System sys;
-
-
 class Oneshot
 {
 public:
@@ -45,7 +42,7 @@ private:
     static constexpr uint32_t PORT_BASE           = 3;
     static constexpr uint32_t PIN                 = 4;
     static constexpr uint32_t PIN_CONFIG          = 5;
-    const uint32_t TIMER_MAPPING[6][6] =
+    static constexpr uint32_t TIMER_MAPPING[6][6] =
         {{SYSCTL_PERIPH_TIMER0, TIMER0_BASE, SYSCTL_PERIPH_GPIOD, GPIO_PORTD_BASE, GPIO_PIN_0, GPIO_PD0_T0CCP0},
          {SYSCTL_PERIPH_TIMER1, TIMER1_BASE, SYSCTL_PERIPH_GPIOD, GPIO_PORTD_BASE, GPIO_PIN_2, GPIO_PD2_T1CCP0},
          {SYSCTL_PERIPH_TIMER2, TIMER2_BASE, SYSCTL_PERIPH_GPIOM, GPIO_PORTM_BASE, GPIO_PIN_0, GPIO_PM0_T2CCP0},
@@ -57,7 +54,7 @@ private:
 
     uint32_t minOffValue = 160;
     uint32_t maxOnValue = 1600;
-    uint32_t timerNum = 0, timerBase = 0;
+    uint32_t timerBase = 0;
 };
 
 #endif /* H_ */

@@ -20,8 +20,3 @@ Note::~Note()
 {
     // TODO Auto-generated destructor stub
 }
-
-bool Note::isDead()
-{
-    return ((ADSRStep && ADSRVolume < 0.1f) || number > 127);
-}

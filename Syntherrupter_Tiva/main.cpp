@@ -20,6 +20,11 @@ Coil coils[COIL_COUNT];
 void sysTickISR()
 {
     sys.systemTimeIncrement();
+
+    for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+    {
+        coils[coil].output();
+    }
 }
 
 void uartUsbISR()
@@ -74,7 +79,7 @@ int main(void)
                 for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
                 {
                     ToneList* tl = &(coils[coil].toneList);
-                    tl->deleteTone(tl->tones[tone]);
+                    tl->deleteTone(tl->firstTone);
                 }
             }
         }

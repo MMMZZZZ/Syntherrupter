@@ -15,9 +15,6 @@
 #include "System.h"
 
 
-extern System sys;
-
-
 class Filter
 {
 public:

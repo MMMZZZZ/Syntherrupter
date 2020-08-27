@@ -118,26 +118,6 @@ void ToneList::buildLinks()
     newTone  = firstTone;
 }
 
-void ToneList::setMaxOntimeUS(float maxOntimeUS)
-{
-    this->maxOntimeUS = maxOntimeUS;
-}
-
-void ToneList::setMaxDuty(float maxDuty)
-{
-    this->maxDuty = maxDuty;
-}
-
-void ToneList::setMaxVoices(uint32_t maxVoices)
-{
-    if (maxVoices > MAX_VOICES)
-    {
-        maxVoices = MAX_VOICES;
-    }
-    this->maxVoices = maxVoices;
-    buildLinks();
-}
-
 void ToneList::limit()
 {
     bool stillActive = false;
@@ -179,30 +159,4 @@ void ToneList::limit()
         }
     }
     limiterActive = stillActive;
-}
-
-uint32_t ToneList::getOntimeUS(uint32_t timeUS)
-{
-    uint32_t highestOntimeUS = 0;
-    Tone* tone = firstTone;
-    for (uint32_t toneNum = 0; toneNum < MAX_VOICES; toneNum++)
-    {
-        if (tone == newTone)
-        {
-            break;
-        }
-        if (timeUS >= tone->nextFireUS)
-        {
-            if (timeUS < tone->nextFireEndUS)
-            {
-                if (tone->limitedOntimeUS > highestOntimeUS)
-                {
-                    highestOntimeUS = tone->limitedOntimeUS;
-                }
-            }
-            tone->update(timeUS);
-        }
-        tone = tone->nextTone;
-    }
-    return highestOntimeUS;
 }

@@ -20,7 +20,10 @@ class Note
 public:
     Note();
     virtual ~Note();
-    bool isDead();
+    bool isDead()
+    {
+        return ((ADSRStep && ADSRVolume < 0.1f) || number > 127);
+    };
     uint32_t ADSRStep      = 0;
     uint8_t channel        = 0;
     uint8_t number         = 0;
@@ -36,6 +39,8 @@ public:
     uint8_t  panChanged     = COIL_COUNT;
     bool  changed           = true;
     Tone* assignedTones[COIL_COUNT];
+    Note* prevNote = 0;
+    Note* nextNote = 0;
 };
 
 #endif /* NOTE_H_ */

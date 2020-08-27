@@ -9,6 +9,29 @@
 #include <GUI.h>
 
 
+Nextion GUI::nxt;
+EEPROMSettings GUI::cfg;
+
+Tone* GUI::simpleTone;
+
+uint32_t GUI::state           = 0;
+uint32_t GUI::userMaxOntimeUS = 0;
+uint32_t GUI::userMaxBPS      = 0;
+uint32_t GUI::userMaxDutyPerm = 0;
+uint32_t GUI::command         = 0;
+uint32_t GUI::commandData[33] = {0, 0, 0, 0, 0, 0, 0, 0,
+                                 0, 0, 0, 0, 0, 0, 0, 0,
+                                 0, 0, 0, 0, 0, 0, 0, 0,
+                                 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+Mode GUI::mode = Mode::idle;
+
+constexpr uint32_t GUI::errorLen;
+char GUI::errorTxt[errorLen];
+
+bool GUI::EEE = false;
+uint32_t GUI::EET = 0;
+uint32_t GUI::EEI = 0;
 constexpr uint32_t GUI::EES;
 constexpr uint8_t  GUI::EED[GUI::EES][4];
 
@@ -35,14 +58,14 @@ void GUI::init()
      * Nextion firmware (which normally requires a working firmware to access
      * that mode).
      */
-    uint32_t startTime = sys.getSystemTimeUS();
+    uint32_t startTime = System::getSystemTimeUS();
     bool nxtOK = false;
-    while ((sys.getSystemTimeUS() - startTime) < nxtStartTimeoutUS && !nxtOK)
+    while ((System::getSystemTimeUS() - startTime) < nxtStartTimeoutUS && !nxtOK)
     {
         nxt.sendCmd("rest");
-        sys.delayUS(700000);
+        System::delayUS(700000);
         nxt.setVal("comOk", 1);
-        sys.delayUS(20000);
+        System::delayUS(20000);
         if (nxt.getVal("comOk") == 1)
         {
             nxtOK = true;
@@ -102,7 +125,7 @@ void GUI::init()
                 nxt.printf("%s.coil%iDuty.val=%i\xff\xff\xff",
                               AllCoilSettings, coil + 1, maxDutyPerm);
                 // Give time to the UART to send the data
-                sys.delayUS(20000);
+                System::delayUS(20000);
             }
 
             // Settings of the 3 users
@@ -130,7 +153,7 @@ void GUI::init()
                 nxt.printf("%s.u%iDuty.val=%i\xff\xff\xff",
                               AllUsersPage, user, maxDutyPerm);
                 // Give time to the UART to send the data
-                sys.delayUS(20000);
+                System::delayUS(20000);
             }
 
             // Other Settings
@@ -146,7 +169,7 @@ void GUI::init()
         nxt.setVal("TC_Settings.maxVoices", MAX_VOICES);
 
         // Give time to the UART to send the data
-        sys.delayUS(20000);
+        System::delayUS(20000);
 
         // Display Tiva firmware versions
         nxt.setTxt("tTivaFWVersion", TIVA_FW_VERSION);
@@ -215,18 +238,18 @@ uint32_t GUI::update()
     if (nxt.charsAvail())
     {
         command = nxt.getChar();
-        time = sys.getSystemTimeUS();
+        time = System::getSystemTimeUS();
         switch (command)
         {
             case 'm':
             {
                 while (nxt.charsAvail() < 2)
                 {
-                    if (sys.getSystemTimeUS() - time > nxtTimeoutUS)
+                    if (System::getSystemTimeUS() - time > nxtTimeoutUS)
                     {
                         setError("Data timeout");
                         showError();
-                        sys.error();
+                        System::error();
                     }
                 }
                 char modeByte0 = nxt.getChar();
@@ -284,13 +307,13 @@ uint32_t GUI::update()
                     if (nxt.charsAvail())
                     {
                         commandData[i++] = nxt.getChar();
-                        time = sys.getSystemTimeUS();
+                        time = System::getSystemTimeUS();
                     }
-                    if (sys.getSystemTimeUS() - time > nxtTimeoutUS)
+                    if (System::getSystemTimeUS() - time > nxtTimeoutUS)
                     {
                         setError("Data timeout");
                         showError();
-                        sys.error();
+                        System::error();
                     }
                 }
                 break;
@@ -303,13 +326,13 @@ uint32_t GUI::update()
                     if (nxt.charsAvail())
                     {
                         commandData[i++] = nxt.getChar();
-                        time = sys.getSystemTimeUS();
+                        time = System::getSystemTimeUS();
                     }
-                    if (sys.getSystemTimeUS() - time > nxtTimeoutUS)
+                    if (System::getSystemTimeUS() - time > nxtTimeoutUS)
                     {
                         setError("Data timeout");
                         showError();
-                        sys.error();
+                        System::error();
                     }
                 }
                 break;
@@ -319,11 +342,11 @@ uint32_t GUI::update()
                 // We need at least 1 additional byte.
                 while (!nxt.charsAvail())
                 {
-                    if (sys.getSystemTimeUS() - time > nxtTimeoutUS)
+                    if (System::getSystemTimeUS() - time > nxtTimeoutUS)
                     {
                         setError("Data timeout");
                         showError();
-                        sys.error();
+                        System::error();
                     }
                 }
                 commandData[0] = nxt.getChar();
@@ -336,13 +359,13 @@ uint32_t GUI::update()
                     if (nxt.charsAvail())
                     {
                         commandData[i++] = nxt.getChar();
-                        time = sys.getSystemTimeUS();
+                        time = System::getSystemTimeUS();
                     }
-                    if (sys.getSystemTimeUS() - time > nxtTimeoutUS)
+                    if (System::getSystemTimeUS() - time > nxtTimeoutUS)
                     {
                         setError("Data timeout");
                         showError();
-                        sys.error();
+                        System::error();
                     }
                 }
                 break;
@@ -409,11 +432,6 @@ uint32_t GUI::update()
     return true;
 }
 
-void GUI::idle()
-{
-    state = 0;
-}
-
 void GUI::userSelect()
 {
     if (command == 'd')
@@ -429,12 +447,6 @@ void GUI::userSelect()
         command = 0;
     }
     mode = Mode::idle;
-}
-
-
-void GUI::simpleEnter()
-{
-    coils->simple.start();
 }
 
 void GUI::simple()
@@ -459,16 +471,6 @@ void GUI::simple()
     }
 }
 
-void GUI::simpleExit()
-{
-    coils->simple.stop();
-}
-
-void GUI::midiLiveEnter()
-{
-    coils->midi.start();
-}
-
 void GUI::midiLive()
 {
     // Apply new data
@@ -489,7 +491,7 @@ void GUI::midiLive()
             if (dateDDMMYYYY == 11102161)
             {
                 EEE = true;
-                EET = sys.getSystemTimeUS() >> 4;
+                EET = System::getSystemTimeUS() >> 4;
                 EEI = 0;
                 for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
                 {
@@ -560,7 +562,7 @@ void GUI::midiLive()
     }
     if (EEE)
     {
-        uint32_t time = sys.getSystemTimeUS() >> 4;
+        uint32_t time = System::getSystemTimeUS() >> 4;
         if ((time - EET) > ((uint32_t) EED[EEI][0] * 1000))
         {
             EET = time;
@@ -573,13 +575,6 @@ void GUI::midiLive()
             }
         }
     }
-}
-
-void GUI::midiLiveExit()
-{
-    // Stop MIDI operation
-    coils->midi.stop();
-    EEE = false;
 }
 
 void GUI::settings()
@@ -648,12 +643,6 @@ void GUI::settings()
     }
 }
 
-void GUI::settingsExit()
-{
-    // Update EEPROM
-    cfg.update();
-}
-
 void GUI::nxtFWUpdate()
 {
     // Stop normal operation and pass data between Nextion UART and USB UART
@@ -687,15 +676,15 @@ void GUI::nxtFWUpdate()
         SysCtlPeripheralEnable(nxtUARTPeriph);
         SysCtlDelay(3);
     }
-    UARTConfigSetExpClk(nxtUARTBase, sys.getClockFreq(), baudRate,
+    UARTConfigSetExpClk(nxtUARTBase, System::getClockFreq(), baudRate,
                         (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
-    UARTConfigSetExpClk(usbUARTBase, sys.getClockFreq(), baudRate,
+    UARTConfigSetExpClk(usbUARTBase, System::getClockFreq(), baudRate,
                         (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
     UARTFIFOEnable(nxtUARTBase);
     UARTFIFOEnable(usbUARTBase);
 
     bool uploadStarted               = false;
-    uint32_t timeUS                  = sys.getSystemTimeUS();
+    uint32_t timeUS                  = System::getSystemTimeUS();
     uint32_t uploadBeginUS           = timeUS;
     constexpr uint32_t minDurationUS = 15000000;
     constexpr uint32_t timeoutUS     = 1000000; // must be smaller than minUploadDurationUS
@@ -708,7 +697,7 @@ void GUI::nxtFWUpdate()
         }
         if (UARTCharsAvail(usbUARTBase))
         {
-            timeUS = sys.getSystemTimeUS();
+            timeUS = System::getSystemTimeUS();
             if (!uploadStarted)
             {
                 uploadStarted = true;
@@ -717,7 +706,7 @@ void GUI::nxtFWUpdate()
             unsigned char c = UARTCharGet(usbUARTBase);
             UARTCharPutNonBlocking(nxtUARTBase, c);
         }
-        if (uploadStarted && (sys.getSystemTimeUS() - timeUS) > timeoutUS)
+        if (uploadStarted && (System::getSystemTimeUS() - timeUS) > timeoutUS)
         {
             if (timeUS - uploadBeginUS > minDurationUS)
             {

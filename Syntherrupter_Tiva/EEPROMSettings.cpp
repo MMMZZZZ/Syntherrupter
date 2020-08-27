@@ -34,7 +34,7 @@ bool EEPROMSettings::init()
     if (EEPROMInit() != EEPROM_INIT_OK)
     {
         // Power supply issues or EEPROM damaged / end of life
-        sys.error();
+        System::error();
     }
 
     // Search for a bank with valid data and return if such data could be found.
@@ -45,7 +45,7 @@ bool EEPROMSettings::init()
         uint32_t error = EEPROMMassErase();
         if (error)
         {
-            sys.error();
+            System::error();
         }
         updateBank();
     }
@@ -263,7 +263,7 @@ void EEPROMSettings::writeSequence(void *newData, uint32_t byteSize)
     uint32_t error = EEPROMProgram((uint32_t *)newData, byteAddress, byteSize); // @suppress("Invalid arguments")
     if (error)
     {
-        sys.error();
+        System::error();
     }
     byteAddress += byteSize;
 }

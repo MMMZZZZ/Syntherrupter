@@ -22,9 +22,6 @@
 #include "MIDIProgram.h"
 
 
-extern System sys;
-
-
 class MIDI
 {
 public:

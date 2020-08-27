@@ -39,7 +39,7 @@ void Nextion::init(uint32_t uartNumber, uint32_t baudRate, uint32_t timeoutUS)
     //UARTCharPut(UART_MAPPING[nxtUARTNum][UART_BASE], 'T');
     UARTIntRegister(UART_MAPPING[UARTNum][UART_BASE], UARTStdioIntHandler);
     IntPrioritySet(UART_MAPPING[UARTNum][UART_INT], 0b01000000);
-    UARTStdioConfig(UARTNum, baudRate, sys.getClockFreq());
+    UARTStdioConfig(UARTNum, baudRate, System::getClockFreq());
     UARTEchoSet(false);
 }
 
@@ -145,7 +145,7 @@ char* Nextion::getTxt(const char* comp)
     /*UARTFlushRx();
     UARTprintf("get %s.txt%s", comp, nxtEndStr);
 
-    uint32_t time = sys.getSystemTimeUS();
+    uint32_t time = System::getSystemTimeUS();
 
     for (uint32_t i = 0; i < nxtReadDataSize; i++)
     {
@@ -156,7 +156,7 @@ char* Nextion::getTxt(const char* comp)
 
     while (UARTRxBytesAvail() < 7)
     {
-        if (sys.getSystemTimeUS() - time > )
+        if (System::getSystemTimeUS() - time > )
     }
     */
     return 0;
@@ -167,11 +167,11 @@ uint32_t Nextion::getVal(const char* comp)
     UARTFlushRx();
     UARTprintf("get %s.val%s", comp, endStr);
 
-    uint32_t time = sys.getSystemTimeUS();
+    uint32_t time = System::getSystemTimeUS();
 
     while (UARTRxBytesAvail() < 8)
     {
-        if (sys.getSystemTimeUS() - time > timeoutUS)
+        if (System::getSystemTimeUS() - time > timeoutUS)
         {
             return receiveTimeoutVal;
         }

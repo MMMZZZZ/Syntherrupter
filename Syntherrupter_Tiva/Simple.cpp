@@ -2,7 +2,7 @@
  * Simple.cpp
  *
  *  Created on: 23.08.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #include <Simple.h>
@@ -30,32 +30,11 @@ void Simple::init(ToneList* tonelist, float ontimeFact, float ontimeConst, float
     filteredFrequency.init(freqFact, freqConst);
 }
 
-void Simple::start()
-{
-    started = true;
-}
-
-void Simple::stop()
-{
-    started = false;
-}
-
-void Simple::setOntimeUS(float ontimeUS, bool force)
-{
-    filteredOntimeUS.setTarget(ontimeUS, force);
-}
-
-void Simple::setFrequency(float freq, bool force)
-{
-    filteredFrequency.setTarget(freq, force);
-}
-
-
 void Simple::updateToneList()
 {
     if (started)
     {
-        if (sys.getSystemTimeUS() - lastUpdateUS > updatePeriodUS)
+        if (System::getSystemTimeUS() - lastUpdateUS > updatePeriodUS)
         {
             float o = filteredOntimeUS.getFiltered();
             float f = filteredFrequency.getFiltered();

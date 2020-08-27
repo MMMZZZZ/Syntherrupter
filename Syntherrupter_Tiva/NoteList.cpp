@@ -2,7 +2,7 @@
  * NoteList.cpp
  *
  *  Created on: 21.08.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #include <NoteList.h>

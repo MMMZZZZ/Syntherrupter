@@ -2,7 +2,7 @@
  * UART.h
  *
  *  Created on: 20.08.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #ifndef UART_H_
@@ -37,8 +37,21 @@ public:
               uint32_t intPriority = DEFAULT_INT_PRIO, bool buffered = true);
     void init(uint32_t uartNum, uint32_t baudRate, void (*rxISR)(void),
               uint32_t intPriority = DEFAULT_INT_PRIO, bool buffered = true);
-    void sendChar(uint8_t chr);
-    void ISR();
+    void sendChar(uint8_t chr)
+    {
+        UARTCharPut(uartBase, chr);
+    };
+    void ISR()
+    {
+        // Read and clear the asserted interrupts
+        UARTIntClear(uartBase, UARTIntStatus(uartBase, true));
+
+        // Store all available chars in bigger buffer.
+        while (UARTCharsAvail(uartBase))
+        {
+            buffer.add(UARTCharGet(uartBase));
+        }
+    };
     ByteBuffer buffer;
     static constexpr uint32_t DEFAULT_INT_PRIO = 42424242;
 

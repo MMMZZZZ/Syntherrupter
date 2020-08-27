@@ -708,7 +708,7 @@ float MIDI::getLFOVal(uint32_t channel)
          *
          * sine wave between 0 and 1 mapped to the desired modulation depth (50% max).
          */
-        return (sinf(6.283185307179586f * float(sys.getSystemTimeUS()) / LFO_PERIOD_US) + 1) / 4.0f
+        return (sinf(6.283185307179586f * float(System::getSystemTimeUS()) / LFO_PERIOD_US) + 1) / 4.0f
                 * channels[channel].modulation;
     }
     else
@@ -720,7 +720,7 @@ float MIDI::getLFOVal(uint32_t channel)
 void MIDI::updateEffects(Note* note)
 {
     // Needed for ADSR
-    float currentTime = sys.getSystemTimeUS();
+    float currentTime = System::getSystemTimeUS();
     if (note->ADSRTimeUS == 0.0f)
     {
         note->ADSRTimeUS = currentTime;
@@ -827,6 +827,7 @@ void MIDI::updateToneList()
             {
                 note->number = 128; // Mark for removal.
                 tonelist->deleteTone(note->assignedTones[coilNum]);
+                note->assignedTones[coilNum] = 0;
             }
             else
             {

@@ -2,7 +2,7 @@
  * UART.cpp
  *
  *  Created on: 20.08.2020
- *      Author: Max
+ *      Author: Max Zuidberg
  */
 
 #include <UART.h>
@@ -67,22 +67,5 @@ void UART::init(uint32_t uartNum, uint32_t baudRate,
     if (buffered)
     {
         buffer.init(512);
-    }
-}
-
-void UART::sendChar(uint8_t chr)
-{
-    UARTCharPut(uartBase, chr);
-}
-
-void UART::ISR()
-{
-    // Read and clear the asserted interrupts
-    UARTIntClear(uartBase, UARTIntStatus(uartBase, true));
-
-    // Store all available chars in bigger buffer.
-    while (UARTCharsAvail(uartBase))
-    {
-        buffer.add(UARTCharGet(uartBase));
     }
 }

@@ -26,11 +26,49 @@ public:
     virtual ~ToneList();
     Tone* updateTone(uint32_t ontimeUS, uint32_t periodUS, void* owner, void* origin, Tone* tone);
     void deleteTone(Tone* tone);
-    void setMaxOntimeUS(float ontimeUSLimit);
-    void setMaxDuty(float maxDuty);
-    void setMaxVoices(uint32_t maxVoices);
     void limit();
-    uint32_t getOntimeUS(uint32_t timeUS);
+    void setMaxOntimeUS(float ontimeUSLimit)
+    {
+        this->maxOntimeUS = maxOntimeUS;
+    };
+    void setMaxDuty(float maxDuty)
+    {
+        this->maxDuty = maxDuty;
+    };
+    void setMaxVoices(uint32_t maxVoices)
+    {
+        if (maxVoices > MAX_VOICES)
+        {
+            maxVoices = MAX_VOICES;
+        }
+        this->maxVoices = maxVoices;
+        buildLinks();
+    };
+    uint32_t getOntimeUS(uint32_t timeUS)
+    {
+        uint32_t highestOntimeUS = 0;
+        Tone* tone = firstTone;
+        for (uint32_t toneNum = 0; toneNum < MAX_VOICES; toneNum++)
+        {
+            if (tone == newTone)
+            {
+                break;
+            }
+            if (timeUS >= tone->nextFireUS)
+            {
+                if (timeUS < tone->nextFireEndUS)
+                {
+                    if (tone->limitedOntimeUS > highestOntimeUS)
+                    {
+                        highestOntimeUS = tone->limitedOntimeUS;
+                    }
+                }
+                tone->update(timeUS);
+            }
+            tone = tone->nextTone;
+        }
+        return highestOntimeUS;
+    };
     Tone* firstTone;
 
 private:
