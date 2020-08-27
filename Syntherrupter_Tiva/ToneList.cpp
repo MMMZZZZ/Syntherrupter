@@ -13,8 +13,9 @@ ToneList::ToneList()
     // tones only contains the pointers to the actual Tone objects.
     for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
     {
-        tones[tone] = &(unorderedTones[tone]);
+        unorderedTones[tone].id = tone;
     }
+    buildLinks();
 }
 
 ToneList::~ToneList()
@@ -22,7 +23,7 @@ ToneList::~ToneList()
     // TODO Auto-generated destructor stub
 }
 
-void ToneList::removeDeadTones()
+/*void ToneList::removeDeadTones()
 {
     uint32_t deadTones = 0;
     for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
@@ -46,52 +47,75 @@ void ToneList::removeDeadTones()
         }
     }
     activeTones -= deadTones;
-}
-
-uint32_t ToneList::available()
-{
-    return (MAX_VOICES - activeTones);
-}
+}*/
 
 Tone* ToneList::updateTone(uint32_t ontimeUS, uint32_t periodUS, void* owner, void* origin, Tone* tone)
 {
     Tone* targetTone = 0;
-    if (tone != ((Tone*) 0))
+    if (tone)
     {
         if (tone->owner == owner)
         {
             targetTone = tone;
         }
     }
-    else if (activeTones < maxVoices)
+    else
     {
-        targetTone       = tones[activeTones++];
+        targetTone       = newTone;
+        newTone          = newTone->nextTone;
+        if (newTone == firstTone)
+        {
+            firstTone   = firstTone->nextTone;
+        }
         targetTone->type = Tone::Type::newdflt;
     }
-    if (targetTone)
+    if (periodUS != targetTone->periodUS || ontimeUS != targetTone->ontimeUS)
     {
-        if (periodUS != targetTone->periodUS || ontimeUS != targetTone->ontimeUS)
-        {
-            targetTone->periodUS = periodUS;
-            targetTone->ontimeUS = ontimeUS;
-            targetTone->duty     = float(ontimeUS) / float(periodUS);
-            targetTone->limitedOntimeUS = ontimeUS;
-            limit();
-        }
-        targetTone->owner    = owner;
-        targetTone->origin   = origin;
-        return targetTone;
+        targetTone->periodUS = periodUS;
+        targetTone->ontimeUS = ontimeUS;
+        targetTone->duty     = float(ontimeUS) / float(periodUS);
+        targetTone->limitedOntimeUS = ontimeUS;
+        limit();
     }
-    return 0;
+    targetTone->owner    = owner;
+    targetTone->origin   = origin;
+    return targetTone;
 }
 
 void ToneList::deleteTone(Tone* tone)
 {
-    if (tone != ((Tone*) 0))
+    if (tone)
     {
-        tone->ontimeUS = 0;
-        removeDeadTones();
+        tone->ontimeUS   = 0;
+        tone->owner      = 0;
+
+        if (tone == firstTone)
+        {
+            firstTone = firstTone->nextTone;
+        }
+        else if (tone->nextTone != firstTone)
+        {
+            tone->prevTone->nextTone       = tone->nextTone;
+            tone->nextTone->prevTone       = tone->prevTone;
+            tone->nextTone                 = firstTone;
+            tone->prevTone                 = firstTone->prevTone;
+            tone->prevTone->nextTone       = tone;
+            tone->nextTone->prevTone       = tone;
+        }
     }
+}
+
+void ToneList::buildLinks()
+{
+    for (uint32_t tone = 0; tone < maxVoices - 1; tone++)
+    {
+        unorderedTones[tone].nextTone = &(unorderedTones[tone + 1]);
+        unorderedTones[tone + 1].prevTone = &(unorderedTones[tone]);
+    }
+    firstTone = &(unorderedTones[0]);
+    firstTone->prevTone = &(unorderedTones[maxVoices - 1]);
+    firstTone->prevTone->nextTone = firstTone;
+    newTone  = firstTone;
 }
 
 void ToneList::setMaxOntimeUS(float maxOntimeUS)
@@ -111,19 +135,22 @@ void ToneList::setMaxVoices(uint32_t maxVoices)
         maxVoices = MAX_VOICES;
     }
     this->maxVoices = maxVoices;
+    buildLinks();
 }
 
 void ToneList::limit()
 {
     bool stillActive = false;
     float totalDuty = 0.0f;
-    for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
+    Tone* tone = firstTone;
+    for (uint32_t toneNum = 0; toneNum < MAX_VOICES; toneNum++)
     {
-        if (tone >= activeTones)
+        if (tone == newTone)
         {
             break;
         }
-        totalDuty += tones[tone]->duty;
+        totalDuty += tone->duty;
+        tone = tone->nextTone;
     }
     if (totalDuty > maxDuty)
     {
@@ -140,13 +167,15 @@ void ToneList::limit()
     }
     if (limiterActive)
     {
-        for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
+        tone = firstTone;
+        for (uint32_t toneNum = 0; toneNum < MAX_VOICES; toneNum++)
         {
-            if (tone >= activeTones)
+            if (tone == newTone)
             {
                 break;
             }
-            tones[tone]->limitedOntimeUS = tones[tone]->ontimeUS * totalDuty;
+            tone->limitedOntimeUS = tone->ontimeUS * totalDuty;
+            tone = tone->nextTone;
         }
     }
     limiterActive = stillActive;
@@ -154,29 +183,26 @@ void ToneList::limit()
 
 uint32_t ToneList::getOntimeUS(uint32_t timeUS)
 {
-    if (!timeUS)
-    {
-        timeUS = sys.getSystemTimeUS();
-    }
     uint32_t highestOntimeUS = 0;
-    for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
+    Tone* tone = firstTone;
+    for (uint32_t toneNum = 0; toneNum < MAX_VOICES; toneNum++)
     {
-        if (tone >= activeTones)
+        if (tone == newTone)
         {
             break;
         }
-        Tone *currentTone = tones[tone];
-        if (timeUS >= currentTone->nextFireUS)
+        if (timeUS >= tone->nextFireUS)
         {
-            if (timeUS < currentTone->nextFireEndUS)
+            if (timeUS < tone->nextFireEndUS)
             {
-                if (currentTone->limitedOntimeUS > highestOntimeUS)
+                if (tone->limitedOntimeUS > highestOntimeUS)
                 {
-                    highestOntimeUS = currentTone->limitedOntimeUS;
+                    highestOntimeUS = tone->limitedOntimeUS;
                 }
             }
-            currentTone->update(timeUS);
+            tone->update(timeUS);
         }
+        tone = tone->nextTone;
     }
     return highestOntimeUS;
 }

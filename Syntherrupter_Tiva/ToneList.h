@@ -24,24 +24,24 @@ class ToneList
 public:
     ToneList();
     virtual ~ToneList();
-    uint32_t available();
     Tone* updateTone(uint32_t ontimeUS, uint32_t periodUS, void* owner, void* origin, Tone* tone);
     void deleteTone(Tone* tone);
-    void removeDeadTones();
     void setMaxOntimeUS(float ontimeUSLimit);
     void setMaxDuty(float maxDuty);
     void setMaxVoices(uint32_t maxVoices);
     void limit();
-    uint32_t getOntimeUS(uint32_t timeUS = 0);
-    Tone* tones[MAX_VOICES];
+    uint32_t getOntimeUS(uint32_t timeUS);
+    Tone* firstTone;
 
 private:
+    void buildLinks();
     float maxOntimeUS    = 10;
     float maxDuty        = 0.01f;
     bool limiterActive   = false;
     uint32_t maxVoices   = 8;
     uint32_t activeTones = 0;
     Tone unorderedTones[MAX_VOICES];
+    Tone* newTone;
 };
 
 #endif /* TONES_H_ */

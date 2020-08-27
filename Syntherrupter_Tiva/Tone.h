@@ -42,6 +42,8 @@ public:
     uint32_t nextFireUS      = 0;
     uint32_t nextFireEndUS   = 0;
     enum class Type {dflt, rand, newdflt} type = Type::dflt;
+    Tone* nextTone           = 0;
+    Tone* prevTone           = 0;
 };
 
 #endif /* TONE_H_ */
