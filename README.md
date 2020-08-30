@@ -4,6 +4,9 @@ You can control up to 6 different coils simultaneously. On each coil you can pla
 
 *By Max Zuidberg. Credits below.*
 
+## IMPORTANT INFORMATION - CRITICAL BUG
+All versions up to v3.1.1 have a serious bug in Simple Mode that causes random ontimes of extremely long duration (miliseconds!). **Do not use Simple Mode!** MIDI Live Mode is not affected. 
+
 ## Download and Installation
 Have a look at the [releases page](https://github.com/MMMZZZZ/Syntherrupter/releases) and the forum links below.
 
