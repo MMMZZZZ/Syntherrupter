@@ -133,7 +133,7 @@ private:
 
     static constexpr uint32_t effectResolutionUS = 963;
 
-    static constexpr uint32_t MAX_PROGRAMS = 16;
+    static constexpr uint32_t MAX_PROGRAMS = 64;
     static MIDIProgram programs[MAX_PROGRAMS];
 
     static constexpr uint32_t    BUFFER_COUNT = 3;

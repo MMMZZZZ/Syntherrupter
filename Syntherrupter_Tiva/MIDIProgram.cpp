@@ -8,16 +8,21 @@
 #include <MIDIProgram.h>
 
 
+float MIDIProgram::resolutionUS = 1000.0f;
+
 
 MIDIProgram::MIDIProgram()
 {
     // TODO Auto-generated constructor stub
-    for (uint32_t i = 0; i < DATA_POINTS; i++)
+    for (uint32_t i = 0; i <= DATA_POINTS; i++)
     {
         amplitude[i]   = 1.0f;
         durationUS[i]  = 1.0f;
-        coefficient[i] = 1.0f;
+        ntau[i]        = 3.0f;
     }
+    amplitude[DATA_POINTS - 1] = 0.0f;
+    mode = Mode::cnst;
+    updateCoefficients();
 }
 
 MIDIProgram::~MIDIProgram()
@@ -42,15 +47,30 @@ void MIDIProgram::setMode(Mode mode)
     updateCoefficients();
 }
 
+void MIDIProgram::setResolutionUS(float res)
+{
+    resolutionUS = res;
+}
+
 void MIDIProgram::updateCoefficients()
 {
-    float lastAmp = amplitude[DATA_POINTS - 1];
-    for (uint32_t i = 0; i < DATA_POINTS; i++)
+    amplitude[DATA_POINTS]   = amplitude[0];
+    durationUS[DATA_POINTS]  = durationUS[0];
+    ntau[DATA_POINTS]        = ntau[0];
+    for (uint32_t i = 1; i <= DATA_POINTS; i++)
     {
+        ticksPerStep[i] = durationUS[i] / resolutionUS;
+        amplitudeDiff[i] = amplitude[i] - amplitude[i - 1];
         if (mode == Mode::lin)
         {
-            coefficient[i] = (amplitude[i] - lastAmp) / durationUS[i];
-            lastAmp = amplitude[i];
+            coefficient[i] = amplitudeDiff[i] / ticksPerStep[i];
+        }
+        else if (mode == Mode::exp)
+        {
+            coefficient[i]  = expf(- 1.0f / ticksPerStep[i]); //powf(expf(-ntau[i]), 1.0f / ntau[i] * ticksPerStep[i]);
+            expTargetAmp[i] = amplitude[i - 1] - amplitudeDiff[i] / expm1f(- ntau[i]);
         }
     }
+    coefficient[0] = coefficient[DATA_POINTS];
+    expTargetAmp[0] = expTargetAmp[DATA_POINTS];
 }

@@ -24,12 +24,19 @@ public:
     {
         return ((ADSRStep && ADSRVolume < 0.1f) || number > 127);
     };
+    void setADSRStep(uint32_t step)
+    {
+        ADSRStep  = step;
+        ADSRTicks = 0;
+    }
     uint32_t ADSRStep      = 0;
+    uint32_t ADSRTicks     = 0;
     uint8_t channel        = 0;
     uint8_t number         = 0;
     uint8_t velocity       = 0;
     uint8_t afterTouch     = 0;
     float ADSRTimeUS        = 0.0f;
+    float ADSRStepTimeUS    = 0.0f;
     float rawVolume         = 0.0f;
     float ADSRVolume        = 0.0f;
     float finishedVolume    = 0.0f;

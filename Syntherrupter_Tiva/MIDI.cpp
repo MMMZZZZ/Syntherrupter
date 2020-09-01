@@ -42,12 +42,17 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPor
     midiUart.init(midiUartPort, midiUartRx, midiUartTx, 31250, midiISR, 0b01100000);
     otherBuffer.init(128);
 
+    MIDIProgram::setResolutionUS(effectResolutionUS);
+
+    // Copy legacy ADSR table to new MIDIProgram class. That's the way it works until there's a useful editor for ADSR.
     for (uint32_t prog = 0; prog < ADSR_PROGRAM_COUNT + 1; prog++)
     {
+        programs[prog].setMode(MIDIProgram::Mode::lin);
+        programs[prog+10].setMode(MIDIProgram::Mode::lin);
         for (uint32_t datapnt = 0; datapnt < 4; datapnt++)
         {
-            programs[prog].setMode(MIDIProgram::Mode::lin);
-            programs[prog].setDataPoint(datapnt, ADSR_LEGACY_PROGRAMS[prog][datapnt*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][datapnt*2+1]);
+            programs[prog].setDataPoint(datapnt, ADSR_LEGACY_PROGRAMS[prog][datapnt*2],    1.0f / ADSR_LEGACY_PROGRAMS[prog][datapnt*2+1]);
+            programs[prog+10].setDataPoint(datapnt, ADSR_LEGACY_PROGRAMS[prog][datapnt*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][datapnt*2+1]);
         }
     }
 }
@@ -125,7 +130,7 @@ bool MIDI::processBuffer(uint32_t b)
 
                     note->number     = number;
                     note->velocity   = c1;
-                    note->ADSRStep   = 0;
+                    note->setADSRStep(0);
                     note->ADSRTimeUS = 0.0f;
                     note->channel    = channel;
                     note->changed    = true;
@@ -346,7 +351,7 @@ bool MIDI::processBuffer(uint32_t b)
                     {
                         if (note->channel == channel)
                         {
-                            note->ADSRStep = MIDIProgram::DATA_POINTS - 1;
+                            note->setADSRStep(MIDIProgram::DATA_POINTS - 1);
                         }
                         note = note->nextNote;
                     }
@@ -609,7 +614,7 @@ void MIDI::process()
                 }
                 else if (!channel->sustainPedal)
                 {
-                    note->ADSRStep = MIDIProgram::DATA_POINTS - 1;
+                    note->setADSRStep(MIDIProgram::DATA_POINTS - 1);
                 }
             }
             updateEffects(note);
@@ -633,60 +638,31 @@ void MIDI::updateEffects(Note* note)
     {
         note->ADSRTimeUS = currentTime;
     }
-    float timeDiffUS = currentTime - note->ADSRTimeUS;
-    if (timeDiffUS > effectResolutionUS)
+    else
     {
-        note->ADSRTimeUS = currentTime;
-        uint32_t program = channels[note->channel].program;
-        if (program)
+        float timeDiffUS = currentTime - note->ADSRTimeUS;
+        if (timeDiffUS > effectResolutionUS)
         {
-            float targetAmp   = programs[program].amplitude[note->ADSRStep];
-            float coefficient = programs[program].coefficient[note->ADSRStep];
+            note->ADSRTimeUS = currentTime;
+            MIDIProgram* program = &(programs[channels[note->channel].program]);
+            program->setADSRAmp(&(note->ADSRStep), &(note->ADSRTicks), &(note->ADSRVolume));
 
-            note->ADSRVolume += coefficient * timeDiffUS;
-
-            if (    (note->ADSRVolume >= targetAmp && coefficient >= 0)
-                 || (note->ADSRVolume <= targetAmp && coefficient <= 0))
+            // After calculation of ADSR envelope, add other effects like modulation
+            float finishedVolume =   note->rawVolume
+                                   * note->ADSRVolume
+                                   * (1.0f - getLFOVal(note->channel));
+            if (finishedVolume != note->finishedVolume)
             {
-                note->ADSRVolume = targetAmp;
-                if (note->ADSRStep < MIDIProgram::DATA_POINTS - 2)
-                {
-                    note->ADSRStep++;
-                }
+                note->toneChanged = (1 << COIL_COUNT) - 1;
+                note->finishedVolume = finishedVolume;
             }
         }
-        else
+        if (timeDiffUS < 0.0f)
         {
-            // No ADSR calculations. Last data point is off, others are on.
-            if (note->ADSRStep < MIDIProgram::DATA_POINTS - 1)
-            {
-                // ADSRStep must not be 0 otherwise it will not be removed by MIDI::removeDeadNotes
-                note->ADSRStep = 1;
-
-                note->ADSRVolume = 1.0f;
-            }
-            else
-            {
-                note->ADSRVolume = 0.0f;
-            }
-        }
-
-        // After calculation of ADSR envelope, add other effects like modulation
-        float finishedVolume =   note->rawVolume
-                                      * note->ADSRVolume
-                                      * (1.0f - getLFOVal(note->channel));
-        if (finishedVolume != note->finishedVolume)
-        {
-            note->toneChanged = (1 << COIL_COUNT) - 1;
-            note->finishedVolume = finishedVolume;
+            // Time overflowed
+            note->ADSRTimeUS = currentTime;
         }
     }
-    if (timeDiffUS < 0.0f)
-    {
-        // Time overflowed
-        note->ADSRTimeUS = currentTime;
-    }
-
 }
 
 void MIDI::updateToneList()
