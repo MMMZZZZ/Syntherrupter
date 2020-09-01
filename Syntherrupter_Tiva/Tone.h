@@ -15,11 +15,17 @@
 #include "System.h"
 
 
+class ToneList;
+
 class Tone
 {
 public:
     Tone();
     virtual ~Tone();
+    void setParentList(ToneList* list)
+    {
+        this->parent = list;
+    };
     void update(uint32_t timeUS)
     {
 
@@ -34,12 +40,10 @@ public:
                 uint32_t freq =  System::rand(lowerFreq, upperFreq);
                 duty          = float(ontimeUS * freq) / 1e6f;
                 periodUS      = 1000000 / freq;
-                periodTolUS   = periodUS >> periodTolShift;
                 break;
             }
             case Type::newdflt:
             {
-                periodTolUS   = periodUS >> periodTolShift;
                 nextFireUS    = 0;
                 type          = Type::dflt;
                 break;
@@ -55,9 +59,8 @@ public:
             // New note
             nextFireUS = timeUS + periodUS;
         }
-        nextFireEndUS = nextFireUS + periodTolUS;
     };
-
+    void remove(void* origin);
     void* owner  = 0;
     void* origin = 0;
 
@@ -71,13 +74,14 @@ public:
     uint32_t ontimeUS        = 0;
     uint32_t limitedOntimeUS = 0;
     uint32_t periodUS        = 0;
-    uint32_t periodTolUS     = 0;
     uint32_t nextFireUS      = 0;
-    uint32_t nextFireEndUS   = 0;
     enum class Type {dflt, rand, newdflt} type = Type::dflt;
     Tone* nextTone           = 0;
     Tone* prevTone           = 0;
+
+    // For debugging purposes only.
     uint32_t id = 0;
+    ToneList* parent = 0;
 };
 
 #endif /* TONE_H_ */

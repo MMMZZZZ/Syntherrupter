@@ -25,9 +25,6 @@
 #include "System.h"
 
 
-extern System sys;
-
-
 class UART
 {
 public:
@@ -37,6 +34,14 @@ public:
               uint32_t intPriority = DEFAULT_INT_PRIO, bool buffered = true);
     void init(uint32_t uartNum, uint32_t baudRate, void (*rxISR)(void),
               uint32_t intPriority = DEFAULT_INT_PRIO, bool buffered = true);
+    void enable()
+    {
+        UARTIntEnable(uartBase, UART_INT_RX);
+    }
+    void disable()
+    {
+        UARTIntDisable(uartBase, UART_INT_RX);
+    }
     void sendChar(uint8_t chr)
     {
         UARTCharPut(uartBase, chr);

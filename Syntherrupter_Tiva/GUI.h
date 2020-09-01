@@ -58,25 +58,25 @@ private:
 
     static void simpleEnter()
     {
-        coils->simple.start();
+        Simple::start();
     };
 
     static void simple();
     static void simpleExit()
     {
-        coils->simple.stop();
+        Simple::stop();
     };
 
     static void midiLiveEnter()
     {
-        coils->midi.start();
+        MIDI::start();
     };
 
     static void midiLive();
     static void midiLiveExit()
     {
         // Stop MIDI operation
-        coils->midi.stop();
+        MIDI::stop();
         EEE = false;
     };
 

@@ -7,6 +7,7 @@
 
 #include <Coil.h>
 
+
 Coil::Coil()
 {
     // TODO Auto-generated constructor stub
@@ -36,7 +37,6 @@ void Coil::setMaxDutyPerm(uint32_t dutyPerm)
 void Coil::setMaxVoices(uint32_t maxVoices)
 {
     midi.setMaxVoices(maxVoices);
-    toneList.setMaxVoices(maxVoices);
 }
 
 void Coil::setMaxOntimeUS(uint32_t ontimeUS)
@@ -45,32 +45,12 @@ void Coil::setMaxOntimeUS(uint32_t ontimeUS)
     toneList.setMaxOntimeUS(ontimeUS);
 }
 
-void Coil::update()
+void Coil::updateData()
 {
+    /*
+     * Not time critical updates.
+     */
+
     simple.updateToneList();
     midi.updateToneList();
-
-    uint32_t timeUS = sys.getSystemTimeUS();
-    if (timeUS > nextAllowedFireUS)
-    {
-        nextOntimeUS = toneList.getOntimeUS(timeUS);
-        if (nextOntimeUS)
-        {
-            nextAllowedFireUS = timeUS + nextOntimeUS + minOffUS;
-        }
-    }
-    /*
-     * Overflow detection. No ontime or min offtime is larger than 10 seconds.
-     * Note: In theory you'd need a similar detection for the tone.nextFireUS
-     * variables. In practice this means that the tones playing during the
-     * overflow will stop playing but the next tones will be fine. Therefore
-     * it is not worth the additional CPU time to check each time for an
-     * overflow. Remember, it only happens less than once an hour.
-     */
-    else if (nextAllowedFireUS - timeUS > 10000000)
-    {
-        nextAllowedFireUS = 0;
-    }
 }
-
-//void Coil::output()

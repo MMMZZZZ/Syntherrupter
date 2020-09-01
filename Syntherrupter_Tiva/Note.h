@@ -34,13 +34,18 @@ public:
     float ADSRVolume        = 0.0f;
     float finishedVolume    = 0.0f;
     float frequency         = 0.0f;
+    float periodUS          = 0.0f;
     float pan               = 0.5f;
     float panVol[COIL_COUNT]; // Dont like this at all but it was by far the easiest fix.
-    uint8_t  panChanged     = COIL_COUNT;
+    uint8_t  panChanged     = (1 << COIL_COUNT) - 1;
+    uint8_t toneChanged     = (1 << COIL_COUNT) - 1;
     bool  changed           = true;
     Tone* assignedTones[COIL_COUNT];
     Note* prevNote = 0;
     Note* nextNote = 0;
+
+    // For debugging purposes only.
+    uint32_t id = 0;
 };
 
 #endif /* NOTE_H_ */

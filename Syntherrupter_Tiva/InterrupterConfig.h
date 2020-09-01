@@ -33,7 +33,7 @@
 #define COIL_COUNT 1
 #endif
 
-#define MAX_VOICES 16
+#define MAX_VOICES 32
 
 
 #endif /* INTERRUPTER_CONFIG_H_ */

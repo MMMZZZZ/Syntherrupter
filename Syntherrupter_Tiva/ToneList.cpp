@@ -9,45 +9,19 @@
 
 ToneList::ToneList()
 {
-    // To prevent excessive copy operations when ordering the tones,
-    // tones only contains the pointers to the actual Tone objects.
+    // For debugging purposes only.
     for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
     {
         unorderedTones[tone].id = tone;
+        unorderedTones[tone].setParentList(this);
     }
     buildLinks();
 }
 
 ToneList::~ToneList()
 {
-    // TODO Auto-generated destructor stub
+    // Auto-generated destructor stub
 }
-
-/*void ToneList::removeDeadTones()
-{
-    uint32_t deadTones = 0;
-    for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
-    {
-        if (tone >= activeTones)
-        {
-            break;
-        }
-        if (!tones[tone]->ontimeUS || !tones[tone]->nextFireUS)
-        {
-            deadTones++;
-            tones[tone]->owner      = 0;
-            tones[tone]->origin     = 0;
-            tones[tone]->nextFireUS = 0;
-        }
-        else if (deadTones)
-        {
-            Tone *temp              = tones[tone - deadTones];
-            tones[tone - deadTones] = tones[tone];
-            tones[tone]             = temp;
-        }
-    }
-    activeTones -= deadTones;
-}*/
 
 Tone* ToneList::updateTone(uint32_t ontimeUS, uint32_t periodUS, void* owner, void* origin, Tone* tone)
 {
@@ -59,13 +33,13 @@ Tone* ToneList::updateTone(uint32_t ontimeUS, uint32_t periodUS, void* owner, vo
             targetTone = tone;
         }
     }
-    else
+    if (!targetTone)
     {
         targetTone       = newTone;
         newTone          = newTone->nextTone;
-        if (newTone == firstTone)
+        if (++activeTones > maxVoices)
         {
-            firstTone   = firstTone->nextTone;
+            deleteTone(firstTone);
         }
         targetTone->type = Tone::Type::newdflt;
     }
@@ -86,6 +60,8 @@ void ToneList::deleteTone(Tone* tone)
 {
     if (tone)
     {
+        activeTones--;
+
         tone->ontimeUS   = 0;
         tone->owner      = 0;
 
@@ -93,7 +69,11 @@ void ToneList::deleteTone(Tone* tone)
         {
             firstTone = firstTone->nextTone;
         }
-        else if (tone->nextTone != firstTone)
+        else if (tone->nextTone == firstTone)
+        {
+            newTone = tone;
+        }
+        else
         {
             tone->prevTone->nextTone       = tone->nextTone;
             tone->nextTone->prevTone       = tone->prevTone;
@@ -107,13 +87,19 @@ void ToneList::deleteTone(Tone* tone)
 
 void ToneList::buildLinks()
 {
-    for (uint32_t tone = 0; tone < maxVoices - 1; tone++)
+    /*
+     * This is a doubly linked list, but a circular one. This makes it easier
+     * to handle "overflows" of the list but (seems) to require one additional
+     * list element that won't be used/moved. Maybe a bug; haven't really
+     * understood the issue yet. TODO!
+     */
+    for (uint32_t tone = 0; tone < MAX_VOICES - 1; tone++)
     {
         unorderedTones[tone].nextTone = &(unorderedTones[tone + 1]);
         unorderedTones[tone + 1].prevTone = &(unorderedTones[tone]);
     }
     firstTone = &(unorderedTones[0]);
-    firstTone->prevTone = &(unorderedTones[maxVoices - 1]);
+    firstTone->prevTone = &(unorderedTones[MAX_VOICES - 1]);
     firstTone->prevTone->nextTone = firstTone;
     newTone  = firstTone;
 }

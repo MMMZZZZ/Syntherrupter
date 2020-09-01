@@ -32,9 +32,33 @@ public:
     void init(uint32_t timer);
     void setMaxOntimeUS(uint32_t maxOntimeUS);
     void setMinOfftimeUS(uint32_t minOfftimeUS);
-    void shot(uint32_t ontimeUS);
-    void rearmISR();
-    bool ready();
+    void shot(uint32_t ontimeUS)
+    {
+        uint32_t matchValue = ontimeUS * (System::getPIOSCFreq() / 1000000);
+        if (matchValue)
+        {
+            if (matchValue > maxOnValue)
+            {
+                matchValue = maxOnValue;
+            }
+
+            // Copied from the TivaWare timer.c, reduced to the minimum, skipping argument checks and platform checks. Big speed increase.
+            // Disable the Output-Timer
+            HWREG(timerBase + TIMER_O_CTL) &= ~(TIMER_CTL_TAEN | TIMER_CTL_TBEN);
+
+            // Reset the Timer A Mode Register (not sure why this is needed)
+            HWREG(timerBase + TIMER_O_TAMR) = 0;//(((0 & 0x000f0000) >> 4) | (0 & 0xff) | TIMER_TAMR_TAPWMIE);
+
+            // Set the configuration of the A timer and set the TxPWMIE bit.
+            HWREG(timerBase + TIMER_O_TAMR) = (((TIMER_CONFIG & 0x000f0000) >> 4) | (TIMER_CONFIG & 0xff) | TIMER_TAMR_TAPWMIE);
+
+            // Set Load in Output-Timer Timer A Interval Load Register
+            HWREG(timerBase + TIMER_O_TAILR) = matchValue - 1;
+
+            // Enable the Timer
+            HWREG(timerBase + TIMER_O_CTL) |= TIMER_CTL_TAEN;
+        }
+};
 private:
     static constexpr uint32_t TIMER_SYSCTL_PERIPH = 0;
     static constexpr uint32_t TIMER_BASE          = 1;

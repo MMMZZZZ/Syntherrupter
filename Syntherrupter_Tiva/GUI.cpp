@@ -166,7 +166,6 @@ void GUI::init()
             nxt.printf("dim=%i\xff\xff\xff", dispBrightness);
         }
         nxt.setVal("TC_Settings.maxCoilCount", COIL_COUNT);
-        nxt.setVal("TC_Settings.maxVoices", MAX_VOICES);
 
         // Give time to the UART to send the data
         System::delayUS(20000);
@@ -291,7 +290,11 @@ uint32_t GUI::update()
                 }
                 else if (modeByte0 == 'e' && modeByte1 == 's')
                 {
-                    mode = Mode::emergency;
+                    for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+                    {
+                        coils[coil].midi.setVolSettings(0.0f, 0.0f);
+                        coils[coil].simple.setOntimeUS(0.0f, true);
+                    }
                 }
                 else
                 {
@@ -510,22 +513,22 @@ void GUI::midiLive()
             bool isMIDICommand = commandData[0] & 0b10000;
             if (isMIDICommand)
             {
-                coils->midi.otherBuffer.add(commandData[1]);
-                coils->midi.otherBuffer.add(commandData[2]);
-                coils->midi.otherBuffer.add(commandData[3]);
+                MIDI::otherBuffer.add(commandData[1]);
+                MIDI::otherBuffer.add(commandData[2]);
+                MIDI::otherBuffer.add(commandData[3]);
             }
             else
             {
                 uint8_t channel = commandData[0] & 0xf;
-                coils->midi.otherBuffer.add(0xB0 + channel);    // Control Change
-                coils->midi.otherBuffer.add(0x63);              // NRPN Coarse
-                coils->midi.otherBuffer.add(commandData[1]); // Value
-                coils->midi.otherBuffer.add(0x62);              // NRPN Fine
-                coils->midi.otherBuffer.add(commandData[2]); // Value
-                coils->midi.otherBuffer.add(0x06);              // Data Entry Coarse
-                coils->midi.otherBuffer.add(commandData[3]); // Value
-                coils->midi.otherBuffer.add(0x26);              // Data Entry Fine
-                coils->midi.otherBuffer.add(commandData[4]); // Value
+                MIDI::otherBuffer.add(0xB0 + channel);    // Control Change
+                MIDI::otherBuffer.add(0x63);              // NRPN Coarse
+                MIDI::otherBuffer.add(commandData[1]); // Value
+                MIDI::otherBuffer.add(0x62);              // NRPN Fine
+                MIDI::otherBuffer.add(commandData[2]); // Value
+                MIDI::otherBuffer.add(0x06);              // Data Entry Coarse
+                MIDI::otherBuffer.add(commandData[3]); // Value
+                MIDI::otherBuffer.add(0x26);              // Data Entry Fine
+                MIDI::otherBuffer.add(commandData[4]); // Value
             }
         }
         else
@@ -546,7 +549,7 @@ void GUI::midiLive()
                     else if (mode == 1)
                     {
                         uint32_t channels = (commandData[2] << 8) + commandData[1];
-                        coils->midi.resetNRPs(channels);
+                        MIDI::resetNRPs(channels);
                     }
                     else if (mode == 3)
                     {
@@ -566,9 +569,9 @@ void GUI::midiLive()
         if ((time - EET) > ((uint32_t) EED[EEI][0] * 1000))
         {
             EET = time;
-            coils->midi.otherBuffer.add(EED[EEI][1]);
-            coils->midi.otherBuffer.add(EED[EEI][2]);
-            coils->midi.otherBuffer.add(EED[EEI][3]);
+            MIDI::otherBuffer.add(EED[EEI][1]);
+            MIDI::otherBuffer.add(EED[EEI][2]);
+            MIDI::otherBuffer.add(EED[EEI][3]);
             if (++EEI >= EES)
             {
                 EEE = false;

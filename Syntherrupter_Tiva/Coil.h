@@ -24,14 +24,38 @@ public:
     Coil();
     virtual ~Coil();
     void init(uint32_t coilNum);
-    void update();
+    void updateData();
     void setMaxDutyPerm(uint32_t dutyPerm);
     void setMaxOntimeUS(uint32_t ontimeUS);
     void setMaxVoices(uint32_t voices);
-    void output()
+    void updateOutput()
     {
-        one.shot(nextOntimeUS);
-        nextOntimeUS = 0;
+        /*
+         * Time critical updates.
+         */
+
+        uint32_t timeUS = System::getSystemTimeUS();
+        if (timeUS > nextAllowedFireUS)
+        {
+            nextOntimeUS = toneList.getOntimeUS(timeUS);
+            if (nextOntimeUS)
+            {
+                one.shot(nextOntimeUS);
+                nextAllowedFireUS = timeUS + nextOntimeUS + minOffUS;
+            }
+        }
+        /*
+         * Overflow detection. No ontime or min offtime is larger than 10 seconds.
+         * Note: In theory you'd need a similar detection for the tone.nextFireUS
+         * variables. In practice this means that the tones playing during the
+         * overflow will stop playing but the next tones will be fine. Therefore
+         * it is not worth the additional CPU time to check each time for an
+         * overflow. Remember, it only happens less than once an hour.
+         */
+        else if (nextAllowedFireUS - timeUS > 10000000)
+        {
+            nextAllowedFireUS = 0;
+        }
     };
 
     Oneshot  one;
@@ -46,6 +70,9 @@ public:
 
     volatile uint32_t nextOntimeUS = 0;
     volatile uint32_t nextFireUS   = -1;
+
+    volatile uint32_t isrUpdateCounter = 0;
+    static uint32_t isrUpdateCounterLim;
 
 private:
     uint32_t num = 0;

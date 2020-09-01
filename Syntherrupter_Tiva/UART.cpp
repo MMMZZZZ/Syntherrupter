@@ -33,7 +33,7 @@ void UART::init(uint32_t port, uint32_t rxPin, uint32_t txPin, uint32_t baudRate
     }
     if (num == 42)
     {
-        sys.error();
+        System::error();
     }
     else
     {
@@ -55,17 +55,16 @@ void UART::init(uint32_t uartNum, uint32_t baudRate,
     GPIOPinTypeUART(   UART_MAPPING[uartNum][UART_PORT_BASE],
                        UART_MAPPING[uartNum][UART_TX_PIN]
                      | UART_MAPPING[uartNum][UART_RX_PIN]);
-    UARTConfigSetExpClk(uartBase, sys.getClockFreq(), baudRate,
+    UARTConfigSetExpClk(uartBase, System::getClockFreq(), baudRate,
                         (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
     UARTFIFODisable(uartBase);
     UARTIntRegister(uartBase, ISR);
-    UARTIntEnable(uartBase, UART_INT_RX);
     if (intPriority != DEFAULT_INT_PRIO)
     {
         IntPrioritySet(UART_MAPPING[uartNum][UART_INT], intPriority);
     }
     if (buffered)
     {
-        buffer.init(512);
+        buffer.init(1024);
     }
 }

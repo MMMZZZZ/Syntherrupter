@@ -13,37 +13,30 @@
 #include "GUI.h"
 
 
-System sys;
 Coil coils[COIL_COUNT];
 
 
 void sysTickISR()
 {
-    sys.systemTimeIncrement();
-
-    for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
-    {
-        coils[coil].output();
-    }
+    System::systemTimeIncrement();
 }
 
 void uartUsbISR()
 {
-    coils->midi.usbUart.ISR();
+    MIDI::usbUart.ISR();
 }
 
 void uartMidiISR()
 {
-    coils->midi.midiUart.ISR();
+    MIDI::midiUart.ISR();
 }
 
 
 int main(void)
 {
-    GUI gui;
-    sys.init(sysTickISR);
-    sys.setSystemTimeResUS(10);
-    gui.init();
+    System::init(sysTickISR);
+    System::setSystemTimeResUS(16);
+    GUI::init();
 
     // Initialize Coil objects
     for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
@@ -54,21 +47,39 @@ int main(void)
 
     while (42)
     {
-        uint32_t state = gui.update();
+        uint32_t state = GUI::update();
 
         if (state)
         {
-            // Use coils[0] objects for calling their static methods.
             MIDI::process();
 
-            for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+            switch (COIL_COUNT)
+            {
+                case 6:
+                    coils[5].updateData();
+                    coils[5].updateOutput();
+                case 5:
+                    coils[4].updateData();
+                    coils[4].updateOutput();
+                case 4:
+                    coils[3].updateData();
+                    coils[3].updateOutput();
+                case 3:
+                    coils[2].updateData();
+                    coils[2].updateOutput();
+                case 2:
+                    coils[1].updateData();
+                    coils[1].updateOutput();
+                case 1:
+                    coils[0].updateData();
+                    coils[0].updateOutput();
+                    break;
+            }
+            /*for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
                 // Run non-static coil object methods
                 coils[coil].update();
-
-                // Generate output
-                coils[coil].output();
-            }
+            }*/
         }
         else
         {
@@ -76,9 +87,9 @@ int main(void)
             // and delete all tones
             for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
+                ToneList* tl = &(coils[coil].toneList);
                 for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
                 {
-                    ToneList* tl = &(coils[coil].toneList);
                     tl->deleteTone(tl->firstTone);
                 }
             }

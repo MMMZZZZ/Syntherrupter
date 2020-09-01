@@ -16,9 +16,6 @@
 #include "Tone.h"
 
 
-extern System sys;
-
-
 class ToneList
 {
 public:
@@ -35,39 +32,19 @@ public:
     {
         this->maxDuty = maxDuty;
     };
-    void setMaxVoices(uint32_t maxVoices)
-    {
-        if (maxVoices > MAX_VOICES)
-        {
-            maxVoices = MAX_VOICES;
-        }
-        this->maxVoices = maxVoices;
-        buildLinks();
-    };
     uint32_t getOntimeUS(uint32_t timeUS)
     {
-        uint32_t highestOntimeUS = 0;
         Tone* tone = firstTone;
-        for (uint32_t toneNum = 0; toneNum < MAX_VOICES; toneNum++)
+        while (tone != newTone)
         {
-            if (tone == newTone)
-            {
-                break;
-            }
             if (timeUS >= tone->nextFireUS)
             {
-                if (timeUS < tone->nextFireEndUS)
-                {
-                    if (tone->limitedOntimeUS > highestOntimeUS)
-                    {
-                        highestOntimeUS = tone->limitedOntimeUS;
-                    }
-                }
                 tone->update(timeUS);
+                return tone->limitedOntimeUS;
             }
             tone = tone->nextTone;
         }
-        return highestOntimeUS;
+        return 0;
     };
     Tone* firstTone;
 
@@ -76,7 +53,7 @@ private:
     float maxOntimeUS    = 10;
     float maxDuty        = 0.01f;
     bool limiterActive   = false;
-    uint32_t maxVoices   = 8;
+    uint32_t maxVoices   = MAX_VOICES - 1;
     uint32_t activeTones = 0;
     Tone unorderedTones[MAX_VOICES];
     Tone* newTone;

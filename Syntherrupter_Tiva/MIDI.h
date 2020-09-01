@@ -19,6 +19,7 @@
 #include "ByteBuffer.h"
 #include "Note.h"
 #include "ToneList.h"
+#include "NoteList.h"
 #include "MIDIProgram.h"
 
 
@@ -29,7 +30,10 @@ public:
     virtual ~MIDI();
     static void init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPort, uint32_t midiUartRx, uint32_t midiUartTx, void (*midiISR)(void));
     void updateToneList();
-    void setCoilsToneList(ToneList* tonelist);
+    void setCoilsToneList(ToneList* tonelist)
+    {
+        this->tonelist = tonelist;
+    };
     void setCoilNum(uint32_t num);
     static void start();
     static void stop();
@@ -39,7 +43,10 @@ public:
     void setPan(uint32_t pan);
     void setPanReach(uint32_t reach);
     void setMaxVoices(uint32_t maxVoices);
-    static bool isPlaying();
+    static bool isPlaying()
+    {
+        return playing;
+    };
     static void process();
     static Channel channels[16];
     static UART usbUart, midiUart;
@@ -48,10 +55,55 @@ public:
 private:
     static bool processBuffer(uint32_t b);
     static void updateEffects(Note* note);
-    void setPanVol(Note* note);
-    static float getLFOVal(uint32_t channel);
+    void setPanVol(Note* note)
+    {
+        if (note->panChanged || coilPanChanged)
+        {
+            if (note->panChanged & coilBit)
+            {
+                note->panChanged &= ~coilBit;
+            }
+            // 1.01f instead of 1.0f to include the borders of the range.
+            note->panVol[coilNum] = 1.01f - inversPanReach * fabsf(note->pan - coilPan);
+            if (note->panVol[coilNum] <= 0.0f)
+            {
+                note->panVol[coilNum] = 0.0f;
+            }
+            else if (panConstVol)
+            {
+                note->panVol[coilNum] = 1.0f;
+            }
+
+            if (coilPan < 0.0f || channels[note->channel].notePanOmniMode)
+            {
+                note->panVol[coilNum] = 1.0f;
+            }
+        }
+    };
+    static float getLFOVal(uint32_t channel)
+    {
+        if (channels[channel].modulation)
+        {
+            /*
+             *               /            t   \
+             * LFO_SINE = sin| 2 * Pi * ----- |
+             *               \           T_0  /
+             *
+             *       1   /  LFO_SINE + 1       ModWheelValue    \
+             * val = - * | --------------- * ------------------ |
+             *       2   \        2           MaxModWheelValue  /
+             *
+             * sine wave between 0 and 1 mapped to the desired modulation depth (50% max).
+             */
+            return (sinf(6.283185307179586f * float(System::getSystemTimeUS()) / LFO_PERIOD_US) + 1) / 4.0f
+                    * channels[channel].modulation;
+        }
+        else
+        {
+            return 0.0f;
+        }
+    };
     static void removeDeadNotes();
-    static uint32_t getNoteIndex(uint32_t channel, uint32_t noteNum);
 
     static constexpr uint32_t ADSR_PROGRAM_COUNT     = 9;
     // TODO: The following list is missing the newer sounds.
@@ -79,7 +131,7 @@ private:
               {3.0f, 1.0f /    3000.0f,     1.0f, 1.0f /   27000.0f,     0.00f, 1.0f /   400000.0f,     0.0f, 1.0f /       1.0f},
     };
 
-    static constexpr uint32_t effectResolutionUS = 1000;
+    static constexpr uint32_t effectResolutionUS = 963;
 
     static constexpr uint32_t MAX_PROGRAMS = 16;
     static MIDIProgram programs[MAX_PROGRAMS];
@@ -90,6 +142,7 @@ private:
     static constexpr uint32_t MAX_NOTES_COUNT = 64;
     static Note               unorderedNotes[MAX_NOTES_COUNT];
     static Note*              notes[MAX_NOTES_COUNT];
+    static NoteList notelist;
     static uint32_t           notesCount;
     static uint32_t dataBytes;
     ToneList* tonelist;
