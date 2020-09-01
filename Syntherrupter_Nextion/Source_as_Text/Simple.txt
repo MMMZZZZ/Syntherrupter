@@ -164,6 +164,30 @@ Page Simple
             nOn.val=ontime.val
             nBPS.val=BPS.val
             nDuty.val=duty.val
+            nOn1.val=set1.val&0xffff
+            nBPS1.val=set1.val>>16
+            nBPS1.val=nBPS1.val&0xffff
+            nDuty1.val=nOn1.val*nBPS1.val/1000
+            nOn2.val=set2.val&0xffff
+            nBPS2.val=set2.val>>16
+            nBPS2.val=nBPS2.val&0xffff
+            nDuty2.val=nOn2.val*nBPS2.val/1000
+            nOn3.val=set3.val&0xffff
+            nBPS3.val=set3.val>>16
+            nBPS3.val=nBPS3.val&0xffff
+            nDuty3.val=nOn3.val*nBPS3.val/1000
+            nOn4.val=set4.val&0xffff
+            nBPS4.val=set4.val>>16
+            nBPS4.val=nBPS4.val&0xffff
+            nDuty4.val=nOn4.val*nBPS4.val/1000
+            nOn5.val=set5.val&0xffff
+            nBPS5.val=set5.val>>16
+            nBPS5.val=nBPS5.val&0xffff
+            nDuty5.val=nOn5.val*nBPS5.val/1000
+            nOn6.val=set6.val&0xffff
+            nBPS6.val=set6.val>>16
+            nBPS6.val=nBPS6.val&0xffff
+            nDuty6.val=nOn6.val*nBPS6.val/1000
             // Restore slider positions
             fSliderInput.val=sDuty.maxval
             fSliderOutput.val=userDutyLimit.val
@@ -190,12 +214,27 @@ Page Simple
         Touch Press Event
             if(Other_Settings.nBackOff.val!=0)
             {
-                // Default "stop" action. Set ontime of all Coils to 0
-                // Details about the data format described in a separate file and in the bApply button.
-                prints "d",1
-                printh FF // All coils
-                prints 0,2 // 0 ontime
-                prints nBPS.val,2 // do not change frequency
+                // Default "stop" action.
+                // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                prints "mes",3
+                // Set all ontime and duty settings of all pages to 0.
+                // First come the global variables then the local variables.
+                Simple.ontime.val=0
+                Simple.duty.val=0
+                Simple.set1.val=Simple.set1.val&0x0000ffff
+                Simple.set2.val=Simple.set2.val&0x0000ffff
+                Simple.set3.val=Simple.set3.val&0x0000ffff
+                Simple.set4.val=Simple.set4.val&0x0000ffff
+                Simple.set5.val=Simple.set5.val&0x0000ffff
+                Simple.set6.val=Simple.set6.val&0x0000ffff
+                MIDI_Live.ontime.val=0
+                MIDI_Live.duty.val=0
+                MIDI_Live.set1.val=0
+                MIDI_Live.set2.val=0
+                MIDI_Live.set3.val=0
+                MIDI_Live.set4.val=0
+                MIDI_Live.set5.val=0
+                MIDI_Live.set6.val=0
                 nOn.val=0
                 sOn.val=0
                 nOn1.val=0
@@ -221,6 +260,18 @@ Page Simple
             ontime.val=nOn.val
             BPS.val=nBPS.val
             duty.val=nDuty.val
+            set1.val=nBPS1.val<<16
+            set1.val+=nOn1.val
+            set2.val=nBPS2.val<<16
+            set2.val+=nOn2.val
+            set3.val=nBPS3.val<<16
+            set3.val+=nOn3.val
+            set4.val=nBPS4.val<<16
+            set4.val+=nOn4.val
+            set5.val=nBPS5.val<<16
+            set5.val+=nOn5.val
+            set6.val=nBPS6.val<<16
+            set6.val+=nOn6.val
         
     Components
         Text tHideBack
@@ -244,7 +295,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -331,7 +382,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -343,7 +394,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -441,7 +492,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -453,7 +504,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -526,7 +577,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -580,8 +631,6 @@ Page Simple
                 
                 Touch Release Event
                     tmReturn.en=0
-                    // Set outputs to 0
-                    click dp,1
                     // Leaving MIDI Live Mode. Mode is now inactive
                     Settings.activeModes.val=Settings.activeModes.val^1
                     // Mode: EXit.
@@ -597,7 +646,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -610,7 +659,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -623,7 +672,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -636,7 +685,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -685,7 +734,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -792,7 +841,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -835,7 +884,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -848,7 +897,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -860,7 +909,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -872,7 +921,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -885,7 +934,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -897,7 +946,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -909,7 +958,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -922,7 +971,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -934,7 +983,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -946,7 +995,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -959,7 +1008,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -971,7 +1020,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -983,7 +1032,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -996,7 +1045,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1008,7 +1057,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1020,7 +1069,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1033,7 +1082,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1045,7 +1094,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1058,7 +1107,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1071,7 +1120,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1084,7 +1133,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1097,7 +1146,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1110,7 +1159,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1123,7 +1172,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1136,7 +1185,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1149,7 +1198,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1162,7 +1211,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1175,7 +1224,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1188,7 +1237,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1201,7 +1250,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1214,7 +1263,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1227,7 +1276,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1240,7 +1289,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1253,7 +1302,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1266,7 +1315,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1279,7 +1328,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1509,7 +1558,9 @@ Page Simple
             
             Events
                 Touch Press Event
-                    
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
                 Touch Release Event
                     // If not already active, go to page.
                     //if(dp!=MIDI_Live.id)
@@ -1525,7 +1576,9 @@ Page Simple
             
             Events
                 Touch Press Event
-                    
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
                 Touch Release Event
                     
         Timer tmReturn
@@ -1543,3 +1596,39 @@ Page Simple
                     p
                     e
                 
+        Variable set1
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable set2
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable set3
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable set4
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable set5
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable set6
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            

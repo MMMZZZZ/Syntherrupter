@@ -13,6 +13,20 @@ Page MIDI_Chn_Set
                 tUser.txt=" "+User_Settings.u2Name.txt
             }
             //
+            // Display all active modes
+            sys0=Settings.activeModes.val&1
+            if(sys0!=0)
+            {
+                // Simple Mode is active
+                tMSI.bco=6900
+            }
+            sys0=Settings.activeModes.val&2
+            if(sys0!=0)
+            {
+                // MIDI Live Mode is active
+                tMML.bco=6900
+            }
+            //
             // Idle field is just used for default text/background color and as target for the numpad if no component is selected. Ergo should be hidden like functions.
             vis fStore,0
             vis fCheck,0
@@ -45,17 +59,6 @@ Page MIDI_Chn_Set
                     nStatus.val=nStatus.val&0xf0
                     nStatus.val+=chnNum.val
                 }
-            }
-            //
-            // Hide Previous button for first coil
-            if(chnNum.val==0)
-            {
-                vis bPrevious,0
-            }
-            // Hide Next button for last coil
-            if(chnNum.val==15)
-            {
-                vis bNext,0
             }
         
         Postinitialize Event
@@ -110,14 +113,21 @@ Page MIDI_Chn_Set
         Touch Press Event
             if(Other_Settings.nBackOff.val!=0)
             {
-                // Default "stop" action. Set ontime of all Coils to 0
-                // Details about the data format described in a separate file and in the bApply button.
-                // shift bits for volume mode
-                sys1=3<<6
-                sys1+=63 // apply to all coils
-                prints "d",1
-                prints sys1,1
-                prints 0,4 // 0 ontime, 0 duty
+                // Default "stop" action.
+                // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                prints "mes",3
+                // Set all ontime and duty settings of all pages to 0.
+                // First come the global variables then the local variables.
+                Simple.ontime.val=0
+                Simple.duty.val=0
+                Simple.set1.val=Simple.set1.val&0x0000ffff
+                Simple.set2.val=Simple.set2.val&0x0000ffff
+                Simple.set3.val=Simple.set3.val&0x0000ffff
+                Simple.set4.val=Simple.set4.val&0x0000ffff
+                Simple.set5.val=Simple.set5.val&0x0000ffff
+                Simple.set6.val=Simple.set6.val&0x0000ffff
+                MIDI_Live.ontime.val=0
+                MIDI_Live.duty.val=0
                 MIDI_Live.set1.val=0
                 MIDI_Live.set2.val=0
                 MIDI_Live.set3.val=0
@@ -175,6 +185,7 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
                     click dp,1
                 
                 Touch Release Event
@@ -202,7 +213,9 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
                 Touch Release Event
                     
         Text tChan
@@ -213,6 +226,7 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
                     click dp,1
                 
                 Touch Release Event
@@ -257,6 +271,9 @@ Page MIDI_Chn_Set
                     if(chnNum.val>0)
                     {
                         chnNum.val-=1
+                    }else
+                    {
+                        chnNum.val=15
                     }
                     // Reload page for previous coil
                     page MIDI_Chn_Set
@@ -277,6 +294,9 @@ Page MIDI_Chn_Set
                     if(chnNum.val<15)
                     {
                         chnNum.val+=1
+                    }else
+                    {
+                        chnNum.val=0
                     }
                     // Reload page for previous coil
                     page MIDI_Chn_Set
@@ -696,6 +716,7 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
                     click dp,1
                 
                 Touch Release Event
@@ -708,6 +729,7 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
                     click dp,1
                 
                 Touch Release Event
@@ -720,6 +742,7 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
                     click dp,1
                 
                 Touch Release Event
@@ -774,6 +797,7 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
                     click dp,1
                 
                 Touch Release Event
@@ -786,6 +810,7 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
                     click dp,1
                 
                 Touch Release Event
@@ -798,6 +823,7 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
                     click dp,1
                 
                 Touch Release Event
@@ -831,6 +857,7 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
                     click dp,1
                 
                 Touch Release Event
@@ -969,6 +996,7 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
                     click dp,1
                 
                 Touch Release Event
@@ -981,6 +1009,7 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
                     click dp,1
                 
                 Touch Release Event
@@ -993,6 +1022,7 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
                     click dp,1
                 
                 Touch Release Event
@@ -1116,6 +1146,7 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
                     click dp,1
                 
                 Touch Release Event
@@ -1168,6 +1199,7 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
                     click dp,1
                 
                 Touch Release Event
@@ -1184,3 +1216,29 @@ Page MIDI_Chn_Set
                 Type          : int32
                 Initial Value : 0
             
+        Text tMSI
+            Properties
+                Scope       : Local
+                Initial Text: "Simple"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tMML
+            Properties
+                Scope       : Local
+                Initial Text: "MIDI Live"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
