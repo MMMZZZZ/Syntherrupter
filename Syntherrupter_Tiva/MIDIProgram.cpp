@@ -97,7 +97,11 @@ void MIDIProgram::updateCoefficients()
      *
      * Solution:
      *   amp_n = (amp_n - totalScale) * c + totalScale
-     *
+     * Note: This could be simplified but would become even less readable.
+     *         amp_n = amp_n * c + (totalScale * (1 - c))
+     *       Since the stuff in the brackets is completely constant, it can
+     *       be calculated ahead. This would reduce the "runtime calculations"
+     *       from 3 (sub mul add) to 2 (mul add).
      */
     amplitude[DATA_POINTS]   = amplitude[0];
     durationUS[DATA_POINTS]  = durationUS[0];
