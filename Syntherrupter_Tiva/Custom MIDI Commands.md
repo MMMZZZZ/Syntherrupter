@@ -1,12 +1,12 @@
-#Custom MIDI Commands
+# Custom MIDI Commands
 Syntherrupter's MIDI functions can be controlled via custom MIDI commands. Since vendor or even device specific MIDI commands are part of the MIDI standard, embedding them in your MIDI files does not break the compatibiliy of the file with other devices. 
 
-##Non-registered Parameters (NRP)
+## Non-registered Parameters (NRP)
 Non-registered parameters allow control over up to 16383 controllers, each one with 14 bit resolution. These commands are not "vendor encoded" like SysEx messages (see below) therefore Syntherrupter only uses controller numbers that are not known to be used by any manufacturer. 
 
 NRPs are implemented via control change commands, which means that the controlled parameter does not affect the same parameter on another MIDI channel - just like other controllers like pedals, volume, pan, ...
 
-###NRP Format
+### NRP Format
 There are 4 controller messages that are used to modify NRPs:
  * Controller 99 - NRP number coarse (NC): Sets the upper 7 bit of the NRP number
  * Controller 98 - NRP number fine (NF): Sets the lower 7 bit of the NRP number
@@ -17,7 +17,7 @@ All 4 commands are independant, meaning a NC command does not affect the lower 7
 
 After finishing the modification of NRPs, the NRP number should be reset to 0x7f7f.
 
-###Syntherrupters NRPs
+### Syntherrupters NRPs
 Currently Syntherrupter has support for the following NRPs (all values are decimal, not hex):
 |Parameter|NC|NF|DC|DF|
 |-|-|-|-|-|
@@ -25,19 +25,19 @@ Currently Syntherrupter has support for the following NRPs (all values are decim
 |Stereo Mapping, Input Range|42|1|0-127: upper end|0-127: lower end|
 |Stereo Mapping, Output Range|42|1|0-127: upper end|0-127: lower end|
 
-###Recommended Links
+### Recommended Links
 If you've never used NRPs or Syntherrupters advanced features, you might have a look at the following helpful links:
  * [Explanation about NRPs and how to use them](https://www.recordingblogs.com/wiki/midi-registered-parameter-number-rpn)
  * [Syntherrupters stereo features in words and videos](https://highvoltageforum.net/index.php?topic=1020.msg8343#msg8343)
 
-##System Exclusive Messages (SysEx)
+## System Exclusive Messages (SysEx)
 SysEx messages were originally intended to allow manufacturers to implement completely custom commands within the MIDI protocol. Part of each command is a device manufacturer ID (DMID) to make sure the commands of different manufacturers don't interfer with each other. Hence, with your own ID you can implement whatever you want. 
 
 However with GM2, kind of a "revision and extension" of the MIDI standard, "Universal SysEx Messages" were introduced. They have a ID just like any other SysEx message but as the "universal" indicates, they are well defined and intended to be implemented on any suitable device. It's basically a backward compatible extension of the existing MIDI standard. As of now, Syntherrupter has no support for Universal SysEx Messages (and tbh they're quite rare in MIDI files).
 
 SysEx Messages have no channel information and are intended to control the device as a whole. Although, of course, every manufacturer can use them to implement whatever they want. Custom note on messages with additional information for example. 
 
-###SysEx format
+### SysEx format
 Here's a good explanation of the format: http://personal.kent.edu/~sbirch/Music_Production/MP-II/MIDI/midi_system_exclusive_messages.htm
 
 Short explanation:
@@ -50,7 +50,7 @@ Short explanation:
 |5-n|0x00-0x7f|Zero or more manufacturer specific data bytes|
 |n+1|0xf7|End of a SysEx message|
 
-###Syntherrupters SysEx Messages
+### Syntherrupters SysEx Messages
 I decided to use the manufacturer ID `0x26 0x05`. It seems to be far enough in the european block to be sure that it won't be assigned to any manufacturer in the next years. 
 
 *Note: getting a unique ID from the MMA (association behind MIDI) costs at least 240$/year. Surprisingly cheap but still too expensive for a niche project like this.*
