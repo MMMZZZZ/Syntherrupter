@@ -20,7 +20,7 @@ public:
     MIDIProgram();
     virtual ~MIDIProgram();
     enum class Mode {lin, exp, cnst};
-    void setDataPoint(uint32_t index, float amplitude, float durationUS);
+    void setDataPoint(uint32_t index, float amplitude, float durationUS, float ntau = 1.0f);
     void setMode(Mode mode);
     static void setResolutionUS(float res);
     static constexpr uint32_t DATA_POINTS = 4;

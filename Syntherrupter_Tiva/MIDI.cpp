@@ -52,7 +52,7 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPor
         for (uint32_t datapnt = 0; datapnt < 4; datapnt++)
         {
             programs[prog].setDataPoint(datapnt, ADSR_LEGACY_PROGRAMS[prog][datapnt*2],    1.0f / ADSR_LEGACY_PROGRAMS[prog][datapnt*2+1]);
-            programs[prog+10].setDataPoint(datapnt, ADSR_LEGACY_PROGRAMS[prog][datapnt*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][datapnt*2+1]);
+            programs[prog+10].setDataPoint(datapnt, ADSR_LEGACY_PROGRAMS[prog][datapnt*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][datapnt*2+1], 3.0f);
         }
     }
 }

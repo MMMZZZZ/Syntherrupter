@@ -30,7 +30,7 @@ MIDIProgram::~MIDIProgram()
     // TODO Auto-generated destructor stub
 }
 
-void MIDIProgram::setDataPoint(uint32_t index, float amplitude, float durationUS)
+void MIDIProgram::setDataPoint(uint32_t index, float amplitude, float durationUS, float ntau)
 {
     if (index >= DATA_POINTS)
     {
