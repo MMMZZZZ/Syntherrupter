@@ -54,6 +54,51 @@ void MIDIProgram::setResolutionUS(float res)
 
 void MIDIProgram::updateCoefficients()
 {
+    /*
+     * Consider the base e exponential decay
+     *   expdecay(t) = amp * exp(-t / tau)
+     * With
+     *   tau: time constant
+     *   amp: start amplitude
+     * It reaches the value 1/e after 1*tau.
+     *
+     * To calculate expdecay iteratively is simple:
+     *   amp_n = amp_n-1 * c
+     * With
+     *   amp_0 = amp
+     *   c < 1
+     *
+     * How to determine c:
+     *   c depends on three variables:
+     *     amp_0: Stating amplitude
+     *     amp_z: Amplitude we want to reach
+     *     x:     Number of iterations to reach targetAmp
+     *
+     *   Based on these values we get the equation
+     *     c^x = amp_z / amp_0
+     *   Which gives
+     *     c = (amp_z / amp_0) ^ (1 / x)
+     *
+     * At this point we can iteratively calculate an exponential decay with
+     *   * any starting amplitude
+     *   * any resolution
+     *   * any "steepness"
+     * However we are still limited to the curve of an exponential decay:
+     *   * Reaching/crossing 0 is impossible
+     *   * Always goes towards 0.
+     *
+     * Remember how we defined amp_z: It's the value we reach after x
+     * iterations, it is not the limit of the series, which will remain 0.
+     * What would be much more useful is to scale the curve such that it
+     * crosses zero after x steps. This of course increases the total
+     * scale (lets call it totalScale).
+     *
+     * TODO more explanations at this point, especially considering ntau
+     *
+     * Solution:
+     *   amp_n = (amp_n - totalScale) * c + totalScale
+     *
+     */
     amplitude[DATA_POINTS]   = amplitude[0];
     durationUS[DATA_POINTS]  = durationUS[0];
     ntau[DATA_POINTS]        = ntau[0];
