@@ -22,15 +22,9 @@ public:
     virtual ~Note();
     bool isDead()
     {
-        return ((ADSRStep && ADSRVolume < 0.1f) || number > 127);
+        return ((ADSRStep && ADSRVolume < 1e-6f) || number > 127);
     };
-    void setADSRStep(uint32_t step)
-    {
-        ADSRStep  = step;
-        ADSRTicks = 0;
-    }
     uint32_t ADSRStep      = 0;
-    uint32_t ADSRTicks     = 0;
     uint8_t channel        = 0;
     uint8_t number         = 0;
     uint8_t velocity       = 0;

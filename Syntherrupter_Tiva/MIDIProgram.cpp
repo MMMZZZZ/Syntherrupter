@@ -59,18 +59,18 @@ void MIDIProgram::updateCoefficients()
     ntau[DATA_POINTS]        = ntau[0];
     for (uint32_t i = 1; i <= DATA_POINTS; i++)
     {
-        ticksPerStep[i] = durationUS[i] / resolutionUS;
         amplitudeDiff[i] = amplitude[i] - amplitude[i - 1];
         if (mode == Mode::lin)
         {
-            coefficient[i] = amplitudeDiff[i] / ticksPerStep[i];
+            coefficient[i] = amplitudeDiff[i] / durationUS[i] * resolutionUS;
         }
         else if (mode == Mode::exp)
         {
-            coefficient[i]  = expf(- 1.0f / ticksPerStep[i]); //powf(expf(-ntau[i]), 1.0f / ntau[i] * ticksPerStep[i]);
+            coefficient[i]  = expf(- ntau[i] / durationUS[i] * resolutionUS); //powf(expf(-ntau[i]), 1.0f / * ticksPerStep[i]);
             expTargetAmp[i] = amplitude[i - 1] - amplitudeDiff[i] / expm1f(- ntau[i]);
         }
     }
-    coefficient[0] = coefficient[DATA_POINTS];
-    expTargetAmp[0] = expTargetAmp[DATA_POINTS];
+    amplitudeDiff[0] = amplitudeDiff[DATA_POINTS];
+    coefficient[0]   = coefficient[DATA_POINTS];
+    expTargetAmp[0]  = expTargetAmp[DATA_POINTS];
 }

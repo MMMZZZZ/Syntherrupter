@@ -48,7 +48,7 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPor
     for (uint32_t prog = 0; prog < ADSR_PROGRAM_COUNT + 1; prog++)
     {
         programs[prog].setMode(MIDIProgram::Mode::lin);
-        programs[prog+10].setMode(MIDIProgram::Mode::lin);
+        programs[prog+10].setMode(MIDIProgram::Mode::exp);
         for (uint32_t datapnt = 0; datapnt < 4; datapnt++)
         {
             programs[prog].setDataPoint(datapnt, ADSR_LEGACY_PROGRAMS[prog][datapnt*2],    1.0f / ADSR_LEGACY_PROGRAMS[prog][datapnt*2+1]);
@@ -130,7 +130,7 @@ bool MIDI::processBuffer(uint32_t b)
 
                     note->number     = number;
                     note->velocity   = c1;
-                    note->setADSRStep(0);
+                    note->ADSRStep   = 0;
                     note->ADSRTimeUS = 0.0f;
                     note->channel    = channel;
                     note->changed    = true;
@@ -351,7 +351,7 @@ bool MIDI::processBuffer(uint32_t b)
                     {
                         if (note->channel == channel)
                         {
-                            note->setADSRStep(MIDIProgram::DATA_POINTS - 1);
+                            note->ADSRStep = MIDIProgram::DATA_POINTS - 1;
                         }
                         note = note->nextNote;
                     }
@@ -388,7 +388,7 @@ bool MIDI::processBuffer(uint32_t b)
         {
             if (dataBytes == 1)
             {
-                if (c1 <= ADSR_PROGRAM_COUNT)
+                if (c1 <= MAX_PROGRAMS)
                 {
                     channels[channel].program = c1;
                 }
@@ -614,7 +614,7 @@ void MIDI::process()
                 }
                 else if (!channel->sustainPedal)
                 {
-                    note->setADSRStep(MIDIProgram::DATA_POINTS - 1);
+                    note->ADSRStep = MIDIProgram::DATA_POINTS - 1;
                 }
             }
             updateEffects(note);
@@ -645,7 +645,7 @@ void MIDI::updateEffects(Note* note)
         {
             note->ADSRTimeUS = currentTime;
             MIDIProgram* program = &(programs[channels[note->channel].program]);
-            program->setADSRAmp(&(note->ADSRStep), &(note->ADSRTicks), &(note->ADSRVolume));
+            program->setADSRAmp(&(note->ADSRStep), &(note->ADSRVolume));
 
             // After calculation of ADSR envelope, add other effects like modulation
             float finishedVolume =   note->rawVolume

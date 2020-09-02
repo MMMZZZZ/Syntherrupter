@@ -28,32 +28,9 @@ public:
     float amplitude[DATA_POINTS + 1];
     float ntau[DATA_POINTS + 1];
     Mode mode = Mode::lin;
-    void setADSRAmp(uint32_t* step, uint32_t* ticks, float* amp)
+    void setADSRAmp(uint32_t* step, float* amp)
     {
         uint32_t currentStep  = *step;
-        /*uint32_t previousStep = currentStep;
-        if (previousStep)
-        {
-            previousStep--;
-        }
-        else
-        {
-            previousStep = DATA_POINTS - 1;
-        }*/
-        if (*ticks >= ticksPerStep[currentStep])
-        {
-            if (currentStep < DATA_POINTS - 2)
-            {
-                *ticks = 0;
-                (*step)++;
-            }
-            *amp = amplitude[currentStep];
-            return;
-        }
-        else
-        {
-            (*ticks)++;
-        }
         if (mode == Mode::lin)
         {
             *amp += coefficient[currentStep];
@@ -68,13 +45,21 @@ public:
         {
             *amp = amplitude[currentStep];
         }
+        if (  (*amp >= amplitude[currentStep] && amplitudeDiff[currentStep] >= 0)
+            ||(*amp <= amplitude[currentStep] && amplitudeDiff[currentStep] <= 0))
+        {
+            if (currentStep < DATA_POINTS - 2)
+            {
+                (*step)++;
+            }
+            *amp = amplitude[currentStep];
+        }
     }
 private:
     float coefficient[DATA_POINTS + 1];
     float amplitudeDiff[DATA_POINTS + 1];
     float expTargetAmp[DATA_POINTS + 1];
     static float resolutionUS;
-    uint32_t ticksPerStep[DATA_POINTS + 1];
 void updateCoefficients();
 };
 
