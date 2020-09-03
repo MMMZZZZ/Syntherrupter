@@ -320,9 +320,29 @@ Page MIDI_Live
                 Touch Release Event
                     fSlider.val=sOn.val
                     click fSlider,1
-                    // Round down to multiples of 5
-                    fSlider.val/=5
-                    fSlider.val*=5
+                    // Reduce resolution according to slider range for more "consistent" steps.
+                    sys0=1
+                    if(fSlider.val>=10000)
+                    {
+                        sys0=1000
+                    }else if(fSlider.val>=5000)
+                    {
+                        sys0=500
+                    }else if(fSlider.val>=1000)
+                    {
+                        sys0=100
+                    }else if(fSlider.val>=500)
+                    {
+                        sys0=50
+                    }else if(fSlider.val>=100)
+                    {
+                        sys0=10
+                    }else if(fSlider.val>=50)
+                    {
+                        sys0=5
+                    }
+                    fSlider.val/=sys0
+                    fSlider.val*=sys0
                     if(nOn.val!=fSlider.val)
                     {
                         newData.val=1
@@ -377,9 +397,6 @@ Page MIDI_Live
                 Touch Release Event
                     fSlider.val=sDuty.val
                     click fSlider,1
-                    // Round down to multiples of 5
-                    fSlider.val/=5
-                    fSlider.val*=5
                     if(nDuty.val!=fSlider.val)
                     {
                         newData.val=1

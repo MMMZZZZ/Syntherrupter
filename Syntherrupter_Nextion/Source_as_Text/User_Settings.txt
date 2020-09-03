@@ -370,9 +370,7 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
+                    
                 Touch Release Event
                     if(userNum.val!=0)
                     {
@@ -423,9 +421,7 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
+                    
                 Touch Release Event
                     if(userNum.val!=0)
                     {
@@ -489,9 +485,7 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
+                    
                 Touch Release Event
                     if(userNum.val==2)
                     {
