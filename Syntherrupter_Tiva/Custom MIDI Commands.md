@@ -51,6 +51,8 @@ Short explanation:
 |n+1|0xf7|End of a SysEx message|
 
 ### Syntherrupters SysEx Messages
+**Currently Syntherrupter does not support any SysEx Messages. This is work in progress.**
+
 I decided to use the manufacturer ID `0x26 0x05`. It seems to be far enough in the european block to be sure that it won't be assigned to any manufacturer in the next years. 
 
 *Note: getting a unique ID from the MMA (association behind MIDI) costs at least 240$/year. Surprisingly cheap but still too expensive for a niche project like this.*
