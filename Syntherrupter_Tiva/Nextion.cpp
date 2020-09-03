@@ -18,65 +18,64 @@ Nextion::~Nextion()
     // TODO Auto-generated destructor stub
 }
 
-void Nextion::init(System* sys, uint32_t uartNumber, uint32_t baudRate, uint32_t timeoutUS)
+void Nextion::init(uint32_t uartNumber, uint32_t baudRate, uint32_t timeoutUS)
 {
-    nxtSys = sys;
-    nxtBaudRate = baudRate;
-    nxtTimeoutUS = timeoutUS;
+    this->baudRate = baudRate;
+    this->timeoutUS = timeoutUS;
 
     // Nextion UART stdio setup
-    nxtUARTNum = uartNumber;
+    this->UARTNum = uartNumber;
 
-    SysCtlPeripheralEnable(NXT_UART_MAPPING[nxtUARTNum][NXT_UART_SYSCTL_PERIPH]);
-    SysCtlPeripheralEnable(NXT_UART_MAPPING[nxtUARTNum][NXT_UART_PORT_SYSCTL_PERIPH]);
-    while (!SysCtlPeripheralReady(NXT_UART_MAPPING[nxtUARTNum][NXT_UART_PORT_SYSCTL_PERIPH]));
-    GPIOPinConfigure(NXT_UART_MAPPING[nxtUARTNum][NXT_UART_RX_PIN_CFG]);
-    GPIOPinConfigure(NXT_UART_MAPPING[nxtUARTNum][NXT_UART_TX_PIN_CFG]);
-    GPIOPinTypeUART(NXT_UART_MAPPING[nxtUARTNum][NXT_UART_PORT_BASE],
-                    NXT_UART_MAPPING[nxtUARTNum][NXT_UART_TX_PIN] |
-                    NXT_UART_MAPPING[nxtUARTNum][NXT_UART_RX_PIN]);
+    SysCtlPeripheralEnable(UART_MAPPING[UARTNum][UART_SYSCTL_PERIPH]);
+    SysCtlPeripheralEnable(UART_MAPPING[UARTNum][UART_PORT_SYSCTL_PERIPH]);
+    while (!SysCtlPeripheralReady(UART_MAPPING[UARTNum][UART_PORT_SYSCTL_PERIPH]));
+    GPIOPinConfigure(UART_MAPPING[UARTNum][UART_RX_PIN_CFG]);
+    GPIOPinConfigure(UART_MAPPING[UARTNum][UART_TX_PIN_CFG]);
+    GPIOPinTypeUART(UART_MAPPING[UARTNum][UART_PORT_BASE],
+                    UART_MAPPING[UARTNum][UART_TX_PIN] |
+                    UART_MAPPING[UARTNum][UART_RX_PIN]);
 
 
-    //UARTCharPut(NXT_UART_MAPPING[nxtUARTNum][NXT_UART_BASE], 'T');
-    UARTIntRegister(NXT_UART_MAPPING[nxtUARTNum][NXT_UART_BASE], UARTStdioIntHandler);
-    IntPrioritySet(NXT_UART_MAPPING[nxtUARTNum][NXT_UART_INT], 0b01000000);
-    UARTStdioConfig(nxtUARTNum, baudRate, nxtSys->getClockFreq());
+    //UARTCharPut(UART_MAPPING[nxtUARTNum][UART_BASE], 'T');
+    UARTIntRegister(UART_MAPPING[UARTNum][UART_BASE], UARTStdioIntHandler);
+    IntPrioritySet(UART_MAPPING[UARTNum][UART_INT], 0b01000000);
+    UARTStdioConfig(UARTNum, baudRate, System::getClockFreq());
     UARTEchoSet(false);
 }
 
 void Nextion::setTimeoutUS(uint32_t us)
 {
-    nxtTimeoutUS = us;
+    timeoutUS = us;
 }
 
 void Nextion::sendCmd(const char* cmd)
 {
     UARTFlushRx();
-    UARTprintf("%s%s", cmd, nxtEndStr);
+    UARTprintf("%s%s", cmd, endStr);
 }
 
 void Nextion::setTxt(const char* comp, const char* txt)
 {
     UARTFlushRx();
-    UARTprintf("%s.txt=\"%s\"%s", comp, txt, nxtEndStr);
+    UARTprintf("%s.txt=\"%s\"%s", comp, txt, endStr);
 }
 
 void Nextion::setVal(const char* comp, uint32_t val)
 {
     UARTFlushRx();
-    UARTprintf("%s.val=%i%s", comp, val, nxtEndStr);
+    UARTprintf("%s.val=%i%s", comp, val, endStr);
 }
 
 void Nextion::setPage(const char* page)
 {
     UARTFlushRx();
-    UARTprintf("page %s%s", page, nxtEndStr);
+    UARTprintf("page %s%s", page, endStr);
 }
 
 void Nextion::setPage(uint32_t page)
 {
     UARTFlushRx();
-    UARTprintf("page %i%s", page, nxtEndStr);
+    UARTprintf("page %i%s", page, endStr);
 }
 
 void Nextion::flushRx()
@@ -86,22 +85,27 @@ void Nextion::flushRx()
 
 void Nextion::disableStdio()
 {
-    UARTIntDisable(NXT_UART_MAPPING[nxtUARTNum][NXT_UART_BASE], 0xFFFFFFFF);
+    UARTIntDisable(UART_MAPPING[UARTNum][UART_BASE], 0xFFFFFFFF);
 }
 
 void Nextion::enableStdio()
 {
-    UARTIntEnable(NXT_UART_MAPPING[nxtUARTNum][NXT_UART_BASE], UART_INT_RX | UART_INT_RT);
+    UARTIntEnable(UART_MAPPING[UARTNum][UART_BASE], UART_INT_RX | UART_INT_RT);
 }
 
 uint32_t Nextion::getUARTBase()
 {
-    return NXT_UART_MAPPING[nxtUARTNum][NXT_UART_BASE];
+    return UART_MAPPING[UARTNum][UART_BASE];
+}
+
+uint32_t Nextion::getUARTPeriph()
+{
+    return UART_MAPPING[UARTNum][UART_SYSCTL_PERIPH];
 }
 
 uint32_t Nextion::getBaudRate()
 {
-    return nxtBaudRate;
+    return baudRate;
 }
 
 uint32_t Nextion::charsAvail()
@@ -141,7 +145,7 @@ char* Nextion::getTxt(const char* comp)
     /*UARTFlushRx();
     UARTprintf("get %s.txt%s", comp, nxtEndStr);
 
-    uint32_t time = nxtSys->getSystemTimeUS();
+    uint32_t time = System::getSystemTimeUS();
 
     for (uint32_t i = 0; i < nxtReadDataSize; i++)
     {
@@ -152,7 +156,7 @@ char* Nextion::getTxt(const char* comp)
 
     while (UARTRxBytesAvail() < 7)
     {
-        if (nxtSys->getSystemTimeUS() - time > )
+        if (System::getSystemTimeUS() - time > )
     }
     */
     return 0;
@@ -161,13 +165,13 @@ char* Nextion::getTxt(const char* comp)
 uint32_t Nextion::getVal(const char* comp)
 {
     UARTFlushRx();
-    UARTprintf("get %s.val%s", comp, nxtEndStr);
+    UARTprintf("get %s.val%s", comp, endStr);
 
-    uint32_t time = nxtSys->getSystemTimeUS();
+    uint32_t time = System::getSystemTimeUS();
 
     while (UARTRxBytesAvail() < 8)
     {
-        if (nxtSys->getSystemTimeUS() - time > nxtTimeoutUS)
+        if (System::getSystemTimeUS() - time > timeoutUS)
         {
             return receiveTimeoutVal;
         }

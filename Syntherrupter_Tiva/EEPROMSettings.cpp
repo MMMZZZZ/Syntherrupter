@@ -17,7 +17,7 @@ EEPROMSettings::~EEPROMSettings()
 
 }
 
-bool EEPROMSettings::init(System *sys)
+bool EEPROMSettings::init()
 {
     /*
      * Total Configuration cannot be larger than 2040 Bytes.
@@ -27,7 +27,6 @@ bool EEPROMSettings::init(System *sys)
      * based on how it internally works) to at least 1.5M writes. So you could
      * change a value every minute for almost three years.
      */
-    cfgSys = sys;
 
     // Make EEPROM available and initialize
     SysCtlPeripheralEnable(SYSCTL_PERIPH_EEPROM0);
@@ -35,7 +34,7 @@ bool EEPROMSettings::init(System *sys)
     if (EEPROMInit() != EEPROM_INIT_OK)
     {
         // Power supply issues or EEPROM damaged / end of life
-        cfgSys->error();
+        System::error();
     }
 
     // Search for a bank with valid data and return if such data could be found.
@@ -46,7 +45,7 @@ bool EEPROMSettings::init(System *sys)
         uint32_t error = EEPROMMassErase();
         if (error)
         {
-            cfgSys->error();
+            System::error();
         }
         updateBank();
     }
@@ -135,20 +134,20 @@ bool EEPROMSettings::updateBank()
      * could be found.
      * Else the return value indicates if we switched to a new bank.
      */
-    if (cfgBank >= CFG_BANK_COUNT)
+    if (bank >= BANK_COUNT)
     {
         // Currently no bank is selected. Search for valid bank.
-        for (uint32_t i = 0; i < CFG_BANK_COUNT; i++)
+        for (uint32_t i = 0; i < BANK_COUNT; i++)
         {
             uint32_t data = 0;
-            EEPROMRead(&data, CFG_BANK_STARTS[i], 4);
+            EEPROMRead(&data, BANK_STARTS[i], 4); // @suppress("Invalid arguments")
             // Check if bank contains data and config version matches
-            if ((data & 0xffff0000) == (CFG_PRESENT & 0xffff0000))
+            if ((data & 0xffff0000) == (PRESENT & 0xffff0000))
             {
                 // Check if wear is non-zero, meaning the bank is in use.
                 if (data & 0x0000ffff)
                 {
-                    cfgBank = i;
+                    bank = i;
                     return true;
                 }
             }
@@ -159,21 +158,21 @@ bool EEPROMSettings::updateBank()
     {
         // Check bank wear level and switch to next one if necessary
         uint32_t data = 0;
-        EEPROMRead(&data, CFG_BANK_STARTS[cfgBank], 4);
+        EEPROMRead(&data, BANK_STARTS[bank], 4); // @suppress("Invalid arguments")
         data &= 0x0000ffff;
         if (data == 0xffff)
         {
             // Time to switch bank
-            data = CFG_PRESENT;
+            data = PRESENT;
             // Mark bank as unused
-            EEPROMProgram(&data, CFG_BANK_STARTS[cfgBank], 4);
+            EEPROMProgram(&data, BANK_STARTS[bank], 4); // @suppress("Invalid arguments")
             // Select and initialize next bank
-            if (++cfgBank >= CFG_BANK_COUNT)
+            if (++bank >= BANK_COUNT)
             {
-                cfgBank = 0;
+                bank = 0;
             }
-            data = CFG_PRESENT + 1;
-            EEPROMProgram(&data, CFG_BANK_STARTS[cfgBank], 4);
+            data = PRESENT + 1;
+            EEPROMProgram(&data, BANK_STARTS[bank], 4); // @suppress("Invalid arguments")
             return true;
         }
     }
@@ -182,34 +181,34 @@ bool EEPROMSettings::updateBank()
 
 void EEPROMSettings::read()
 {
-    rwuAll(CFG_READ_EEPROM);
+    rwuAll(READ_EEPROM);
 }
 
 void EEPROMSettings::write()
 {
-    rwuAll(CFG_WRITE_EEPROM);
+    rwuAll(WRITE_EEPROM);
 }
 
 void EEPROMSettings::update()
 {
     // TODO Needs more testing!
-    rwuAll(CFG_UPDATE_EEPROM);
+    rwuAll(UPDATE_EEPROM);
 }
 
 void EEPROMSettings::rwuAll(uint32_t mode)
 {
 
-    if (cfgBank >= CFG_BANK_COUNT)
+    if (bank >= BANK_COUNT)
     {
         // No data in EEPROM yet. Select and initialize bank 0
-        cfgBank = 0;
-        if (mode != CFG_READ_EEPROM)
+        bank = 0;
+        if (mode != READ_EEPROM)
         {
-            uint32_t data = CFG_PRESENT + 1;
-            EEPROMProgram(&data, CFG_BANK_STARTS[0], 4);
+            uint32_t data = PRESENT + 1;
+            EEPROMProgram(&data, BANK_STARTS[0], 4); // @suppress("Invalid arguments")
         }
     }
-    cfgByteAddress = CFG_BANK_STARTS[cfgBank] + 4;
+    byteAddress = BANK_STARTS[bank] + 4;
 
     bool EEPROMModified = false;
     EEPROMModified |= rwuSingle(mode, userNames, sizeof(userNames));
@@ -229,17 +228,17 @@ bool EEPROMSettings::rwuSingle(uint32_t mode, void *newData, uint32_t byteSize)
 {
     // Returns if EEPROM has been modified.
 
-    if (mode == CFG_READ_EEPROM)
+    if (mode == READ_EEPROM)
     {
         readSequence(newData, byteSize);
         return false;
     }
-    else if (mode == CFG_WRITE_EEPROM)
+    else if (mode == WRITE_EEPROM)
     {
         writeSequence(newData, byteSize);
         return true;
     }
-    else if (mode == CFG_UPDATE_EEPROM)
+    else if (mode == UPDATE_EEPROM)
     {
         return writeChangedSequence(newData, byteSize);
     }
@@ -252,8 +251,8 @@ void EEPROMSettings::readSequence(void *newData, uint32_t byteSize)
     // Make sure byteSize is a multiple of 4
     byteSize = byteSize >> 2;
     byteSize = byteSize << 2;
-    EEPROMRead((uint32_t *)newData, cfgByteAddress, byteSize);
-    cfgByteAddress += byteSize;
+    EEPROMRead((uint32_t *)newData, byteAddress, byteSize); // @suppress("Invalid arguments")
+    byteAddress += byteSize;
 }
 
 void EEPROMSettings::writeSequence(void *newData, uint32_t byteSize)
@@ -261,12 +260,12 @@ void EEPROMSettings::writeSequence(void *newData, uint32_t byteSize)
     // Make sure byteSize is a multiple of 4
     byteSize = byteSize >> 2;
     byteSize = byteSize << 2;
-    uint32_t error = EEPROMProgram((uint32_t *)newData, cfgByteAddress, byteSize);
+    uint32_t error = EEPROMProgram((uint32_t *)newData, byteAddress, byteSize); // @suppress("Invalid arguments")
     if (error)
     {
-        cfgSys->error();
+        System::error();
     }
-    cfgByteAddress += byteSize;
+    byteAddress += byteSize;
 }
 
 bool EEPROMSettings::writeChangedSequence(void *newData, uint32_t byteSize)
@@ -298,7 +297,7 @@ bool EEPROMSettings::writeChangedSequence(void *newData, uint32_t byteSize)
     }
     if (dataChanged)
     {
-        cfgByteAddress -= byteSize;
+        byteAddress -= byteSize;
         writeSequence(newData, byteSize);
     }
     return dataChanged;

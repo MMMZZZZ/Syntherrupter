@@ -5,7 +5,9 @@
  *      Author: Max Zuidberg
  */
 
+
 #include <Filter.h>
+
 
 Filter::Filter()
 {
@@ -18,60 +20,61 @@ Filter::~Filter()
     // TODO Auto-generated destructor stub
 }
 
-void Filter::init(System* sys, float factor, float constant)
+void Filter::init(float factor, float constant)
 {
-    filterSys = sys;
-    filterValue = 0.0f;
-    filterFactor = factor;
-    filterConstant = constant;
-    filterMinTimestep = float(filterSys->getSystemTimeResUS()) / 2000000.0f;
+    this->value = 0.0f;
+    this->factor = factor;
+    this->constant = constant;
+    this->minTimestepUS = 1000.0f;
 }
 
-void Filter::setTarget(float target)
+void Filter::setTarget(float target, bool force)
 {
-    if (filterTarget != target)
+    if (target < 0.0f)
     {
-        filterTimeUS = filterSys->getSystemTimeUS();
-        filterTargetReached = false;
-        if (target < 0.0f)
+        target = 0.0f;
+    }
+    if (force)
+    {
+        value = target;
+    }
+    if (this->target != target)
+    {
+        lastTimeUS = System::getSystemTimeUS();
+        targetReached = false;
+        this->target = target;
+        if (this->target > value)
         {
-            filterTarget = 0.0f;
+            dir = 1;
         }
         else
         {
-            filterTarget = target;
-        }
-        if (filterTarget > filterValue)
-        {
-            filterDir = 1;
-        }
-        else
-        {
-            filterDir = -1;
+            dir = -1;
         }
     }
 }
 
 float Filter::getFiltered()
 {
-    if (!filterTargetReached)
+    if (!targetReached)
     {
-        uint32_t currentTimeUS = filterSys->getSystemTimeUS();
-        float timestep = float(currentTimeUS - filterTimeUS) / 1000000.0f;
+        uint32_t currentTimeUS = System::getSystemTimeUS();
+        float timestep = currentTimeUS - lastTimeUS;
 
-        if (timestep > filterMinTimestep)
+        if (timestep > minTimestepUS)
         {
-            filterTimeUS = currentTimeUS;
-            timestep *= filterDir;
-            filterValue = filterValue * powf(filterFactor, timestep) + filterConstant * timestep;
-            if ((filterDir > 0 && filterValue >= filterTarget) || (filterDir < 0 && filterValue <= filterTarget))
+            lastTimeUS = currentTimeUS;
+            timestep /= 1000000.0f;
+            timestep *= dir;
+            value = value * powf(factor, timestep) + constant * timestep;
+            if ((dir > 0 && value >= this->target) || (dir < 0 && value <= this->target))
             {
-                filterValue = filterTarget;
-                filterTargetReached = true;
+                value = this->target;
+                targetReached = true;
             }
         }
     }
 
-    return filterValue;
+    return value;
 }
 

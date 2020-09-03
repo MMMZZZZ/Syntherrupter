@@ -2,7 +2,7 @@ List of commands send by the Nextion. Dots indicate variable bytes. Bytes are nu
 Note: Any value ranges that have no specified meaning here should be ignored by the microcontroller for compatibility with future version. 
 * General: First byte of all commands indicate command type, length and (context sensitive) content. 
 * m..: Mode command. Tells the microcontroller the context of any other commands. There are no context sensitive variants of this command. 
-	* mex: Mode EXit command. We left the last mode and are in idle now. It causes the microcontroller to update the configuration stored in its EEPROM. 
+	* mex: Mode EXit command. Leave the currently active mode (possible modes running in the background stay active). Usually this means the mode is shut down (disable any associated interrupts, remove all of its tones from the output tonelist, ...). In case of the settings mode it causes the microcontroller to update the values stored in EEPROM.
 	* msi: Mode SImple command. We entered simple mode
 		* d.....: Data command. In this context:
 			* Byte 1: bit 0-5 indicate which of the outputs 0-5 is affected by this command
@@ -92,3 +92,4 @@ Note: Any value ranges that have no specified meaning here should be ignored by 
 				* Bit   5: Indicates content of the following bytes. 0 = Name, 1 = Password
 				* Bit 0-4: Number of following bytes minus one. This means Name or password are at least 1 character and at most 32 characters. 
 			* Byte 2-x: Characters of the username/password without null termination character.
+	* mes: Mode Emergency Stop. This is not an actual mode, meaning it keeps the previously active mode. It is a global command that sets the ontimes/duties/... of all modes to 0 so that there's no output signal. It does _not_ disable any of the modes. 

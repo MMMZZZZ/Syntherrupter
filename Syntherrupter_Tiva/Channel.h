@@ -23,7 +23,7 @@ public:
 
     uint8_t channelAfterTouch    = 0;
     uint8_t program              = 0;
-    uint8_t coils                = 0;
+    uint8_t coils                = 0xff; // Startup default: play every channel on every coil.
     uint8_t pitchBendRangeFine   = 0;
     uint8_t pitchBendRangeCoarse = 0;
     uint8_t fineTuningFine       = 0;
@@ -46,6 +46,7 @@ public:
     bool notePanOmniMode         = false;
     bool sustainPedal            = false;
     bool damperPedal             = false;
+    bool changed                 = true;
 };
 
 #endif /* CHANNEL_H_ */

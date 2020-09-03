@@ -11,6 +11,8 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "InterrupterConfig.h"
+#include "Tone.h"
 
 
 class Note
@@ -18,21 +20,33 @@ class Note
 public:
     Note();
     virtual ~Note();
-    uint8_t ADSRMode       = 'A';
+    bool isDead()
+    {
+        return ((ADSRStep && ADSRVolume < 1e-6f) || number > 127);
+    };
+    uint32_t ADSRStep      = 0;
     uint8_t channel        = 0;
     uint8_t number         = 0;
     uint8_t velocity       = 0;
     uint8_t afterTouch     = 0;
-    uint32_t periodUS       = 0;
-    uint32_t periodTolUS    = 0;
-    uint32_t nextFireUS     = 0;
-    uint32_t nextFireEndUS  = 0;
-    float rawOntimeUS       = 0.0f;
-    float ADSROntimeUS      = 0.0f;
-    float finishedOntimeUS  = 0.0f;
+    float ADSRTimeUS        = 0.0f;
+    float ADSRStepTimeUS    = 0.0f;
+    float rawVolume         = 0.0f;
+    float ADSRVolume        = 0.0f;
+    float finishedVolume    = 0.0f;
     float frequency         = 0.0f;
-    float panVol            = 1.0f;
-    bool changed            = false;
+    float periodUS          = 0.0f;
+    float pan               = 0.5f;
+    float panVol[COIL_COUNT]; // Dont like this at all but it was by far the easiest fix.
+    uint8_t  panChanged     = (1 << COIL_COUNT) - 1;
+    uint8_t toneChanged     = (1 << COIL_COUNT) - 1;
+    bool  changed           = true;
+    Tone* assignedTones[COIL_COUNT];
+    Note* prevNote = 0;
+    Note* nextNote = 0;
+
+    // For debugging purposes only.
+    uint32_t id = 0;
 };
 
 #endif /* NOTE_H_ */

@@ -13,6 +13,20 @@ Page MIDI_TC_Set
                 tUser.txt=" "+User_Settings.u2Name.txt
             }
             //
+            // Display all active modes
+            sys0=Settings.activeModes.val&1
+            if(sys0!=0)
+            {
+                // Simple Mode is active
+                tMSI.bco=6900
+            }
+            sys0=Settings.activeModes.val&2
+            if(sys0!=0)
+            {
+                // MIDI Live Mode is active
+                tMML.bco=6900
+            }
+            //
             // functions shall not be visible
             vis fConvBtnState,0
             vis fStore,0
@@ -68,17 +82,6 @@ Page MIDI_TC_Set
                 btPanDis.val=1
             }
             //
-            // Hide Previous button for first coil
-            if(coilNum.val==1)
-            {
-                vis bPrevious,0
-            }
-            // Hide Next button for last coil
-            if(coilNum.val==TC_Settings.maxCoilCount.val)
-            {
-                vis bNext,0
-            }
-            //
             // Hide Pan objects in case its disabled (prevents flickering)
             vis tL,0
             vis sPan,0
@@ -96,14 +99,21 @@ Page MIDI_TC_Set
         Touch Press Event
             if(Other_Settings.nBackOff.val!=0)
             {
-                // Default "stop" action. Set ontime of all Coils to 0
-                // Details about the data format described in a separate file and in the bApply button.
-                // shift bits for volume mode
-                sys1=3<<6
-                sys1+=63 // apply to all coils
-                prints "d",1
-                prints sys1,1
-                prints 0,4 // 0 ontime, 0 duty
+                // Default "stop" action.
+                // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                prints "mes",3
+                // Set all ontime and duty settings of all pages to 0.
+                // First come the global variables then the local variables.
+                Simple.ontime.val=0
+                Simple.duty.val=0
+                Simple.set1.val=Simple.set1.val&0x0000ffff
+                Simple.set2.val=Simple.set2.val&0x0000ffff
+                Simple.set3.val=Simple.set3.val&0x0000ffff
+                Simple.set4.val=Simple.set4.val&0x0000ffff
+                Simple.set5.val=Simple.set5.val&0x0000ffff
+                Simple.set6.val=Simple.set6.val&0x0000ffff
+                MIDI_Live.ontime.val=0
+                MIDI_Live.duty.val=0
                 MIDI_Live.set1.val=0
                 MIDI_Live.set2.val=0
                 MIDI_Live.set3.val=0
@@ -117,6 +127,18 @@ Page MIDI_TC_Set
         Page Exit Event
             
     Components
+        Text tHideBack
+            Properties
+                Scope       : Local
+                Initial Text: " "
+                Max. length : 1
+            
+            Events
+                Touch Press Event
+                    // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+                
+                Touch Release Event
+                    
         Text tHideBack1
             Properties
                 Scope       : Local
@@ -927,6 +949,9 @@ Page MIDI_TC_Set
                     if(coilNum.val>1)
                     {
                         coilNum.val-=1
+                    }else
+                    {
+                        coilNum.val=TC_Settings.maxCoilCount.val
                     }
                     // Reload page for previous coil
                     page MIDI_TC_Set
@@ -947,6 +972,9 @@ Page MIDI_TC_Set
                     if(coilNum.val<TC_Settings.maxCoilCount.val)
                     {
                         coilNum.val+=1
+                    }else
+                    {
+                        coilNum.val=1
                     }
                     // Reload page for previous coil
                     page MIDI_TC_Set
@@ -1049,3 +1077,25 @@ Page MIDI_TC_Set
                 Initial String: "0"
                 Max. length   : 2
             
+        Text tMSI
+            Properties
+                Scope       : Local
+                Initial Text: "Simple"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tMML
+            Properties
+                Scope       : Local
+                Initial Text: "MIDI Live"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    

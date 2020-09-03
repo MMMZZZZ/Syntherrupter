@@ -7,6 +7,15 @@
 
 #include <System.h>
 
+
+volatile uint32_t System::timeUS = 0;
+volatile uint32_t System::sysTickResUS = 50;
+//uint32_t System::sysTickHalfRes = sysTickResUS / 2;
+constexpr uint32_t System::peripheralsCount;
+constexpr uint32_t System::peripherals[peripheralsCount];
+
+
+
 System::System()
 {
     // TODO Auto-generated constructor stub
@@ -18,17 +27,16 @@ System::~System()
     // TODO Auto-generated destructor stub
 }
 
-void System::init(uint32_t clockFreq, void (*ISR)(void))
+void System::init(void (*ISR)(void))
 {
-     uint32_t clock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ |SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), sysClockFreq);
+     uint32_t clock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ |SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), clockFreq);
 
-     if (clock != sysClockFreq)
+     if (clock != clockFreq)
      {
          error();
      }
 
-     sysExactTime = 0;
-     sysTime = 0;
+     timeUS = 0;
 
 
     FPULazyStackingEnable();
@@ -44,25 +52,16 @@ void System::init(uint32_t clockFreq, void (*ISR)(void))
     SysTickEnable();
 }
 
-uint32_t System::getClockFreq()
-{
-    return sysClockFreq;
-}
-uint32_t System::getPIOSCFreq()
-{
-    return sysPIOSCFreq;
-}
-
 void System::error()
 {
     // Disable Interrupts
     // IntMasterDisable();
 
     // Stop all peripherals
-    for (uint_fast8_t i = 0; i < sysPeripheralsCount; i++)
+    for (uint_fast8_t i = 0; i < peripheralsCount; i++)
     {
-        SysCtlPeripheralReset(sysPeripherals[i]);
-        SysCtlPeripheralDisable(sysPeripherals[i]);
+        SysCtlPeripheralReset(peripherals[i]);
+        SysCtlPeripheralDisable(peripherals[i]);
     }
 
     while (42);
@@ -71,26 +70,6 @@ void System::error()
 void System::setSystemTimeResUS(uint32_t us)
 {
     sysTickResUS = us;
-    sysTickHalfRes = sysTickResUS / 2;
-    SysTickPeriodSet(sysClockTicksUS * sysTickResUS);
-}
-
-uint32_t System::getSystemTimeResUS()
-{
-    return sysTickResUS;
-}
-
-void System::systemTimeIncrement()
-{
-    sysTime += sysTickResUS;
-}
-
-uint32_t System::getSystemTimeUS()
-{
-    return sysTime;
-}
-
-void System::delayUS(uint32_t us)
-{
-    SysCtlDelay((sysClockTicksUS * us) / 3);
+    //sysTickHalfRes = sysTickResUS / 2;
+    SysTickPeriodSet(clockTicksUS * sysTickResUS);
 }

@@ -13,6 +13,25 @@ Page Simple
                 tUser.txt=" "+User_Settings.u2Name.txt
             }
             //
+            // Entered Simple Mode. MIDI Simple is now active
+            Settings.activeModes.val=Settings.activeModes.val|1
+            //
+            // Display all active modes
+            sys0=Settings.activeModes.val&1
+            if(sys0!=0)
+            {
+                // Simple Mode is active
+                tMSI.bco=6900
+            }
+            sys0=Settings.activeModes.val&2
+            if(sys0!=0)
+            {
+                // MIDI Live Mode is active
+                tMML.bco=6900
+            }
+            //
+            tmReturn.tim=Other_Settings.nHoldTime.val
+            //
             ref bReturn
             // Default mode is on release.
             vis bModeImmediate,0
@@ -145,6 +164,30 @@ Page Simple
             nOn.val=ontime.val
             nBPS.val=BPS.val
             nDuty.val=duty.val
+            nOn1.val=set1.val&0xffff
+            nBPS1.val=set1.val>>16
+            nBPS1.val=nBPS1.val&0xffff
+            nDuty1.val=nOn1.val*nBPS1.val/1000
+            nOn2.val=set2.val&0xffff
+            nBPS2.val=set2.val>>16
+            nBPS2.val=nBPS2.val&0xffff
+            nDuty2.val=nOn2.val*nBPS2.val/1000
+            nOn3.val=set3.val&0xffff
+            nBPS3.val=set3.val>>16
+            nBPS3.val=nBPS3.val&0xffff
+            nDuty3.val=nOn3.val*nBPS3.val/1000
+            nOn4.val=set4.val&0xffff
+            nBPS4.val=set4.val>>16
+            nBPS4.val=nBPS4.val&0xffff
+            nDuty4.val=nOn4.val*nBPS4.val/1000
+            nOn5.val=set5.val&0xffff
+            nBPS5.val=set5.val>>16
+            nBPS5.val=nBPS5.val&0xffff
+            nDuty5.val=nOn5.val*nBPS5.val/1000
+            nOn6.val=set6.val&0xffff
+            nBPS6.val=set6.val>>16
+            nBPS6.val=nBPS6.val&0xffff
+            nDuty6.val=nOn6.val*nBPS6.val/1000
             // Restore slider positions
             fSliderInput.val=sDuty.maxval
             fSliderOutput.val=userDutyLimit.val
@@ -171,12 +214,27 @@ Page Simple
         Touch Press Event
             if(Other_Settings.nBackOff.val!=0)
             {
-                // Default "stop" action. Set ontime of all Coils to 0
-                // Details about the data format described in a separate file and in the bApply button.
-                prints "d",1
-                printh FF // All coils
-                prints 0,2 // 0 ontime
-                prints nBPS.val,2 // do not change frequency
+                // Default "stop" action.
+                // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                prints "mes",3
+                // Set all ontime and duty settings of all pages to 0.
+                // First come the global variables then the local variables.
+                Simple.ontime.val=0
+                Simple.duty.val=0
+                Simple.set1.val=Simple.set1.val&0x0000ffff
+                Simple.set2.val=Simple.set2.val&0x0000ffff
+                Simple.set3.val=Simple.set3.val&0x0000ffff
+                Simple.set4.val=Simple.set4.val&0x0000ffff
+                Simple.set5.val=Simple.set5.val&0x0000ffff
+                Simple.set6.val=Simple.set6.val&0x0000ffff
+                MIDI_Live.ontime.val=0
+                MIDI_Live.duty.val=0
+                MIDI_Live.set1.val=0
+                MIDI_Live.set2.val=0
+                MIDI_Live.set3.val=0
+                MIDI_Live.set4.val=0
+                MIDI_Live.set5.val=0
+                MIDI_Live.set6.val=0
                 nOn.val=0
                 sOn.val=0
                 nOn1.val=0
@@ -202,6 +260,18 @@ Page Simple
             ontime.val=nOn.val
             BPS.val=nBPS.val
             duty.val=nDuty.val
+            set1.val=nBPS1.val<<16
+            set1.val+=nOn1.val
+            set2.val=nBPS2.val<<16
+            set2.val+=nOn2.val
+            set3.val=nBPS3.val<<16
+            set3.val+=nOn3.val
+            set4.val=nBPS4.val<<16
+            set4.val+=nOn4.val
+            set5.val=nBPS5.val<<16
+            set5.val+=nOn5.val
+            set6.val=nBPS6.val<<16
+            set6.val+=nOn6.val
         
     Components
         Text tHideBack
@@ -225,7 +295,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -260,9 +330,29 @@ Page Simple
                     fSliderOutput.val=userOnLimit.val
                     fSlider.val=sOn.val
                     click fSlider,1 // final Ontime value
-                    // Round to multiple of five
-                    fSlider.val/=5
-                    fSlider.val*=5
+                    // Reduce resolution according to slider range for more "consistent" steps.
+                    sys0=1
+                    if(fSlider.val>=10000)
+                    {
+                        sys0=1000
+                    }else if(fSlider.val>=5000)
+                    {
+                        sys0=500
+                    }else if(fSlider.val>=1000)
+                    {
+                        sys0=100
+                    }else if(fSlider.val>=500)
+                    {
+                        sys0=50
+                    }else if(fSlider.val>=100)
+                    {
+                        sys0=10
+                    }else if(fSlider.val>=50)
+                    {
+                        sys0=5
+                    }
+                    fSlider.val/=sys0
+                    fSlider.val*=sys0
                     sys1=nBPS.val*fSlider.val/1000 // resulting duty cycle
                     if(sys1<=userDutyLimit.val)
                     {
@@ -312,7 +402,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -324,7 +414,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -344,9 +434,29 @@ Page Simple
                     fSliderOutput.val=userBPSLimit.val
                     fSlider.val=sBPS.val
                     click fSlider,1
-                    // Round to multiple of five
-                    fSlider.val/=5
-                    fSlider.val*=5
+                    // Reduce resolution according to slider range for more "consistent" steps.
+                    sys0=1
+                    if(fSlider.val>=10000)
+                    {
+                        sys0=1000
+                    }else if(fSlider.val>=5000)
+                    {
+                        sys0=500
+                    }else if(fSlider.val>=1000)
+                    {
+                        sys0=100
+                    }else if(fSlider.val>=500)
+                    {
+                        sys0=50
+                    }else if(fSlider.val>=100)
+                    {
+                        sys0=10
+                    }else if(fSlider.val>=50)
+                    {
+                        sys0=5
+                    }
+                    fSlider.val/=sys0
+                    fSlider.val*=sys0
                     temp.val=fSlider.val // final BPS value
                     // Depending on whether ontime or duty was set, calculate the resulting value for the other one and check if it's legal.
                     if(keepOntime.val>0)
@@ -359,9 +469,6 @@ Page Simple
                             fSliderOutput.val=userDutyLimit.val
                             fSlider.val=nDuty.val
                             click fSlider,0
-                            // Round to multiple of five
-                            fSlider.val/=5
-                            fSlider.val*=5
                             sDuty.val=fSlider.val
                         }else
                         {
@@ -377,9 +484,6 @@ Page Simple
                             fSliderOutput.val=userOnLimit.val
                             fSlider.val=nOn.val
                             click fSlider,0
-                            // Round to multiple of five
-                            fSlider.val/=5
-                            fSlider.val*=5
                             sOn.val=fSlider.val
                         }else
                         {
@@ -422,7 +526,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -434,7 +538,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -455,9 +559,6 @@ Page Simple
                     fSliderOutput.val=userDutyLimit.val
                     fSlider.val=sDuty.val
                     click fSlider,1
-                    // Round to multiple of five
-                    fSlider.val/=5
-                    fSlider.val*=5
                     sys1=fSlider.val*1000/nBPS.val // Resulting Ontime
                     if(sys1<=userOnLimit.val)
                     {
@@ -507,7 +608,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -556,10 +657,13 @@ Page Simple
             
             Events
                 Touch Press Event
-                    // Set outputs to 0
-                    click Simple,1
+                    // If button is hold, return without "exiting" simple mode (keep it running in background.
+                    tmReturn.en=1
                 
                 Touch Release Event
+                    tmReturn.en=0
+                    // Leaving MIDI Live Mode. Mode is now inactive
+                    Settings.activeModes.val=Settings.activeModes.val^1
                     // Mode: EXit.
                     prints "mex",0
                     page Menu
@@ -573,7 +677,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -586,7 +690,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -599,7 +703,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -612,7 +716,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -661,7 +765,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -768,7 +872,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -811,7 +915,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -824,7 +928,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -836,7 +940,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -848,7 +952,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -861,7 +965,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -873,7 +977,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -885,7 +989,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -898,7 +1002,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -910,7 +1014,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -922,7 +1026,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -935,7 +1039,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -947,7 +1051,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -959,7 +1063,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -972,7 +1076,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -984,7 +1088,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -996,7 +1100,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1009,7 +1113,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1021,7 +1125,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1034,7 +1138,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1047,7 +1151,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1060,7 +1164,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1073,7 +1177,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1086,7 +1190,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1099,7 +1203,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1112,7 +1216,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1125,7 +1229,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1138,7 +1242,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1151,7 +1255,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1164,7 +1268,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1177,7 +1281,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1190,7 +1294,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1203,7 +1307,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1216,7 +1320,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1229,7 +1333,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1242,7 +1346,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1255,7 +1359,7 @@ Page Simple
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click Simple,1
+                    click dp,1
                 
                 Touch Release Event
                     
@@ -1281,39 +1385,111 @@ Page Simple
                         // Update Info below coil buttons
                         if(btCoil1.val==1)
                         {
-                            nOn1.val=nOn.val
+                            if(nOn.val<TC_Settings.coil1On.val)
+                            {
+                                nOn1.val=nOn.val
+                            }else
+                            {
+                                nOn1.val=TC_Settings.coil1On.val
+                            }
+                            if(nDuty.val<TC_Settings.coil1Duty.val)
+                            {
+                                nDuty1.val=nDuty.val
+                            }else
+                            {
+                                nDuty1.val=TC_Settings.coil1Duty.val
+                            }
                             nBPS1.val=nBPS.val
-                            nDuty1.val=nDuty.val
                         }
                         if(btCoil2.val==1)
                         {
-                            nOn2.val=nOn.val
+                            if(nOn.val<TC_Settings.coil2On.val)
+                            {
+                                nOn2.val=nOn.val
+                            }else
+                            {
+                                nOn2.val=TC_Settings.coil2On.val
+                            }
+                            if(nDuty.val<TC_Settings.coil2Duty.val)
+                            {
+                                nDuty2.val=nDuty.val
+                            }else
+                            {
+                                nDuty2.val=TC_Settings.coil2Duty.val
+                            }
                             nBPS2.val=nBPS.val
-                            nDuty2.val=nDuty.val
                         }
                         if(btCoil3.val==1)
                         {
-                            nOn3.val=nOn.val
+                            if(nOn.val<TC_Settings.coil3On.val)
+                            {
+                                nOn3.val=nOn.val
+                            }else
+                            {
+                                nOn3.val=TC_Settings.coil3On.val
+                            }
+                            if(nDuty.val<TC_Settings.coil3Duty.val)
+                            {
+                                nDuty3.val=nDuty.val
+                            }else
+                            {
+                                nDuty3.val=TC_Settings.coil3Duty.val
+                            }
                             nBPS3.val=nBPS.val
-                            nDuty3.val=nDuty.val
                         }
                         if(btCoil4.val==1)
                         {
-                            nOn4.val=nOn.val
+                            if(nOn.val<TC_Settings.coil4On.val)
+                            {
+                                nOn4.val=nOn.val
+                            }else
+                            {
+                                nOn4.val=TC_Settings.coil4On.val
+                            }
+                            if(nDuty.val<TC_Settings.coil4Duty.val)
+                            {
+                                nDuty4.val=nDuty.val
+                            }else
+                            {
+                                nDuty4.val=TC_Settings.coil4Duty.val
+                            }
                             nBPS4.val=nBPS.val
-                            nDuty4.val=nDuty.val
                         }
                         if(btCoil5.val==1)
                         {
-                            nOn5.val=nOn.val
+                            if(nOn.val<TC_Settings.coil5On.val)
+                            {
+                                nOn5.val=nOn.val
+                            }else
+                            {
+                                nOn5.val=TC_Settings.coil5On.val
+                            }
+                            if(nDuty.val<TC_Settings.coil5Duty.val)
+                            {
+                                nDuty5.val=nDuty.val
+                            }else
+                            {
+                                nDuty5.val=TC_Settings.coil5Duty.val
+                            }
                             nBPS5.val=nBPS.val
-                            nDuty5.val=nDuty.val
                         }
                         if(btCoil6.val==1)
                         {
-                            nOn6.val=nOn.val
+                            if(nOn.val<TC_Settings.coil6On.val)
+                            {
+                                nOn6.val=nOn.val
+                            }else
+                            {
+                                nOn6.val=TC_Settings.coil6On.val
+                            }
+                            if(nDuty.val<TC_Settings.coil6Duty.val)
+                            {
+                                nDuty6.val=nDuty.val
+                            }else
+                            {
+                                nDuty6.val=TC_Settings.coil6Duty.val
+                            }
                             nBPS6.val=nBPS.val
-                            nDuty6.val=nDuty.val
                         }
                         prints "d",0
                         prints TC_Settings.activeCoils.val,1
@@ -1405,3 +1581,85 @@ Page Simple
                     sys0=2*fSliderOutput.val
                     fSlider.val=fSqrt.val/sys0
                 
+        Text tMSI
+            Properties
+                Scope       : Local
+                Initial Text: "Simple"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    // If not already active, go to page.
+                    //if(dp!=MIDI_Live.id)
+                    //{
+                    //  page MIDI_Live
+                    //}
+                
+        Text tMML
+            Properties
+                Scope       : Local
+                Initial Text: "MIDI Live"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Timer tmReturn
+            Properties
+                Scope      : Local
+                Period [ms]: 250
+                Running    : No
+            
+            Events
+                Touch Press Event
+                    p
+                    e
+                
+                Touch Release Event
+                    p
+                    e
+                
+        Variable set1
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable set2
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable set3
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable set4
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable set5
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable set6
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            

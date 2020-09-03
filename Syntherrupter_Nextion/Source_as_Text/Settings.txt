@@ -13,6 +13,20 @@ Page Settings
                 tUser.txt=" "+User_Settings.u2Name.txt
             }
             //
+            // Display all active modes
+            sys0=Settings.activeModes.val&1
+            if(sys0!=0)
+            {
+                // Simple Mode is active
+                tMSI.bco=6900
+            }
+            sys0=Settings.activeModes.val&2
+            if(sys0!=0)
+            {
+                // MIDI Live Mode is active
+                tMML.bco=6900
+            }
+            //
             // Tell the microcontroller: Mode: SEttings
             prints "mse",0
             // Not all users have the same rights
@@ -25,7 +39,31 @@ Page Settings
         Postinitialize Event
             
         Touch Press Event
-            
+            if(Other_Settings.nBackOff.val!=0)
+            {
+                // Default "stop" action.
+                // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                prints "mes",3
+                // Set all ontime and duty settings of all pages to 0.
+                // First come the global variables then the local variables.
+                Simple.ontime.val=0
+                Simple.duty.val=0
+                Simple.set1.val=Simple.set1.val&0x0000ffff
+                Simple.set2.val=Simple.set2.val&0x0000ffff
+                Simple.set3.val=Simple.set3.val&0x0000ffff
+                Simple.set4.val=Simple.set4.val&0x0000ffff
+                Simple.set5.val=Simple.set5.val&0x0000ffff
+                Simple.set6.val=Simple.set6.val&0x0000ffff
+                MIDI_Live.ontime.val=0
+                MIDI_Live.duty.val=0
+                MIDI_Live.set1.val=0
+                MIDI_Live.set2.val=0
+                MIDI_Live.set3.val=0
+                MIDI_Live.set4.val=0
+                MIDI_Live.set5.val=0
+                MIDI_Live.set6.val=0
+            }
+        
         Touch Release Event
             
         Page Exit Event
@@ -76,7 +114,9 @@ Page Settings
             
             Events
                 Touch Press Event
-                    
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
                 Touch Release Event
                     
         Button bUSBFWUpdate
@@ -115,3 +155,35 @@ Page Settings
                 Touch Release Event
                     page User_Settings
                 
+        Variable activeModes
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Text tMSI
+            Properties
+                Scope       : Local
+                Initial Text: "Simple"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tMML
+            Properties
+                Scope       : Local
+                Initial Text: "MIDI Live"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    

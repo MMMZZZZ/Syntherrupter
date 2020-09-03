@@ -20,19 +20,18 @@ class Filter
 public:
     Filter();
     virtual ~Filter();
-    void init(System* sys, float factor = 2.0f, float constant = 1.0f);
-    void setTarget(float a);
+    void init(float factor = 2.0f, float constant = 1.0f);
+    void setTarget(float target, bool force = false);
     float getFiltered();
 private:
-    System*  filterSys;
-    bool     filterTargetReached = false;
-    float    filterMinTimestep   = 0.0f;
-    uint32_t filterTimeUS        = 0;
-    float    filterValue         = 0.0f;
-    float    filterFactor        = 0.0f;
-    float    filterConstant      = 0.0f;
-    float    filterDir     = 0.0f;
-    float    filterTarget        = 0.0f;
+    bool     targetReached = false;
+    float    minTimestepUS   = 0.0f;
+    uint32_t lastTimeUS        = 0;
+    float    value         = 0.0f;
+    float    factor        = 0.0f;
+    float    constant      = 0.0f;
+    float    dir           = 0.0f;
+    float    target        = 0.0f;
 
 };
 
