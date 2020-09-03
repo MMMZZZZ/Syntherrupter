@@ -28,6 +28,7 @@ public:
     void setMaxDutyPerm(uint32_t dutyPerm);
     void setMaxOntimeUS(uint32_t ontimeUS);
     void setMaxVoices(uint32_t voices);
+    void setMinOfftimeUS(uint32_t offtimeUS);
     void updateOutput()
     {
         /*
@@ -60,22 +61,18 @@ public:
 
     Oneshot  one;
     ToneList toneList;
-    MIDI midi;
-    Simple simple;
+    MIDI     midi;
+    Simple   simple;
 
+
+private:
+    uint32_t num               =  0;
     uint32_t minOffUS          = 50;
     uint32_t maxOntimeUS       = 10;
     uint32_t maxDutyPerm       = 10;
-    uint32_t nextAllowedFireUS = 0;
-
-    volatile uint32_t nextOntimeUS = 0;
-    volatile uint32_t nextFireUS   = -1;
-
-    volatile uint32_t isrUpdateCounter = 0;
-    static uint32_t isrUpdateCounterLim;
-
-private:
-    uint32_t num = 0;
+    uint32_t nextAllowedFireUS =  0;
+    uint32_t nextOntimeUS      =  0;
+    uint32_t nextFireUS        = -1;
 };
 
 #endif /* COIL_H_ */

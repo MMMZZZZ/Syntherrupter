@@ -115,7 +115,7 @@ void GUI::init()
                 coils[coil].setMaxVoices(maxVoices);
                 coils[coil].setMaxDutyPerm(maxDutyPerm);
                 coils[coil].setMaxOntimeUS(maxOntimeUS);
-                coils[coil].minOffUS = minOffUS;
+                coils[coil].setMinOfftimeUS(minOffUS);
 
                 // Send to Nextion
                 nxt.printf("%s.coil%iOn.val=%i\xff\xff\xff",
@@ -598,7 +598,7 @@ void GUI::settings()
             number--;
             cfg.coilSettings[number] = data;
             coils[number].setMaxVoices(cfg.getCoilsMaxVoices(number));
-            coils[number].minOffUS = cfg.getCoilsMinOffUS(number);
+            coils[number].setMinOfftimeUS(cfg.getCoilsMinOffUS(number));
             coils[number].setMaxDutyPerm(cfg.getCoilsMaxDutyPerm(number));
             coils[number].setMaxOntimeUS(cfg.getCoilsMaxOntimeUS(number));
         }

@@ -45,6 +45,12 @@ void Coil::setMaxOntimeUS(uint32_t ontimeUS)
     toneList.setMaxOntimeUS(ontimeUS);
 }
 
+void Coil::setMinOfftimeUS(uint32_t offtimeUS)
+{
+    // Integer ceiling.
+    minOffUS = offtimeUS + System::getSystemTimeResUS() - 1;
+}
+
 void Coil::updateData()
 {
     /*
