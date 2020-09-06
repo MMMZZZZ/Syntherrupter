@@ -75,8 +75,10 @@
 #define APPSK  "ICanChange!IPromise!"
 #endif
 #define PORT     8888
-#define MAX_CLIENTS 8
+#define MAX_CLIENTS 4
 #define DATA_SIZE  24
+#define DATA_PERIOD_MS 20
+#define TIMEOUT_FACTOR  3
 
 #define MPU_SDA_PIN 0 // GPIO0
 #define MPU_SCL_PIN 2 // GPIO2
@@ -88,14 +90,15 @@ IPAddress masterIP;
 MPU6050 mpu(Wire);
 bool slave = 0;
 uint8_t slaveIDs[MAX_CLIENTS];
+uint32_t masterClientsTimeout[MAX_CLIENTS];
 
 // Task callbacks
 void slaveReadMPUCallback();
 void slaveConnectToMasterServerCallback();
 
 // Tasks
-Task slaveReadMPU(20, TASK_FOREVER, slaveReadMPUCallback);
-Task slaveConnectToMasterServer(200, TASK_FOREVER, slaveConnectToMasterServerCallback);
+Task slaveReadMPU(DATA_PERIOD_MS, TASK_FOREVER, slaveReadMPUCallback);
+Task slaveConnectToMasterServer(DATA_PERIOD_MS * TIMEOUT_FACTOR, TASK_FOREVER, slaveConnectToMasterServerCallback);
 
 Scheduler scheduler;
 
@@ -282,6 +285,7 @@ void loop()
           else
           {
             masterClients[i].write(slaveIDs[i]);
+            masterClientsTimeout[i] = millis() + DATA_PERIOD_MS * TIMEOUT_FACTOR;
             //Serial.print("New Client (id: ");
             //Serial.print(i);
             //Serial.println(")");
@@ -303,11 +307,13 @@ void loop()
     // Check clients for new data
     for (uint32_t clientNum = 0; clientNum < MAX_CLIENTS; clientNum++)
     {
+      uint32_t timeMS = millis();
       if (masterClients[clientNum].available() >= DATA_SIZE + 1)
       {
         uint8_t dataByte =  masterClients[clientNum].read();
         if (dataByte == slaveIDs[clientNum])
         {
+          masterClientsTimeout[clientNum] = timeMS + DATA_PERIOD_MS * TIMEOUT_FACTOR;
           Serial.write(dataByte);
           for (uint32_t i = 0; i < DATA_SIZE; i++)
           {
@@ -315,6 +321,12 @@ void loop()
           }
         }
       }
+      else if (timeMS > masterClientsTimeout[clientNum])
+      {
+        masterClients[clientNum].flush();
+        masterClients[clientNum].stop();
+      }
+      yield();
     }
   }
   else
