@@ -276,6 +276,10 @@ uint32_t GUI::update()
                 {
                     mode = Mode::midiLiveEnter;
                 }
+                else if (modeByte0 == 'l' && modeByte1 == 's')
+                {
+                    mode = Mode::lightsaberEnter;
+                }
                 else if (modeByte0 == 'u' && modeByte1 == 's')
                 {
                     mode = Mode::userSelect;
@@ -294,6 +298,7 @@ uint32_t GUI::update()
                     {
                         coils[coil].midi.setVolSettings(0.0f, 0.0f);
                         coils[coil].simple.setOntimeUS(0.0f, true);
+                        coils[coil].lightsaber.setOntimeUS(0.0f);
                     }
                 }
                 else
@@ -408,6 +413,18 @@ uint32_t GUI::update()
         break;
     case Mode::midiLiveExit:
         midiLiveExit();
+        mode = Mode::idle;
+        break;
+
+    case Mode::lightsaberEnter:
+        lightsaberEnter();
+        mode = Mode::lightsaber;
+        break;
+    case Mode::lightsaber:
+        lightsaber();
+        break;
+    case Mode::lightsaberExit:
+        lightsaberExit();
         mode = Mode::idle;
         break;
 
@@ -575,6 +592,33 @@ void GUI::midiLive()
             if (++EEI >= EES)
             {
                 EEE = false;
+            }
+        }
+    }
+}
+
+void GUI::lightsaber()
+{
+    if (command == 'd')
+    {
+        uint32_t targetCoils =  commandData[0];
+        uint32_t type        =  commandData[1];
+        uint32_t data        = (commandData[4] << 8) + commandData[3];
+
+        for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+        {
+            if (targetCoils & (1 << coil))
+            {
+                if (type == 0)
+                {
+                    // Set ontime
+                    coils[coil].lightsaber.setOntimeUS(data);
+                }
+                else if (type == 1)
+                {
+                    // Set which lightsabers play on this coil.
+                    coils[coil].lightsaber.setActiveLightsabers(data);
+                }
             }
         }
     }

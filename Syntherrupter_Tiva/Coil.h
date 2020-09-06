@@ -16,6 +16,7 @@
 #include "ToneList.h"
 #include "MIDI.h"
 #include "Simple.h"
+#include "LightSaber.h"
 
 
 class Coil
@@ -63,6 +64,7 @@ public:
     ToneList toneList;
     MIDI     midi;
     Simple   simple;
+    LightSaber lightsaber;
 
 
 private:

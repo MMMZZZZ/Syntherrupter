@@ -54,6 +54,15 @@ Note: Any value ranges that have no specified meaning here should be ignored by 
 					* Bit 7: 
 						* 0 = linear mode. The volume of the note decreases linearly with the distance from the coil. At distance 0 the volume is equal to the notes volume. At the limit of the range the volume drops to 0. 
 						* 1 = constant mode. All notes within the range will play at their nominal volume.
+	* mls: Mode LightSaber. In this mode the Tiva listens on a serial port for accelerometer and gyrometer data from lightsabers.
+		* d.....: Data command. In this context:
+			* Byte 1: bit 0-5 indicate which of the outputs 0-5 is affected by this command
+			* Byte 2: Command type. Specifies meaning of following bytes.
+			* Byte 3: unused.
+			* Byte 4: lower data byte.
+			* Byte 5: upper data byte.
+				* Command type 0: data represents ontime in microseconds.
+				* Command type 1: data represents bit field. Bit n indicates whether the coils specified in byte 1 shall listen to lightsaber n. 
 	* mnu: Mode Nextion firmware Update. In this mode the Tiva "connects" the Nextion to the USB serial to allow updating the Nextion firmware via USB. It automatically performs a self reset after the update. 
 	* mus: Mode User Select command. User has been selected / changed. Load corresponding settings. 
 	* mse: Mode SEttings command. 

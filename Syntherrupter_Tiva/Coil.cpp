@@ -27,6 +27,7 @@ void Coil::init(uint32_t coilNum)
     one.init(num);
     midi.setCoilNum(num);
     midi.setCoilsToneList(&toneList);
+    lightsaber.setTonelist(&toneList);
 }
 
 void Coil::setMaxDutyPerm(uint32_t dutyPerm)
@@ -59,4 +60,5 @@ void Coil::updateData()
 
     simple.updateToneList();
     midi.updateToneList();
+    lightsaber.updateTonelist();
 }

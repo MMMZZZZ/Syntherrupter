@@ -32,6 +32,9 @@ enum class Mode {
     midiLiveEnter,
     midiLive,
     midiLiveExit,
+    lightsaberEnter,
+    lightsaber,
+    lightsaberExit,
     userSelect,
     settings,
     settingsExit,
@@ -79,6 +82,16 @@ private:
         MIDI::stop();
         EEE = false;
     };
+
+    static void lightsaberEnter()
+    {
+        LightSaber::start();
+    }
+    static void lightsaber();
+    static void lightsaberExit()
+    {
+        LightSaber::stop();
+    }
 
     static void userSelect();
     static void settings();
