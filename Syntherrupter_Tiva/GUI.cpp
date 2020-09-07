@@ -603,24 +603,27 @@ void GUI::lightsaber()
     {
         uint32_t targetCoils =  commandData[0];
         uint32_t type        =  commandData[1];
-        uint32_t data        = (commandData[4] << 8) + commandData[3];
+        uint32_t data1       =  commandData[2];
+        uint32_t data2       = (commandData[4] << 8) + commandData[3];
 
-        for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+        if (type == 0)
         {
-            if (targetCoils & (1 << coil))
+            // Set which lightsabers play on this coil.
+            for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
-                if (type == 0)
+                if (targetCoils & (1 << coil))
                 {
-                    // Set ontime
-                    coils[coil].lightsaber.setOntimeUS(data);
-                }
-                else if (type == 1)
-                {
-                    // Set which lightsabers play on this coil.
-                    coils[coil].lightsaber.setActiveLightsabers(data);
+                    coils[coil].lightsaber.setActiveLightsabers(data1);
+                    coils[coil].lightsaber.setOntimeUS(data2);
                 }
             }
         }
+        else if (type == 1)
+        {
+            LightSaber::ESPSetID(data1);
+        }
+        // Data applied; clear command byte.
+        command = 0;
     }
 }
 

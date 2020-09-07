@@ -58,11 +58,15 @@ Note: Any value ranges that have no specified meaning here should be ignored by 
 		* d.....: Data command. In this context:
 			* Byte 1: bit 0-5 indicate which of the outputs 0-5 is affected by this command
 			* Byte 2: Command type. Specifies meaning of following bytes.
-			* Byte 3: unused.
-			* Byte 4: lower data byte.
-			* Byte 5: upper data byte.
-				* Command type 0: data represents ontime in microseconds.
-				* Command type 1: data represents bit field. Bit n indicates whether the coils specified in byte 1 shall listen to lightsaber n. 
+				* Type 0: Set assigned lightsabers and ontimes.
+				* Type 1: Set ESP8266 ID. Byte 1 is ignored in this case.
+			* Byte 3: data1.
+				* Command type 0: data1 represents bit field. Bits 0-7 indicates whether the coils specified in byte 1 shall listen to lightsabers 1-8. 
+				* Command type 1: data1 contains the ID (0-8)
+			* Byte 4: lower data2 byte.
+			* Byte 5: upper data2 byte.
+				* Command type 0: data2 represents ontime in microseconds.
+				* Command type 1: data2 unused.
 	* mnu: Mode Nextion firmware Update. In this mode the Tiva "connects" the Nextion to the USB serial to allow updating the Nextion firmware via USB. It automatically performs a self reset after the update. 
 	* mus: Mode User Select command. User has been selected / changed. Load corresponding settings. 
 	* mse: Mode SEttings command. 

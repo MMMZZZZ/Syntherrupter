@@ -23,10 +23,11 @@ class LightSaber
 public:
     LightSaber();
     virtual ~LightSaber();
-    static void init(uint32_t uartPort, uint32_t uartRxPin, uint32_t uartTxPin, void (*rxISR)(void));
+    static void init(uint32_t uartPort, uint32_t uartRxPin, uint32_t uartTxPin, uint32_t baudRate, void (*rxISR)(void));
     static void process();
     static void start();
     static void stop();
+    static void ESPSetID(uint32_t id);
     void updateTonelist();
     void setTonelist(ToneList* tonelist)
     {
@@ -43,11 +44,11 @@ public:
         {
             if (lsBits & (1 << lsNum))
             {
-                lightsabers[lsNum].assignedCoils |=  (1 << lsNum);
+                lightsabers[lsNum].assignedCoils |=  coilBit;
             }
             else
             {
-                lightsabers[lsNum].assignedCoils &= ~(1 << lsNum);
+                lightsabers[lsNum].assignedCoils &= ~coilBit;
             }
         }
     };
@@ -59,9 +60,25 @@ public:
     static UART uart;
 
 private:
-    static constexpr uint32_t MAX_CLIENTS = 8;
+    static bool ESPCommand(uint8_t address, uint8_t data);
+    static constexpr uint32_t MAX_CLIENTS = 4;
     static constexpr uint32_t DATA_SIZE = 24;
+    static constexpr uint32_t PACKET_TIMEOUT_US = 20000 / MAX_CLIENTS / 2; // Each client sends a packet every 20ms. /2 to be sure delay is small enough.
+    static constexpr uint32_t ESP_CMD_TIEMOUT_US = 9000;
 
+    // Wild guess
+    static constexpr uint32_t ESP_START_TIMEOUT_US = 20000;
+
+    /*
+     * 2:       Safety factor
+     * 140:     Approx. character count of the bootloader message
+     * 10:      Bits per Character (1 Start, 8 Data, 1 Stop Bit)
+     * 1000000: us per s
+     * 74880:   Baud rate
+     */
+    static constexpr uint32_t ESP_START_MSG_DURATION_US = 2ul * 140ul * 10ul * 1000000ul / 74880ul;
+
+    static uint32_t lastPacket;
     static LSData lightsabers[MAX_CLIENTS];
     static bool started;
 
