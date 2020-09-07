@@ -44,6 +44,10 @@ public:
             readIndex = writeIndex;
         }
     };
+    void flush()
+    {
+        readIndex = writeIndex;
+    }
     uint32_t level()
     {
         if (readIndex <= writeIndex)
