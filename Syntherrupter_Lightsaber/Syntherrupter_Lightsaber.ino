@@ -43,8 +43,9 @@
  *   that different slave packets won't be scrambled together. 
  * 
  * Serial configuration
- *   The code is listening to the serial port for commands. If the device 
- *   operates as slave this requires a successful pairing (see above).
+ *   The code is listening to the serial port for commands. It does this if 
+ *   it detected no IMU (operates as master) and if there are no clients. 
+ *   This makes sure that the Serial port is not used for anything else.
  *   Command format is pretty simple: 1 address byte, 1 data byte, both must 
  *   not be 0.
  *   Configurable parameters: 
@@ -88,6 +89,7 @@ WiFiClient masterClients[MAX_CLIENTS];
 WiFiClient slaveClient;
 IPAddress masterIP;
 MPU6050 mpu(Wire);
+bool serialCommandsEnabled = true;
 bool slave = 0;
 uint8_t slaveIDs[MAX_CLIENTS];
 uint32_t masterClientsTimeout[MAX_CLIENTS];
@@ -179,6 +181,7 @@ void setup()
     // If an MPU6050 has been found this device operates as a slave (since master and slave run the same firmware)
     //Serial.println("Entering slave setup.");
     slave = true;
+    serialCommandsEnabled = false;
 
     // Read slaveID from EEPROM
     slaveIDs[0] = EEPROM.read(1);
@@ -231,19 +234,22 @@ void loop()
 {
   scheduler.execute();
 
-  if (Serial.available() >= 2)
+  if (serialCommandsEnabled)
   {
-    uint8_t address = Serial.read();
-    uint8_t data    = Serial.read();
-    if (address == 1 && data)
+    if (Serial.available() >= 2)
     {
-      EEPROM.write(address, data);
-      EEPROM.commit();
-      Serial.write(EEPROM.read(address));
-    }
-    else
-    {
-      Serial.write(0);
+      uint8_t address = Serial.read();
+      uint8_t data    = Serial.read();
+      if (address == 1 && data)
+      {
+        EEPROM.write(address, data);
+        EEPROM.commit();
+        Serial.write(EEPROM.read(address));
+      }
+      else
+      {
+        Serial.write(0);
+      }
     }
   }
 
@@ -254,6 +260,7 @@ void loop()
     // Handle new clients if there are any.
     if (masterServer.hasClient())
     {
+      serialCommandsEnabled = false;
       //Serial.println("There's something...");
       bool clientLimitReached = true;
       for (uint32_t i = 0; i < MAX_CLIENTS; i++)
