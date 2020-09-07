@@ -1,4 +1,4 @@
-Page MIDI_Live
+Page Lightsaber
     Events
         Preinitialize Event
             // Display username
@@ -13,8 +13,8 @@ Page MIDI_Live
                 tUser.txt=" "+User_Settings.u2Name.txt
             }
             //
-            // Entered MIDI Live Mode. MIDI Live Mode is now active
-            Settings.activeModes.val=Settings.activeModes.val|2
+            // Entered Lightsaber Mode. Lightsaber Mode is now active
+            Settings.activeModes.val=Settings.activeModes.val|4
             //
             // Display all active modes
             sys0=Settings.activeModes.val&1
@@ -36,7 +36,7 @@ Page MIDI_Live
                 tMLS.bco=6900
             }
             //
-            tmTCButtonHold.tim=Other_Settings.nHoldTime.val
+            tmLSButtonHold.tim=Other_Settings.nHoldTime.val
             tmReturn.tim=Other_Settings.nHoldTime.val
             // Default update mode is on release.
             vis bModeImmediate,0
@@ -44,61 +44,50 @@ Page MIDI_Live
             vis bApply,0
             vis bModeRelease,1
             sMode.txt=bModeRelease.txt
-            // Default volume mode is Auto.
-            vis bRel,0
-            vis bAbs,0
-            vis bAuto,1
-            sVolMode.val=3
             // Functions shall be invisible
             vis fSqrt,0
             vis fSlider,0
             // Hide buttons for unavailable tesla coils
-            vis bChannels,0
-            vis tChannels,0
             if(TC_Settings.maxCoilCount.val<6)
             {
                 vis btCoil6,0
                 vis nOn6,0
-                vis tBar6,0
-                vis nDuty6,0
+                vis tus6,0
+                vis tLS6,0
             }
             if(TC_Settings.maxCoilCount.val<5)
             {
                 vis btCoil5,0
                 vis nOn5,0
-                vis tBar5,0
-                vis nDuty5,0
+                vis tus5,0
+                vis tLS5,0
             }
             if(TC_Settings.maxCoilCount.val<4)
             {
                 vis btCoil4,0
                 vis nOn4,0
-                vis tBar4,0
-                vis nDuty4,0
+                vis tus4,0
+                vis tLS4,0
             }
             if(TC_Settings.maxCoilCount.val<3)
             {
                 vis btCoil3,0
                 vis nOn3,0
-                vis tBar3,0
-                vis nDuty3,0
+                vis tus3,0
+                vis tLS3,0
             }
             if(TC_Settings.maxCoilCount.val<2)
             {
                 // Single Coil Mode. No need to show a select option.
                 vis btCoil2,0
                 vis nOn2,0
-                vis tBar2,0
-                vis nDuty2,0
+                vis tus2,0
+                vis tLS2,0
                 vis btCoil1,0
                 vis nOn1,0
-                vis tBar1,0
-                vis nDuty1,0
+                vis tus1,0
+                vis tLS1,0
                 vis tCoil,0
-                vis tChnInfo,0
-                // ... But we need a button to change the MIDI Channels
-                vis bChannels,1
-                vis tChannels,1
                 // Make sure that the coil is active.
                 btCoil1.val=1
                 click btCoil1,0
@@ -155,40 +144,36 @@ Page MIDI_Live
                 userOnLimit.val=User_Settings.u0Ontime.val
                 userDutyLimit.val=User_Settings.u0Duty.val
             }
-            // Load Ontime and Duty from variables. Note: variables take much less space than displayed elements and are therefore better as persistent (= global) variables.
+            // Load coil ontimes and assigned lightsabers Note: variables take much less space than displayed elements and are therefore better as persistent (= global) variables.
             nOn.val=ontime.val
-            nDuty.val=duty.val
-            nOn1.val=set1.val&0xffff
-            set1.val=set1.val>>16
-            nDuty1.val=set1.val&0xffff
-            nOn2.val=set2.val&0xffff
-            set2.val=set2.val>>16
-            nDuty2.val=set2.val&0xffff
-            nOn3.val=set3.val&0xffff
-            set3.val=set3.val>>16
-            nDuty3.val=set3.val&0xffff
-            nOn4.val=set4.val&0xffff
-            set4.val=set4.val>>16
-            nDuty4.val=set4.val&0xffff
-            nOn5.val=set5.val&0xffff
-            set5.val=set5.val>>16
-            nDuty5.val=set5.val&0xffff
-            nOn6.val=set6.val&0xffff
-            set6.val=set6.val>>16
-            nDuty6.val=set6.val&0xffff
+            nOn2.val=ontimes12.val&0xffff
+            nOn1.val=ontimes12.val>>16
+            nOn4.val=ontimes34.val&0xffff
+            nOn3.val=ontimes34.val>>16
+            nOn6.val=ontimes56.val&0xffff
+            nOn5.val=ontimes56.val>>16
+            ls1.val=lightsabers.val&1
+            lightsabers.val=lightsabers.val>>1
+            ls2.val=lightsabers.val&1
+            lightsabers.val=lightsabers.val>>1
+            ls3.val=lightsabers.val&1
+            lightsabers.val=lightsabers.val>>1
+            ls4.val=lightsabers.val&1
+            lightsabers.val=lightsabers.val>>1
+            tLS1.txt=sLS1.txt
+            tLS2.txt=sLS2.txt
+            tLS3.txt=sLS3.txt
+            tLS4.txt=sLS4.txt
+            tLS5.txt=sLS5.txt
+            tLS6.txt=sLS6.txt
             // Restore slider positions
-            fSliderInput.val=sDuty.maxval
-            fSliderOutput.val=userDutyLimit.val
-            fSlider.val=nDuty.val
-            click fSlider,0
-            sDuty.val=fSlider.val
             fSliderInput.val=sOn.maxval
             fSliderOutput.val=userOnLimit.val
             fSlider.val=nOn.val
             click fSlider,0
             sOn.val=fSlider.val
-            // Tell the microcontroller: Mode: Midi Live
-            prints "mml",3
+            // Tell the microcontroller: Mode: LightSaber
+            prints "mls",3
         
         Postinitialize Event
             // Make sure the microcontroller is up-to-date
@@ -230,14 +215,6 @@ Page MIDI_Live
                 nOn4.val=0
                 nOn5.val=0
                 nOn6.val=0
-                nDuty.val=0
-                sDuty.val=0
-                nDuty1.val=0
-                nDuty2.val=0
-                nDuty3.val=0
-                nDuty4.val=0
-                nDuty5.val=0
-                nDuty6.val=0
             }
         
         Touch Release Event
@@ -245,64 +222,44 @@ Page MIDI_Live
         Page Exit Event
             // Store Ontime and Duty in global variables. Note: variables take much less space than displayed elements and are therefore better as persistent (= global) variables.
             ontime.val=nOn.val
-            duty.val=nDuty.val
-            set1.val=nDuty1.val<<16
-            set1.val+=nOn1.val
-            set2.val=nDuty2.val<<16
-            set2.val+=nOn2.val
-            set3.val=nDuty3.val<<16
-            set3.val+=nOn3.val
-            set4.val=nDuty4.val<<16
-            set4.val+=nOn4.val
-            set5.val=nDuty5.val<<16
-            set5.val+=nOn5.val
-            set6.val=nDuty6.val<<16
-            set6.val+=nOn6.val
+            ontimes12.val=nOn1.val<<16
+            ontimes12.val+=nOn2.val
+            ontimes34.val=nOn3.val<<16
+            ontimes34.val+=nOn4.val
+            ontimes56.val=nOn5.val<<16
+            ontimes56.val+=nOn6.val
+            lightsabers.val=ls4.val
+            lightsabers.val=lightsabers.val<<1
+            lightsabers.val+=ls3.val
+            lightsabers.val=lightsabers.val<<1
+            lightsabers.val+=ls2.val
+            lightsabers.val=lightsabers.val<<1
+            lightsabers.val+=ls1.val
+            sLS1.txt=tLS1.txt
+            sLS2.txt=tLS2.txt
+            sLS3.txt=tLS3.txt
+            sLS4.txt=tLS4.txt
+            sLS5.txt=tLS5.txt
+            sLS6.txt=tLS6.txt
         
     Components
-        Button bChannels
-            Properties
-                Scope      : Local
-                Caption    : "Channels | Pan"
-                Max. length: 26
-            
-            Events
-                Touch Press Event
-                    sCoil.txt=btCoil1.txt
-                
-                Touch Release Event
-                    // Basically copy paste from tmTCButtonHold
-                    MIDI_TC_Set.origin.val=dp
-                    covx sCoil.txt,MIDI_TC_Set.coilNum.val,0,0
-                    page MIDI_TC_Set
-                
-        Text tHideBack
+        Text tCoil
             Properties
                 Scope       : Local
-                Initial Text: " "
-                Max. length : 1
-            
-            Events
-                Touch Press Event
-                    // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
-                
-                Touch Release Event
-                    
-        Text tChannels
-            Properties
-                Scope       : Local
-                Initial Text: "Listen to:"
+                Initial Text: "Apply to:"
                 Max. length : 20
             
             Events
                 Touch Press Event
-                    
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
                 Touch Release Event
                     
         Text tTitle
             Properties
                 Scope       : Local
-                Initial Text: "MIDI Live Mode"
+                Initial Text: "Lightsaber Mode"
                 Max. length : 22
             
             Events
@@ -392,61 +349,6 @@ Page MIDI_Live
                 
                 Touch Release Event
                     
-        Slider sDuty
-            Properties
-                Scope           : Local
-                Initial Position: 0
-                Lower End       : 0
-                Upper End       : 366
-            
-            Events
-                Touch Press Event
-                    fSliderInput.val=sDuty.maxval
-                    fSliderOutput.val=userDutyLimit.val
-                
-                Touch Release Event
-                    fSlider.val=sDuty.val
-                    click fSlider,1
-                    if(nDuty.val!=fSlider.val)
-                    {
-                        newData.val=1
-                        nDuty.val=fSlider.val
-                    }
-                    // to understand the following lines have a look at the Touch Move code.
-                    // what you would actually wanna do is put the code above in touch move and perform a click event on touch move here (because your can press/release a slider, changing its value without moving it).
-                    // However "click" can only execute press/release events, so it gets more complicated...
-                    if(sMode.txt==bModeRelease.txt)
-                    {
-                        click bApply,0
-                    }
-                    if(sMode.txt==bModeImmediate.txt)
-                    {
-                        click bApply,0
-                    }
-                
-                Touch Move
-                    // Prevent double data transmission on move.
-                    sMode.txt+="M"
-                    click sDuty,0
-                    sMode.txt-=1
-                    if(sMode.txt==bModeImmediate.txt)
-                    {
-                        click bApply,0
-                    }
-                
-        Text tDuty
-            Properties
-                Scope       : Local
-                Initial Text: "Note Duty:"
-                Max. length : 20
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
         Button bReturn
             Properties
                 Scope      : Local
@@ -461,29 +363,16 @@ Page MIDI_Live
                 Touch Release Event
                     tmReturn.en=0
                     // Leaving MIDI Live Mode. Mode is now inactive
-                    Settings.activeModes.val=Settings.activeModes.val^2
+                    Settings.activeModes.val=Settings.activeModes.val^4
                     // Mode: EXit.
                     prints "mex",0
                     page Menu
                 
-        Float nDuty
-            Properties
-                Scope           : Local
-                Initial Value   : 0
-                Divide by [10^x]: 1
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Text tPerc
+        Text tUser
             Properties
                 Scope       : Local
-                Initial Text: "%"
-                Max. length : 1
+                Initial Text: " Guest"
+                Max. length : 32
             
             Events
                 Touch Press Event
@@ -499,32 +388,6 @@ Page MIDI_Live
                 Initial String: "newtxt"
                 Max. length   : 16
             
-        Text tCoil
-            Properties
-                Scope       : Local
-                Initial Text: "Apply to:"
-                Max. length : 20
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Text tVolMode
-            Properties
-                Scope       : Local
-                Initial Text: "Vol. Mode:"
-                Max. length : 20
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
         Button bModeRelease
             Properties
                 Scope      : Local
@@ -548,87 +411,95 @@ Page MIDI_Live
             
             Events
                 Touch Press Event
-                    tmEE.en=1
-                
+                    
                 Touch Release Event
                     // Return format: 'd', data byte 1, 2, 3, 4, 5
                     // Data byte 1:
-                    //   Bits 0-5: coils to which settings apply.
-                    //   Bits 6-7: Mode
-                    //     0 = Settings Change (not used here)
-                    //     1 = NRP Reset (not used here)
-                    //     2 = unused
-                    //     3 = Volume change
-                    // Data byte 2: ontime[us] lower byte
-                    // Data byte 3: ontime[us] upper byte
-                    // Data byte 4: duty[1/1000] lower byte
-                    // Data byte 5: duty[1/1000] upper byte
+                    //   Bit 0-5: Bitfield with coils to which the settings apply.
+                    // Data byte 2: Command type.
+                    //   Here: type 0: assigned lightsabers and ontime.
+                    // Data byte 3: data1
+                    //   Here: Bit 0-7: Bitfield with lightsabers to which the coils shall listen
+                    // Data byte 4: lower data2 byte
+                    // Data byte 5: upper data2 byte
+                    //  Here: data2=ontime [us]
                     sys0=newData.val*TC_Settings.activeCoils.val
                     if(sys0>0)
                     {
                         // Update Info below coil buttons
-                        // Duty is displayed in %
-                        sys1=nDuty.val+5
-                        sys1/=10
+                        tempString.txt=""
+                        if(ls1.val==1)
+                        {
+                            tempString.txt+=ls1.txt
+                        }else
+                        {
+                            tempString.txt+="_"
+                        }
+                        if(ls2.val==1)
+                        {
+                            tempString.txt+=ls2.txt
+                        }else
+                        {
+                            tempString.txt+="_"
+                        }
+                        if(ls3.val==1)
+                        {
+                            tempString.txt+=ls3.txt
+                        }else
+                        {
+                            tempString.txt+="_"
+                        }
+                        if(ls4.val==1)
+                        {
+                            tempString.txt+=ls4.txt
+                        }else
+                        {
+                            tempString.txt+="_"
+                        }
                         if(btCoil1.val==1)
                         {
                             nOn1.val=nOn.val
-                            nDuty1.val=sys1
+                            tLS1.txt=tempString.txt
                         }
                         if(btCoil2.val==1)
                         {
                             nOn2.val=nOn.val
-                            nDuty2.val=sys1
+                            tLS2.txt=tempString.txt
                         }
                         if(btCoil3.val==1)
                         {
                             nOn3.val=nOn.val
-                            nDuty3.val=sys1
+                            tLS3.txt=tempString.txt
                         }
                         if(btCoil4.val==1)
                         {
                             nOn4.val=nOn.val
-                            nDuty4.val=sys1
+                            tLS4.txt=tempString.txt
                         }
                         if(btCoil5.val==1)
                         {
                             nOn5.val=nOn.val
-                            nDuty5.val=sys1
+                            tLS5.txt=tempString.txt
                         }
                         if(btCoil6.val==1)
                         {
                             nOn6.val=nOn.val
-                            nDuty6.val=sys1
+                            tLS6.txt=tempString.txt
                         }
-                        // shift bits for volume mode
-                        sys1=3<<6
-                        // Add which coils are affected
-                        sys1+=TC_Settings.activeCoils.val
-                        // sys2 contains ontime and duty data. In relative mode the ontime is 0, in absolute mode the duty is 0.
-                        sys2=0
-                        if(sMode.txt!=bAbs.txt)
-                        {
-                            sys2=nDuty.val
-                            sys2=sys2<<16
-                        }
-                        if(sMode.txt!=bRel.txt)
-                        {
-                            sys2+=nOn.val
-                        }
+                        // sys1: active lightsabers
+                        sys1=ls4.val
+                        sys1=sys1<<1
+                        sys1+=ls3.val
+                        sys1=sys1<<1
+                        sys1+=ls2.val
+                        sys1=sys1<<1
+                        sys1+=ls1.val
                         prints "d",0
+                        prints sys0,1
+                        prints 0,1
                         prints sys1,1
-                        prints sys2,4
+                        prints nOn.val,2
                         newData.val=0
-                    }
-                    //
-                    tmEE.en=0
-                    if(openEE.val!=0)
-                    {
-                        openEE.val=0
-                        // Important date! (DDMMYYYY)
-                        sys0=11102161
-                        prints "c",0
-                        prints sys0,3
                     }
                 
         Button bModeImmediate
@@ -682,13 +553,8 @@ Page MIDI_Live
             
             Events
                 Touch Press Event
-                    sCoil.txt=btCoil1.txt
-                    tmTCButtonHold.en=1
-                
+                    
                 Touch Release Event
-                    // Stop and reset timer that detects long hold.
-                    tmTCButtonHold.en=0
-                    tmTCButtonHold.tim=Other_Settings.nHoldTime.val
                     // A coil might have been enabled, and thus does not have the currently displayed values.
                     newData.val=1
                     //  Bit 0-5 correspond to the state of the buttons btCoil1-btCoil6
@@ -710,9 +576,7 @@ Page MIDI_Live
             
             Events
                 Touch Press Event
-                    sCoil.txt=btCoil2.txt
-                    tmTCButtonHold.en=1
-                
+                    
                 Touch Release Event
                     click btCoil1,0
                 
@@ -725,9 +589,7 @@ Page MIDI_Live
             
             Events
                 Touch Press Event
-                    sCoil.txt=btCoil3.txt
-                    tmTCButtonHold.en=1
-                
+                    
                 Touch Release Event
                     click btCoil1,0
                 
@@ -740,9 +602,7 @@ Page MIDI_Live
             
             Events
                 Touch Press Event
-                    sCoil.txt=btCoil4.txt
-                    tmTCButtonHold.en=1
-                
+                    
                 Touch Release Event
                     click btCoil1,0
                 
@@ -755,9 +615,7 @@ Page MIDI_Live
             
             Events
                 Touch Press Event
-                    sCoil.txt=btCoil5.txt
-                    tmTCButtonHold.en=1
-                
+                    
                 Touch Release Event
                     click btCoil1,0
                 
@@ -770,13 +628,11 @@ Page MIDI_Live
             
             Events
                 Touch Press Event
-                    sCoil.txt=btCoil6.txt
-                    tmTCButtonHold.en=1
-                
+                    
                 Touch Release Event
                     click btCoil1,0
                 
-        Timer tmTCButtonHold
+        Timer tmLSButtonHold
             Properties
                 Scope      : Local
                 Period [ms]: 250
@@ -791,12 +647,11 @@ Page MIDI_Live
                     p
                     e
                 
-        Variable sCoil
+        Variable lsID
             Properties
                 Scope         : Local
-                Type          : String
-                Initial String: "0"
-                Max. length   : 3
+                Type          : int32
+                Initial Value : 0
             
         Variable newData
             Properties
@@ -804,84 +659,6 @@ Page MIDI_Live
                 Type          : int32
                 Initial Value : 0
             
-        Button bAbs
-            Properties
-                Scope      : Local
-                Caption    : "Absolute"
-                Max. length: 15
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    // Switch to relative mode
-                    vis bAbs,0
-                    vis bRel,1
-                    vis bAuto,0
-                    sVolMode.val=2 // see bApply button
-                    newData.val=1
-                    // Apply if wanted
-                    if(sMode.txt==bModeRelease.txt)
-                    {
-                        click bApply,0
-                    }
-                    if(sMode.txt==bModeImmediate.txt)
-                    {
-                        click bApply,0
-                    }
-                
-        Button bRel
-            Properties
-                Scope      : Local
-                Caption    : "Relative"
-                Max. length: 15
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    // Switch to auto mode
-                    vis bRel,0
-                    vis bAuto,1
-                    vis bAbs,0
-                    sVolMode.val=3 // see bApply button
-                    newData.val=1
-                    // Apply if wanted
-                    if(sMode.txt==bModeRelease.txt)
-                    {
-                        click bApply,0
-                    }
-                    if(sMode.txt==bModeImmediate.txt)
-                    {
-                        click bApply,0
-                    }
-                
-        Button bAuto
-            Properties
-                Scope      : Local
-                Caption    : "Auto"
-                Max. length: 15
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    // Change to absolute mode
-                    vis bAuto,0
-                    vis bRel,0
-                    vis bAbs,1
-                    sVolMode.val=1 // see bApply button
-                    newData.val=1
-                    // Apply if wanted
-                    if(sMode.txt==bModeRelease.txt)
-                    {
-                        click bApply,0
-                    }
-                    if(sMode.txt==bModeImmediate.txt)
-                    {
-                        click bApply,0
-                    }
-                
         Variable sVolMode
             Properties
                 Scope         : Local
@@ -894,326 +671,56 @@ Page MIDI_Live
                 Type          : int32
                 Initial Value : 0
             
-        Variable duty
+        Variable lightsabers
             Properties
                 Scope         : Global
                 Type          : int32
-                Initial Value : 0
+                Initial Value : 255
             
-        Text tChnInfo
-            Properties
-                Scope       : Local
-                Initial Text: "Keep double lined buttons \r\npressed for more settings."
-                Max. length : 100
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Timer tmEE
-            Properties
-                Scope      : Local
-                Period [ms]: 6000
-                Running    : No
-            
-            Events
-                Touch Press Event
-                    p
-                    e
-                
-                Touch Release Event
-                    p
-                    e
-                
         Variable openEE
             Properties
                 Scope         : Local
                 Type          : int32
                 Initial Value : 0
             
-        Button bNRPReset
-            Properties
-                Scope      : Local
-                Caption    : "NRP Reset"
-                Max. length: 10
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    // Return format: 'd', data byte 1, 2, 3, 4, 5
-                    // Data byte 1:
-                    //   Bits 0-5: coils to which settings apply. (not used here)
-                    //   Bits 6-7: Mode
-                    //     0 = Settings Change (not used here)
-                    //     1 = NRP Reset
-                    //     2 = unused
-                    //     3 = Volume change (not used here)
-                    // Data byte 2-5: not used here.
-                    prints "d",0
-                    prints 0x7f,1
-                    prints 0xffffffff,4
-                
-        Number nOn1
-            Properties
-                Scope        : Local
-                Initial Value: 0
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Text tBar1
-            Properties
-                Scope       : Local
-                Initial Text: "|"
-                Max. length : 2
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Number nDuty1
-            Properties
-                Scope        : Local
-                Initial Value: 0
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Number nOn2
-            Properties
-                Scope        : Local
-                Initial Value: 0
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Text tBar2
-            Properties
-                Scope       : Local
-                Initial Text: "|"
-                Max. length : 2
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Number nDuty2
-            Properties
-                Scope        : Local
-                Initial Value: 0
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Number nOn3
-            Properties
-                Scope        : Local
-                Initial Value: 0
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Text tBar3
-            Properties
-                Scope       : Local
-                Initial Text: "|"
-                Max. length : 2
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Number nDuty3
-            Properties
-                Scope        : Local
-                Initial Value: 0
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Number nOn4
-            Properties
-                Scope        : Local
-                Initial Value: 0
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Text tBar4
-            Properties
-                Scope       : Local
-                Initial Text: "|"
-                Max. length : 2
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Number nDuty4
-            Properties
-                Scope        : Local
-                Initial Value: 0
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Number nOn5
-            Properties
-                Scope        : Local
-                Initial Value: 0
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Text tBar5
-            Properties
-                Scope       : Local
-                Initial Text: "|"
-                Max. length : 2
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Number nDuty5
-            Properties
-                Scope        : Local
-                Initial Value: 0
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Number nOn6
-            Properties
-                Scope        : Local
-                Initial Value: 0
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Text tBar6
-            Properties
-                Scope       : Local
-                Initial Text: "|"
-                Max. length : 2
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Number nDuty6
-            Properties
-                Scope        : Local
-                Initial Value: 0
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Variable set1
+        Variable ontimes12
             Properties
                 Scope         : Global
                 Type          : int32
                 Initial Value : 0
             
-        Variable set2
+        Variable ontimes34
             Properties
                 Scope         : Global
                 Type          : int32
                 Initial Value : 0
             
-        Variable set3
+        Variable ontimes56
             Properties
                 Scope         : Global
                 Type          : int32
                 Initial Value : 0
             
-        Variable set4
+        Variable sLS1
             Properties
                 Scope         : Global
-                Type          : int32
-                Initial Value : 0
+                Type          : String
+                Initial String: "1234"
+                Max. length   : 4
             
-        Variable set5
+        Variable sLS2
             Properties
                 Scope         : Global
-                Type          : int32
-                Initial Value : 0
+                Type          : String
+                Initial String: "1234"
+                Max. length   : 4
             
-        Variable set6
+        Variable sLS3
             Properties
                 Scope         : Global
-                Type          : int32
-                Initial Value : 0
+                Type          : String
+                Initial String: "1234"
+                Max. length   : 4
             
         Number fSlider
             Properties
@@ -1320,7 +827,7 @@ Page MIDI_Live
         Text tOn
             Properties
                 Scope       : Local
-                Initial Text: "Note Ontime:"
+                Initial Text: "Ontime:"
                 Max. length : 20
             
             Events
@@ -1345,11 +852,11 @@ Page MIDI_Live
                     p
                     e
                 
-        Text tUser
+        Text tMML
             Properties
                 Scope       : Local
-                Initial Text: " Guest"
-                Max. length : 32
+                Initial Text: "MIDI Live"
+                Max. length : 16
             
             Events
                 Touch Press Event
@@ -1371,11 +878,242 @@ Page MIDI_Live
                 
                 Touch Release Event
                     
-        Text tMML
+        Number nOn1
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tus1
             Properties
                 Scope       : Local
-                Initial Text: "MIDI Live"
-                Max. length : 16
+                Initial Text: "탎"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Number nOn2
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tus2
+            Properties
+                Scope       : Local
+                Initial Text: "탎"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Number nOn3
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tus3
+            Properties
+                Scope       : Local
+                Initial Text: "탎"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Number nOn4
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tus4
+            Properties
+                Scope       : Local
+                Initial Text: "탎"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Number nOn5
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tus5
+            Properties
+                Scope       : Local
+                Initial Text: "탎"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Number nOn6
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tus6
+            Properties
+                Scope       : Local
+                Initial Text: "탎"
+                Max. length : 2
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tLightsabers
+            Properties
+                Scope       : Local
+                Initial Text: "Lightsabers:"
+                Max. length : 20
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Dual-state Button ls1
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "1"
+                Max. length  : 3
+            
+            Events
+                Touch Press Event
+                    lsID.val=1
+                    newData.val=1
+                    tmLSButtonHold.en=1
+                
+                Touch Release Event
+                    tmLSButtonHold.en=0
+                    if(sMode.txt==bModeRelease.txt||sMode.txt==bModeImmediate.txt)
+                    {
+                        click bApply,0
+                    }
+                
+        Dual-state Button ls2
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "2"
+                Max. length  : 4
+            
+            Events
+                Touch Press Event
+                    lsID.val=2
+                    newData.val=1
+                    tmLSButtonHold.en=1
+                
+                Touch Release Event
+                    click ls1,0
+                
+        Dual-state Button ls3
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "3"
+                Max. length  : 4
+            
+            Events
+                Touch Press Event
+                    lsID.val=3
+                    newData.val=1
+                    tmLSButtonHold.en=1
+                
+                Touch Release Event
+                    click ls1,0
+                
+        Dual-state Button ls4
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "4"
+                Max. length  : 4
+            
+            Events
+                Touch Press Event
+                    lsID.val=4
+                    newData.val=1
+                    tmLSButtonHold.en=1
+                
+                Touch Release Event
+                    click ls1,0
+                
+        Text tLSInfo
+            Properties
+                Scope       : Local
+                Initial Text: "Hold to set ID of the\r\nconnected ESP8266."
+                Max. length : 100
             
             Events
                 Touch Press Event
@@ -1397,3 +1135,109 @@ Page MIDI_Live
                 
                 Touch Release Event
                     
+        Variable tempString
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: ""
+                Max. length   : 4
+            
+        Text tLS1
+            Properties
+                Scope       : Local
+                Initial Text: "____"
+                Max. length : 8
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tLS2
+            Properties
+                Scope       : Local
+                Initial Text: "____"
+                Max. length : 8
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tLS4
+            Properties
+                Scope       : Local
+                Initial Text: "____"
+                Max. length : 8
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tLS3
+            Properties
+                Scope       : Local
+                Initial Text: "____"
+                Max. length : 8
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tLS6
+            Properties
+                Scope       : Local
+                Initial Text: "____"
+                Max. length : 8
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tLS5
+            Properties
+                Scope       : Local
+                Initial Text: "____"
+                Max. length : 8
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Variable sLS4
+            Properties
+                Scope         : Global
+                Type          : String
+                Initial String: "1234"
+                Max. length   : 4
+            
+        Variable sLS5
+            Properties
+                Scope         : Global
+                Type          : String
+                Initial String: "1234"
+                Max. length   : 4
+            
+        Variable sLS6
+            Properties
+                Scope         : Global
+                Type          : String
+                Initial String: "1234"
+                Max. length   : 4
+            

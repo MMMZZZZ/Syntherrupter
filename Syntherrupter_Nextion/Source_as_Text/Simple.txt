@@ -29,6 +29,12 @@ Page Simple
                 // MIDI Live Mode is active
                 tMML.bco=6900
             }
+            sys0=Settings.activeModes.val&4
+            if(sys0!=0)
+            {
+                // Lightsaber Mode is active
+                tMLS.bco=6900
+            }
             //
             tmReturn.tim=Other_Settings.nHoldTime.val
             //
@@ -235,6 +241,10 @@ Page Simple
                 MIDI_Live.set4.val=0
                 MIDI_Live.set5.val=0
                 MIDI_Live.set6.val=0
+                Lightsaber.ontime.val=0
+                Lightsaber.ontimes12.val=0
+                Lightsaber.ontimes34.val=0
+                Lightsaber.ontimes56.val=0
                 nOn.val=0
                 sOn.val=0
                 nOn1.val=0
@@ -699,19 +709,6 @@ Page Simple
                 Scope       : Local
                 Initial Text: "%"
                 Max. length : 1
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Text tUser
-            Properties
-                Scope       : Local
-                Initial Text: " Guest"
-                Max. length : 32
             
             Events
                 Touch Press Event
@@ -1581,37 +1578,6 @@ Page Simple
                     sys0=2*fSliderOutput.val
                     fSlider.val=fSqrt.val/sys0
                 
-        Text tMSI
-            Properties
-                Scope       : Local
-                Initial Text: "Simple"
-                Max. length : 16
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    // If not already active, go to page.
-                    //if(dp!=MIDI_Live.id)
-                    //{
-                    //  page MIDI_Live
-                    //}
-                
-        Text tMML
-            Properties
-                Scope       : Local
-                Initial Text: "MIDI Live"
-                Max. length : 16
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
         Timer tmReturn
             Properties
                 Scope      : Local
@@ -1663,3 +1629,55 @@ Page Simple
                 Type          : int32
                 Initial Value : 0
             
+        Text tUser
+            Properties
+                Scope       : Local
+                Initial Text: " Guest"
+                Max. length : 32
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tMSI
+            Properties
+                Scope       : Local
+                Initial Text: "Simple"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tMML
+            Properties
+                Scope       : Local
+                Initial Text: "MIDI Live"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tMLS
+            Properties
+                Scope       : Local
+                Initial Text: "Lightsaber"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    

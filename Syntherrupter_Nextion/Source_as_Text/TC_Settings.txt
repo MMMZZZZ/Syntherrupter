@@ -12,6 +12,12 @@ Page TC_Settings
             {
                 tUser.txt=" "+User_Settings.u2Name.txt
             }
+            sys0=Settings.activeModes.val&4
+            if(sys0!=0)
+            {
+                // Lightsaber Mode is active
+                tMLS.bco=6900
+            }
             //
             // Display all active modes
             sys0=Settings.activeModes.val&1
@@ -200,6 +206,10 @@ Page TC_Settings
                 MIDI_Live.set4.val=0
                 MIDI_Live.set5.val=0
                 MIDI_Live.set6.val=0
+                Lightsaber.ontime.val=0
+                Lightsaber.ontimes12.val=0
+                Lightsaber.ontimes34.val=0
+                Lightsaber.ontimes56.val=0
             }
         
         Touch Release Event
@@ -489,19 +499,6 @@ Page TC_Settings
                 Touch Release Event
                     page Settings
                 
-        Text tUser
-            Properties
-                Scope       : Local
-                Initial Text: " Guest"
-                Max. length : 32
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
         Variable coil1Chn
             Properties
                 Scope         : Global
@@ -1778,6 +1775,19 @@ Page TC_Settings
                 Type          : int32
                 Initial Value : 16
             
+        Text tUser
+            Properties
+                Scope       : Local
+                Initial Text: " Guest"
+                Max. length : 32
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
         Text tMSI
             Properties
                 Scope       : Local
@@ -1795,6 +1805,19 @@ Page TC_Settings
             Properties
                 Scope       : Local
                 Initial Text: "MIDI Live"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tMLS
+            Properties
+                Scope       : Local
+                Initial Text: "Lightsaber"
                 Max. length : 16
             
             Events

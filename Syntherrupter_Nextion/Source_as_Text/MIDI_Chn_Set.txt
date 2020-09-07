@@ -26,6 +26,12 @@ Page MIDI_Chn_Set
                 // MIDI Live Mode is active
                 tMML.bco=6900
             }
+            sys0=Settings.activeModes.val&4
+            if(sys0!=0)
+            {
+                // Lightsaber Mode is active
+                tMLS.bco=6900
+            }
             //
             // Idle field is just used for default text/background color and as target for the numpad if no component is selected. Ergo should be hidden like functions.
             vis fStore,0
@@ -134,6 +140,10 @@ Page MIDI_Chn_Set
                 MIDI_Live.set4.val=0
                 MIDI_Live.set5.val=0
                 MIDI_Live.set6.val=0
+                Lightsaber.ontime.val=0
+                Lightsaber.ontimes12.val=0
+                Lightsaber.ontimes34.val=0
+                Lightsaber.ontimes56.val=0
             }
         
         Touch Release Event
@@ -205,19 +215,6 @@ Page MIDI_Chn_Set
                     // Go back to origin page.
                     page origin.val
                 
-        Text tUser
-            Properties
-                Scope       : Local
-                Initial Text: " Guest"
-                Max. length : 32
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
         Text tChan
             Properties
                 Scope       : Local
@@ -1216,6 +1213,19 @@ Page MIDI_Chn_Set
                 Type          : int32
                 Initial Value : 0
             
+        Text tUser
+            Properties
+                Scope       : Local
+                Initial Text: " Guest"
+                Max. length : 32
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
         Text tMSI
             Properties
                 Scope       : Local
@@ -1233,6 +1243,19 @@ Page MIDI_Chn_Set
             Properties
                 Scope       : Local
                 Initial Text: "MIDI Live"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tMLS
+            Properties
+                Scope       : Local
+                Initial Text: "Lightsaber"
                 Max. length : 16
             
             Events

@@ -26,6 +26,12 @@ Page Menu
                 // MIDI Live Mode is active
                 tMML.bco=6900
             }
+            sys0=Settings.activeModes.val&4
+            if(sys0!=0)
+            {
+                // Lightsaber Mode is active
+                tMLS.bco=6900
+            }
         
         Postinitialize Event
             
@@ -53,6 +59,10 @@ Page Menu
                 MIDI_Live.set4.val=0
                 MIDI_Live.set5.val=0
                 MIDI_Live.set6.val=0
+                Lightsaber.ontime.val=0
+                Lightsaber.ontimes12.val=0
+                Lightsaber.ontimes34.val=0
+                Lightsaber.ontimes56.val=0
             }
         
         Touch Release Event
@@ -107,19 +117,6 @@ Page Menu
                 Touch Release Event
                     page Settings
                 
-        Text tUser
-            Properties
-                Scope       : Local
-                Initial Text: " Guest"
-                Max. length : 32
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
         Button bSwitchUser
             Properties
                 Scope      : Local
@@ -134,6 +131,31 @@ Page Menu
                 Touch Release Event
                     page Identification
                 
+        Button bLightsaber
+            Properties
+                Scope      : Local
+                Caption    : "Lightsaber"
+                Max. length: 10
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    page Lightsaber
+                
+        Text tUser
+            Properties
+                Scope       : Local
+                Initial Text: " Guest"
+                Max. length : 32
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
         Text tMSI
             Properties
                 Scope       : Local
@@ -146,16 +168,24 @@ Page Menu
                     click dp,1
                 
                 Touch Release Event
-                    // If not already active, go to page.
-                    //if(dp!=MIDI_Live.id)
-                    //{
-                    //  page MIDI_Live
-                    //}
-                
+                    
         Text tMML
             Properties
                 Scope       : Local
                 Initial Text: "MIDI Live"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tMLS
+            Properties
+                Scope       : Local
+                Initial Text: "Lightsaber"
                 Max. length : 16
             
             Events
