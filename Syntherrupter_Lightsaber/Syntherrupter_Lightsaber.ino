@@ -78,11 +78,13 @@
 #define PORT     8888
 #define MAX_CLIENTS 4
 #define DATA_SIZE  24
-#define DATA_PERIOD_MS 20
+#define DATA_PERIOD_MS 30
+#define SAMPLE_PERIOD_MS 5
 #define TIMEOUT_FACTOR  3
 
 #define MPU_SDA_PIN 0 // GPIO0
 #define MPU_SCL_PIN 2 // GPIO2
+#define MPU_SIGNAL_PATH_RESET 0x68
 
 WiFiServer masterServer(PORT);
 WiFiClient masterClients[MAX_CLIENTS];
@@ -93,34 +95,54 @@ bool serialCommandsEnabled = true;
 bool slave = 0;
 uint8_t slaveIDs[MAX_CLIENTS];
 uint32_t masterClientsTimeout[MAX_CLIENTS];
+float slaveData[6];
 
 // Task callbacks
 void slaveReadMPUCallback();
 void slaveConnectToMasterServerCallback();
+void slaveSendDataCallback();
 
 // Tasks
-Task slaveReadMPU(DATA_PERIOD_MS, TASK_FOREVER, slaveReadMPUCallback);
+Task slaveReadMPU(SAMPLE_PERIOD_MS, TASK_FOREVER, slaveReadMPUCallback);
+Task slaveSendData(DATA_PERIOD_MS, TASK_FOREVER, slaveSendDataCallback);
 Task slaveConnectToMasterServer(DATA_PERIOD_MS * TIMEOUT_FACTOR, TASK_FOREVER, slaveConnectToMasterServerCallback);
 
 Scheduler scheduler;
 
 
-void slaveReadMPUCallback() {
+void slaveReadMPUCallback()
+{
   mpu.update();
-  float data[DATA_SIZE / 4];
-  data[0] = mpu.getAccX();
-  data[1] = mpu.getAccY();
-  data[2] = mpu.getAccZ();
-  data[3] = mpu.getGyroX();
-  data[4] = mpu.getGyroY();
-  data[5] = mpu.getGyroZ();
 
-  uint8_t* dataBytes = (uint8_t*) ((void*) data);
-  
+  float newData[6];
+  newData[0] = mpu.getAccX();
+  newData[1] = mpu.getAccY();
+  newData[2] = mpu.getAccZ();
+  newData[3] = mpu.getGyroX();
+  newData[4] = mpu.getGyroY();
+  newData[5] = mpu.getGyroZ();
+
+  for (uint32_t i = 0; i < 6; i++)
+  {
+    if (fabsf(newData[i]) > fabsf(slaveData[i]))
+    {
+      slaveData[i] = newData[i];
+    }
+  }
+}
+
+void slaveSendDataCallback()
+{
+  uint8_t* dataBytes = (uint8_t*) ((void*) slaveData);
   if (slaveClient.connected())
   {
     slaveClient.write(slaveIDs[0]);
     slaveClient.write(dataBytes, DATA_SIZE);
+  }
+
+  for (uint32_t i = 0; i < 6; i++)
+  {
+    slaveData[i] = 0;
   }
 }
 
@@ -156,11 +178,8 @@ void slaveConnectToMasterServerCallback()
 void setup()
 {
   EEPROM.begin(128);
-
   scheduler.init(); 
   Serial.begin(115200);
-  Wire.begin(MPU_SDA_PIN, MPU_SCL_PIN);
-  mpu.begin();
 
   // Check if EEPROM has been written. Otherwise overwrite with default values.
   if (EEPROM.read(0) != 42)
@@ -169,7 +188,14 @@ void setup()
     EEPROM.write(1, 1);
     EEPROM.commit();
   }
-  
+
+  Wire.begin(MPU_SDA_PIN, MPU_SCL_PIN);
+  // Reset MPU (MPU6050 Register Map page 41
+  delay(100);
+  mpu.writeMPU6050(MPU6050_PWR_MGMT_1, 0b10000000);
+  delay(100);  
+  mpu.writeMPU6050(MPU_SIGNAL_PATH_RESET, 0b00000111);
+  delay(100);
   // Search for MPU 6050. Its WHO_AM_I 
   byte whoAmI = mpu.readMPU6050(MPU6050_WHO_AM_I);
   //Serial.print("MPU6050 Who Am I: ");
@@ -183,10 +209,19 @@ void setup()
     slave = true;
     serialCommandsEnabled = false;
 
+    // Initialize MPU
+    mpu.begin();
+
     // Read slaveID from EEPROM
     slaveIDs[0] = EEPROM.read(1);
     //Serial.print("SlaveID is ");
     //Serial.println(slaveIDs[0]);
+
+    // Initialize slaveData
+    for (uint32_t i = 0; i < 6; i++)
+    {
+      slaveData[i] = 0;
+    }
     
     // Wait for the masters AP to appear and connect to it.
     //Serial.print("Waiting for Master AP to appear");
@@ -208,6 +243,8 @@ void setup()
     // Add slave tasks to scheduler
     scheduler.addTask(slaveReadMPU);
     slaveReadMPU.enable();
+    scheduler.addTask(slaveSendData);
+    slaveSendData.enable();
     scheduler.addTask(slaveConnectToMasterServer);
     slaveConnectToMasterServer.enable();
   }
