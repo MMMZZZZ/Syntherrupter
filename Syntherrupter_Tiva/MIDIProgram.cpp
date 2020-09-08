@@ -38,6 +38,7 @@ void MIDIProgram::setDataPoint(uint32_t index, float amplitude, float durationUS
     }
     this->amplitude[index]  = amplitude;
     this->durationUS[index] = durationUS;
+    this->ntau[index]       = ntau;
     updateCoefficients();
 }
 
