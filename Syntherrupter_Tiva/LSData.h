@@ -47,8 +47,10 @@ public:
     };
     void process()
     {
-        float gyro = sqrtf(gx * gx + gz * gz);
+        //float gyro = sqrtf(gx * gx + gz * gz);
         float accel = sqrtf(ax * ax + ay * ay + az * az) - 1;
+        float gyro  = (fabsf(gx) + fabsf(gz)) / 2.0f;
+        //float accel = fmaxf(0.0f, (fabsf(ax) + fabsf(ay) + fabsf(az)) / 3.0f - 1);
         /*static float gyroFiltered{0};
         static float accelFiltered{0};
 
@@ -68,17 +70,20 @@ public:
 
         float frequency = exp2f((40.0f - 69.0f + ayFiltered) / 12.0f) * 440.0f;*/
 
-        float volume = fmaxf(0.0f, fminf(1.0f, accel / 2.0f + gyro / 600.0f));
+        float volume = fmaxf(0.0f, fminf(1.0f, accel * 0.4f + gyro / 1000.0f - 0.01f));
 
         static float peakVol{0};
         if (volume >= peakVol)
         {
             peakVol = volume;
         }
-        peakVol = filtered(0, peakVol, 0.08);
-        volume = ((filtered(volume, peakVol, 0.5)));
+        peakVol = filtered(0, peakVol, 0.09);
+        volume = filtered(volume, peakVol, 0.5);
 
-        float frequency = exp2f((40.0f - 69.0f + volume) / 12.0f) * 440.0f;
+        static float slowVol{0};
+        slowVol = filtered(volume, slowVol, 0.5);
+
+        float frequency = exp2f((43.0f - 69.0f - slowVol) / 12.0f) * 440.0f;
 
         float periodUS = 1e6f / frequency;
 
