@@ -192,7 +192,7 @@ bool LightSaber::ESPCommand(uint8_t address, uint8_t data)
 
     // For now we don't care about the return data.
     uint32_t startTimeUS = System::getSystemTimeUS();
-    while (System::getSystemTimeUS() - startTimeUS < ESP_CMD_TIEMOUT_US)
+    while (System::getSystemTimeUS() - startTimeUS < ESP_CMD_TIMEOUT_US)
     {
         if (uart.buffer.level() == 1)
         {

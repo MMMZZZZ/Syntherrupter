@@ -63,8 +63,8 @@ private:
     static bool ESPCommand(uint8_t address, uint8_t data);
     static constexpr uint32_t MAX_CLIENTS = 4;
     static constexpr uint32_t DATA_SIZE = 24;
-    static constexpr uint32_t PACKET_TIMEOUT_US = 20000 / MAX_CLIENTS / 2; // Each client sends a packet every 20ms. /2 to be sure delay is small enough.
-    static constexpr uint32_t ESP_CMD_TIEMOUT_US = 9000;
+    static constexpr uint32_t PACKET_TIMEOUT_US = 30000 / MAX_CLIENTS / 2; // Each client sends a packet every 20ms. /2 to be sure delay is small enough.
+    static constexpr uint32_t ESP_CMD_TIMEOUT_US = 9000;
 
     // Wild guess
     static constexpr uint32_t ESP_START_TIMEOUT_US = 20000;
