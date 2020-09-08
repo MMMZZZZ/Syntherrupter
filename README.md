@@ -21,6 +21,9 @@ Have a look at the [releases page](https://github.com/MMMZZZZ/Syntherrupter/rele
 These Pins are connected to the on-board USB to serial converter.
 * *A0: RX*
 * *A1: TX*
+#### For Lightsaber Receiving ESP8266
+* PA6: RX
+* PA7: TX
 ### Output pins
 The following pins supply the interrupt signal for the given coil. Signal is active high, 3.3V, max. 12mA.
 * Coil 1: PD0
@@ -53,8 +56,8 @@ English: https://highvoltageforum.net/index.php?topic=1020.0
 German: http://forum.mosfetkiller.de/viewtopic.php?f=9&t=64458
 
 ### Credits
-[Netzpfuscher and his awesome UD3](https://highvoltageforum.net/index.php?topic=188.0)
+[Netzpfuscher and his awesome UD3](https://highvoltageforum.net/index.php?topic=188.0). Thank you for the help with polyphony and the awesome lightsaber idea.
 
-[TMaxElectronics for many interesting discussions](https://tmax-electronics.de/easteregg/)
+[TMaxElectronics](https://tmax-electronics.de/easteregg/). Many great discussions about MIDI, Interrupters, C/C++ bad practices, and much more. And for developping a competing Interrupter - keeps the development going. 
 
-[highvoltageforum for great ideas and support](https://highvoltageforum.net)
+[highvoltageforum](https://highvoltageforum.net). Without those people sharing their ideas and knowledge, Syntherrupter would never be where it is now. 
