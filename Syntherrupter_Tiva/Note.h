@@ -22,7 +22,7 @@ public:
     virtual ~Note();
     bool isDead()
     {
-        return ((ADSRStep && ADSRVolume < 1e-6f) || number > 127);
+        return (number > 127);
     };
     uint32_t ADSRStep      = 0;
     uint8_t channel        = 0;

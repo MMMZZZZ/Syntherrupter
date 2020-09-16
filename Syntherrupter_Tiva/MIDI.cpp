@@ -645,7 +645,11 @@ void MIDI::updateEffects(Note* note)
         {
             note->ADSRTimeUS = currentTime;
             MIDIProgram* program = &(programs[channels[note->channel].program]);
-            program->setADSRAmp(&(note->ADSRStep), &(note->ADSRVolume));
+            if (!program->setADSRAmp(&(note->ADSRStep), &(note->ADSRVolume)))
+            {
+                // Note ended.
+                note->number = 128;
+            }
 
             // After calculation of ADSR envelope, add other effects like modulation
             float finishedVolume =   note->rawVolume
