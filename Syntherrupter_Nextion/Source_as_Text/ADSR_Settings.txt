@@ -35,6 +35,11 @@ Page ADSR_Settings
             //
             // Display maxSteps
             nMaxSteps.val=maxSteps.val
+            //
+            // Set newValTargetId to idle
+            newValTargetId.val=idle.id
+            // First step is step 0, which cant be release
+            vis tRelease,0
         
         Postinitialize Event
             
@@ -496,20 +501,17 @@ Page ADSR_Settings
                             sys2=0
                             if(sys1==0)
                             {
-                                sys2+=nProg.val
+                                sys2+=nStep.val
                             }else if(sys1==1)
                             {
-                                sys2+=nStep.val
+                                sys2+=nNext.val
                             }else if(sys1==2)
                             {
-                                sys2+=nNext.val
+                                sys2+=nAmp.val
                             }else if(sys1==3)
                             {
-                                sys2+=nAmp.val
-                            }else if(sys1==4)
-                            {
                                 sys2+=nDur.val
-                            }else if(sys1==5)
+                            }else if(sys1==4)
                             {
                                 sys2+=nNTau.val
                             }
@@ -531,19 +533,6 @@ Page ADSR_Settings
                         }
                     }
                 
-        Text tSelToMod
-            Properties
-                Scope       : Local
-                Initial Text: "Select any value\r\nto modify."
-                Max. length : 30
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
         Text tStep
             Properties
                 Scope       : Local
@@ -868,22 +857,23 @@ Page ADSR_Settings
                         sys0=0
                         if(newValTargetId.val==nProg.id)
                         {
-                            sys0=1
-                        }else if(newValTargetId.val==nStep.id)
+                            sys0=0x1f
+                        }
+                        if(newValTargetId.val==nStep.id)
                         {
-                            sys0=1<<1
+                            sys0=1
                         }else if(newValTargetId.val==nNext.id)
                         {
-                            sys0=1<<2
+                            sys0=1<<1
                         }else if(newValTargetId.val==nAmp.id)
                         {
-                            sys0=1<<3
+                            sys0=1<<2
                         }else if(newValTargetId.val==nDur.id)
                         {
-                            sys0=1<<4
+                            sys0=1<<3
                         }else if(newValTargetId.val==nNTau.id)
                         {
-                            sys0=1<<5
+                            sys0=1<<4
                         }
                         changedValues.val=changedValues.val|sys0
                     }
