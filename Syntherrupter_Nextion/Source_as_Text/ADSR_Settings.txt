@@ -34,7 +34,8 @@ Page ADSR_Settings
             }
             //
             // Display maxSteps
-            nMaxSteps.val=maxSteps.val
+            nMaxSteps1.val=maxSteps.val
+            nMaxSteps2.val=maxSteps.val
             //
             // Set newValTargetId to idle
             newValTargetId.val=idle.id
@@ -400,7 +401,14 @@ Page ADSR_Settings
                 Touch Press Event
                     
                 Touch Release Event
+                    //if(newValTargetId.val==nProg.id||newValTargetId.val==nStep.id)
+                    //{
+                    //  b[newValTargetId.val].val=1
+                    //}else
+                    //{
                     b[newValTargetId.val].val=0
+                    //}
+                    //click fCheck,0
                 
         Button bSet
             Properties
@@ -429,10 +437,6 @@ Page ADSR_Settings
                     //   Bit 7: 0: Value is positive. 1: Value is negative.
                     // Data Byte 4: Value, LSB
                     // Data Byte 5: Value, MSB
-                    //
-                    // sys0 contains Data Byte 1
-                    sys0=3<<6
-                    sys0+=nProg.val
                     //
                     // Send all changes
                     sys1=0
@@ -501,31 +505,40 @@ Page ADSR_Settings
                             sys2=0
                             if(sys1==0)
                             {
-                                sys2+=nStep.val
+                                sys2+=nStep.val-1
+                                sys0=nStep.id
                             }else if(sys1==1)
                             {
-                                sys2+=nNext.val
+                                sys2+=nNext.val-1
+                                sys0=nNext.id
                             }else if(sys1==2)
                             {
                                 sys2+=nAmp.val
+                                sys0=nAmp.id
                             }else if(sys1==3)
                             {
                                 sys2+=nDur.val
+                                sys0=nDur.id
                             }else if(sys1==4)
                             {
                                 sys2+=nNTau.val
+                                sys0=nNTau.id
                             }
-                            sys2+=b[newValTargetId.val].val
                             sys2=sys2<<1
-                            if(b[newValTargetId.val].val<0)
+                            if(b[sys0].val<0)
                             {
                                 sys2+=1
                             }
                             sys2=sys2<<7
-                            if(b[newValTargetId.val].type==59)
+                            if(b[sys0].type==59)
                             {
-                                sys2+=b[newValTargetId.val].vvs1
+                                prints "test1",0
+                                sys2+=b[sys0].vvs1
                             }
+                            //
+                            // sys0 contains Data Byte 1
+                            sys0=3<<6
+                            sys0+=nProg.val
                             prints "d",1
                             prints sys0,1
                             prints sys1,1
@@ -739,6 +752,7 @@ Page ADSR_Settings
                 Touch Press Event
                     
                 Touch Release Event
+                    newSelect.val=0
                     if(b[newValTargetId.val].type==59)
                     {
                         // If selected component has a decimal point, move it.
@@ -760,6 +774,7 @@ Page ADSR_Settings
                 Touch Press Event
                     
                 Touch Release Event
+                    newSelect.val=0
                     if(b[newValTargetId.val].type==59)
                     {
                         // If selected component has a decimal point.
@@ -820,21 +835,51 @@ Page ADSR_Settings
                         bR.txt="+1"
                     }
                     // ifs can only compare variables, they cannot do calulations...
-                    sys0=maxSteps.val-1
-                    if(nStep.val==-1)
+                    sys0=63+1
+                    if(nProg.val==0)
                     {
-                        nStep.val=sys0
-                    }else if(nStep.val==maxSteps.val)
+                        nProg.val=63
+                    }else if(nProg.val==sys0)
                     {
-                        nStep.val=0
-                    }else if(nStep.val>maxSteps.val)
+                        nProg.val=1
+                    }else if(nProg.val>sys0)
                     {
-                        nStep.val=sys0
-                    }else if(nStep.val<0)
+                        nProg.val=63
+                    }else if(nProg.val<1)
                     {
-                        nStep.val=0
+                        nProg.val=1
                     }
-                    if(nStep.val==sys0)
+                    // ifs can only compare variables, they cannot do calulations...
+                    sys0=maxSteps.val+1
+                    if(nStep.val==0)
+                    {
+                        nStep.val=maxSteps.val
+                    }else if(nStep.val==sys0)
+                    {
+                        nStep.val=1
+                    }else if(nStep.val>sys0)
+                    {
+                        nStep.val=maxSteps.val
+                    }else if(nStep.val<1)
+                    {
+                        nStep.val=1
+                    }
+                    // ifs can only compare variables, they cannot do calulations...
+                    sys0=maxSteps.val+1
+                    if(nNext.val==0)
+                    {
+                        nNext.val=maxSteps.val
+                    }else if(nNext.val==sys0)
+                    {
+                        nNext.val=1
+                    }else if(nNext.val>sys0)
+                    {
+                        nNext.val=maxSteps.val
+                    }else if(nNext.val<1)
+                    {
+                        nNext.val=1
+                    }
+                    if(nStep.val==maxSteps.val)
                     {
                         nAmp.val=0
                         vis tRelease,1
@@ -875,7 +920,7 @@ Page ADSR_Settings
                         {
                             sys0=1<<4
                         }
-                        changedValues.val=changedValues.val|sys0
+                        changedValues.val|=sys0
                     }
                 
         Variable maxSteps
@@ -897,7 +942,7 @@ Page ADSR_Settings
                 
                 Touch Release Event
                     
-        Number nMaxSteps
+        Number nMaxSteps1
             Properties
                 Scope        : Local
                 Initial Value: 0
@@ -918,7 +963,7 @@ Page ADSR_Settings
                 
                 Touch Release Event
                     
-        Text tSlash
+        Text tSlash1
             Properties
                 Scope       : Local
                 Initial Text: "/"
@@ -1057,3 +1102,37 @@ Page ADSR_Settings
                 Type          : int32
                 Initial Value : 0
             
+        Number nMaxSteps2
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    newValTargetId.val=nStep.id
+                    b[newValTargetId.val].bco=idle.pco
+                    b[newValTargetId.val].pco=idle.bco
+                    // A new value has been selected
+                    newSelect.val=1
+                    // Check if values are legal
+                    click fCheck,0
+                
+                Touch Release Event
+                    
+        Text tSlash2
+            Properties
+                Scope       : Local
+                Initial Text: "/"
+                Max. length : 1
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    

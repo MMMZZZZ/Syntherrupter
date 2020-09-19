@@ -259,7 +259,10 @@ void EEPROMSettings::rwuAll(uint32_t mode)
     EEPROMModified |= rwuSingle(mode, userSettings, sizeof(userSettings));
     EEPROMModified |= rwuSingle(mode, coilSettings, sizeof(coilSettings));
     EEPROMModified |= rwuSingle(mode, otherSettings, sizeof(coilSettings));
-    EEPROMModified |= rwuSingle(mode, ADSRSettings, sizeof(ADSRSettings));
+    for (uint32_t i = 0; i < MIDI::MAX_PROGRAMS; i+=2)
+    {
+        EEPROMModified |= rwuSingle(mode, ADSRSettings[i], 2 * sizeof(ADSRSettings[i]));
+    }
 
     if (EEPROMModified)
     {

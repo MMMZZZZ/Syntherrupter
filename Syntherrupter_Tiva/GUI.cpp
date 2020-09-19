@@ -155,6 +155,10 @@ void GUI::init()
                 System::delayUS(20000);
             }
 
+            // ADSR
+            EEPROMSettings::getMIDIPrograms();
+            nxt.printf("ADSR_Settings.maxSteps.val=%i\xff\xff\xff", MIDIProgram::DATA_POINTS);
+
             // Other Settings
             uint32_t buttonHoldTime =  EEPROMSettings::otherSettings[0] & 0x0000ffff;
             uint32_t sleepDelay     = (EEPROMSettings::otherSettings[0] & 0xffff0000) >> 16;
@@ -179,6 +183,7 @@ void GUI::init()
         if (!cfgInEEPROM)
         {
             nxt.sendCmd("vis pStartup,0");
+            EEPROMSettings::setMIDIPrograms();
         }
     }
 }
@@ -678,23 +683,23 @@ void GUI::settings()
                 static float amplitude{1.0f}, durationUS{1000.0f}, ntau{0.0f};
 
                 float sign = 1.0f;
-                if (commandData[3] & 0b10000000)
+                if (commandData[2] & 0b10000000)
                 {
                     sign = -1.0f;
                 }
 
-                float factor = powf(10.0f, - float(commandData[3] & 0x7f));
+                float factor = powf(10.0f, - float(commandData[2] & 0x7f));
                 float val      = (commandData[4] << 8) + commandData[3];
 
                 val *= sign * factor;
 
-                switch (commandData[2])
+                switch (commandData[1])
                 {
                     case 0: // current step
-                        index      = commandData[4];
+                        index      = commandData[3];
                         break;
                     case 1: // next step
-                        nextStep   = commandData[4];
+                        nextStep   = commandData[3];
                         break;
                     case 2: // amplitude
                         amplitude  = val;

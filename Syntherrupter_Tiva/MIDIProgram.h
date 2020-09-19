@@ -23,7 +23,7 @@ public:
     void setDataPoint(uint32_t index, float amplitude, float durationUS, float ntau = 1.0f, uint32_t nextStep = DATA_POINTS);
     void setMode(Mode mode);
     static void setResolutionUS(float res);
-    static constexpr uint32_t DATA_POINTS = 4;
+    static constexpr uint32_t DATA_POINTS = 8;
     float durationUS[DATA_POINTS + 1];
     float amplitude[DATA_POINTS + 1];
     float ntau[DATA_POINTS + 1];

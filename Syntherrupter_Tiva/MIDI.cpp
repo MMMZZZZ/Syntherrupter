@@ -47,12 +47,17 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPor
     // Copy legacy ADSR table to new MIDIProgram class. That's the way it works until there's a useful editor for ADSR.
     for (uint32_t prog = 0; prog < ADSR_PROGRAM_COUNT + 1; prog++)
     {
-        programs[prog].setMode(MIDIProgram::Mode::lin);
+        programs[prog].setMode(MIDIProgram::Mode::exp);
         programs[prog+10].setMode(MIDIProgram::Mode::exp);
         for (uint32_t datapnt = 0; datapnt < 4; datapnt++)
         {
-            programs[prog].setDataPoint(datapnt, ADSR_LEGACY_PROGRAMS[prog][datapnt*2],    1.0f / ADSR_LEGACY_PROGRAMS[prog][datapnt*2+1]);
-            programs[prog+10].setDataPoint(datapnt, ADSR_LEGACY_PROGRAMS[prog][datapnt*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][datapnt*2+1], 3.0f);
+            uint32_t nextPnt = datapnt + 1;
+            if (datapnt == 3)
+            {
+                nextPnt = MIDIProgram::DATA_POINTS - 1;
+            }
+            programs[prog   ].setDataPoint(datapnt, ADSR_LEGACY_PROGRAMS[prog][datapnt*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][datapnt*2+1], 0.0f, nextPnt);
+            programs[prog+10].setDataPoint(datapnt, ADSR_LEGACY_PROGRAMS[prog][datapnt*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][datapnt*2+1], 3.0f, nextPnt);
         }
     }
 }
@@ -244,7 +249,7 @@ bool MIDI::processBuffer(uint32_t b)
                     {
                         channels[channel].pitchBendRangeCoarse = c1;
                         channels[channel].pitchBendRange  =   channels[channel].pitchBendRangeCoarse
-                                                                + channels[channel].pitchBendRangeFine / 100.0f;
+                                                            + channels[channel].pitchBendRangeFine / 100.0f;
                         channels[channel].pitchBendRange /= 8192.0f;
                         channels[channel].changed = true;
                     }
@@ -252,7 +257,7 @@ bool MIDI::processBuffer(uint32_t b)
                     {
                         channels[channel].fineTuningCoarse = c1;
                         channels[channel].tuning = ((channels[channel].fineTuningCoarse << 8)
-                                                        + channels[channel].fineTuningFine) - 8192.0f;
+                                                   + channels[channel].fineTuningFine) - 8192.0f;
                         channels[channel].tuning /= 4096.0f;
                         channels[channel].tuning += channels[channel].coarseTuning;
                         channels[channel].changed = true;
@@ -261,7 +266,7 @@ bool MIDI::processBuffer(uint32_t b)
                     {
                         channels[channel].coarseTuning = c1;
                         channels[channel].tuning = ((channels[channel].fineTuningCoarse << 8)
-                                                        + channels[channel].fineTuningFine) - 8192.0f;
+                                                   + channels[channel].fineTuningFine) - 8192.0f;
                         channels[channel].tuning /= 4096.0f;
                         channels[channel].tuning += channels[channel].coarseTuning;
                         channels[channel].changed = true;
@@ -284,7 +289,7 @@ bool MIDI::processBuffer(uint32_t b)
                     {
                         channels[channel].pitchBendRangeFine = c1;
                         channels[channel].pitchBendRange  =   channels[channel].pitchBendRangeCoarse
-                                                                + channels[channel].pitchBendRangeFine / 100.0f;
+                                                            + channels[channel].pitchBendRangeFine / 100.0f;
                         channels[channel].pitchBendRange /= 8192.0f;
                         channels[channel].changed = true;
                     }
@@ -296,7 +301,7 @@ bool MIDI::processBuffer(uint32_t b)
                          */
                         channels[channel].fineTuningFine = c1;
                         channels[channel].tuning = ((channels[channel].fineTuningCoarse << 8)
-                                                        + channels[channel].fineTuningFine) - 8192.0f;
+                                                   + channels[channel].fineTuningFine) - 8192.0f;
                         channels[channel].tuning /= 4096.0f;
                         channels[channel].tuning += channels[channel].coarseTuning;
                         channels[channel].changed = true;

@@ -54,7 +54,7 @@ private:
     static bool writeChangedSequence(void *newData, uint32_t byteSize);
     static bool updateBank();
 
-    static constexpr uint32_t PRESENT       = 0x42010000; // MSB: Random value != 0 and != 0xff to check if data has been written to the EEPROM. Next byte: Config Version. Increments if there has been incompatible changes. Lowest two bytes: wear leveling. Switch to next bank on overflow.
+    static constexpr uint32_t PRESENT       = 0x42020000; // MSB: Random value != 0 and != 0xff to check if data has been written to the EEPROM. Next byte: Config Version. Increments if there has been incompatible changes. Lowest two bytes: wear leveling. Switch to next bank on overflow.
     static constexpr uint32_t WRITE_EEPROM  = 0;
     static constexpr uint32_t READ_EEPROM   = 1;
     static constexpr uint32_t UPDATE_EEPROM = 2;
