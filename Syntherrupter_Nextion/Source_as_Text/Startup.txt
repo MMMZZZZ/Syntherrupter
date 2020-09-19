@@ -27,26 +27,6 @@ Page Startup
                     // Do the same thing as on a normal start. This is just a note to the user without effect on the behavior during operation.
                     click pStartup,0
                 
-        Picture pStartup
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    // If one of the user passwords is blank, do auto login to this user.
-                    if(User_Settings.u0Code.txt==User_Settings.tAutoCode.txt)
-                    {
-                        Identification.tTitle.txt=User_Settings.tAutoCode.txt
-                    }
-                    if(User_Settings.u1Code.txt==User_Settings.tAutoCode.txt)
-                    {
-                        Identification.tTitle.txt=User_Settings.tAutoCode.txt
-                    }
-                    if(User_Settings.u2Code.txt==User_Settings.tAutoCode.txt)
-                    {
-                        Identification.tTitle.txt=User_Settings.tAutoCode.txt
-                    }
-                    page Identification
-                
         Variable comOk
             Properties
                 Scope         : Local
@@ -98,3 +78,23 @@ Page Startup
                 
                 Touch Release Event
                     
+        Picture pStartup
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    // If one of the user passwords is blank, do auto login to this user.
+                    if(User_Settings.u0Code.txt==User_Settings.tAutoCode.txt)
+                    {
+                        Identification.tTitle.txt=User_Settings.tAutoCode.txt
+                    }
+                    if(User_Settings.u1Code.txt==User_Settings.tAutoCode.txt)
+                    {
+                        Identification.tTitle.txt=User_Settings.tAutoCode.txt
+                    }
+                    if(User_Settings.u2Code.txt==User_Settings.tAutoCode.txt)
+                    {
+                        Identification.tTitle.txt=User_Settings.tAutoCode.txt
+                    }
+                    page Identification
+                

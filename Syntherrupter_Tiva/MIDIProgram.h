@@ -27,25 +27,26 @@ public:
     float durationUS[DATA_POINTS + 1];
     float amplitude[DATA_POINTS + 1];
     float ntau[DATA_POINTS + 1];
-    Mode mode = Mode::lin;
+    uint32_t nextStep[DATA_POINTS + 1];
+    Mode mode = Mode::exp;
     bool setADSRAmp(uint32_t* step, float* amp)
     {
         // Return if note is still active or not.
 
-        if (mode == Mode::lin)
+        /*if (mode == Mode::lin)
         {
             *amp += coefficient[*step];
         }
         else if (mode == Mode::exp)
-        {
+        {*/
             *amp -= expTargetAmp[*step];
             *amp *= coefficient[*step];
             *amp += expTargetAmp[*step];
-        }
+        /*}
         else //if (mode == Mode::cnst)
         {
             *amp = amplitude[*step];
-        }
+        }*/
         if (  (*amp >= amplitude[*step] && amplitudeDiff[*step] >= 0)
             ||(*amp <= amplitude[*step] && amplitudeDiff[*step] <= 0))
         {
@@ -64,7 +65,6 @@ private:
     float coefficient[DATA_POINTS + 1];
     float amplitudeDiff[DATA_POINTS + 1];
     float expTargetAmp[DATA_POINTS + 1];
-    uint32_t nextStep[DATA_POINTS + 1];
     static float resolutionUS;
     void updateCoefficients();
 };

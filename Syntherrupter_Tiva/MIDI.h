@@ -51,6 +51,8 @@ public:
     static Channel channels[16];
     static UART usbUart, midiUart;
     static ByteBuffer otherBuffer;
+    static constexpr uint32_t MAX_PROGRAMS = 64;
+    static MIDIProgram programs[MAX_PROGRAMS];
 
 private:
     static bool processBuffer(uint32_t b);
@@ -132,9 +134,6 @@ private:
     };
 
     static constexpr uint32_t effectResolutionUS = 963;
-
-    static constexpr uint32_t MAX_PROGRAMS = 64;
-    static MIDIProgram programs[MAX_PROGRAMS];
 
     static constexpr uint32_t    BUFFER_COUNT = 3;
     static constexpr ByteBuffer* BUFFER_LIST[BUFFER_COUNT] = {&(usbUart.buffer), &(midiUart.buffer), &otherBuffer};;

@@ -16,7 +16,7 @@ Page USB_FW_Update
         Text tTitle
             Properties
                 Scope       : Local
-                Initial Text: "USB Firmware Update"
+                Initial Text: "Nextion Firmware Upload"
                 Max. length : 25
             
             Events

@@ -98,14 +98,13 @@ private:
     static void settingsExit()
     {
         // Update EEPROM
-        cfg.update();
+        EEPROMSettings::update();
     };
 
     static void nxtFWUpdate();
     static bool checkValue(uint32_t val);
 
     static Nextion nxt;
-    static EEPROMSettings cfg;
 
     static Tone* simpleTone;
 

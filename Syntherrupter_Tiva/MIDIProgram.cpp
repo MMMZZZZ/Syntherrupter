@@ -43,7 +43,20 @@ void MIDIProgram::setDataPoint(uint32_t index, float amplitude, float durationUS
         this->amplitude[index]  = amplitude;
     }
     this->durationUS[index] = durationUS;
-    this->ntau[index]       = ntau;
+
+    if (mode == Mode::cnst)
+    {
+        this->ntau[index] = 1e6f;
+    }
+    else if (mode == Mode::lin)
+    {
+        this->ntau[index] = 0.0f;
+    }
+    else if (mode == Mode::exp)
+    {
+        this->ntau[index] = ntau;
+    }
+
     if (index == DATA_POINTS - 1)
     {
         nextStep = DATA_POINTS - 1;
@@ -58,7 +71,26 @@ void MIDIProgram::setDataPoint(uint32_t index, float amplitude, float durationUS
 
 void MIDIProgram::setMode(Mode mode)
 {
-    this->mode = mode;
+    if (this->mode != mode)
+    {
+        this->mode = mode;
+
+        for (uint32_t i = 0; i < DATA_POINTS; i++)
+        {
+            if (mode == Mode::cnst)
+            {
+                this->ntau[i] = 1e6f;
+            }
+            else if (mode == Mode::lin)
+            {
+                this->ntau[i] = 0.0f;
+            }
+            else if (mode == Mode::exp)
+            {
+                this->ntau[i] = 3.0f;
+            }
+        }
+    }
     updateCoefficients();
 }
 
@@ -158,15 +190,15 @@ void MIDIProgram::updateCoefficients()
         }
 
         amplitudeDiff[currentStep] = amplitude[currentStep] - amplitude[lastStep];
-        if (mode == Mode::lin)
+        /*if (mode == Mode::lin)
         {
             coefficient[currentStep] = amplitudeDiff[currentStep] / durationUS[currentStep] * resolutionUS;
         }
         else if (mode == Mode::exp)
-        {
+        {*/
             coefficient[currentStep]  = expf(- ntau[currentStep] / durationUS[currentStep] * resolutionUS); // powf(expf(-ntau[currentStep]), 1.0f / * ticksPerStep[currentStep]);
             expTargetAmp[currentStep] = amplitude[lastStep] - amplitudeDiff[currentStep] / expm1f(- ntau[currentStep]);
-        }
+        //}
 
         stepDone[currentStep] = true;
         lastStep = currentStep;

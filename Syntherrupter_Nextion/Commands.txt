@@ -76,10 +76,12 @@ Note: Any value ranges that have no specified meaning here should be ignored by 
 					0 = User limits
 					1 = Coil limits
 					2 = Other settings
+					3 = ADSR settings (note: will always be exp-type)
 				* bit 0-5: 
 					* Settings type 0: A value from 1 to 6 indicates which one of the outputs 0-5 is affected by this command. 
 					* Settings type 1: A value from 0 to 2 indicates which user is affected by this command.
 					* Settings type 2: A value from 0 to 9 indicates a page number, and thus the meaning of the following bytes.
+					* Settings type 3: A value from 1 to 63 indicates the ADSR Program that will be modified. A value of 0 tells the microcontroller to update all ADSR Programs in EEPROM with the values currently stored in RAM. Bytes 2-5 should be 0.
 			* User limits
 				* Byte 2-5: form a 32bit bitfield containing the limits of what the user can enter with the GUI. Note: in MIDI operation these values can be exceeded for numerous reasons. F.ex. ADSR can be adjusted to exceed a given value for a short time. Therefore the user limits are more "average limits". The never-exceeded-hard-limits are set by the Coil limits below. 
 					* Bit  0-11: Maximum allowed ontime [10us]
@@ -98,7 +100,19 @@ Note: Any value ranges that have no specified meaning here should be ignored by 
 				* Byte 5: Delay until sleep in seconds MSB
 			* Other settings, page 1
 				* Byte 2: Display brightness
-			* Byte 6: can't be used in this context.
+			* ADSR settings
+				* Byte 2: Parameter that is set. 
+					* 0: Set current step (byte 3 ignored, should be 0) (Like NRP number)
+					* 1: Set next step (byte 3 ignored, should be 0)
+					* 2: Set amplitude 
+					* 3: Set duration in milliseconds
+					* 4: Set n-tau.
+				* Byte 3: 
+					* Bit 0-6: Power of 10 by which the value (bytes 4-5) is divided.
+					* Bit 7: 0: Value is positive. 1: Value is negative.
+				* Byte 4: Signed value, LSB
+				* Byte 5: Signed value, MSB
+					
 		* u..(.): User Command. Length is variable and indicated in byte 1 by the bits 0-4. The other bits are context sensitive. In this context:	
 			* Byte 1: 
 				* Bit 6-7: User. Can be 0, 1 or 2. 

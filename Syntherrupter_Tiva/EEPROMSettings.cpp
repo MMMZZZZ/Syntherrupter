@@ -7,6 +7,21 @@
 
 #include <EEPROMSettings.h>
 
+
+constexpr uint32_t EEPROMSettings::BANK_STARTS[BANK_COUNT];
+char     EEPROMSettings::userNames[3][STR_CHAR_COUNT] = {"Padawan", "Jedi Knight", "Master Yoda"};
+char     EEPROMSettings::userPwds[3][STR_CHAR_COUNT]  = {"1234",    "8079",        "0"};
+uint32_t EEPROMSettings::userSettings[3]          = {0, 0, 0};          // Bit format equal to communication format, documented in separate file.
+uint32_t EEPROMSettings::coilSettings[6]          = {0, 0, 0, 0, 0, 0}; // Bit format equal to communication format, documented in separate file.
+uint32_t EEPROMSettings::otherSettings[10]        = {((0 << 16) | 250), 100, 0, 0, 0,
+                                                     0, 0, 0, 0, 0};  // Bit format equal to communication format, documented in separate file.
+uint32_t EEPROMSettings::ADSRSettings[MIDI::MAX_PROGRAMS][MIDIProgram::DATA_POINTS][4];
+uint32_t EEPROMSettings::byteAddress = 0;
+uint32_t EEPROMSettings::bank = BANK_COUNT; // initialized to value higher than normally possible
+uint32_t EEPROMSettings::tempArray[(sizeof(ADSRSettings) > 30) ? MIDI::MAX_PROGRAMS : 30]; // must be at least as large as the largest array in use.
+bool     EEPROMSettings::EEPROMUpToDate = false;
+
+
 EEPROMSettings::EEPROMSettings()
 {
 
@@ -127,6 +142,34 @@ uint32_t EEPROMSettings::getCoilsMaxOntimeUS(uint32_t coil)
     return ontimeUS;
 }
 
+void EEPROMSettings::getMIDIPrograms()
+{
+    for (uint32_t program = 0; program < MIDI::MAX_PROGRAMS; program++)
+    {
+        for (uint32_t dataPoint = 0; dataPoint < MIDIProgram::DATA_POINTS; dataPoint++)
+        {
+            MIDI::programs[program].amplitude[dataPoint]  = ANY_TO_FLOAT(ADSRSettings[program][dataPoint][ADSR_AMP]);
+            MIDI::programs[program].durationUS[dataPoint] = ANY_TO_FLOAT(ADSRSettings[program][dataPoint][ADSR_DUR]);
+            MIDI::programs[program].ntau[dataPoint]       = ANY_TO_FLOAT(ADSRSettings[program][dataPoint][ADSR_NTAU]);
+            MIDI::programs[program].nextStep[dataPoint]   =              ADSRSettings[program][dataPoint][ADSR_NEXT];
+        }
+    }
+}
+
+void EEPROMSettings::setMIDIPrograms()
+{
+    for (uint32_t program = 0; program < MIDI::MAX_PROGRAMS; program++)
+    {
+        for (uint32_t dataPoint = 0; dataPoint < MIDIProgram::DATA_POINTS; dataPoint++)
+        {
+            ADSRSettings[program][dataPoint][ADSR_AMP]  = ANY_TO_UINT32(MIDI::programs[program].amplitude[dataPoint]);
+            ADSRSettings[program][dataPoint][ADSR_DUR]  = ANY_TO_UINT32(MIDI::programs[program].durationUS[dataPoint]);
+            ADSRSettings[program][dataPoint][ADSR_NTAU] = ANY_TO_UINT32(MIDI::programs[program].ntau[dataPoint]);
+            ADSRSettings[program][dataPoint][ADSR_NEXT] =               MIDI::programs[program].nextStep[dataPoint];
+        }
+    }
+}
+
 bool EEPROMSettings::updateBank()
 {
     /*
@@ -191,7 +234,7 @@ void EEPROMSettings::write()
 
 void EEPROMSettings::update()
 {
-    // TODO Needs more testing!
+    // Needs more testing! Edit 19.09.20: Apparently it works fine.
     rwuAll(UPDATE_EEPROM);
 }
 
@@ -216,6 +259,7 @@ void EEPROMSettings::rwuAll(uint32_t mode)
     EEPROMModified |= rwuSingle(mode, userSettings, sizeof(userSettings));
     EEPROMModified |= rwuSingle(mode, coilSettings, sizeof(coilSettings));
     EEPROMModified |= rwuSingle(mode, otherSettings, sizeof(coilSettings));
+    EEPROMModified |= rwuSingle(mode, ADSRSettings, sizeof(ADSRSettings));
 
     if (EEPROMModified)
     {

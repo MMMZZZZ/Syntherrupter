@@ -731,7 +731,7 @@ void MIDI::updateToneList()
                 if (*assignedTone)
                 {
                     (*assignedTone)->remove(note);
-                    *assignedTone = 0;
+                     *assignedTone = 0;
                 }
             }
         }
