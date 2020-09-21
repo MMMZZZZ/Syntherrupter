@@ -61,16 +61,19 @@ void MIDIProgram::setDataPoint(uint32_t index, float amplitude, float durationUS
         this->ntau[index] = ntau;
     }
 
-    /*if (index == DATA_POINTS - 1)
+    if (nextStep >= DATA_POINTS)
     {
-        nextStep = DATA_POINTS - 1;
+        if (index == DATA_POINTS - 1 || index == DATA_POINTS - 2)
+        {
+            nextStep = index;
+        }
+        else
+        {
+            nextStep = index + 1;
+        }
     }
-    else if (nextStep == DATA_POINTS)
-    {
-        nextStep = index + 1;
-    }*/
 
-    this->nextStep[index]   = nextStep;
+    this->nextStep[index] = nextStep;
 
     if (fabsf(this->ntau[index]) < 0.1f)
     {
