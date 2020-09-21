@@ -546,7 +546,6 @@ Page ADSR_Settings
                             sys2=sys2<<7
                             if(b[sys0].type==59)
                             {
-                                prints "test1",0
                                 sys2+=b[sys0].vvs1
                             }
                             //
