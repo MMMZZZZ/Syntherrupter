@@ -157,7 +157,6 @@ void GUI::init()
 
             // ADSR
             EEPROMSettings::getMIDIPrograms();
-            nxt.printf("ADSR_Settings.maxSteps.val=%i\xff\xff\xff", MIDIProgram::DATA_POINTS);
 
             // Other Settings
             uint32_t buttonHoldTime =  EEPROMSettings::otherSettings[0] & 0x0000ffff;
@@ -169,6 +168,7 @@ void GUI::init()
             nxt.printf("dim=%i\xff\xff\xff", dispBrightness);
         }
         nxt.setVal("TC_Settings.maxCoilCount", COIL_COUNT);
+        nxt.setVal("ADSR_Settings.maxSteps", MIDIProgram::DATA_POINTS);
 
         // Give time to the UART to send the data
         System::delayUS(20000);

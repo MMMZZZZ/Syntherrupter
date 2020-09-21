@@ -13,16 +13,15 @@ float MIDIProgram::resolutionUS = 1000.0f;
 
 MIDIProgram::MIDIProgram()
 {
-    // TODO Auto-generated constructor stub
-    for (uint32_t i = 0; i <= DATA_POINTS; i++)
+    setMode(Mode::cnst);
+    for (uint32_t i = 0; i < DATA_POINTS; i++)
     {
-        amplitude[i]   = 1.0f;
-        durationUS[i]  = 1.0f;
-        ntau[i]        = 3.0f;
+        setDataPoint(i, 1.0f, 1.0f);
     }
     amplitude[DATA_POINTS - 1] = 0.0f;
-    mode = Mode::cnst;
+    nextStep[DATA_POINTS - 1]  = DATA_POINTS - 1;
     updateCoefficients();
+    setMode(Mode::exp);
 }
 
 MIDIProgram::~MIDIProgram()
@@ -40,8 +39,13 @@ void MIDIProgram::setDataPoint(uint32_t index, float amplitude, float durationUS
     {
         // Amplitude of the release datapoint cannot be set to another value
         // than the default 0.0f.
-        this->amplitude[index]  = amplitude;
+        this->amplitude[index] = amplitude;
     }
+    else
+    {
+        this->amplitude[index] = 0.0f;
+    }
+
     this->durationUS[index] = durationUS;
 
     if (mode == Mode::cnst)
@@ -57,15 +61,22 @@ void MIDIProgram::setDataPoint(uint32_t index, float amplitude, float durationUS
         this->ntau[index] = ntau;
     }
 
-    if (index == DATA_POINTS - 1)
+    /*if (index == DATA_POINTS - 1)
     {
         nextStep = DATA_POINTS - 1;
     }
     else if (nextStep == DATA_POINTS)
     {
         nextStep = index + 1;
-    }
+    }*/
+
     this->nextStep[index]   = nextStep;
+
+    if (fabsf(this->ntau[index]) < 0.1f)
+    {
+        this->ntau[index] = 0.1f;
+    }
+
     updateCoefficients();
 }
 
@@ -156,6 +167,7 @@ void MIDIProgram::updateCoefficients()
     {
         stepDone[i] = false;
     }
+    bool done = false;
     uint32_t currentStep = 0;
     uint32_t lastStep    = DATA_POINTS - 1;
     do
@@ -175,8 +187,9 @@ void MIDIProgram::updateCoefficients()
                  * cant be used to determine the release step since the
                  * amplitude difference is 0).
                  */
-                coefficient[DATA_POINTS - 1]  = coefficient[lastStep];
-                expTargetAmp[DATA_POINTS - 1] = expTargetAmp[lastStep];
+                coefficient[DATA_POINTS - 1]   = coefficient[lastStep];
+                expTargetAmp[DATA_POINTS - 1]  = expTargetAmp[lastStep];
+                amplitudeDiff[DATA_POINTS - 1] = amplitudeDiff[lastStep];
                 break;
             }
             else
@@ -186,6 +199,7 @@ void MIDIProgram::updateCoefficients()
                  * as previous step to the release.
                  */
                 currentStep = DATA_POINTS - 1;
+                done = true;
             }
         }
 
@@ -198,11 +212,15 @@ void MIDIProgram::updateCoefficients()
         {*/
             coefficient[currentStep]  = expf(- ntau[currentStep] / durationUS[currentStep] * resolutionUS); // powf(expf(-ntau[currentStep]), 1.0f / * ticksPerStep[currentStep]);
             expTargetAmp[currentStep] = amplitude[lastStep] - amplitudeDiff[currentStep] / expm1f(- ntau[currentStep]);
+
+            // Prevent +/- infinity
+            coefficient[currentStep]  = fmaxf(-1e6f, fminf(1e6f, coefficient[currentStep]));
+            expTargetAmp[currentStep] = fmaxf(-1e6f, fminf(1e6f, expTargetAmp[currentStep]));
         //}
 
         stepDone[currentStep] = true;
         lastStep = currentStep;
         currentStep = nextStep[currentStep];
 
-    } while (lastStep != DATA_POINTS - 1);
+    } while (!done);
 }

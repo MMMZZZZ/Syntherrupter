@@ -133,7 +133,7 @@ private:
               {3.0f, 1.0f /    3000.0f,     1.0f, 1.0f /   27000.0f,     0.00f, 1.0f /   400000.0f,     0.0f, 1.0f /       1.0f},
     };
 
-    static constexpr uint32_t effectResolutionUS = 963;
+    static constexpr uint32_t effectResolutionUS = 1000;
 
     static constexpr uint32_t    BUFFER_COUNT = 3;
     static constexpr ByteBuffer* BUFFER_LIST[BUFFER_COUNT] = {&(usbUart.buffer), &(midiUart.buffer), &otherBuffer};;

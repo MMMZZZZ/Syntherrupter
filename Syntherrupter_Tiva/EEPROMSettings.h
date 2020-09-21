@@ -59,14 +59,16 @@ private:
     static constexpr uint32_t READ_EEPROM   = 1;
     static constexpr uint32_t UPDATE_EEPROM = 2;
 
-    static constexpr uint32_t BANK_COUNT    = 3;
-    static constexpr uint32_t BANK_STARTS[BANK_COUNT]  = {0, 2048, 4096};
+    static constexpr uint32_t BANK_COUNT    = 2;
+    static constexpr uint32_t BANK_STARTS[BANK_COUNT]  = {0, 3072};
 
     static constexpr uint32_t ADSR_AMP  = 0;
     static constexpr uint32_t ADSR_DUR  = 1;
     static constexpr uint32_t ADSR_NTAU = 2;
     static constexpr uint32_t ADSR_NEXT = 3;
-    static uint32_t ADSRSettings[MIDI::MAX_PROGRAMS][MIDIProgram::DATA_POINTS][4];
+    static constexpr uint32_t ADSR_PROG_COUNT  = 20; // Only 10 programs stored in EEPROM.
+    static constexpr uint32_t ADSR_PROG_OFFSET = 20;
+    static uint32_t ADSRSettings[ADSR_PROG_COUNT][MIDIProgram::DATA_POINTS][4];
 
     static uint32_t byteAddress;
     static uint32_t bank; // initialized to value higher than normally possible

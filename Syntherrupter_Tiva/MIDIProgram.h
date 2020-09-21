@@ -24,10 +24,10 @@ public:
     void setMode(Mode mode);
     static void setResolutionUS(float res);
     static constexpr uint32_t DATA_POINTS = 8;
-    float durationUS[DATA_POINTS + 1];
-    float amplitude[DATA_POINTS + 1];
-    float ntau[DATA_POINTS + 1];
-    uint32_t nextStep[DATA_POINTS + 1];
+    float durationUS[DATA_POINTS];
+    float amplitude[DATA_POINTS];
+    float ntau[DATA_POINTS];
+    uint32_t nextStep[DATA_POINTS];
     Mode mode = Mode::exp;
     bool setADSRAmp(uint32_t* step, float* amp)
     {
@@ -50,8 +50,8 @@ public:
         if (  (*amp >= amplitude[*step] && amplitudeDiff[*step] >= 0)
             ||(*amp <= amplitude[*step] && amplitudeDiff[*step] <= 0))
         {
-            *step =  nextStep[*step];
             *amp  = amplitude[*step];
+            *step =  nextStep[*step];
 
             if (*amp < 1e-6f && (*step == nextStep[*step]))
             {
@@ -62,9 +62,9 @@ public:
         return true;
     }
 private:
-    float coefficient[DATA_POINTS + 1];
-    float amplitudeDiff[DATA_POINTS + 1];
-    float expTargetAmp[DATA_POINTS + 1];
+    float coefficient[DATA_POINTS];
+    float amplitudeDiff[DATA_POINTS];
+    float expTargetAmp[DATA_POINTS];
     static float resolutionUS;
     void updateCoefficients();
 };

@@ -15,7 +15,7 @@ uint32_t EEPROMSettings::userSettings[3]          = {0, 0, 0};          // Bit f
 uint32_t EEPROMSettings::coilSettings[6]          = {0, 0, 0, 0, 0, 0}; // Bit format equal to communication format, documented in separate file.
 uint32_t EEPROMSettings::otherSettings[10]        = {((0 << 16) | 250), 100, 0, 0, 0,
                                                      0, 0, 0, 0, 0};  // Bit format equal to communication format, documented in separate file.
-uint32_t EEPROMSettings::ADSRSettings[MIDI::MAX_PROGRAMS][MIDIProgram::DATA_POINTS][4];
+uint32_t EEPROMSettings::ADSRSettings[ADSR_PROG_COUNT][MIDIProgram::DATA_POINTS][4];
 uint32_t EEPROMSettings::byteAddress = 0;
 uint32_t EEPROMSettings::bank = BANK_COUNT; // initialized to value higher than normally possible
 uint32_t EEPROMSettings::tempArray[(sizeof(ADSRSettings) > 30) ? MIDI::MAX_PROGRAMS : 30]; // must be at least as large as the largest array in use.
@@ -144,28 +144,30 @@ uint32_t EEPROMSettings::getCoilsMaxOntimeUS(uint32_t coil)
 
 void EEPROMSettings::getMIDIPrograms()
 {
-    for (uint32_t program = 0; program < MIDI::MAX_PROGRAMS; program++)
+    for (uint32_t program = 0; program < ADSR_PROG_COUNT; program++)
     {
         for (uint32_t dataPoint = 0; dataPoint < MIDIProgram::DATA_POINTS; dataPoint++)
         {
-            MIDI::programs[program].amplitude[dataPoint]  = ANY_TO_FLOAT(ADSRSettings[program][dataPoint][ADSR_AMP]);
-            MIDI::programs[program].durationUS[dataPoint] = ANY_TO_FLOAT(ADSRSettings[program][dataPoint][ADSR_DUR]);
-            MIDI::programs[program].ntau[dataPoint]       = ANY_TO_FLOAT(ADSRSettings[program][dataPoint][ADSR_NTAU]);
-            MIDI::programs[program].nextStep[dataPoint]   =              ADSRSettings[program][dataPoint][ADSR_NEXT];
+            float amplitude  = ANY_TO_FLOAT(ADSRSettings[program][dataPoint][ADSR_AMP]);
+            float durationUS = ANY_TO_FLOAT(ADSRSettings[program][dataPoint][ADSR_DUR]);
+            float ntau       = ANY_TO_FLOAT(ADSRSettings[program][dataPoint][ADSR_NTAU]);
+            float nextStep   =              ADSRSettings[program][dataPoint][ADSR_NEXT];
+
+            MIDI::programs[ADSR_PROG_OFFSET + program].setDataPoint(dataPoint, amplitude, durationUS, ntau, nextStep);
         }
     }
 }
 
 void EEPROMSettings::setMIDIPrograms()
 {
-    for (uint32_t program = 0; program < MIDI::MAX_PROGRAMS; program++)
+    for (uint32_t program = 0; program < ADSR_PROG_COUNT; program++)
     {
         for (uint32_t dataPoint = 0; dataPoint < MIDIProgram::DATA_POINTS; dataPoint++)
         {
-            ADSRSettings[program][dataPoint][ADSR_AMP]  = ANY_TO_UINT32(MIDI::programs[program].amplitude[dataPoint]);
-            ADSRSettings[program][dataPoint][ADSR_DUR]  = ANY_TO_UINT32(MIDI::programs[program].durationUS[dataPoint]);
-            ADSRSettings[program][dataPoint][ADSR_NTAU] = ANY_TO_UINT32(MIDI::programs[program].ntau[dataPoint]);
-            ADSRSettings[program][dataPoint][ADSR_NEXT] =               MIDI::programs[program].nextStep[dataPoint];
+            ADSRSettings[program][dataPoint][ADSR_AMP]  = ANY_TO_UINT32(MIDI::programs[ADSR_PROG_OFFSET + program].amplitude[dataPoint]);
+            ADSRSettings[program][dataPoint][ADSR_DUR]  = ANY_TO_UINT32(MIDI::programs[ADSR_PROG_OFFSET + program].durationUS[dataPoint]);
+            ADSRSettings[program][dataPoint][ADSR_NTAU] = ANY_TO_UINT32(MIDI::programs[ADSR_PROG_OFFSET + program].ntau[dataPoint]);
+            ADSRSettings[program][dataPoint][ADSR_NEXT] =               MIDI::programs[ADSR_PROG_OFFSET + program].nextStep[dataPoint];
         }
     }
 }
@@ -201,21 +203,21 @@ bool EEPROMSettings::updateBank()
     {
         // Check bank wear level and switch to next one if necessary
         uint32_t data = 0;
-        EEPROMRead(&data, BANK_STARTS[bank], 4); // @suppress("Invalid arguments")
+        EEPROMRead(&data, BANK_STARTS[bank], 4);
         data &= 0x0000ffff;
         if (data == 0xffff)
         {
             // Time to switch bank
             data = PRESENT;
             // Mark bank as unused
-            EEPROMProgram(&data, BANK_STARTS[bank], 4); // @suppress("Invalid arguments")
+            EEPROMProgram(&data, BANK_STARTS[bank], 4);
             // Select and initialize next bank
             if (++bank >= BANK_COUNT)
             {
                 bank = 0;
             }
             data = PRESENT + 1;
-            EEPROMProgram(&data, BANK_STARTS[bank], 4); // @suppress("Invalid arguments")
+            EEPROMProgram(&data, BANK_STARTS[bank], 4);
             return true;
         }
     }
@@ -259,7 +261,8 @@ void EEPROMSettings::rwuAll(uint32_t mode)
     EEPROMModified |= rwuSingle(mode, userSettings, sizeof(userSettings));
     EEPROMModified |= rwuSingle(mode, coilSettings, sizeof(coilSettings));
     EEPROMModified |= rwuSingle(mode, otherSettings, sizeof(coilSettings));
-    for (uint32_t i = 0; i < MIDI::MAX_PROGRAMS; i+=2)
+
+    for (uint32_t i = 0; i < ADSR_PROG_COUNT; i+=2)
     {
         EEPROMModified |= rwuSingle(mode, ADSRSettings[i], 2 * sizeof(ADSRSettings[i]));
     }

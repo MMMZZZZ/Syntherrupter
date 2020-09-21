@@ -47,17 +47,23 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPor
     // Copy legacy ADSR table to new MIDIProgram class. That's the way it works until there's a useful editor for ADSR.
     for (uint32_t prog = 0; prog < ADSR_PROGRAM_COUNT + 1; prog++)
     {
-        programs[prog].setMode(MIDIProgram::Mode::exp);
+        programs[prog].setMode(MIDIProgram::Mode::lin);
         programs[prog+10].setMode(MIDIProgram::Mode::exp);
-        for (uint32_t datapnt = 0; datapnt < 4; datapnt++)
+        for (uint32_t i = 0; i < 4; i++)
         {
-            uint32_t nextPnt = datapnt + 1;
-            if (datapnt == 3)
+            uint32_t dataPnt = i;
+            uint32_t nextPnt = dataPnt + 1;
+            if (dataPnt == 2)
             {
-                nextPnt = MIDIProgram::DATA_POINTS - 1;
+                nextPnt = dataPnt;
             }
-            programs[prog   ].setDataPoint(datapnt, ADSR_LEGACY_PROGRAMS[prog][datapnt*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][datapnt*2+1], 0.0f, nextPnt);
-            programs[prog+10].setDataPoint(datapnt, ADSR_LEGACY_PROGRAMS[prog][datapnt*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][datapnt*2+1], 3.0f, nextPnt);
+            if (dataPnt == 3)
+            {
+                dataPnt = MIDIProgram::DATA_POINTS - 1;
+                nextPnt = dataPnt;
+            }
+            programs[prog   ].setDataPoint(dataPnt, ADSR_LEGACY_PROGRAMS[prog][i*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][i*2+1], 0.0f, nextPnt);
+            programs[prog+10].setDataPoint(dataPnt, ADSR_LEGACY_PROGRAMS[prog][i*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][i*2+1], 3.0f, nextPnt);
         }
     }
 }
@@ -654,16 +660,20 @@ void MIDI::updateEffects(Note* note)
             {
                 // Note ended.
                 note->number = 128;
-            }
-
-            // After calculation of ADSR envelope, add other effects like modulation
-            float finishedVolume =   note->rawVolume
-                                   * note->ADSRVolume
-                                   * (1.0f - getLFOVal(note->channel));
-            if (finishedVolume != note->finishedVolume)
-            {
                 note->toneChanged = (1 << COIL_COUNT) - 1;
-                note->finishedVolume = finishedVolume;
+            }
+            else
+            {
+
+                // After calculation of ADSR envelope, add other effects like modulation
+                float finishedVolume =   note->rawVolume
+                                       * note->ADSRVolume
+                                       * (1.0f - getLFOVal(note->channel));
+                if (finishedVolume != note->finishedVolume)
+                {
+                    note->toneChanged = (1 << COIL_COUNT) - 1;
+                    note->finishedVolume = finishedVolume;
+                }
             }
         }
         if (timeDiffUS < 0.0f)

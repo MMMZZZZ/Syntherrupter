@@ -40,7 +40,10 @@ Page ADSR_Settings
             // Set newValTargetId to idle
             newValTargetId.val=idle.id
             // First step is step 0, which cant be release
-            vis tRelease,0
+            vis tRelease1,0
+            vis tRelease2,0
+            // Currently no dedicated Write EEPROM Button is needed.
+            vis bSaveEEPROM,0
         
         Postinitialize Event
             
@@ -439,6 +442,7 @@ Page ADSR_Settings
                     // Data Byte 5: Value, MSB
                     //
                     // Send all changes
+                    changedValues.val=0x1f
                     sys1=0
                     while(sys1>=0)
                     {
@@ -662,26 +666,7 @@ Page ADSR_Settings
             
             Events
                 Touch Press Event
-                    click bOK,0
-                    // Store local component values in global variables. Note: Since a component consists of many different properties (like font size, color, position, ...) its memory footprint is much larger and it should not be global.
-                    // Since min offtime and max MIDI voices are not used elsewhere in the GUI they are packed into the same variable, where minOff occupies the lower 16 bit, and voices the uppe 16 bit.
-                    // Set user 2 limits to max Coil limits.
-                    //   sys0 = max ontime of all coils
-                    //   sys1 = max duty of all coils
-                    //
-                    // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
-                    // Data byte 1:
-                    //    Bit 6-7: 1 = Coil settings.
-                    //    Bit 0-5:Tesla Coil whose limits are being set (1, 2, 3, 4, 5 or 6)
-                    // Data byte 2-5: Bit field with settings
-                    //    Bit  0-11: Maximum allowed ontime [10us]
-                    //    Bit 12-15: Maximum number of simultaneous voices in MIDI playback minus one.
-                    //    Bit 16-22: Minimum offtime after each ontime [10us]
-                    //    Bit 23-31: Maximum allowed duty [1/1000]
-                    //
-                    // sys0 will contain the bit field (a.k.a. the data bytes 2-5)
-                    // sys1 is used as temp variable
-                    // sys2 is data byte 1
+                    click bSaveEEPROM,0
                 
                 Touch Release Event
                     page Settings
@@ -882,10 +867,17 @@ Page ADSR_Settings
                     if(nStep.val==maxSteps.val)
                     {
                         nAmp.val=0
-                        vis tRelease,1
+                        vis tRelease1,1
                     }else
                     {
-                        vis tRelease,0
+                        vis tRelease1,0
+                    }
+                    if(nNext.val==maxSteps.val)
+                    {
+                        vis tRelease2,1
+                    }else
+                    {
+                        vis tRelease2,0
                     }
                     if(nAmp.val<0)
                     {
@@ -929,7 +921,7 @@ Page ADSR_Settings
                 Type          : int32
                 Initial Value : 4
             
-        Text tRelease
+        Text tRelease1
             Properties
                 Scope       : Local
                 Initial Text: "(Release)"
@@ -1128,6 +1120,19 @@ Page ADSR_Settings
                 Scope       : Local
                 Initial Text: "/"
                 Max. length : 1
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click dp,1
+                
+                Touch Release Event
+                    
+        Text tRelease2
+            Properties
+                Scope       : Local
+                Initial Text: "(Release)"
+                Max. length : 15
             
             Events
                 Touch Press Event
