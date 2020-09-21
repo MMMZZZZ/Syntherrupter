@@ -33,7 +33,10 @@ The following pins supply the interrupt signal for the given coil. Signal is act
 * Coil 5: PM4
 * Coil 6: PM6
 ### ADSR Sounds
-The sound can be selected by the MIDI command "Program Change". In your MIDI software you can select it by changing the instrument of the channel. At the time of writing (release v4.0.0) there are the following sounds available:
+The sound can be selected by the MIDI command "Program Change". In your MIDI software you can select it by changing the instrument of the channel. 
+
+The programs 1-63 can be modified by the user using the ADSR Editor. The programs 20-39 are stored in EEPROM. Unless modified by the user, they are simply constant ontime. All other programs have the following characteristics at startup:
+
 * Program 0 and all unlisted: No ADSR. Constant ontime (except for other effects like modulation).
 * Program 1: Roughly like a piano. Attack peaks to 1 (= not exceeding the given ontime)
 * Program 2: Sloooow rise, slow fall. Good for soft background, but too slow for shorter notes. Attack peaks to 1 (= not exceeding the given ontime)
@@ -54,6 +57,8 @@ Building and using one is much easier than it looks. The forum threads (especial
 English: https://highvoltageforum.net/index.php?topic=1020.0
 
 German: http://forum.mosfetkiller.de/viewtopic.php?f=9&t=64458
+
+However, since this gets more and more confusing, I started working on a proper documentation. Which you can find in the "Documentation" folder in this repository. 
 
 ### Credits
 [Netzpfuscher and his awesome UD3](https://highvoltageforum.net/index.php?topic=188.0). Thank you for the help with polyphony and the awesome lightsaber idea.
