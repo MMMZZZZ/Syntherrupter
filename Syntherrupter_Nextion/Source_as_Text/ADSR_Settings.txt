@@ -32,10 +32,13 @@ Page ADSR_Settings
                 // MIDI Live Mode is active
                 tMML.bco=6900
             }
-            //
             // Display maxSteps
             nMaxSteps1.val=maxSteps.val
             nMaxSteps2.val=maxSteps.val
+            //
+            // Idle field is just used for default text/background color and as target for the numpad if no component is selected. Ergo should be hidden like functions.
+            vis idle,0
+            vis fCheck,0
             //
             // Set newValTargetId to idle
             newValTargetId.val=idle.id
@@ -509,29 +512,36 @@ Page ADSR_Settings
                             sys2=0
                             if(sys1==0)
                             {
-                                sys2+=nStep.val-1
+                                sys2=nStep.val-1
                                 sys0=nStep.id
                             }else if(sys1==1)
                             {
-                                sys2+=nNext.val-1
+                                sys2=nNext.val-1
                                 sys0=nNext.id
                             }else if(sys1==2)
                             {
-                                sys2+=nAmp.val
+                                sys2=nAmp.val
                                 sys0=nAmp.id
                             }else if(sys1==3)
                             {
-                                sys2+=nDur.val
+                                sys2=nDur.val
                                 sys0=nDur.id
                             }else if(sys1==4)
                             {
-                                sys2+=nNTau.val
+                                sys2=nNTau.val
                                 sys0=nNTau.id
                             }
-                            sys2=sys2<<1
-                            if(b[sys0].val<0)
+                            if(sys2<0)
                             {
+                                // We want the absolute value (same bits for positive and negative value)...
+                                sys2=0-sys2
+                                // ... and indicate the sign with a sign bit only.
+                                sys2=sys2<<1
                                 sys2+=1
+                            }else
+                            {
+                                // Only do the bitshifting (sign bit remains 0)
+                                sys2=sys2<<1
                             }
                             sys2=sys2<<7
                             if(b[sys0].type==59)
@@ -866,6 +876,7 @@ Page ADSR_Settings
                     }
                     if(nStep.val==maxSteps.val)
                     {
+                        nNext.val=maxSteps.val
                         nAmp.val=0
                         vis tRelease1,1
                     }else
