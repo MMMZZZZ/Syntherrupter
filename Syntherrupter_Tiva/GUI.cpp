@@ -118,11 +118,11 @@ void GUI::init()
 
                 // Send to Nextion
                 nxt.printf("%s.coil%iOn.val=%i\xff\xff\xff",
-                              AllCoilSettings, coil + 1, maxOntimeUS);
+                           AllCoilSettings, coil + 1, maxOntimeUS);
                 nxt.printf("%s.coil%iOffVoices.val=%i\xff\xff\xff",
-                              AllCoilSettings, coil + 1, (maxVoices << 16) + minOffUS);
+                           AllCoilSettings, coil + 1, (maxVoices << 16) + minOffUS);
                 nxt.printf("%s.coil%iDuty.val=%i\xff\xff\xff",
-                              AllCoilSettings, coil + 1, maxDutyPerm);
+                           AllCoilSettings, coil + 1, maxDutyPerm);
                 // Give time to the UART to send the data
                 System::delayUS(20000);
             }
@@ -142,15 +142,15 @@ void GUI::init()
                 }
 
                 nxt.printf("%s.u%iName.txt=\"%s\"\xff\xff\xff",
-                              AllUsersPage, user, EEPROMSettings::userNames[user]);
+                           AllUsersPage, user, EEPROMSettings::userNames[user]);
                 nxt.printf("%s.u%iCode.txt=\"%s\"\xff\xff\xff",
-                              AllUsersPage, user, EEPROMSettings::userPwds[user]);
+                           AllUsersPage, user, EEPROMSettings::userPwds[user]);
                 nxt.printf("%s.u%iOntime.val=%i\xff\xff\xff",
-                              AllUsersPage, user, maxOntimeUS);
+                           AllUsersPage, user, maxOntimeUS);
                 nxt.printf("%s.u%iBPS.val=%i\xff\xff\xff",
-                              AllUsersPage, user, maxBPS);
+                           AllUsersPage, user, maxBPS);
                 nxt.printf("%s.u%iDuty.val=%i\xff\xff\xff",
-                              AllUsersPage, user, maxDutyPerm);
+                           AllUsersPage, user, maxDutyPerm);
                 // Give time to the UART to send the data
                 System::delayUS(20000);
             }
