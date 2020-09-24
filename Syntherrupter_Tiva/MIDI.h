@@ -137,13 +137,9 @@ private:
 
     static constexpr uint32_t    BUFFER_COUNT = 3;
     static constexpr ByteBuffer* BUFFER_LIST[BUFFER_COUNT] = {&(usbUart.buffer), &(midiUart.buffer), &otherBuffer};;
-    static uint8_t               bufferMidiStatus[BUFFER_COUNT];
     static constexpr uint32_t MAX_NOTES_COUNT = 64;
-    static Note               unorderedNotes[MAX_NOTES_COUNT];
-    static Note*              notes[MAX_NOTES_COUNT];
     static NoteList notelist;
     static uint32_t           notesCount;
-    static uint32_t dataBytes;
     ToneList* tonelist;
     float absFreq               =  0.0f;
     float singleNoteMaxDuty     =  0.0f;
@@ -159,7 +155,6 @@ private:
     bool coilPanChanged         = false;
     bool panConstVol            = false;
 
-    static float ADSRTimeUS;
     static bool playing;
     static constexpr float LFO_PERIOD_US          = 200000.0f;
 };

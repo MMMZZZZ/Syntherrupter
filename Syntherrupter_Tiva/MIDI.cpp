@@ -12,14 +12,10 @@ UART                  MIDI::usbUart;
 UART                  MIDI::midiUart;
 ByteBuffer            MIDI::otherBuffer;
 constexpr ByteBuffer* MIDI::BUFFER_LIST[];
-uint8_t               MIDI::bufferMidiStatus[] = {0, 0, 0};
 Channel               MIDI::channels[];
-Note                  MIDI::unorderedNotes[];
 NoteList              MIDI::notelist;
 uint32_t              MIDI::notesCount         = 0;
-uint32_t              MIDI::dataBytes          = 0;
 bool                  MIDI::playing            = false;
-float                 MIDI::ADSRTimeUS;
 MIDIProgram           MIDI::programs[MAX_PROGRAMS];
 constexpr float       MIDI::ADSR_LEGACY_PROGRAMS[MIDI::ADSR_PROGRAM_COUNT + 1][8];
 
@@ -75,41 +71,56 @@ bool MIDI::processBuffer(uint32_t b)
      * Returns if valid data has been found.
      */
 
+    /*
+     * It would probably be better to have a child class of the ByteBuffer
+     * class which does the buffer processing. But for now this does the
+     * job, too.
+     * It makes sure that the processing of the buffers is not mixed together.
+     *
+     */
+    static uint32_t midiStatusAll[BUFFER_COUNT]{0};
+    static uint32_t dataBytesAll[BUFFER_COUNT]{0};
+    static uint32_t channelAll[BUFFER_COUNT]{0};
+    static uint8_t  c1All[BUFFER_COUNT]{0};
+
+    uint32_t* midiStatus = &(midiStatusAll[b]);
+    uint32_t* dataBytes  = &(dataBytesAll[b]);
+    uint32_t* channel    = &(channelAll[b]);
+    uint8_t*  c1         = &(c1All[b]);
+
     ByteBuffer* buffer = BUFFER_LIST[b];
 
-    static uint32_t channel{0};
+    *c1 = buffer->read();
 
-    uint8_t c1 = buffer->read();
-
-    if (c1 & 0b10000000) // The first byte of a MIDI Command starts with a 1. Following bytes start with a 0.
+    if (*c1 & 0b10000000) // The first byte of a MIDI Command starts with a 1. Following bytes start with a 0.
     {
-        if (0xf8 <= c1)
+        if (0xf8 <= *c1)
         {
             // System real time messages do not affect the running status.
         }
         else
         {
             // Lower 4 bits are channel.
-            channel = c1 & 0x0f;
+            *channel = *c1 & 0x0f;
 
             // Save running status
-            bufferMidiStatus[b] = c1;
+            *midiStatus = *c1;
         }
-        dataBytes = 0;
+        *dataBytes = 0;
     }
     else
     {
-        dataBytes++;
+        *dataBytes++;
 
     }
 
-    switch (bufferMidiStatus[b] & 0xf0)
+    switch (*midiStatus & 0xf0)
     {
         case 0x80: // Note off
         {
-            if (dataBytes == 1)
+            if (*dataBytes == 1)
             {
-                Note* note = notelist.getNote(channel, c1);
+                Note* note = notelist.getNote(*channel, *c1);
                 if (note)
                 {
                     note->velocity = 0;
@@ -122,14 +133,14 @@ bool MIDI::processBuffer(uint32_t b)
         {
             static Note* note{0};
             static uint8_t  number{0};
-            if (dataBytes == 1)
+            if (*dataBytes == 1)
             {
-                number = c1;
-                note = notelist.getNote(channel, c1);
+                number = *c1;
+                note = notelist.getNote(*channel, *c1);
             }
-            else if (dataBytes == 2)
+            else if (*dataBytes == 2)
             {
-                if (c1) // Note has a velocity
+                if (*c1) // Note has a velocity
                 {
                     if (!note)
                     {
@@ -140,10 +151,10 @@ bool MIDI::processBuffer(uint32_t b)
                     }
 
                     note->number     = number;
-                    note->velocity   = c1;
+                    note->velocity   = *c1;
                     note->ADSRStep   = 0;
                     note->ADSRTimeUS = 0.0f;
-                    note->channel    = channel;
+                    note->channel    = *channel;
                     note->changed    = true;
                 }
                 else if (note)// Note has no velocity = note off. Code copy pasted from note off command.
@@ -157,13 +168,13 @@ bool MIDI::processBuffer(uint32_t b)
         case 0xA0: // Polyphonic Aftertouch
         {
             static Note* note{0};
-            if (dataBytes == 1)
+            if (*dataBytes == 1)
             {
-                note = notelist.getNote(channel, c1);
+                note = notelist.getNote(*channel, *c1);
             }
-            else if (dataBytes == 2 && note)
+            else if (*dataBytes == 2 && note)
             {
-                note->afterTouch = c1;
+                note->afterTouch = *c1;
                 note->changed = true;
             }
             break;
@@ -171,171 +182,171 @@ bool MIDI::processBuffer(uint32_t b)
         case 0xB0: // Control Change / Channel Mode
         {
             static uint32_t controller{128};
-            if (dataBytes == 1)
+            if (*dataBytes == 1)
             {
-                controller = c1;
+                controller = *c1;
             }
-            else if (dataBytes == 2)
+            else if (*dataBytes == 2)
             {
                 switch (controller)
                 {
                 case 0x01: // Modulation Wheel
-                    channels[channel].modulation = c1 / 128.0f;
+                    channels[*channel].modulation = *c1 / 128.0f;
                     break;
                 case 0x02: // Breath Controller
 
                     break;
                 case 0x07: // Channel Volume
-                    channels[channel].volume = c1 / 128.0f;
-                    channels[channel].changed = true;
+                    channels[*channel].volume = *c1 / 128.0f;
+                    channels[*channel].changed = true;
                     break;
                 case 0x0A: // Pan
-                    if (!channels[channel].notePanEnabled)
+                    if (!channels[*channel].notePanEnabled)
                     {
-                        channels[channel].pan = c1 / 128.0f;
-                        channels[channel].changed = true;
+                        channels[*channel].pan = *c1 / 128.0f;
+                        channels[*channel].changed = true;
                     }
                     break;
                 case 0x0B: // Expression coarse
-                    channels[channel].expression = c1 / 128.0f;
+                    channels[*channel].expression = *c1 / 128.0f;
                     break;
                 case 0x40: // Sustain Pedal
-                    if (c1 >= 64)
+                    if (*c1 >= 64)
                     {
-                        channels[channel].sustainPedal = true;
+                        channels[*channel].sustainPedal = true;
                     }
                     else
                     {
-                        channels[channel].sustainPedal = false;
+                        channels[*channel].sustainPedal = false;
                     }
-                    channels[channel].changed = true;
+                    channels[*channel].changed = true;
                     break;
                 case 0x43: // Damper Pedal
-                    if (c1 >= 64)
+                    if (*c1 >= 64)
                     {
-                        channels[channel].damperPedal = true;
+                        channels[*channel].damperPedal = true;
                     }
                     else
                     {
-                        channels[channel].damperPedal = false;
+                        channels[*channel].damperPedal = false;
                     }
-                    channels[channel].changed = true;
+                    channels[*channel].changed = true;
                     break;
                 case 0x62: // Non Registered Parameter Number, fine
-                    channels[channel].NRPN &= 0xff00;
-                    channels[channel].NRPN += c1;
+                    channels[*channel].NRPN &= 0xff00;
+                    channels[*channel].NRPN += *c1;
 
                     // Can't receive RP and NRP data at the same time.
-                    channels[channel].RPN   = 0x7f7f;
+                    channels[*channel].RPN   = 0x7f7f;
                     break;
                 case 0x63: // Non Registered Parameter Number, coarse
-                    channels[channel].NRPN &= 0x00ff;
-                    channels[channel].NRPN += (c1 << 8);
+                    channels[*channel].NRPN &= 0x00ff;
+                    channels[*channel].NRPN += (*c1 << 8);
 
                     // Can't receive RP and NRP data at the same time.
-                    channels[channel].RPN   = 0x7f7f;
+                    channels[*channel].RPN   = 0x7f7f;
                     break;
                 case 0x64: // Registered Parameter Number, fine
-                    channels[channel].RPN &= 0xff00;
-                    channels[channel].RPN += c1;
+                    channels[*channel].RPN &= 0xff00;
+                    channels[*channel].RPN += *c1;
 
                     // Can't receive RP and NRP data at the same time.
-                    channels[channel].NRPN = 0x7f7f;
+                    channels[*channel].NRPN = 0x7f7f;
                     break;
                 case 0x65: // Registered Parameter Number, coarse
-                    channels[channel].RPN &= 0x00ff;
-                    channels[channel].RPN += (c1 << 8);
+                    channels[*channel].RPN &= 0x00ff;
+                    channels[*channel].RPN += (*c1 << 8);
 
                     // Can't receive RP and NRP data at the same time.
-                    channels[channel].NRPN = 0x7f7f;
+                    channels[*channel].NRPN = 0x7f7f;
                     break;
                 case 0x06: // (N)RPN Data Entry, coase
                     // Registered Parameter
-                    if (channels[channel].RPN == 0) // Pitch bend range
+                    if (channels[*channel].RPN == 0) // Pitch bend range
                     {
-                        channels[channel].pitchBendRangeCoarse = c1;
-                        channels[channel].pitchBendRange  =   channels[channel].pitchBendRangeCoarse
-                                                            + channels[channel].pitchBendRangeFine / 100.0f;
-                        channels[channel].pitchBendRange /= 8192.0f;
-                        channels[channel].changed = true;
+                        channels[*channel].pitchBendRangeCoarse = *c1;
+                        channels[*channel].pitchBendRange  =   channels[*channel].pitchBendRangeCoarse
+                                                            + channels[*channel].pitchBendRangeFine / 100.0f;
+                        channels[*channel].pitchBendRange /= 8192.0f;
+                        channels[*channel].changed = true;
                     }
-                    else if (channels[channel].RPN == 1) // Fine tuning
+                    else if (channels[*channel].RPN == 1) // Fine tuning
                     {
-                        channels[channel].fineTuningCoarse = c1;
-                        channels[channel].tuning = ((channels[channel].fineTuningCoarse << 8)
-                                                   + channels[channel].fineTuningFine) - 8192.0f;
-                        channels[channel].tuning /= 4096.0f;
-                        channels[channel].tuning += channels[channel].coarseTuning;
-                        channels[channel].changed = true;
+                        channels[*channel].fineTuningCoarse = *c1;
+                        channels[*channel].tuning = ((channels[*channel].fineTuningCoarse << 8)
+                                                   + channels[*channel].fineTuningFine) - 8192.0f;
+                        channels[*channel].tuning /= 4096.0f;
+                        channels[*channel].tuning += channels[*channel].coarseTuning;
+                        channels[*channel].changed = true;
                     }
-                    else if (channels[channel].RPN == 2) // Coarse tuning
+                    else if (channels[*channel].RPN == 2) // Coarse tuning
                     {
-                        channels[channel].coarseTuning = c1;
-                        channels[channel].tuning = ((channels[channel].fineTuningCoarse << 8)
-                                                   + channels[channel].fineTuningFine) - 8192.0f;
-                        channels[channel].tuning /= 4096.0f;
-                        channels[channel].tuning += channels[channel].coarseTuning;
-                        channels[channel].changed = true;
+                        channels[*channel].coarseTuning = *c1;
+                        channels[*channel].tuning = ((channels[*channel].fineTuningCoarse << 8)
+                                                   + channels[*channel].fineTuningFine) - 8192.0f;
+                        channels[*channel].tuning /= 4096.0f;
+                        channels[*channel].tuning += channels[*channel].coarseTuning;
+                        channels[*channel].changed = true;
                     }
 
                     // Non-Registered Parameter
-                    if (channels[channel].NRPN == (42 << 8) + 1) // Note pan mode - source range upper limit
+                    if (channels[*channel].NRPN == (42 << 8) + 1) // Note pan mode - source range upper limit
                     {
-                        channels[channel].notePanSourceRangeHigh = c1;
-                        channels[channel].changed = true;
+                        channels[*channel].notePanSourceRangeHigh = *c1;
+                        channels[*channel].changed = true;
                     }
-                    else if (channels[channel].NRPN == (42 << 8) + 2) // Note pan mode - target range upper limit
+                    else if (channels[*channel].NRPN == (42 << 8) + 2) // Note pan mode - target range upper limit
                     {
-                        channels[channel].notePanTargetRangeHigh = c1 / 128.0f;
-                        channels[channel].changed = true;
+                        channels[*channel].notePanTargetRangeHigh = *c1 / 128.0f;
+                        channels[*channel].changed = true;
                     }
                     break;
                 case 0x26: // (N)RPN Data Entry, fine
-                    if (channels[channel].RPN == 0) // Pitch bend range
+                    if (channels[*channel].RPN == 0) // Pitch bend range
                     {
-                        channels[channel].pitchBendRangeFine = c1;
-                        channels[channel].pitchBendRange  =   channels[channel].pitchBendRangeCoarse
-                                                            + channels[channel].pitchBendRangeFine / 100.0f;
-                        channels[channel].pitchBendRange /= 8192.0f;
-                        channels[channel].changed = true;
+                        channels[*channel].pitchBendRangeFine = *c1;
+                        channels[*channel].pitchBendRange  =   channels[*channel].pitchBendRangeCoarse
+                                                            + channels[*channel].pitchBendRangeFine / 100.0f;
+                        channels[*channel].pitchBendRange /= 8192.0f;
+                        channels[*channel].changed = true;
                     }
-                    else if (channels[channel].RPN == 1) // Fine tuning
+                    else if (channels[*channel].RPN == 1) // Fine tuning
                     {
                         /*
                          * Fine tuning mapping is similar to pitch bend. A 14 bit value (0..16383) is mapped to -2.0f..2.0f
                          * Coarse tuning is unmapped.
                          */
-                        channels[channel].fineTuningFine = c1;
-                        channels[channel].tuning = ((channels[channel].fineTuningCoarse << 8)
-                                                   + channels[channel].fineTuningFine) - 8192.0f;
-                        channels[channel].tuning /= 4096.0f;
-                        channels[channel].tuning += channels[channel].coarseTuning;
-                        channels[channel].changed = true;
+                        channels[*channel].fineTuningFine = *c1;
+                        channels[*channel].tuning = ((channels[*channel].fineTuningCoarse << 8)
+                                                   + channels[*channel].fineTuningFine) - 8192.0f;
+                        channels[*channel].tuning /= 4096.0f;
+                        channels[*channel].tuning += channels[*channel].coarseTuning;
+                        channels[*channel].changed = true;
                     }
 
                     // Non-Registered Parameter
-                    if (channels[channel].NRPN == (42 << 8) + 0) // Note pan mode - enable/disable
+                    if (channels[*channel].NRPN == (42 << 8) + 0) // Note pan mode - enable/disable
                     {
-                        if (c1 == 2)
+                        if (*c1 == 2)
                         {
                             // Omni Mode (Note plays everywhere)
-                            channels[channel].notePanOmniMode = true;
+                            channels[*channel].notePanOmniMode = true;
                         }
                         else
                         {
-                            channels[channel].notePanOmniMode = false;
-                            channels[channel].notePanEnabled = c1;
+                            channels[*channel].notePanOmniMode = false;
+                            channels[*channel].notePanEnabled = *c1;
                         }
                     }
-                    else if (channels[channel].NRPN == (42 << 8) + 1) // Note pan mode - source range lower limit
+                    else if (channels[*channel].NRPN == (42 << 8) + 1) // Note pan mode - source range lower limit
                     {
-                        channels[channel].notePanSourceRangeLow = c1;
-                        channels[channel].changed = true;
+                        channels[*channel].notePanSourceRangeLow = *c1;
+                        channels[*channel].changed = true;
                     }
-                    else if (channels[channel].NRPN == (42 << 8) + 2) // Note pan mode - target range lower limit
+                    else if (channels[*channel].NRPN == (42 << 8) + 2) // Note pan mode - target range lower limit
                     {
-                        channels[channel].notePanTargetRangeLow = c1 / 128.0f;
-                        channels[channel].changed = true;
+                        channels[*channel].notePanTargetRangeLow = *c1 / 128.0f;
+                        channels[*channel].changed = true;
                     }
                     break;
                 case 0x78: // All Sounds off
@@ -344,7 +355,7 @@ bool MIDI::processBuffer(uint32_t b)
                     while (note != notelist.newNote)
                     {
                         Note* nextNote = note->nextNote;
-                        if (note->channel == channel)
+                        if (note->channel == *channel)
                         {
                             notelist.removeNote(note);
                         }
@@ -353,14 +364,14 @@ bool MIDI::processBuffer(uint32_t b)
                 }
                     break;
                 case 0x79: // Reset all Controllers
-                    channels[channel].resetControllers();
+                    channels[*channel].resetControllers();
                     break;
                 case 0x7B: // All Notes off
                 {
                     Note* note = notelist.firstNote;
                     while (note != notelist.newNote)
                     {
-                        if (note->channel == channel)
+                        if (note->channel == *channel)
                         {
                             note->ADSRStep = MIDIProgram::DATA_POINTS - 1;
                         }
@@ -375,37 +386,37 @@ bool MIDI::processBuffer(uint32_t b)
         case 0xE0: // Pitch Bend
         {
             static float pb{0.0f};
-            if (dataBytes == 1)
+            if (*dataBytes == 1)
             {
-                pb = c1 - 8192.0f;
+                pb = *c1 - 8192.0f;
             }
-            else if (dataBytes == 2)
+            else if (*dataBytes == 2)
             {
-                channels[channel].pitchBend = c1 * 128.0f + pb;
-                channels[channel].changed = true;
+                channels[*channel].pitchBend = *c1 * 128.0f + pb;
+                channels[*channel].changed = true;
             }
             break;
         }
         case 0xD0: // Channel Aftertouch
         {
-            if (dataBytes == 1)
+            if (*dataBytes == 1)
             {
-                channels[channel].channelAfterTouch = c1;
-                channels[channel].changed = true;
+                channels[*channel].channelAfterTouch = *c1;
+                channels[*channel].changed = true;
             }
             break;
         }
         case 0xC0: // Program Change
         {
-            if (dataBytes == 1)
+            if (*dataBytes == 1)
             {
-                if (c1 <= MAX_PROGRAMS)
+                if (*c1 <= MAX_PROGRAMS)
                 {
-                    channels[channel].program = c1;
+                    channels[*channel].program = *c1;
                 }
                 else
                 {
-                    channels[channel].program = 0;
+                    channels[*channel].program = 0;
                 }
             }
             break;
