@@ -17,7 +17,6 @@
 #include "Channel.h"
 #include "UART.h"
 #include "ByteBuffer.h"
-#include "Note.h"
 #include "ToneList.h"
 #include "NoteList.h"
 #include "MIDIProgram.h"
@@ -28,7 +27,9 @@ class MIDI
 public:
     MIDI();
     virtual ~MIDI();
-    static void init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPort, uint32_t midiUartRx, uint32_t midiUartTx, void (*midiISR)(void));
+    static void init(uint32_t usbBaudRate, void (*usbISR)(void),
+                     uint32_t midiUartPort, uint32_t midiUartRx,
+                     uint32_t midiUartTx, void (*midiISR)(void));
     void updateToneList();
     void setCoilsToneList(ToneList* tonelist)
     {

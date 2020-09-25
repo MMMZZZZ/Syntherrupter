@@ -170,60 +170,49 @@ void MIDIProgram::updateCoefficients()
     {
         stepDone[i] = false;
     }
-    bool done = false;
-    uint32_t currentStep = 0;
-    uint32_t lastStep    = DATA_POINTS - 1;
-    do
+
+    uint32_t currentStep       = 0;
+    uint32_t lastDifferentStep = DATA_POINTS - 1;
+    uint32_t beforeReleaseStep = DATA_POINTS - 2;
+    for (uint32_t i = 0; i < 2 * DATA_POINTS; i++)
     {
+        amplitudeDiff[currentStep] = amplitude[currentStep] - amplitude[lastDifferentStep];
+
+        coefficient[currentStep]   = expf(- ntau[currentStep] / durationUS[currentStep] * resolutionUS); // powf(expf(-ntau[currentStep]), 1.0f / * ticksPerStep[currentStep]);
+        expTargetAmp[currentStep]  = amplitude[lastDifferentStep] - amplitudeDiff[currentStep] / expm1f(- ntau[currentStep]);
+
+        // Prevent +/- infinity
+        coefficient[currentStep]   = fmaxf(-1e6f, fminf(1e6f, coefficient[currentStep]));
+        expTargetAmp[currentStep]  = fmaxf(-1e6f, fminf(1e6f, expTargetAmp[currentStep]));
+
+        stepDone[currentStep] = true;
+        if (amplitude[nextStep[currentStep]] != amplitude[currentStep])
+        {
+            lastDifferentStep = currentStep;
+        }
+        if (amplitude[currentStep] != amplitude[DATA_POINTS - 1])
+        {
+            beforeReleaseStep = currentStep;
+        }
+        currentStep = nextStep[currentStep];
         if (stepDone[currentStep])
         {
-            /* A loop has returned to its starting point. All steps of the
+            /*
+             * A loop has returned to its starting point. All steps of the
              * loop have been calculated. Now calculate the release step
-             * depending on how the loop "ends".
+             * based on the last step that is suitable for calculations
+             * (meaning the last one that is different from this one).
              */
 
-            if (amplitude[lastStep] == 0.0f)
+            if (currentStep != DATA_POINTS - 1)
             {
-                /*
-                 * The last step of the loop reaches 0. So the release should
-                 * act just like this data point. (Additionally that last step
-                 * cant be used to determine the release step since the
-                 * amplitude difference is 0).
-                 */
-                coefficient[DATA_POINTS - 1]   = coefficient[lastStep];
-                expTargetAmp[DATA_POINTS - 1]  = expTargetAmp[lastStep];
-                amplitudeDiff[DATA_POINTS - 1] = amplitudeDiff[lastStep];
-                break;
+                currentStep       = DATA_POINTS - 1;
+                lastDifferentStep = beforeReleaseStep;
             }
             else
             {
-                /*
-                 * The last step of the loop does not reach 0. Use this step
-                 * as previous step to the release.
-                 */
-                currentStep = DATA_POINTS - 1;
-                done = true;
+                break;
             }
         }
-
-        amplitudeDiff[currentStep] = amplitude[currentStep] - amplitude[lastStep];
-        /*if (mode == Mode::lin)
-        {
-            coefficient[currentStep] = amplitudeDiff[currentStep] / durationUS[currentStep] * resolutionUS;
-        }
-        else if (mode == Mode::exp)
-        {*/
-            coefficient[currentStep]  = expf(- ntau[currentStep] / durationUS[currentStep] * resolutionUS); // powf(expf(-ntau[currentStep]), 1.0f / * ticksPerStep[currentStep]);
-            expTargetAmp[currentStep] = amplitude[lastStep] - amplitudeDiff[currentStep] / expm1f(- ntau[currentStep]);
-
-            // Prevent +/- infinity
-            coefficient[currentStep]  = fmaxf(-1e6f, fminf(1e6f, coefficient[currentStep]));
-            expTargetAmp[currentStep] = fmaxf(-1e6f, fminf(1e6f, expTargetAmp[currentStep]));
-        //}
-
-        stepDone[currentStep] = true;
-        lastStep = currentStep;
-        currentStep = nextStep[currentStep];
-
-    } while (!done);
+    }
 }

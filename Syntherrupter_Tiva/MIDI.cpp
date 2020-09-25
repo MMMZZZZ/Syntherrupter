@@ -110,11 +110,11 @@ bool MIDI::processBuffer(uint32_t b)
     }
     else
     {
-        *dataBytes++;
+        (*dataBytes)++;
 
     }
 
-    switch (*midiStatus & 0xf0)
+    switch ((*midiStatus) & 0xf0)
     {
         case 0x80: // Note off
         {
@@ -131,64 +131,68 @@ bool MIDI::processBuffer(uint32_t b)
         }
         case 0x90: // Note on
         {
-            static Note* note{0};
-            static uint8_t  number{0};
+            static Note*    noteAll[BUFFER_COUNT]{0};
+            static uint8_t  numberAll[BUFFER_COUNT]{0};
+            Note**   note   = &(noteAll[b]);
+            uint8_t* number = &(numberAll[b]);
             if (*dataBytes == 1)
             {
-                number = *c1;
-                note = notelist.getNote(*channel, *c1);
+                *number = *c1;
+                *note = notelist.getNote(*channel, *c1);
             }
             else if (*dataBytes == 2)
             {
                 if (*c1) // Note has a velocity
                 {
-                    if (!note)
+                    if (!(*note))
                     {
-                        note = notelist.addNote();
-                        note->afterTouch = 0;
-                        note->rawVolume  = 0.0f;
-                        note->ADSRVolume = 0.0f;
+                        (*note) = notelist.addNote();
+                        (*note)->afterTouch = 0;
+                        (*note)->rawVolume  = 0.0f;
+                        (*note)->ADSRVolume = 0.0f;
                     }
 
-                    note->number     = number;
-                    note->velocity   = *c1;
-                    note->ADSRStep   = 0;
-                    note->ADSRTimeUS = 0.0f;
-                    note->channel    = *channel;
-                    note->changed    = true;
+                    (*note)->number     = *number;
+                    (*note)->velocity   = *c1;
+                    (*note)->ADSRStep   = 0;
+                    (*note)->ADSRTimeUS = 0.0f;
+                    (*note)->channel    = *channel;
+                    (*note)->changed    = true;
                 }
-                else if (note)// Note has no velocity = note off. Code copy pasted from note off command.
+                else if (*note)// Note has no velocity = note off. Code copy pasted from note off command.
                 {
-                    note->velocity = 0;
-                    note->changed  = true;
+                    (*note)->velocity = 0;
+                    (*note)->changed  = true;
                 }
             }
             break;
         }
         case 0xA0: // Polyphonic Aftertouch
         {
-            static Note* note{0};
+            static Note* noteAll[BUFFER_COUNT]{0};
+            Note** note = &(noteAll[b]);
             if (*dataBytes == 1)
             {
-                note = notelist.getNote(*channel, *c1);
+                (*note) = notelist.getNote(*channel, *c1);
             }
-            else if (*dataBytes == 2 && note)
+            else if (*dataBytes == 2 && (*note))
             {
-                note->afterTouch = *c1;
-                note->changed = true;
+                (*note)->afterTouch = *c1;
+                (*note)->changed = true;
             }
             break;
         }
         case 0xB0: // Control Change / Channel Mode
         {
-            static uint32_t controller{128};
+            static uint32_t controllerAll[BUFFER_COUNT]{128};
+            uint32_t* controller = &(controllerAll[b]);
             if (*dataBytes == 1)
             {
-                controller = *c1;
+                *controller = *c1;
             }
             else if (*dataBytes == 2)
             {
-                switch (controller)
+                switch (*controller)
                 {
                 case 0x01: // Modulation Wheel
                     channels[*channel].modulation = *c1 / 128.0f;
@@ -266,7 +270,7 @@ bool MIDI::processBuffer(uint32_t b)
                     {
                         channels[*channel].pitchBendRangeCoarse = *c1;
                         channels[*channel].pitchBendRange  =   channels[*channel].pitchBendRangeCoarse
-                                                            + channels[*channel].pitchBendRangeFine / 100.0f;
+                                                             + channels[*channel].pitchBendRangeFine / 100.0f;
                         channels[*channel].pitchBendRange /= 8192.0f;
                         channels[*channel].changed = true;
                     }
@@ -274,7 +278,7 @@ bool MIDI::processBuffer(uint32_t b)
                     {
                         channels[*channel].fineTuningCoarse = *c1;
                         channels[*channel].tuning = ((channels[*channel].fineTuningCoarse << 8)
-                                                   + channels[*channel].fineTuningFine) - 8192.0f;
+                                                    + channels[*channel].fineTuningFine) - 8192.0f;
                         channels[*channel].tuning /= 4096.0f;
                         channels[*channel].tuning += channels[*channel].coarseTuning;
                         channels[*channel].changed = true;
@@ -283,7 +287,7 @@ bool MIDI::processBuffer(uint32_t b)
                     {
                         channels[*channel].coarseTuning = *c1;
                         channels[*channel].tuning = ((channels[*channel].fineTuningCoarse << 8)
-                                                   + channels[*channel].fineTuningFine) - 8192.0f;
+                                                    + channels[*channel].fineTuningFine) - 8192.0f;
                         channels[*channel].tuning /= 4096.0f;
                         channels[*channel].tuning += channels[*channel].coarseTuning;
                         channels[*channel].changed = true;
@@ -306,7 +310,7 @@ bool MIDI::processBuffer(uint32_t b)
                     {
                         channels[*channel].pitchBendRangeFine = *c1;
                         channels[*channel].pitchBendRange  =   channels[*channel].pitchBendRangeCoarse
-                                                            + channels[*channel].pitchBendRangeFine / 100.0f;
+                                                             + channels[*channel].pitchBendRangeFine / 100.0f;
                         channels[*channel].pitchBendRange /= 8192.0f;
                         channels[*channel].changed = true;
                     }
@@ -318,7 +322,7 @@ bool MIDI::processBuffer(uint32_t b)
                          */
                         channels[*channel].fineTuningFine = *c1;
                         channels[*channel].tuning = ((channels[*channel].fineTuningCoarse << 8)
-                                                   + channels[*channel].fineTuningFine) - 8192.0f;
+                                                    + channels[*channel].fineTuningFine) - 8192.0f;
                         channels[*channel].tuning /= 4096.0f;
                         channels[*channel].tuning += channels[*channel].coarseTuning;
                         channels[*channel].changed = true;
