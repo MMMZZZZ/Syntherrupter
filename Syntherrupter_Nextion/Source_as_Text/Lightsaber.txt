@@ -148,10 +148,13 @@ Page Lightsaber
             nOn.val=ontime.val
             nOn2.val=ontimes12.val&0xffff
             nOn1.val=ontimes12.val>>16
+            nOn1.val=nOn1.val&0xffff // Kill sign bit
             nOn4.val=ontimes34.val&0xffff
             nOn3.val=ontimes34.val>>16
+            nOn3.val=nOn3.val&0xffff
             nOn6.val=ontimes56.val&0xffff
             nOn5.val=ontimes56.val>>16
+            nOn3.val=nOn3.val&0xffff
             ls1.val=lightsabers.val&1
             lightsabers.val=lightsabers.val>>1
             ls2.val=lightsabers.val&1

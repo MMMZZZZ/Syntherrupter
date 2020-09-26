@@ -42,48 +42,48 @@ Page TC_Settings
             {
                 nCoil1On.val=coil1On.val
                 nCoil1MinOff.val=coil1OffVoices.val&0x0000ffff
-                nCoil1Voices.val=coil1OffVoices.val&0xffff0000
-                nCoil1Voices.val=nCoil1Voices.val>>16
+                nCoil1Voices.val=coil1OffVoices.val>>16
+                nCoil1Voices.val=nCoil1Voices.val&0x0000ffff
                 nCoil1Duty.val=coil1Duty.val
             }
             if(maxCoilCount.val>=2)
             {
                 nCoil2On.val=coil2On.val
                 nCoil2MinOff.val=coil2OffVoices.val&0x0000ffff
-                nCoil2Voices.val=coil2OffVoices.val&0xffff0000
-                nCoil2Voices.val=nCoil2Voices.val>>16
+                nCoil2Voices.val=coil2OffVoices.val>>16
+                nCoil2Voices.val=nCoil2Voices.va&0x0000ffff
                 nCoil2Duty.val=coil2Duty.val
             }
             if(maxCoilCount.val>=3)
             {
                 nCoil3On.val=coil3On.val
                 nCoil3MinOff.val=coil3OffVoices.val&0x0000ffff
-                nCoil3Voices.val=coil3OffVoices.val&0xffff0000
-                nCoil3Voices.val=nCoil3Voices.val>>16
+                nCoil3Voices.val=coil3OffVoices.val>>16
+                nCoil3Voices.val=nCoil3Voices.val&0x0000ffff
                 nCoil3Duty.val=coil3Duty.val
             }
             if(maxCoilCount.val>=4)
             {
                 nCoil4On.val=coil4On.val
                 nCoil4MinOff.val=coil4OffVoices.val&0x0000ffff
-                nCoil4Voices.val=coil4OffVoices.val&0xffff0000
-                nCoil4Voices.val=nCoil4Voices.val>>16
+                nCoil4Voices.val=coil4OffVoices.val>>16
+                nCoil4Voices.val=nCoil4Voices.val&0x0000ffff
                 nCoil4Duty.val=coil4Duty.val
             }
             if(maxCoilCount.val>=5)
             {
                 nCoil5On.val=coil5On.val
                 nCoil5MinOff.val=coil5OffVoices.val&0x0000ffff
-                nCoil5Voices.val=coil5OffVoices.val&0xffff0000
-                nCoil5Voices.val=nCoil5Voices.val>>16
+                nCoil5Voices.val=coil5OffVoices.val>>16
+                nCoil5Voices.val=nCoil5Voices.val&0x0000ffff
                 nCoil5Duty.val=coil5Duty.val
             }
             if(maxCoilCount.val>=6)
             {
                 nCoil6On.val=coil6On.val
                 nCoil6MinOff.val=coil6OffVoices.val&0x0000ffff
-                nCoil6Voices.val=coil6OffVoices.val&0xffff0000
-                nCoil6Voices.val=nCoil6Voices.val>>16
+                nCoil6Voices.val=coil6OffVoices.val>>16
+                nCoil6Voices.val=nCoil6Voices.val&0x0000ffff
                 nCoil6Duty.val=coil6Duty.val
             }
             // Idle field is just used for default text/background color and as target for the numpad if no component is selected. Ergo should be hidden like functions.
@@ -378,8 +378,8 @@ Page TC_Settings
                     if(maxCoilCount.val>=1)
                     {
                         sys0=coil1On.val/10
-                        sys1=coil1OffVoices.val&0xffff0000
-                        sys1=sys1>>16
+                        sys1=coil1OffVoices.val>>16
+                        sys1=sys1&0x0000ffff
                         sys1-=1
                         sys1=sys1<<12
                         sys0+=sys1
@@ -398,8 +398,8 @@ Page TC_Settings
                     if(maxCoilCount.val>=2)
                     {
                         sys0=coil2On.val/10
-                        sys1=coil2OffVoices.val&0xffff0000
-                        sys1=sys1>>16
+                        sys1=coil2OffVoices.val>>16
+                        sys1=sys1&0x0000ffff
                         sys1-=1
                         sys1=sys1<<12
                         sys0+=sys1
@@ -418,8 +418,8 @@ Page TC_Settings
                     if(maxCoilCount.val>=3)
                     {
                         sys0=coil3On.val/10
-                        sys1=coil3OffVoices.val&0xffff0000
-                        sys1=sys1>>16
+                        sys1=coil3OffVoices.val>>16
+                        sys1=sys1&0x0000ffff
                         sys1-=1
                         sys1=sys1<<12
                         sys0+=sys1
@@ -438,8 +438,8 @@ Page TC_Settings
                     if(maxCoilCount.val>=4)
                     {
                         sys0=coil4On.val/10
-                        sys1=coil4OffVoices.val&0xffff0000
-                        sys1=sys1>>16
+                        sys1=coil4OffVoices.val>>16
+                        sys1=sys1&0x0000ffff
                         sys1-=1
                         sys1=sys1<<12
                         sys0+=sys1
@@ -458,8 +458,8 @@ Page TC_Settings
                     if(maxCoilCount.val>=5)
                     {
                         sys0=coil5On.val/10
-                        sys1=coil5OffVoices.val&0xffff0000
-                        sys1=sys1>>16
+                        sys1=coil5OffVoices.val>>16
+                        sys1=sys1&0x0000ffff
                         sys1-=1
                         sys1=sys1<<12
                         sys0+=sys1
@@ -478,8 +478,8 @@ Page TC_Settings
                     if(maxCoilCount.val>=6)
                     {
                         sys0=coil6On.val/10
-                        sys1=coil6OffVoices.val&0xffff0000
-                        sys1=sys1>>16
+                        sys1=coil6OffVoices.val>>16
+                        sys1=sys1&0x0000ffff
                         sys1-=1
                         sys1=sys1<<12
                         sys0+=sys1
