@@ -118,7 +118,9 @@ Page Keyboard
             
             Events
                 Touch Press Event
-                    
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
+                
                 Touch Release Event
                     
         Button bReturn
@@ -176,7 +178,9 @@ Page Keyboard
             
             Events
                 Touch Press Event
-                    
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
+                
                 Touch Release Event
                     
         Text newVal
@@ -1205,7 +1209,7 @@ Page Keyboard
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1218,7 +1222,7 @@ Page Keyboard
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1231,7 +1235,7 @@ Page Keyboard
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1244,7 +1248,7 @@ Page Keyboard
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     

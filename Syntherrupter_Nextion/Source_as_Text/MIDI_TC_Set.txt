@@ -169,7 +169,8 @@ Page MIDI_TC_Set
             
             Events
                 Touch Press Event
-                    click dp,1
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -196,7 +197,8 @@ Page MIDI_TC_Set
             
             Events
                 Touch Press Event
-                    click dp,1
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -754,7 +756,8 @@ Page MIDI_TC_Set
             
             Events
                 Touch Press Event
-                    click dp,1
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -780,7 +783,8 @@ Page MIDI_TC_Set
             
             Events
                 Touch Press Event
-                    click dp,1
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -792,7 +796,8 @@ Page MIDI_TC_Set
             
             Events
                 Touch Press Event
-                    click dp,1
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -838,7 +843,8 @@ Page MIDI_TC_Set
             
             Events
                 Touch Press Event
-                    click dp,1
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -898,7 +904,8 @@ Page MIDI_TC_Set
             
             Events
                 Touch Press Event
-                    click dp,1
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1085,7 +1092,7 @@ Page MIDI_TC_Set
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1098,7 +1105,7 @@ Page MIDI_TC_Set
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1111,7 +1118,7 @@ Page MIDI_TC_Set
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1124,7 +1131,7 @@ Page MIDI_TC_Set
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     

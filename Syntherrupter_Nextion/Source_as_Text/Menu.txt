@@ -78,7 +78,9 @@ Page Menu
             
             Events
                 Touch Press Event
-                    
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
+                
                 Touch Release Event
                     
         Button bSimple
@@ -125,8 +127,8 @@ Page Menu
             
             Events
                 Touch Press Event
-                    // Switching the current user disables outputs.
-                    click dp,1
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
                 
                 Touch Release Event
                     page Identification
@@ -152,7 +154,7 @@ Page Menu
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -165,7 +167,7 @@ Page Menu
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -178,7 +180,7 @@ Page Menu
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -191,7 +193,7 @@ Page Menu
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     

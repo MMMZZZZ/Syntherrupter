@@ -308,7 +308,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -388,7 +388,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -443,7 +443,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -475,7 +475,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -488,7 +488,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -508,7 +508,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -521,7 +521,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -669,7 +669,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -909,7 +909,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -965,7 +965,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -978,7 +978,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -990,7 +990,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1002,7 +1002,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1015,7 +1015,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1027,7 +1027,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1039,7 +1039,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1052,7 +1052,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1064,7 +1064,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1076,7 +1076,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1089,7 +1089,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1101,7 +1101,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1113,7 +1113,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1126,7 +1126,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1138,7 +1138,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1150,7 +1150,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1163,7 +1163,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1175,7 +1175,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1326,7 +1326,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1354,7 +1354,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1367,7 +1367,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1380,7 +1380,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
@@ -1393,7 +1393,7 @@ Page MIDI_Live
             Events
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
-                    click dp,1
+                    click 0,1
                 
                 Touch Release Event
                     
