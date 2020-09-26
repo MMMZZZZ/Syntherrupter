@@ -51,7 +51,7 @@ Page TC_Settings
                 nCoil2On.val=coil2On.val
                 nCoil2MinOff.val=coil2OffVoices.val&0x0000ffff
                 nCoil2Voices.val=coil2OffVoices.val>>16
-                nCoil2Voices.val=nCoil2Voices.va&0x0000ffff
+                nCoil2Voices.val=nCoil2Voices.val&0x0000ffff
                 nCoil2Duty.val=coil2Duty.val
             }
             if(maxCoilCount.val>=3)
