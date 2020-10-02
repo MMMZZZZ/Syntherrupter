@@ -6,9 +6,11 @@ You can control up to 6 different coils simultaneously. On each coil you can pla
 
 ## Demo Videos
 Syntherrupter playing "I Want It All" - a MIDI with ~6 voices, pitch bending, sometimes very fast notes, and other effects.
+
 [![Syntherrupter Demo - I Want It All](http://img.youtube.com/vi/H2ykCsD_b5g/0.jpg)](http://www.youtube.com/watch?v=H2ykCsD_b5g)
 
 Here's a demo of Syntherrupters stereo features with Thunderstruck. The only modification made to the MIDI file, were the commands that set up Syntherrupters stereo mode (documented [here](/Documentation/Wiki/Custom%20MIDI%20Commands.md)). The mapping of the notes to the coils (represented by LEDs) in done automatically.
+
 [![Syntherrupter Demo - I Want It All](http://img.youtube.com/vi/Tyts9u0le6A/0.jpg)](http://www.youtube.com/watch?v=Tyts9u0le6A)
 
 ## Features
@@ -27,6 +29,25 @@ Have a look at the [releases page](https://github.com/MMMZZZZ/Syntherrupter/rele
 
 ## Documentation
 Check the [Wiki](/Documentation/Wiki). It's far from being complete, but the most important stuff is there.
+
+### ADSR Sounds
+The sound can be selected by the MIDI command "Program Change". In your MIDI software you can select it by changing the instrument of the channel. 
+
+The programs 1-63 can be modified by the user using the ADSR Editor. The programs 20-39 are stored in EEPROM. Unless modified by the user, they are simply constant ontime. All other programs have the following characteristics at startup:
+
+* Program 0 and all unlisted: No ADSR. Constant ontime (except for other effects like modulation).
+* Program 1: Roughly like a piano. Attack peaks to 1 (= not exceeding the given ontime)
+* Program 2: Sloooow rise, slow fall. Good for soft background, but too slow for shorter notes. Attack peaks to 1 (= not exceeding the given ontime)
+* Program 3: Like program 1, but with a small step, to make shorter notes more audible. Attack peaks to 1 (= not exceeding the given ontime)
+* Program 4: Twice as fast as program 1. Attack peaks to 1 (= not exceeding the given ontime)
+* Program 5: Forced Staccato. All notes are always short. Attack peaks to 1 (= not exceeding the given ontime)
+* Program 6: Forced Legato. All notes are hold for quite some time. Attack peaks to 1 (= not exceeding the given ontime)
+* Program 7: Like program 2, but with a faster release. Attack peaks to 1 (= not exceeding the given ontime)
+* Program 8: Roughly like a piano. Attack peaks to 2 (= doublingt he given ontime for a few miliseconds)
+* Program 9: Forced Staccato with slight sustain. Attack peaks to 3 (= tripling the given ontime for a few miliseconds)
+* Program 11-19: Same as programs 1-9 but with exponential instead of linear curves between the points. No other changes made, so not that special yet. 
+
+If you wonder why you would want to exceed the given ontime, it is an "efficient" way to get louder notes even with high voice count without tripping your circuit breaker. Since the ontime drops pretty fast after the attack you can consider the ontime on the display more like an average ontime. Note that all these ADSR settings do not allow to exceed your coil limits (->Settings->Coil Setttings). 
 
 ### Communication Pins
 
@@ -51,25 +72,6 @@ The following pins supply the interrupt signal for the given coil. Signal is act
 * Coil 4: PM2
 * Coil 5: PM4
 * Coil 6: PM6
-### ADSR Sounds
-The sound can be selected by the MIDI command "Program Change". In your MIDI software you can select it by changing the instrument of the channel. 
-
-The programs 1-63 can be modified by the user using the ADSR Editor. The programs 20-39 are stored in EEPROM. Unless modified by the user, they are simply constant ontime. All other programs have the following characteristics at startup:
-
-* Program 0 and all unlisted: No ADSR. Constant ontime (except for other effects like modulation).
-* Program 1: Roughly like a piano. Attack peaks to 1 (= not exceeding the given ontime)
-* Program 2: Sloooow rise, slow fall. Good for soft background, but too slow for shorter notes. Attack peaks to 1 (= not exceeding the given ontime)
-* Program 3: Like program 1, but with a small step, to make shorter notes more audible. Attack peaks to 1 (= not exceeding the given ontime)
-* Program 4: Twice as fast as program 1. Attack peaks to 1 (= not exceeding the given ontime)
-* Program 5: Forced Staccato. All notes are always short. Attack peaks to 1 (= not exceeding the given ontime)
-* Program 6: Forced Legato. All notes are hold for quite some time. Attack peaks to 1 (= not exceeding the given ontime)
-* Program 7: Like program 2, but with a faster release. Attack peaks to 1 (= not exceeding the given ontime)
-* Program 8: Roughly like a piano. Attack peaks to 2 (= doublingt he given ontime for a few miliseconds)
-* Program 9: Forced Staccato with slight sustain. Attack peaks to 3 (= tripling the given ontime for a few miliseconds)
-* Program 11-19: Same as programs 1-9 but with exponential instead of linear curves between the points. No other changes made, so not that special yet. 
-
-If you wonder why you would want to exceed the given ontime, it is an "efficient" way to get louder notes even with high voice count without tripping your circuit breaker. Since the ontime drops pretty fast after the attack you can consider the ontime on the display more like an average ontime. Note that all these ADSR settings do not allow to exceed your coil limits (->Settings->Coil Setttings). 
-
 ### Other documentation
 Building and using one is much easier than it looks. The forum threads (especially the english one) contain many posts and videos explaining and demonstrating the features of v2.x.x, v3.x.x and v4.x.x. Anything that's not yet been described here can be found there.
 
