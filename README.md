@@ -4,10 +4,29 @@ You can control up to 6 different coils simultaneously. On each coil you can pla
 
 *By Max Zuidberg. Credits below.*
 
+## Demo Videos
+Syntherrupter playing "I Want It All" - a MIDI with ~6 voices, pitch bending, sometimes very fast notes, and other effects.
+[![Syntherrupter Demo - I Want It All](http://img.youtube.com/vi/H2ykCsD_b5g/0.jpg)](http://www.youtube.com/watch?v=H2ykCsD_b5g)
+
+Here's a demo of Syntherrupters stereo features with Thunderstruck. The only modification made to the MIDI file, were the commands that set up Syntherrupters stereo mode (documented [here](/Documentation/Wiki/Custom%20MIDI%20Commands.md)). The mapping of the notes to the coils (represented by LEDs) in done automatically.
+[![Syntherrupter Demo - I Want It All](http://img.youtube.com/vi/Tyts9u0le6A/0.jpg)](http://www.youtube.com/watch?v=Tyts9u0le6A)
+
+## Features
+* A unique and truly awesome name: Syntherrupter. ;D 
+* **Easy to build**. Except for the optical transmitters the other parts are "ready to use" modules that can be connected without soldering or custom PCBs.
+* Up to **16 voice polyphony** including effects like pitch bend, modulation and different "instruments". Yes, you can - within limits - change how your coil sounds.
+* Control up to **6 independant tesla coils** with only one interrupter. And yes, each output can play different notes. Simply select which output should listen to which MIDI channel
+* Set and change hard limits for each coil. They will be stored even when powered off and assure that you don't fry your tesla coil no matter how crazy the MIDI file is.
+* Advanced stereo features. Voices can seamlessly change between multiple coils, creating **fascinating visual effects**.
+* **Lightsabers**! An ESP8266, an IMU and a battery form a lightsaber that connects to Syntherrupter and allows "lightsaber-effects" to be played on your tesla coils! (credits: Netzpfuscher)
+* Different users with different limits. This is useful if you want to rent the coil to someone else who does not know the coils (thermal?) limits as well as you do.
+* Sounds boring, but for me it belongs to an interrupter as well: **Normal interrupter mode** where you can control the ontime, BPS and duty.
+
 ## Download and Installation
 Have a look at the [releases page](https://github.com/MMMZZZZ/Syntherrupter/releases) and the forum links below.
 
 ## Documentation
+Check the [Wiki](/Documentation/Wiki). It's far from being complete, but the most important stuff is there.
 
 ### Communication Pins
 
@@ -52,13 +71,12 @@ The programs 1-63 can be modified by the user using the ADSR Editor. The program
 If you wonder why you would want to exceed the given ontime, it is an "efficient" way to get louder notes even with high voice count without tripping your circuit breaker. Since the ontime drops pretty fast after the attack you can consider the ontime on the display more like an average ontime. Note that all these ADSR settings do not allow to exceed your coil limits (->Settings->Coil Setttings). 
 
 ### Other documentation
-Building and using one is much easier than it looks. The forum threads (especially the english one) contain many posts and videos explaining and demonstrating the features of v2.x.x, v3.x.x and v4.x.x. Until I find the time to write a complete wiki, that's pretty much the best documentation you'll find. 
+Building and using one is much easier than it looks. The forum threads (especially the english one) contain many posts and videos explaining and demonstrating the features of v2.x.x, v3.x.x and v4.x.x. Anything that's not yet been described here can be found there.
 
 English: https://highvoltageforum.net/index.php?topic=1020.0
 
 German: http://forum.mosfetkiller.de/viewtopic.php?f=9&t=64458
 
-However, since this gets more and more confusing, I started working on a proper documentation. Which you can find in the "Documentation" folder in this repository. 
 
 ### Credits
 [Netzpfuscher and his awesome UD3](https://highvoltageforum.net/index.php?topic=188.0). Thank you for the help with polyphony and the awesome lightsaber idea.
