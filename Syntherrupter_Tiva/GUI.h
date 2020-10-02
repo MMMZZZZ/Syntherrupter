@@ -9,12 +9,12 @@
 #define GUI_H_
 
 
-#include "InterrupterConfig.h"
-#include "EEPROMSettings.h"
 #include "stdint.h"
 #include "stdbool.h"
-#include "driverlib/uart.h"
+#include "driverlib/gpio.h"
 #include "System.h"
+#include "InterrupterConfig.h"
+#include "EEPROMSettings.h"
 #include "Nextion.h"
 #include "Coil.h"
 
@@ -39,6 +39,7 @@ enum class Mode {
     settings,
     settingsExit,
     nxtFWUpdate,
+    espFWUpdate,
 };
 
 
@@ -101,12 +102,11 @@ private:
         EEPROMSettings::update();
     };
 
-    static void nxtFWUpdate();
+    static void serialPassthrough(uint32_t uartNum);
+
     static bool checkValue(uint32_t val);
 
     static Nextion nxt;
-
-    static Tone* simpleTone;
 
     static uint32_t state;
     static uint32_t userMaxOntimeUS;

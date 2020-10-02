@@ -31,7 +31,7 @@ public:
     static void setSystemTimeResUS(uint32_t us);
     static uint32_t getClockFreq()
     {
-        return clockFreq;
+        return CLOCK_FREQ;
     };
     static uint32_t getPIOSCFreq()
     {
@@ -39,7 +39,7 @@ public:
     };
     static void systemTimeIncrement()
     {
-        timeUS += sysTickResUS;
+        timeUS += SYS_TICK_RES_US;
     };
     static uint32_t getSystemTimeUS()
     {
@@ -47,7 +47,7 @@ public:
     };
     static uint32_t getSystemTimeResUS()
     {
-        return sysTickResUS;
+        return SYS_TICK_RES_US;
     }
     static void delayUS(uint32_t us)
     {
@@ -58,11 +58,11 @@ public:
         return ((timeUS + SysTickValueGet()) % (upper - lower) + lower);
     };
 private:
-    static constexpr uint32_t clockFreq = 120000000;
-    static constexpr uint32_t clockTicksUS = clockFreq / 1000000;
+    static constexpr uint32_t CLOCK_FREQ = 120000000;
+    static constexpr uint32_t clockTicksUS = CLOCK_FREQ / 1000000;
     static constexpr uint32_t PIOSCFreq = 16000000;
     static volatile uint32_t timeUS;
-    static volatile uint32_t sysTickResUS;
+    static volatile uint32_t SYS_TICK_RES_US;
 
     // Peripherals that should be turned off in case of an error
     static constexpr uint32_t peripheralsCount = 43;

@@ -9,7 +9,7 @@
 
 
 volatile uint32_t System::timeUS = 0;
-volatile uint32_t System::sysTickResUS = 50;
+volatile uint32_t System::SYS_TICK_RES_US = 50;
 //uint32_t System::sysTickHalfRes = sysTickResUS / 2;
 constexpr uint32_t System::peripheralsCount;
 constexpr uint32_t System::peripherals[peripheralsCount];
@@ -29,9 +29,9 @@ System::~System()
 
 void System::init(void (*ISR)(void))
 {
-     uint32_t clock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ |SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), clockFreq);
+     uint32_t clock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ |SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), CLOCK_FREQ);
 
-     if (clock != clockFreq)
+     if (clock != CLOCK_FREQ)
      {
          error();
      }
@@ -69,7 +69,7 @@ void System::error()
 
 void System::setSystemTimeResUS(uint32_t us)
 {
-    sysTickResUS = us;
+    SYS_TICK_RES_US = us;
     //sysTickHalfRes = sysTickResUS / 2;
-    SysTickPeriodSet(clockTicksUS * sysTickResUS);
+    SysTickPeriodSet(clockTicksUS * SYS_TICK_RES_US);
 }

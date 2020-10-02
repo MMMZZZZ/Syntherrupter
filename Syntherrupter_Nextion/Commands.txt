@@ -67,7 +67,7 @@ Note: Any value ranges that have no specified meaning here should be ignored by 
 			* Byte 5: upper data2 byte.
 				* Command type 0: data2 represents ontime in microseconds.
 				* Command type 1: data2 unused.
-	* mnu: Mode Nextion firmware Update. In this mode the Tiva "connects" the Nextion to the USB serial to allow updating the Nextion firmware via USB. It automatically performs a self reset after the update. 
+	* mnu/meu: Mode Nextion/Esp USB. In this mode the microcontroller "connects" the Nextion/ESP8266 serial pins to the USB serial converter. This means the host can communicate at any baud rate with the device which can be used for debugging purposes or firmware uploads. A reset of the microcontroller is needed to leave this mode. 
 	* mus: Mode User Select command. User has been selected / changed. Load corresponding settings. 
 	* mse: Mode SEttings command. 
 		* d.....: Data command. In this context:

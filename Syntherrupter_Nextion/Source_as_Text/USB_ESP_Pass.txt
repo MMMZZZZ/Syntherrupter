@@ -1,10 +1,10 @@
-Page USB_FW_Update
+Page USB_ESP_Pass
     Events
         Preinitialize Event
             
         Postinitialize Event
-            // Tell the microcontroller: Mode Nextion firmware Update
-            prints "mnu",0
+            // Tell the microcontroller: Mode Esp USB
+            prints "meu",0
         
         Touch Press Event
             
@@ -16,7 +16,7 @@ Page USB_FW_Update
         Text tTitle
             Properties
                 Scope       : Local
-                Initial Text: "Nextion Firmware Upload"
+                Initial Text: "ESP<->USB Passthrough"
                 Max. length : 25
             
             Events
@@ -27,8 +27,8 @@ Page USB_FW_Update
         Text tInfo
             Properties
                 Scope       : Local
-                Initial Text: "Waiting for beginning of transmission..."
-                Max. length : 40
+                Initial Text: "The ESP is now connected to the USB serial port. \r\nUse this to upload a new firmware or to \r\ncommunicate with the device. \r\nNotes:\r\n  * To leave passthrough mode, you need to \r\n     power cycle Syntherrupter.\r\n  * To upload a new ESP firmware you need to\r\n     pull ESPs GPIO0 pin to ground."
+                Max. length : 8620
             
             Events
                 Touch Press Event

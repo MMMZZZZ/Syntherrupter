@@ -1,4 +1,4 @@
-Page ADSR_Settings
+Page Env_Settings
     Events
         Preinitialize Event
             // Display username
@@ -88,7 +88,7 @@ Page ADSR_Settings
         Text tTitle
             Properties
                 Scope       : Local
-                Initial Text: "ADSR Settings"
+                Initial Text: "Envelope Settings"
                 Max. length : 30
             
             Events

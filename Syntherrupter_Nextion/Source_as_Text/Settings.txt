@@ -39,7 +39,8 @@ Page Settings
             if(User_Settings.userNum.val!=2)
             {
                 vis bCoilSettings,0
-                vis bUSBFWUpdate,0
+                vis bNXTUpdate,0
+                vis bESPUpdate,0
             }
         
         Postinitialize Event
@@ -116,17 +117,17 @@ Page Settings
                     prints "mex",0
                     page Menu
                 
-        Button bUSBFWUpdate
+        Button bNXTUpdate
             Properties
                 Scope      : Local
-                Caption    : "FW Upload"
+                Caption    : "Nextion<->USB"
                 Max. length: 20
             
             Events
                 Touch Press Event
                     
                 Touch Release Event
-                    page USB_FW_Update
+                    page USB_NXT_Pass
                 
         Button bGeneral
             Properties
@@ -143,7 +144,7 @@ Page Settings
         Button bUsers
             Properties
                 Scope      : Local
-                Caption    : "User"
+                Caption    : "Users"
                 Max. length: 20
             
             Events
@@ -210,15 +211,27 @@ Page Settings
                 
                 Touch Release Event
                     
-        Button bADSR
+        Button bEnvelope
             Properties
                 Scope      : Local
-                Caption    : "ADSR"
+                Caption    : "Envelopes"
                 Max. length: 20
             
             Events
                 Touch Press Event
                     
                 Touch Release Event
-                    page ADSR_Settings
+                    page Env_Settings
+                
+        Button bESPUpdate
+            Properties
+                Scope      : Local
+                Caption    : "ESP<->USB"
+                Max. length: 20
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    page USB_ESP_Pass
                 

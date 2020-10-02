@@ -1,9 +1,11 @@
-Page Error
+Page USB_NXT_Pass
     Events
         Preinitialize Event
             
         Postinitialize Event
-            
+            // Tell the microcontroller: Mode Nextion USB
+            prints "mnu",0
+        
         Touch Press Event
             
         Touch Release Event
@@ -14,7 +16,7 @@ Page Error
         Text tTitle
             Properties
                 Scope       : Local
-                Initial Text: "Unspecified Error"
+                Initial Text: "Nextion<->USB Passthrough"
                 Max. length : 25
             
             Events
@@ -22,11 +24,11 @@ Page Error
                     
                 Touch Release Event
                     
-        Text tError
+        Text tInfo
             Properties
                 Scope       : Local
-                Initial Text: "No details available."
-                Max. length : 25
+                Initial Text: "Nextion is now connected to the USB serial port. \r\nUse this to upload a new firmware or to \r\ncommunicate with the device. \r\nNotes:\r\n  * To leave passthrough mode, you need to \r\n     power cycle Syntherrupter.\r\n  * After a firmware upload the screen will\r\n    become dark (Remember to power cycle!)"
+                Max. length : 8620
             
             Events
                 Touch Press Event

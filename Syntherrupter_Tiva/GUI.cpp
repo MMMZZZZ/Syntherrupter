@@ -11,8 +11,6 @@
 
 Nextion GUI::nxt;
 
-Tone* GUI::simpleTone;
-
 uint32_t GUI::state           = 0;
 uint32_t GUI::userMaxOntimeUS = 0;
 uint32_t GUI::userMaxBPS      = 0;
@@ -292,6 +290,10 @@ uint32_t GUI::update()
                 {
                     mode = Mode::nxtFWUpdate;
                 }
+                else if (modeByte0 == 'e' && modeByte1 == 'u')
+                {
+                    mode = Mode::espFWUpdate;
+                }
                 else if (modeByte0 == 's' && modeByte1 == 'e')
                 {
                     mode = Mode::settings;
@@ -441,7 +443,10 @@ uint32_t GUI::update()
         break;
 
     case Mode::nxtFWUpdate:
-        nxtFWUpdate();
+        serialPassthrough(3);
+        break;
+    case Mode::espFWUpdate:
+        serialPassthrough(2);
         break;
 
     case Mode::idle:
@@ -746,81 +751,65 @@ void GUI::settings()
     }
 }
 
-void GUI::nxtFWUpdate()
+void GUI::serialPassthrough(uint32_t uartNum)
 {
-    // Stop normal operation and pass data between Nextion UART and USB UART
-    // After upload is done (1 sec timeout) the uC performs a reset.
+    /*
+     * Disable Interrupts and UARTs and pass data between the USB serial port
+     * and the selected serial port.
+     *
+     * This is done via polling to operate independantly of the baud rate
+     * Since Syntherrupter does nothing else during this time, this doesn't
+     * cause timing issues.
+     *
+     * Note: To leave this mode you have to power cycle Syntherrupter.
+     */
 
-    // Stop Nextion UARTstdio operation
-    nxt.disableStdio();
+    IntMasterDisable();
 
-    // UARTs are supposed to be initialized.
-    uint32_t nxtUARTBase   = nxt.getUARTBase();
-    uint32_t nxtUARTPeriph = nxt.getUARTPeriph();
-    uint32_t usbUARTBase   = UART0_BASE;
-    uint32_t baudRate      = nxt.getBaudRate();
+    // USB UART is UART 0
+    uint32_t USBPort     = UART::UART_MAPPING[0][UART::UART_PORT_BASE];
+    uint32_t USBRXPin    = UART::UART_MAPPING[0][UART::UART_RX_PIN];
+    uint32_t USBTXPin    = UART::UART_MAPPING[0][UART::UART_TX_PIN];
+    uint32_t targetPort  = UART::UART_MAPPING[uartNum][UART::UART_PORT_BASE];
+    uint32_t targetRXPin = UART::UART_MAPPING[uartNum][UART::UART_RX_PIN];
+    uint32_t targetTXPin = UART::UART_MAPPING[uartNum][UART::UART_TX_PIN];
 
-    // Re-init to make sure settings are correct
-    if (SysCtlPeripheralReady(SYSCTL_PERIPH_UART0))
-    {
-        SysCtlPeripheralReset(SYSCTL_PERIPH_UART0);
-    }
-    else
-    {
-        SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
-        SysCtlDelay(3);
-    }
-    if (SysCtlPeripheralReady(nxtUARTPeriph))
-    {
-        SysCtlPeripheralReset(nxtUARTPeriph);
-    }
-    else
-    {
-        SysCtlPeripheralEnable(nxtUARTPeriph);
-        SysCtlDelay(3);
-    }
-    UARTConfigSetExpClk(nxtUARTBase, System::getClockFreq(), baudRate,
-                        (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
-    UARTConfigSetExpClk(usbUARTBase, System::getClockFreq(), baudRate,
-                        (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
-    UARTFIFOEnable(nxtUARTBase);
-    UARTFIFOEnable(usbUARTBase);
+    SysCtlPeripheralDisable(UART::UART_MAPPING[0][UART::UART_SYSCTL_PERIPH]);
+    SysCtlPeripheralDisable(UART::UART_MAPPING[uartNum][UART::UART_SYSCTL_PERIPH]);
 
-    bool uploadStarted               = false;
-    uint32_t timeUS                  = System::getSystemTimeUS();
-    uint32_t uploadBeginUS           = timeUS;
-    constexpr uint32_t minDurationUS = 15000000;
-    constexpr uint32_t timeoutUS     = 1000000; // must be smaller than minUploadDurationUS
+    GPIOPinTypeGPIOOutput(USBPort,    USBTXPin);
+    GPIOPinTypeGPIOOutput(targetPort, targetTXPin);
+    GPIOPinTypeGPIOInput(USBPort,    USBRXPin);
+    GPIOPinTypeGPIOInput(targetPort, targetRXPin);
+    GPIOPadConfigSet(USBPort, USBRXPin, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+    GPIOPadConfigSet(USBPort, USBRXPin, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+
+
     while (42)
     {
-        if (UARTCharsAvail(nxtUARTBase))
+        uint8_t USBRXState    = 0;
+        uint8_t targetRXState = 0;
+
+        // Read Pins
+        if (GPIOPinRead(USBPort, USBRXPin) & 0xff)
         {
-            unsigned char c = UARTCharGet(nxtUARTBase);
-            UARTCharPutNonBlocking(usbUARTBase, c);
+            USBRXState    = 0xff;
         }
-        if (UARTCharsAvail(usbUARTBase))
+        else
         {
-            timeUS = System::getSystemTimeUS();
-            if (!uploadStarted)
-            {
-                uploadStarted = true;
-                uploadBeginUS = timeUS;
-            }
-            unsigned char c = UARTCharGet(usbUARTBase);
-            UARTCharPutNonBlocking(nxtUARTBase, c);
+            USBRXState = 0;
         }
-        if (uploadStarted && (System::getSystemTimeUS() - timeUS) > timeoutUS)
+        if (GPIOPinRead(targetPort, targetRXPin) & 0xff)
         {
-            if (timeUS - uploadBeginUS > minDurationUS)
-            {
-                // Upload has happened.
-                SysCtlReset();
-            }
-            else
-            {
-                // Maybe just a port check.
-                uploadStarted = false;
-            }
+            targetRXState = 0xff;
         }
+        else
+        {
+            targetRXState = 0;
+        }
+
+        // Pass to other port
+        GPIOPinWrite(USBPort,    USBTXPin,    targetRXState);
+        GPIOPinWrite(targetPort, targetTXPin, USBRXState);
     }
 }
