@@ -4,11 +4,11 @@
 * [Introduction](#introduction)
 * [Note about beta versions](#note-about-beta-versions)
 * [Tiva Flashing](#tiva-flashing)
-* [Nextion Flashing with a microSD card](#nextion-lashing-with-a-microSD-card)
-* [Nextion Flashing over USB/Serial](#nextion-flashing-over-usb-serial)
+* [Nextion Flashing with a microSD card](#nextion-flashing-with-a-microsd-card)
+* [Nextion Flashing over USB/Serial](#nextion-flashing-over-usbserial)
 
 ## Introduction
-This page covers how to flash a (new) firmware on your Syntherrupter. It requires everything to be wired up as described in the *[Wiring and Schematics](./../../Wiring and Schematics)* folder.
+This page covers how to flash a (new) firmware on your Syntherrupter. It requires everything to be wired up as described in the *[Wiring and Schematics](/Documentation/Wiring%20and%20Schematics)* folder.
 
 ## Note about beta versions
 Beta versions usually include new features that do not touch the core of Syntherrupter. This means it's *highly unlikely* that the update breaks the core's safety features, namely the specified maximum ontime, minimum offtime and maximum duty. However, you should not expect any part of the GUI or any of Syntherrupter's modes to be free of bugs. 
@@ -18,8 +18,8 @@ Beta versions usually include new features that do not touch the core of Synther
 ### Requirements
 * Windows. The tools used are not available for other operating systems.
 * [Latest Syntherrupter release](https://github.com/MMMZZZZ/Syntherrupter/releases/)
-* [Drivers](./../../../Utilities and Drivers/Tiva USB Drivers (Stellaris ICDI Drivers).zip)
-* [LM Flash Programmer](./../../../Utilities and Drivers/LMFlashProgrammer_1613.msi)
+* [Drivers](/Utilities%20and%20Drivers/Tiva%20USB%20Drivers%20(Stellaris%20ICDI%20Drivers).zip?raw=true)
+* [LM Flash Programmer](/Utilities%20and%20Drivers/LMFlashProgrammer_1613.msi?raw=true)
 
 ### Steps for Driver Installation
 * Extract the *stellaris_icdi_drivers* folder from the drivers zip file.
@@ -66,7 +66,7 @@ You can upload a new firmware to the Nextion screen using its serial connection.
 * Windows. The tools used are not available for other operating systems.
 * [Tiva Firmware](#tiva-flashing) up and running. 
 * [Latest Syntherrupter release](https://github.com/MMMZZZZ/Syntherrupter/releases/)
-* [TFTFileDownload](./../../../Utilities and Drivers/TFTFileDownload.exe?raw=true)
+* [TFTFileDownload](/Utilities%20and%20Drivers/TFTFileDownload.exe?raw=true)
 
 ### Steps
 * Check the exact model number of your touch screen. 
