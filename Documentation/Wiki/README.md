@@ -5,7 +5,7 @@ Welcome to the Syntherrupter wiki. This is a collection of how-tos and documenta
 
 ## Content
 * [Syntherrupter Firmware Flashing](Syntherrupter%20Firmware%20Flashing.md). How to flash Syntherrupter for the first time or update its firmware.
-* [Lightsaber ESP8266 Setup](Lightsaber%20Setup%20md). How to flash and use the ESP8266 which the lightsabers are based on.
+* [Lightsaber ESP8266 Setup](Lightsaber%20ESP8266%20Setup.md). How to flash and use the ESP8266 which the lightsabers are based on.
 * [Custom MIDI Commands](Custom%20MIDI%20Commands.md). Documentation of the Syntherrupter specific commands, that are f.ex. required for some stereo features.
 
 ## Other Documentation
