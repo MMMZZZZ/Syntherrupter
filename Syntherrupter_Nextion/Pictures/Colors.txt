@@ -10,3 +10,12 @@ Gray:
 	Red:   127
 	Green: 127
 	Blue:  127
+
+Light Mode Background:
+	Red:   255
+	Green: 255
+	Blue:  255
+Dark Mode Background:
+	Red:    28
+	Green:  28
+	Blue:   28

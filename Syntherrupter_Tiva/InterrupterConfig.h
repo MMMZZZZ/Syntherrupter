@@ -9,7 +9,7 @@
 #define INTERRUPTER_CONFIG_H_
 
 
-#define TIVA_FW_VERSION "v4.1.0-beta.4"
+#define TIVA_FW_VERSION "v4.1.0-beta.5"
 
 #ifdef COIL_COUNT_1
 #define COIL_COUNT 1

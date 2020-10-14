@@ -109,9 +109,6 @@ private:
     static Nextion nxt;
 
     static uint32_t state;
-    static uint32_t userMaxOntimeUS;
-    static uint32_t userMaxBPS;
-    static uint32_t userMaxDutyPerm;
     static uint32_t command;
     static uint32_t commandData[33]; // sized to max length of all commands.
     static Mode mode;

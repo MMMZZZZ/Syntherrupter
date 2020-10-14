@@ -12,9 +12,6 @@
 Nextion GUI::nxt;
 
 uint32_t GUI::state           = 0;
-uint32_t GUI::userMaxOntimeUS = 0;
-uint32_t GUI::userMaxBPS      = 0;
-uint32_t GUI::userMaxDutyPerm = 0;
 uint32_t GUI::command         = 0;
 uint32_t GUI::commandData[33] = {0, 0, 0, 0, 0, 0, 0, 0,
                                  0, 0, 0, 0, 0, 0, 0, 0,
@@ -157,32 +154,37 @@ void GUI::init()
             EEPROMSettings::getMIDIPrograms();
 
             // Other Settings
-            uint32_t buttonHoldTime =  EEPROMSettings::otherSettings[0] & 0x0000ffff;
-            uint32_t sleepDelay     = (EEPROMSettings::otherSettings[0] & 0xffff0000) >> 16;
-            uint32_t dispBrightness =  EEPROMSettings::otherSettings[1] & 0xff;
+            uint32_t buttonHoldTime =  EEPROMSettings::otherSettings[0]        & 0xffff;
+            uint32_t sleepDelay     = (EEPROMSettings::otherSettings[0] >> 16) & 0xffff;
+            uint32_t dispBrightness =  EEPROMSettings::otherSettings[1]        & 0xff;
+            uint32_t backOff        = (EEPROMSettings::otherSettings[1] >>  8) & 0b1;
+            uint32_t colorMode      = (EEPROMSettings::otherSettings[1] >>  9) & 0b1;
             nxt.printf("Other_Settings.nHoldTime.val=%i\xff\xff\xff",
                           buttonHoldTime);
             nxt.printf("thsp=%i\xff\xff\xff", sleepDelay);
             nxt.printf("dim=%i\xff\xff\xff", dispBrightness);
+            //nxt.printf("Other_Settings.nBackOff.val=%i\xff\xff\xff", backOff);
+            nxt.printf("Settings.colorMode.val=%i\xff\xff\xff", colorMode);
+
+            // Give time to the UART to send the data
+            System::delayUS(20000);
+        }
+        else
+        {
+            // Show warning if no valid config is present in EEPROM.
+            nxt.sendCmd("tStartup.txt=sNoConfig.txt");
+            nxt.sendCmd("tStartup.font=0");
+
+            EEPROMSettings::setMIDIPrograms();
         }
         nxt.setVal("TC_Settings.maxCoilCount", COIL_COUNT);
         nxt.setVal("ADSR_Settings.maxSteps", MIDIProgram::DATA_POINTS);
-
-        // Give time to the UART to send the data
-        System::delayUS(20000);
 
         // Display Tiva firmware versions
         nxt.setTxt("tTivaFWVersion", TIVA_FW_VERSION);
 
         // Initialization completed.
-        nxt.sendCmd("vis 255,1");
-
-        // Show warning if no valid config is present in EEPROM. Warning is one layer below normal startup picture.
-        if (!cfgInEEPROM)
-        {
-            nxt.sendCmd("vis pStartup,0");
-            EEPROMSettings::setMIDIPrograms();
-        }
+        nxt.sendCmd("click comOk,1");
     }
 }
 
@@ -463,18 +465,7 @@ uint32_t GUI::update()
 
 void GUI::userSelect()
 {
-    if (command == 'd')
-    {
-        uint32_t user = commandData[0];
-        if (user < 2)
-        {
-            userMaxOntimeUS = EEPROMSettings::getUsersMaxOntimeUS(user);
-            userMaxBPS      = EEPROMSettings::getUsersMaxBPS(user);
-            userMaxDutyPerm = EEPROMSettings::getUsersMaxDutyPerm(user);
-        }
-        // Data applied; clear command byte.
-        command = 0;
-    }
+    // obsolete; left for backward compatibility.
     mode = Mode::idle;
 }
 
@@ -664,9 +655,6 @@ void GUI::settings()
             {
                 // User limits.
                 EEPROMSettings::userSettings[number] = data;
-                userMaxOntimeUS = EEPROMSettings::getUsersMaxOntimeUS(number);
-                userMaxBPS      = EEPROMSettings::getUsersMaxBPS(number);
-                userMaxDutyPerm = EEPROMSettings::getUsersMaxDutyPerm(number);
             }
             else if (settings == 2 && number < 10)
             {

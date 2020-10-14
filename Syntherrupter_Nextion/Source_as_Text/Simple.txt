@@ -1,6 +1,12 @@
 Page Simple
     Events
         Preinitialize Event
+            // Prevent page refreshs until postinit
+            ref_stop
+            //
+            // Load colors
+            click fLoadColors,1
+            //
             // Display username
             if(User_Settings.userNum.val==0)
             {
@@ -212,6 +218,9 @@ Page Simple
             sBPS.val=fSlider.val
             // Tell the microcontroller: Mode: SImple
             prints "msi",0
+            //
+            // Enable page refreshs again
+            ref_star
         
         Postinitialize Event
             // Make sure the microcontroller is up-to-date
@@ -1382,109 +1391,103 @@ Page Simple
                         // Update Info below coil buttons
                         if(btCoil1.val==1)
                         {
-                            if(nOn.val<TC_Settings.coil1On.val)
-                            {
-                                nOn1.val=nOn.val
-                            }else
+                            if(nOn.val>TC_Settings.coil1On.val)
                             {
                                 nOn1.val=TC_Settings.coil1On.val
-                            }
-                            if(nDuty.val<TC_Settings.coil1Duty.val)
-                            {
-                                nDuty1.val=nDuty.val
-                            }else
+                                nDuty1.val=nOn.val*nBPS.val/1000
+                            }else if(nDuty.val>TC_Settings.coil1Duty.val)
                             {
                                 nDuty1.val=TC_Settings.coil1Duty.val
+                                nOn1.val=nDuty.val*1000/nBPS.val
+                            }else
+                            {
+                                nOn1.val=nOn.val
+                                nDuty1.val=nDuty.val
                             }
                             nBPS1.val=nBPS.val
                         }
                         if(btCoil2.val==1)
                         {
-                            if(nOn.val<TC_Settings.coil2On.val)
-                            {
-                                nOn2.val=nOn.val
-                            }else
+                            if(nOn.val>TC_Settings.coil2On.val)
                             {
                                 nOn2.val=TC_Settings.coil2On.val
-                            }
-                            if(nDuty.val<TC_Settings.coil2Duty.val)
-                            {
-                                nDuty2.val=nDuty.val
-                            }else
+                                nDuty2.val=nOn.val*nBPS.val/1000
+                            }else if(nDuty.val>TC_Settings.coil2Duty.val)
                             {
                                 nDuty2.val=TC_Settings.coil2Duty.val
+                                nOn2.val=nDuty.val*1000/nBPS.val
+                            }else
+                            {
+                                nOn2.val=nOn.val
+                                nDuty2.val=nDuty.val
                             }
                             nBPS2.val=nBPS.val
                         }
                         if(btCoil3.val==1)
                         {
-                            if(nOn.val<TC_Settings.coil3On.val)
-                            {
-                                nOn3.val=nOn.val
-                            }else
+                            if(nOn.val>TC_Settings.coil3On.val)
                             {
                                 nOn3.val=TC_Settings.coil3On.val
-                            }
-                            if(nDuty.val<TC_Settings.coil3Duty.val)
-                            {
-                                nDuty3.val=nDuty.val
-                            }else
+                                nDuty3.val=nOn.val*nBPS.val/1000
+                            }else if(nDuty.val>TC_Settings.coil3Duty.val)
                             {
                                 nDuty3.val=TC_Settings.coil3Duty.val
+                                nOn3.val=nDuty.val*1000/nBPS.val
+                            }else
+                            {
+                                nOn3.val=nOn.val
+                                nDuty3.val=nDuty.val
                             }
                             nBPS3.val=nBPS.val
                         }
                         if(btCoil4.val==1)
                         {
-                            if(nOn.val<TC_Settings.coil4On.val)
-                            {
-                                nOn4.val=nOn.val
-                            }else
+                            if(nOn.val>TC_Settings.coil4On.val)
                             {
                                 nOn4.val=TC_Settings.coil4On.val
-                            }
-                            if(nDuty.val<TC_Settings.coil4Duty.val)
-                            {
-                                nDuty4.val=nDuty.val
-                            }else
+                                nDuty4.val=nOn.val*nBPS.val/1000
+                            }else if(nDuty.val>TC_Settings.coil4Duty.val)
                             {
                                 nDuty4.val=TC_Settings.coil4Duty.val
+                                nOn4.val=nDuty.val*1000/nBPS.val
+                            }else
+                            {
+                                nOn4.val=nOn.val
+                                nDuty4.val=nDuty.val
                             }
                             nBPS4.val=nBPS.val
                         }
                         if(btCoil5.val==1)
                         {
-                            if(nOn.val<TC_Settings.coil5On.val)
-                            {
-                                nOn5.val=nOn.val
-                            }else
+                            if(nOn.val>TC_Settings.coil5On.val)
                             {
                                 nOn5.val=TC_Settings.coil5On.val
-                            }
-                            if(nDuty.val<TC_Settings.coil5Duty.val)
-                            {
-                                nDuty5.val=nDuty.val
-                            }else
+                                nDuty5.val=nOn.val*nBPS.val/1000
+                            }else if(nDuty.val>TC_Settings.coil5Duty.val)
                             {
                                 nDuty5.val=TC_Settings.coil5Duty.val
+                                nOn5.val=nDuty.val*1000/nBPS.val
+                            }else
+                            {
+                                nOn5.val=nOn.val
+                                nDuty5.val=nDuty.val
                             }
                             nBPS5.val=nBPS.val
                         }
                         if(btCoil6.val==1)
                         {
-                            if(nOn.val<TC_Settings.coil6On.val)
-                            {
-                                nOn6.val=nOn.val
-                            }else
+                            if(nOn.val>TC_Settings.coil6On.val)
                             {
                                 nOn6.val=TC_Settings.coil6On.val
-                            }
-                            if(nDuty.val<TC_Settings.coil6Duty.val)
-                            {
-                                nDuty6.val=nDuty.val
-                            }else
+                                nDuty6.val=nOn.val*nBPS.val/1000
+                            }else if(nDuty.val>TC_Settings.coil6Duty.val)
                             {
                                 nDuty6.val=TC_Settings.coil6Duty.val
+                                nOn6.val=nDuty.val*1000/nBPS.val
+                            }else
+                            {
+                                nOn6.val=nOn.val
+                                nDuty6.val=nDuty.val
                             }
                             nBPS6.val=nBPS.val
                         }
@@ -1678,6 +1681,68 @@ Page Simple
                 Touch Press Event
                     // Make this object "transparent" for clicks and click background.
                     click 0,1
+                
+                Touch Release Event
+                    
+        Hotspot fLoadColors
+            Events
+                Touch Press Event
+                    // Changes all page components according to the current color set.
+                    // Note: This component has to be the last component of the page.
+                    //
+                    // sys0: component id
+                    // sys1: component type
+                    // sys2: picture id offset for current color mode
+                    sys2=Settings.colorMode.val*Settings.picCount.val
+                    for(sys0=0;sys0<fLoadColors.id;sys0++)
+                    {
+                        // More convenient for typing
+                        sys1=b[sys0].type
+                        if(sys1==121)
+                        {
+                            // Types that have bco
+                            // page
+                            if(b[sys0].bco!=Settings.backCol2.val)
+                            {
+                                b[sys0].bco=Settings.backCol.val
+                            }
+                        }else if(sys1==54||sys1==59||sys1==116||sys1==55)
+                        {
+                            // Types that have bco, pco, and sta:
+                            // number, float, text, scroll text
+                            if(b[sys0].sta==1)
+                            {
+                                if(b[sys0].bco!=Settings.backCol2.val)
+                                {
+                                    b[sys0].bco=Settings.backCol.val
+                                    b[sys0].pco=Settings.frontCol.val
+                                }else
+                                {
+                                    b[sys0].pco=Settings.frontCol2.val
+                                }
+                            }
+                        }else if(sys1==98||sys1==53)
+                        {
+                            // Types that have pco, pic, pco2, pic2, sta:
+                            // button, dual-state button
+                            if(b[sys0].sta==2)
+                            {
+                                b[sys0].pco=Settings.frontCol.val
+                                b[sys0].pco2=Settings.backCol.val
+                                b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                                b[sys0].pic+=sys2
+                                b[sys0].pic2=b[sys0].pic+1
+                            }
+                        }else if(sys1==1)
+                        {
+                            // Types that have pic, pic2:
+                            // slider
+                            b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                            b[sys0].pic+=sys2
+                            b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
+                            b[sys0].pic2+=sys2
+                        }
+                    }
                 
                 Touch Release Event
                     

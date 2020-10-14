@@ -1,9 +1,10 @@
 Page Startup
     Events
         Preinitialize Event
-            //
-            // Keep Startup page black until serial communication is successfully established.
+            // Prevent page refreshs until postinit
             vis 255,0
+            //
+            // Actual init code is in the comOk press event that is called by the uC after initialization.
         
         Postinitialize Event
             
@@ -14,25 +15,33 @@ Page Startup
         Page Exit Event
             
     Components
-        Text tNoConfig
+        Text tStartup
             Properties
                 Scope       : Local
-                Initial Text: "Warning! EEPROM contains no vaild configuration.\r\n      Please go to settings and check ALL values."
+                Initial Text: "SYNTHERRUPTER"
                 Max. length : 100
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    // Do the same thing as on a normal start. This is just a note to the user without effect on the behavior during operation.
-                    click pStartup,0
+                    // This component should actually be named "tStartup" since its a text box.
+                    // However it formerly was a picture and the name is kept for compatibility.
                 
-        Variable comOk
-            Properties
-                Scope         : Local
-                Type          : int32
-                Initial Value : 0
-            
+                Touch Release Event
+                    // If one of the user passwords is blank, do auto login to this user.
+                    if(User_Settings.u0Code.txt==User_Settings.tAutoCode.txt)
+                    {
+                        Identification.tTitle.txt=User_Settings.tAutoCode.txt
+                    }
+                    if(User_Settings.u1Code.txt==User_Settings.tAutoCode.txt)
+                    {
+                        Identification.tTitle.txt=User_Settings.tAutoCode.txt
+                    }
+                    if(User_Settings.u2Code.txt==User_Settings.tAutoCode.txt)
+                    {
+                        Identification.tTitle.txt=User_Settings.tAutoCode.txt
+                    }
+                    page Identification
+                
         Text tNxtFW
             Properties
                 Scope       : Local
@@ -47,7 +56,7 @@ Page Startup
         Text tNxtFWVersion
             Properties
                 Scope       : Local
-                Initial Text: "v4.1.0-beta.4"
+                Initial Text: "v4.1.0-beta.5"
                 Max. length : 20
             
             Events
@@ -78,23 +87,102 @@ Page Startup
                 
                 Touch Release Event
                     
-        Picture pStartup
+        Variable sNoConfig
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: "Warning! EEPROM contains no vaild configuration.\r\n      Please go to settings and check ALL values."
+                Max. length   : 100
+            
+        Hotspot fLoadColors
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    // If one of the user passwords is blank, do auto login to this user.
-                    if(User_Settings.u0Code.txt==User_Settings.tAutoCode.txt)
+                    // Changes all page components according to the current color set.
+                    // Note: This component has to be the last component of the page.
+                    //
+                    // sys0: component id
+                    // sys1: component type
+                    // sys2: picture id offset for current color mode
+                    sys2=Settings.colorMode.val*Settings.picCount.val
+                    for(sys0=0;sys0<fLoadColors.id;sys0++)
                     {
-                        Identification.tTitle.txt=User_Settings.tAutoCode.txt
+                        // More convenient for typing
+                        sys1=b[sys0].type
+                        if(sys1==121)
+                        {
+                            // Types that have bco
+                            // page
+                            if(b[sys0].bco!=Settings.backCol2.val)
+                            {
+                                b[sys0].bco=Settings.backCol.val
+                            }
+                        }else if(sys1==54||sys1==59||sys1==116||sys1==55)
+                        {
+                            // Types that have bco, pco, and sta:
+                            // number, float, text, scroll text
+                            if(b[sys0].sta==1)
+                            {
+                                if(b[sys0].bco!=Settings.backCol2.val)
+                                {
+                                    b[sys0].bco=Settings.backCol.val
+                                    b[sys0].pco=Settings.frontCol.val
+                                }else
+                                {
+                                    b[sys0].pco=Settings.frontCol2.val
+                                }
+                            }
+                        }else if(sys1==98||sys1==53)
+                        {
+                            // Types that have pco, pic, pco2, pic2, sta:
+                            // button, dual-state button
+                            if(b[sys0].sta==2)
+                            {
+                                b[sys0].pco=Settings.frontCol.val
+                                b[sys0].pco2=Settings.backCol.val
+                                b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                                b[sys0].pic+=sys2
+                                b[sys0].pic2=b[sys0].pic+1
+                            }
+                        }else if(sys1==1)
+                        {
+                            // Types that have pic, pic2:
+                            // slider
+                            b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                            b[sys0].pic+=sys2
+                            b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
+                            b[sys0].pic2+=sys2
+                        }
                     }
-                    if(User_Settings.u1Code.txt==User_Settings.tAutoCode.txt)
-                    {
-                        Identification.tTitle.txt=User_Settings.tAutoCode.txt
-                    }
-                    if(User_Settings.u2Code.txt==User_Settings.tAutoCode.txt)
-                    {
-                        Identification.tTitle.txt=User_Settings.tAutoCode.txt
-                    }
-                    page Identification
                 
+                Touch Release Event
+                    
+        Number comOk
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    ref_stop
+                    //
+                    // Load colors
+                    if(Settings.colorMode.val!=0)
+                    {
+                        Settings.backCol.val=8484
+                        Settings.frontCol2.val=33808
+                    }else
+                    {
+                        Settings.backCol.val=65535
+                        Settings.frontCol2.val=65535
+                    }
+                    click fLoadColors,1
+                    //
+                    // Init done
+                    vis 255,1
+                    vis comOk,0
+                    ref 0
+                    // Enable page refreshs again
+                    ref_star
+                
+                Touch Release Event
+                    

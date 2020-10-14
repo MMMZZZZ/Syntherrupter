@@ -4,8 +4,8 @@
 * [Introduction](#introduction)
 * [Note about beta versions](#note-about-beta-versions)
 * [Tiva Flashing](#tiva-flashing)
-* [Nextion Flashing with a microSD card](#nextion-flashing-with-a-microsd-card)
 * [Nextion Flashing over USB/Serial](#nextion-flashing-over-usbserial)
+* [Nextion Flashing with a microSD card](#nextion-flashing-with-a-microsd-card)
 
 ## Introduction
 This page covers how to flash a (new) firmware on your Syntherrupter. It requires everything to be wired up as described in the *[Wiring and Schematics](/Documentation/Wiring%20and%20Schematics)* folder.
@@ -42,10 +42,27 @@ Beta versions usually include new features that do not touch the core of Synther
 	* *Reset MCU After Program*
 * Click on *Program* to flash the microcontroller.
 
-## Nextion Flashing with a microSD card
-If you haven't flashed any Syntherrupter firmware to your Nextion screen yet, you "need" to flash it using a microSD card. The reason is that the default baud rate of Nextion is 9600baud/s. At this rate it takes almost 30 minutes to upload the firmware. However, the firmware reconfigures the baud rate to 115200baud/s, at which the upload takes about 2min. 
+## Nextion Flashing over USB/Serial
+You can upload a firmware to the Nextion screen using its serial connection. This is very convenient because you don't have to access the microSD card slot on the screen itself. 
 
-This update method is also useful if you have no access to a windows host. 
+Note: While the Nextion screen is configured to communicate at 115200baud/s, the Nextion upload protocol allows to switch to a different baud rate during the firmware upload. The highest possible baud rate is 512000baud/s. This speeds up the upload considerably, "only" taking about 1 minute.
+
+### Requirements
+* Windows. The tools used are not available for other operating systems.
+* [Tiva Firmware](#tiva-flashing) up and running. 
+* [Latest Syntherrupter release](https://github.com/MMMZZZZ/Syntherrupter/releases/)
+* [TFTFileDownload](/Utilities%20and%20Drivers/TFTFileDownload.exe?raw=true)
+
+### Steps
+* Check the exact model number of your touch screen. 
+* Extract the Nextion firmware for your model number from the Syntherrupter release zip file. The firmware file is called "Syntherrupter_Nextion_MODEL.tft". 
+* Connect Syntherrupter to your computer and choose *Nextion<->USB* in Syntherrupters *Settings* menu. If your Nextion firmware is not working, the Tiva Firmware will automatically enter this mode after 3 seconds. 
+* Open the TFTFileDownload tool and select the COM port. Baud rate should be 512000baud/s. In case you get timeout or other errors, try a lower baud rate. If even at 115200baud/s you can't upload the firmware, there's something wrong.
+* Click on the *Down* button to start flashing. 
+* Once the upload is done, the screen will reset and stay black until you power cycle Syntherrupter. 
+
+## Nextion Flashing with a microSD card
+In case the serial upload does not work or is too slow for you, you can try uploading the firmware using a microSD card. This update method is also useful if you have no access to a Windows PC. 
 
 ### Requirements
 * [Latest Syntherrupter release](https://github.com/MMMZZZZ/Syntherrupter/releases/)
@@ -59,19 +76,3 @@ This update method is also useful if you have no access to a windows host.
 * It is possible that the upload fails because you actually got a TJC screen, and not a Nextion screen. Try again with the *TJC8048...* firmware instead of the *NX8048...* file. 
 * Once the upload has completed, power off your screen and remove the microSD card.
 
-## Nextion Flashing over USB/Serial
-You can upload a new firmware to the Nextion screen using its serial connection. This is useful for updates since you don't have to access the microSD card slot on the screen itself. 
-
-### Requirements
-* Windows. The tools used are not available for other operating systems.
-* [Tiva Firmware](#tiva-flashing) up and running. 
-* [Latest Syntherrupter release](https://github.com/MMMZZZZ/Syntherrupter/releases/)
-* [TFTFileDownload](/Utilities%20and%20Drivers/TFTFileDownload.exe?raw=true)
-
-### Steps
-* Check the exact model number of your touch screen. 
-* Extract the Nextion firmware for your model number from the Syntherrupter release zip file. The firmware file is called "Syntherrupter_Nextion_MODEL.tft". 
-* Connect Syntherrupter to your computer and choose *Nextion<->USB* in Syntherrupters *Settings* menu. If your Nextion firmware is not working, the Tiva Firmware will automatically enter this mode after 3 seconds. 
-* Open the TFTFileDownload tool and select the COM port. Baud rate is 115200baud/s.
-* Click on the *Down* button to start flashing. 
-* Once the upload is done, the screen will reset and stay black until you power cycle Syntherrupter. 

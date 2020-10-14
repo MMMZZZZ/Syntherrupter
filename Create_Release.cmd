@@ -1,3 +1,5 @@
+del /q Syntherrupter_Firmwares
+md Syntherrupter_Firmwares
 rem Start Nextion Build VM.
 "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" controlvm "Windows 7 Nextion VBox" poweroff
 "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" snapshot "Windows 7 Nextion VBox" restore "Starting in 3 seconds..." 
@@ -22,5 +24,3 @@ if exist "*.HMI" goto loop
 "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" snapshot "Windows 7 Nextion VBox" restore "Starting in 3 seconds..."
 "C:\Program Files\WinRAR\winrar" a -afzip -m5 ..\Syntherrupter_Firmwares.zip
 cd ..
-del /q Syntherrupter_Firmwares
-md Syntherrupter_Firmwares

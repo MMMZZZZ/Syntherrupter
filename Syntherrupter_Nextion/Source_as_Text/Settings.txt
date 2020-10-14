@@ -1,6 +1,12 @@
 Page Settings
     Events
         Preinitialize Event
+            // Prevent page refreshs until postinit
+            ref_stop
+            //
+            // Load colors
+            click fLoadColors,1
+            //
             // Display username
             if(User_Settings.userNum.val==0)
             {
@@ -32,9 +38,6 @@ Page Settings
                 // MIDI Live Mode is active
                 tMML.bco=6900
             }
-            //
-            // Tell the microcontroller: Mode: SEttings
-            prints "mse",0
             // Not all users have the same rights
             if(User_Settings.userNum.val!=2)
             {
@@ -42,6 +45,11 @@ Page Settings
                 vis bNXTUpdate,0
                 vis bESPUpdate,0
             }
+            // Tell the microcontroller: Mode: SEttings
+            prints "mse",0
+            //
+            // Enable page refreshs again
+            ref_star
         
         Postinitialize Event
             
@@ -132,7 +140,7 @@ Page Settings
         Button bGeneral
             Properties
                 Scope      : Local
-                Caption    : "Other"
+                Caption    : "General"
                 Max. length: 20
             
             Events
@@ -235,3 +243,101 @@ Page Settings
                 Touch Release Event
                     page USB_ESP_Pass
                 
+        Variable backCol
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 65535
+            
+        Variable frontCol
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 6900
+            
+        Variable frontCol2
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 65535
+            
+        Variable picCount
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 31
+            
+        Variable colorMode
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Hotspot fLoadColors
+            Events
+                Touch Press Event
+                    // Changes all page components according to the current color set.
+                    // Note: This component has to be the last component of the page.
+                    //
+                    // sys0: component id
+                    // sys1: component type
+                    // sys2: picture id offset for current color mode
+                    sys2=Settings.colorMode.val*Settings.picCount.val
+                    for(sys0=0;sys0<fLoadColors.id;sys0++)
+                    {
+                        // More convenient for typing
+                        sys1=b[sys0].type
+                        if(sys1==121)
+                        {
+                            // Types that have bco
+                            // page
+                            if(b[sys0].bco!=Settings.backCol2.val)
+                            {
+                                b[sys0].bco=Settings.backCol.val
+                            }
+                        }else if(sys1==54||sys1==59||sys1==116||sys1==55)
+                        {
+                            // Types that have bco, pco, and sta:
+                            // number, float, text, scroll text
+                            if(b[sys0].sta==1)
+                            {
+                                if(b[sys0].bco!=Settings.backCol2.val)
+                                {
+                                    b[sys0].bco=Settings.backCol.val
+                                    b[sys0].pco=Settings.frontCol.val
+                                }else
+                                {
+                                    b[sys0].pco=Settings.frontCol2.val
+                                }
+                            }
+                        }else if(sys1==98||sys1==53)
+                        {
+                            // Types that have pco, pic, pco2, pic2, sta:
+                            // button, dual-state button
+                            if(b[sys0].sta==2)
+                            {
+                                b[sys0].pco=Settings.frontCol.val
+                                b[sys0].pco2=Settings.backCol.val
+                                b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                                b[sys0].pic+=sys2
+                                b[sys0].pic2=b[sys0].pic+1
+                            }
+                        }else if(sys1==1)
+                        {
+                            // Types that have pic, pic2:
+                            // slider
+                            b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                            b[sys0].pic+=sys2
+                            b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
+                            b[sys0].pic2+=sys2
+                        }
+                    }
+                
+                Touch Release Event
+                    
+        Variable backCol2
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 4589
+            

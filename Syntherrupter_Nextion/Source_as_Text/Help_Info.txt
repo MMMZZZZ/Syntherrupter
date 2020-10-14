@@ -1,0 +1,268 @@
+Page Help_Info
+    Events
+        Preinitialize Event
+            // Prevent page refreshs until postinit
+            ref_stop
+            //
+            // Load colors
+            click fLoadColors,1
+            //
+            // Display username
+            if(User_Settings.userNum.val==0)
+            {
+                tUser.txt=" "+User_Settings.u0Name.txt
+            }else if(User_Settings.userNum.val==1)
+            {
+                tUser.txt=" "+User_Settings.u1Name.txt
+            }else if(User_Settings.userNum.val==2)
+            {
+                tUser.txt=" "+User_Settings.u2Name.txt
+            }
+            //
+            // Display all active modes
+            sys0=Settings.activeModes.val&1
+            if(sys0!=0)
+            {
+                // Simple Mode is active
+                tMSI.bco=6900
+            }
+            sys0=Settings.activeModes.val&2
+            if(sys0!=0)
+            {
+                // MIDI Live Mode is active
+                tMML.bco=6900
+            }
+            sys0=Settings.activeModes.val&4
+            if(sys0!=0)
+            {
+                // Lightsaber Mode is active
+                tMLS.bco=6900
+            }
+            //
+            // Enable page refreshs again
+            ref_star
+        
+        Postinitialize Event
+            
+        Touch Press Event
+            if(Other_Settings.nBackOff.val!=0)
+            {
+                // Default "stop" action.
+                // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                prints "mes",3
+                // Set all ontime and duty settings of all pages to 0.
+                // First come the global variables then the local variables.
+                Simple.ontime.val=0
+                Simple.duty.val=0
+                Simple.set1.val=Simple.set1.val&0x0000ffff
+                Simple.set2.val=Simple.set2.val&0x0000ffff
+                Simple.set3.val=Simple.set3.val&0x0000ffff
+                Simple.set4.val=Simple.set4.val&0x0000ffff
+                Simple.set5.val=Simple.set5.val&0x0000ffff
+                Simple.set6.val=Simple.set6.val&0x0000ffff
+                MIDI_Live.ontime.val=0
+                MIDI_Live.duty.val=0
+                MIDI_Live.set1.val=0
+                MIDI_Live.set2.val=0
+                MIDI_Live.set3.val=0
+                MIDI_Live.set4.val=0
+                MIDI_Live.set5.val=0
+                MIDI_Live.set6.val=0
+                Lightsaber.ontime.val=0
+                Lightsaber.ontimes12.val=0
+                Lightsaber.ontimes34.val=0
+                Lightsaber.ontimes56.val=0
+            }
+        
+        Touch Release Event
+            
+        Page Exit Event
+            
+    Components
+        Text tTitle
+            Properties
+                Scope       : Local
+                Initial Text: "Help and Information"
+                Max. length : 22
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
+                
+                Touch Release Event
+                    
+        Text tUser
+            Properties
+                Scope       : Local
+                Initial Text: " Guest"
+                Max. length : 32
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
+                
+                Touch Release Event
+                    
+        Text tMSI
+            Properties
+                Scope       : Local
+                Initial Text: "Simple"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
+                
+                Touch Release Event
+                    
+        Text tMML
+            Properties
+                Scope       : Local
+                Initial Text: "MIDI Live"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
+                
+                Touch Release Event
+                    
+        Text tMLS
+            Properties
+                Scope       : Local
+                Initial Text: "Lightsaber"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
+                
+                Touch Release Event
+                    
+        Text tButtons
+            Properties
+                Scope       : Local
+                Initial Text: "Double lined Buttons"
+                Max. length : 40
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tCredits
+            Properties
+                Scope       : Local
+                Initial Text: "Credits"
+                Max. length : 40
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    
+        Text tChnInfo
+            Properties
+                Scope       : Local
+                Initial Text: "Buttons with a double outline have an alternate function when you keep them pressed. \r\nDouble lined return buttons f.ex. keep the mode running in background.\r\nOther double lined buttons can open additional settings."
+                Max. length : 300
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
+                
+                Touch Release Event
+                    
+        Hotspot fLoadColors
+            Events
+                Touch Press Event
+                    // Changes all page components according to the current color set.
+                    // Note: This component has to be the last component of the page.
+                    //
+                    // sys0: component id
+                    // sys1: component type
+                    // sys2: picture id offset for current color mode
+                    sys2=Settings.colorMode.val*Settings.picCount.val
+                    for(sys0=0;sys0<fLoadColors.id;sys0++)
+                    {
+                        // More convenient for typing
+                        sys1=b[sys0].type
+                        if(sys1==121)
+                        {
+                            // Types that have bco
+                            // page
+                            if(b[sys0].bco!=Settings.backCol2.val)
+                            {
+                                b[sys0].bco=Settings.backCol.val
+                            }
+                        }else if(sys1==54||sys1==59||sys1==116||sys1==55)
+                        {
+                            // Types that have bco, pco, and sta:
+                            // number, float, text, scroll text
+                            if(b[sys0].sta==1)
+                            {
+                                if(b[sys0].bco!=Settings.backCol2.val)
+                                {
+                                    b[sys0].bco=Settings.backCol.val
+                                    b[sys0].pco=Settings.frontCol.val
+                                }else
+                                {
+                                    b[sys0].pco=Settings.frontCol2.val
+                                }
+                            }
+                        }else if(sys1==98||sys1==53)
+                        {
+                            // Types that have pco, pic, pco2, pic2, sta:
+                            // button, dual-state button
+                            if(b[sys0].sta==2)
+                            {
+                                b[sys0].pco=Settings.frontCol.val
+                                b[sys0].pco2=Settings.backCol.val
+                                b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                                b[sys0].pic+=sys2
+                                b[sys0].pic2=b[sys0].pic+1
+                            }
+                        }else if(sys1==1)
+                        {
+                            // Types that have pic, pic2:
+                            // slider
+                            b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                            b[sys0].pic+=sys2
+                            b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
+                            b[sys0].pic2+=sys2
+                        }
+                    }
+                
+                Touch Release Event
+                    
+        Text tCreditsInfo
+            Properties
+                Scope       : Local
+                Initial Text: "Forums with great people: highvoltageforum, Unofficial Nextion Forum.\r\nSpecial thanks to: Netzpfuscher\r\nMore info on GitHub\r\n\r\nDevelopped by Max Zuidberg"
+                Max. length : 300
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
+                
+                Touch Release Event
+                    
+        Button bReturn
+            Properties
+                Scope      : Local
+                Caption    : "Return"
+                Max. length: 10
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    page Settings
+                
