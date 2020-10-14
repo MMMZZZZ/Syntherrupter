@@ -152,7 +152,9 @@ Page Help_Info
             
             Events
                 Touch Press Event
-                    
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
+                
                 Touch Release Event
                     
         Text tCredits
@@ -163,7 +165,9 @@ Page Help_Info
             
             Events
                 Touch Press Event
-                    
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
+                
                 Touch Release Event
                     
         Text tChnInfo
@@ -202,7 +206,7 @@ Page Help_Info
                 Touch Press Event
                     
                 Touch Release Event
-                    page Settings
+                    page Menu
                 
         Hotspot fLoadColors
             Events
