@@ -9,8 +9,10 @@ My own version currently looks like this (with Dark Mode on):
 
 ![Syntherrupter Max Top](/Documentation/Pictures/Syntherrupter_Max_Top.jpeg)
 
+Left to right: On/Off switch, charge port, USB Serial port, optical out (only one for now):
 ![Syntherrupter Max Back](/Documentation/Pictures/Syntherrupter_Max_Back.jpeg)
 
+There's an optical receiver that's not needed. The transmitter has a little BC547C BJT to drive it with the 60mA it needs. The cable mess on the right is 1 USB cable from the powerbanks charge port to Syntherrupters charge port, and 1 USB cable from the Powerbank to the Tiva LaunchPad, whose ground wire goes to the switch. Nothing complicated. 
 ![Syntherrupter Max Inside](/Documentation/Pictures/Syntherrupter_Max_Internal.jpeg)
 
 ## Demo Videos
