@@ -4,6 +4,15 @@ You can control up to 6 different coils simultaneously. On each coil you can pla
 
 *By Max Zuidberg. Credits below.*
 
+## Pictures
+My own version currently looks like this (with Dark Mode on):
+
+![Syntherrupter Max Top](/Documentation/Pictures/Syntherrupter_Max_Top.jpeg)
+
+![Syntherrupter Max Back](/Documentation/Pictures/Syntherrupter_Max_Back.jpeg)
+
+![Syntherrupter Max Inside](/Documentation/Pictures/Syntherrupter_Max_Internal.jpeg)
+
 ## Demo Videos
 Syntherrupter playing "I Want It All" - a MIDI with ~6 voices, pitch bending, sometimes very fast notes, and other effects.
 
