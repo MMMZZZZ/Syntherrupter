@@ -179,6 +179,31 @@ Page Help_Info
                 
                 Touch Release Event
                     
+        Text tCreditsInfo
+            Properties
+                Scope       : Local
+                Initial Text: "Forums with great people: highvoltageforum, Unofficial Nextion Forum.\r\nSpecial thanks to: Netzpfuscher\r\nMore info on GitHub\r\n\r\nDevelopped by Max Zuidberg"
+                Max. length : 300
+            
+            Events
+                Touch Press Event
+                    // Make this object "transparent" for clicks and click background.
+                    click 0,1
+                
+                Touch Release Event
+                    
+        Button bReturn
+            Properties
+                Scope      : Local
+                Caption    : "Return"
+                Max. length: 10
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    page Settings
+                
         Hotspot fLoadColors
             Events
                 Touch Press Event
@@ -241,28 +266,3 @@ Page Help_Info
                 
                 Touch Release Event
                     
-        Text tCreditsInfo
-            Properties
-                Scope       : Local
-                Initial Text: "Forums with great people: highvoltageforum, Unofficial Nextion Forum.\r\nSpecial thanks to: Netzpfuscher\r\nMore info on GitHub\r\n\r\nDevelopped by Max Zuidberg"
-                Max. length : 300
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click 0,1
-                
-                Touch Release Event
-                    
-        Button bReturn
-            Properties
-                Scope      : Local
-                Caption    : "Return"
-                Max. length: 10
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    page Settings
-                
