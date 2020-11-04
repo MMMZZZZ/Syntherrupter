@@ -1,5 +1,7 @@
 # Syntherrupter Firmware Flashing
 
+[Back to the wiki main page](README.md#readme)
+
 This page covers how to flash a (new) firmware on your Syntherrupter. It requires everything to be wired up as described in the *[Wiring and Schematics](/Documentation/Wiring%20and%20Schematics)* folder.
 
 ## Index

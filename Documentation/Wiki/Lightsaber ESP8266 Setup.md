@@ -1,5 +1,7 @@
 # Lightsaber ESP8266 Setup
 
+[Back to the wiki main page](README.md#readme)
+
 This page covers how to get the ESP8266 (in the following: ESP) ready to work in the lightsabers. To build the lightsabers themselves, please have a look at the *Schematic and Wiring* folder.
 
 The lightsabers use ESP8266s to communicate with the Syntherrupter. They are cheap and supposed to work even in a noisy environment like a tesla coil. 

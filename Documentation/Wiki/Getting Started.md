@@ -1,6 +1,6 @@
 # Getting Started with Syntherrupter
 
-[Back to the wiki main page](README.md)
+[Back to the wiki main page](README.md#readme)
 
 So you want to build your own Syntherrupter? Great! This page will guide you. First you'll learn about what you need to build one, then how you get it ready to use, and finally we'll take a quick tour through the user interface. 
 

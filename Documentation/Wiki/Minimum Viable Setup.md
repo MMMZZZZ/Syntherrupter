@@ -1,5 +1,7 @@
 # Minimum Viable Setup
 
+[Back to the Getting Started Guide](Getting%20Started.md#readme)
+
 The minimum viable setup is the bare minimum you need to even run the Syntherrupter firmware. It won't be ready to use yet but it will allow you to flash firmwares and get to know the user interface. 
 
 ## Index
