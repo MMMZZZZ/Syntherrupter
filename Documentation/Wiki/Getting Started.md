@@ -34,7 +34,7 @@ Link to the page: [Minimum Viable Setup](Minimum%20Viable%20Setup.md#readme)
 Once you have the minimum viable setup, you can extend it by any combination of the following options. Each option is described on its own page.
 
 * [Optical transmitters for up to 6 independant coils](HW/Optical%20Transmitters.md#readme)
-* [Shielded encasing]((HW/Casing.md#readme)
+* [Shielded encasing](HW/Casing.md#readme)
 * [Powerbank for standalone operation](HW/Power.md#readme)
 * [MIDI Input jack](HW/MIDI%20In.md#readme)
 * [Lightsabers](HW/Lightsabers.md#readme)
