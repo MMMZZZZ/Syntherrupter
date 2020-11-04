@@ -2,9 +2,9 @@
 
 [Back to the wiki main page](README.md#readme)
 
-This page covers how to get the ESP8266 (in the following: ESP) ready to work in the lightsabers. To build the lightsabers themselves, please have a look at the *Schematic and Wiring* folder.
-
 The lightsabers use ESP8266s to communicate with the Syntherrupter. They are cheap and supposed to work even in a noisy environment like a tesla coil. 
+
+This page covers how to get those ESP8266 (in the following: ESP) ready to work. This requires the circuitry described on the [Lightsaber Receiver](HW/Lightsaber%20Receiver.md#readme) wiki page. To build the lightsabers themselves, please have a look at the pictures [here](/Documentation/Wiring%20and%20Schematics/Lightsaber%20Sender).
 
 The ESPs require their own firmware which has to be flashed once. Ideally they shouldn't require updates if there're new features, because they are not involved in the actual processing of the sensor data. This is completely handled by the Tiva microcontroller. 
 
