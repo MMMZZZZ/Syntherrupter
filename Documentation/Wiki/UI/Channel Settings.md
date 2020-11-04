@@ -9,3 +9,5 @@ Description
 * [Content](#content)
 
 ## Content
+
+![Channel Settings](/Documentation/Pictures/UI/Channel%20Settings.png)

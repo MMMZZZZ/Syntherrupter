@@ -9,3 +9,5 @@ Description
 * [Content](#content)
 
 ## Content
+
+![General Settings](/Documentation/Pictures/UI/General.png)

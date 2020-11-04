@@ -9,3 +9,5 @@ Description
 * [Content](#content)
 
 ## Content
+
+![Lightsaber Mode](/Documentation/Pictures/UI/Lightsaber.png)

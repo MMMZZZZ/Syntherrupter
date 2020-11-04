@@ -9,3 +9,5 @@ Description
 * [Content](#content)
 
 ## Content
+
+![Error Page](/Documentation/Pictures/UI/Error.png)

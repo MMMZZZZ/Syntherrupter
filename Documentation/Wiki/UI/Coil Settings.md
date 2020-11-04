@@ -9,3 +9,5 @@ Description
 * [Content](#content)
 
 ## Content
+
+![Coil Settings](/Documentation/Pictures/UI/Coil%20Settings.png)

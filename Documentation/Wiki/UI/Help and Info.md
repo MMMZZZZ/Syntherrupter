@@ -9,3 +9,5 @@ Description
 * [Content](#content)
 
 ## Content
+
+![Help and Info](/Documentation/Pictures/UI/Help%20and%20Info.png)

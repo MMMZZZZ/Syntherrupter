@@ -9,3 +9,5 @@ Description
 * [Content](#content)
 
 ## Content
+
+![Simple Mode](/Documentation/Pictures/UI/Simple.png)

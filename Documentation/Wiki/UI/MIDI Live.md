@@ -9,3 +9,5 @@ Description
 * [Content](#content)
 
 ## Content
+
+![MIDI Live Mode](/Documentation/Pictures/UI/MIDI%20Live.png)

@@ -9,3 +9,5 @@ Description
 * [Content](#content)
 
 ## Content
+
+![User Settings](/Documentation/Pictures/UI/Users.png)

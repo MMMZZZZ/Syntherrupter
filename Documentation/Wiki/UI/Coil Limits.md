@@ -9,3 +9,5 @@ Description
 * [Content](#content)
 
 ## Content
+
+![Coil Limits](/Documentation/Pictures/UI/Coil%20Limits.png)

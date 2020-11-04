@@ -9,3 +9,5 @@ Description
 * [Content](#content)
 
 ## Content
+
+![Nextion<->USB Passthrough](/Documentation/Pictures/UI/Nextion-USB.png)

@@ -9,3 +9,5 @@ Description
 * [Content](#content)
 
 ## Content
+
+![Startup](/Documentation/Pictures/UI/Startup.png)
