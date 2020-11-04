@@ -31,17 +31,17 @@ There's no finished PCB which you could buy and populate. Since Syntherrupter is
 
 No matter what features you want to (not) have this is what you'll always need. The minimum viable setup doesn't require any soldering or additional components. 
 
-Link to the page: [Minimum Viable Setup](Minimum%20Viable%20Setup.md)
+Link to the page: [Minimum Viable Setup](Minimum%20Viable%20Setup.md#readme)
 
 ### Options
 
 Once you have the minimum viable setup, you can extend it by any combination of the following options. Each option is described on its own page.
 
-* [Optical transmitters for up to 6 independant coils](HW/Optical%20Transmitters.md)
-* [Shielded encasing]((HW/Casing.md)
-* [Powerbank for standalone operation](HW/Power.md)
-* [MIDI Input jack](HW/MIDI%20In.md)
-* [Lightsabers](HW/Lightsabers.md)
+* [Optical transmitters for up to 6 independant coils](HW/Optical%20Transmitters.md#readme)
+* [Shielded encasing]((HW/Casing.md#readme)
+* [Powerbank for standalone operation](HW/Power.md#readme)
+* [MIDI Input jack](HW/MIDI%20In.md#readme)
+* [Lightsabers](HW/Lightsabers.md#readme)
 
 ## Firmware
 
@@ -64,7 +64,7 @@ Hit any part of the screen to continue.
 
 Syntherrupter supports three different users with different rights. By default you'll automatically log in as "Master Yoda", the user with all rights (think of it as the "Admin" or "root user").
 
-More details about the different users can be found here: [User Management](User%20Management.md)
+More details about the different users can be found here: [User Management](UI/User%20Management.md#readme)
 
 ### Main Menu
 
@@ -77,6 +77,8 @@ It contains 6 buttons.
 * Last one is Switch User. It brings you back to the login page. At this point I should probably tell you, that the auto login password is `0`. 
 
 ### Simple Mode
+
+*Complete documentation of the Simple Mode: [Simple Mode](UI/Simple%20Mode.md#readme)*
 
 Let's check Simple mode first. This is a good place to learn about some basic usage concepts of Syntherrupter. 
 
@@ -128,9 +130,11 @@ At this point you may think again about the emergency stop. Imagine how much tim
 
 ### MIDI Live Mode and Lightsaber Mode
 
-They deserve their own page. 
+They follow the same principles as Simple Mode. Since this is only the Getting Started guide, I recommend you to check the according wiki pages: [MIDI Live Mode](MIDI%20Live%20Mode.md#readme), [Lightsaber Mode](Lightsaber%20Mode.md#readme).
 
 ### Settings
+
+*Complete documentation of the Settings: [Settings](Settings.md#readme)
 
 Let's leave the operation modes for now and look at the settings. 
 
