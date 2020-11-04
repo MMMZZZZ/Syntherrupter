@@ -35,11 +35,8 @@ Here's a demo of Syntherrupters stereo features with Thunderstruck. The only mod
 * Different users with different limits. This is useful if you want to rent the coil to someone else who does not know the coils (thermal?) limits as well as you do.
 * Sounds boring, but for me it belongs to an interrupter as well: **Normal interrupter mode** where you can control the ontime, BPS and duty.
 
-## Download and Installation
-Have a look at the [releases page](https://github.com/MMMZZZZ/Syntherrupter/releases).
-
-## Documentation
-Check the [Wiki](/Documentation/Wiki#readme). It's far from being complete, but the most important stuff is there.
+## Documentation and Getting Started
+Check the [Wiki](/Documentation/Wiki#readme). It's far from being complete, but the most important stuff - like a Getting Started Guide - is there.
 
 ### ADSR Sounds
 The sound can be selected by the MIDI command "Program Change". In your MIDI software you can select it by changing the instrument of the channel. 
@@ -60,31 +57,8 @@ The programs 1-63 can be modified by the user using the ADSR Editor. The program
 
 If you wonder why you would want to exceed the given ontime, it is an "efficient" way to get louder notes even with high voice count without tripping your circuit breaker. Since the ontime drops pretty fast after the attack you can consider the ontime on the display more like an average ontime. Note that all these ADSR settings do not allow to exceed your coil limits (->Settings->Coil Setttings). 
 
-### Communication Pins
-
-#### For the Nextion touch screen
-* PA4: RX
-* PA5: TX
-#### For MIDI data at 31250baud/s
-* PC4: RX
-* *PC5: TX (unused)*
-#### For MIDI data at 115200baud/s
-These Pins are connected to the on-board USB to serial converter.
-* *A0: RX*
-* *A1: TX*
-#### For Lightsaber Receiving ESP8266
-* PA6: RX
-* PA7: TX
-### Output pins
-The following pins supply the interrupt signal for the given coil. Signal is active high, 3.3V, max. 12mA.
-* Coil 1: PD0
-* Coil 2: PD2
-* Coil 3: PM0
-* Coil 4: PM2
-* Coil 5: PM4
-* Coil 6: PM6
 ### Other documentation
-Building and using one is much easier than it looks. The forum threads (especially the english one) contain many posts and videos explaining and demonstrating the features of v2.x.x, v3.x.x and v4.x.x. Anything that's not yet been described here can be found there.
+The forum threads (especially the english one) contain many posts and videos explaining and demonstrating the features of v2.x.x, v3.x.x and v4.x.x. Anything that's not yet been described in the wiki can be found there.
 
 English: https://highvoltageforum.net/index.php?topic=1020.0
 
