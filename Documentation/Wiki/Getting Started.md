@@ -41,7 +41,7 @@ Once you have the minimum viable setup, you can extend it by any combination of 
 
 ## Firmware
 
-Once the hardware is done, you can flash the Syntherrupter firmware. Step-by-step guide over here: [Firmware Flashing](Firmware%20Flashing.md). 
+Once the hardware is done, you can flash the Syntherrupter firmware. Step-by-step guide over here: [Firmware Flashing](Firmware%20Flashing.md#readme). 
 
 *Note: actually, you could already flash the firmware once you have the minimum viable setup, but I assume most people want to get the hardware finished before messing with software.*
 
@@ -58,9 +58,7 @@ Hit any part of the screen to continue.
 
 ### Login Page
 
-Syntherrupter supports three different users with different rights. By default you'll automatically log in as "Master Yoda", the user with all rights (think of it as the "Admin" or "root user").
-
-More details about the different users can be found here: [User Management](UI/User%20Management.md#readme)
+Syntherrupter supports three different users with different rights. By default you'll automatically log in as "Master Yoda", the user with all rights (think of it as the "Admin" or "root user"). We'll get to Syntherrupters User Management a bit later.
 
 ### Main Menu
 
@@ -74,7 +72,7 @@ It contains 6 buttons.
 
 ### Simple Mode
 
-*Complete documentation of the Simple Mode: [Simple Mode](UI/Simple%20Mode.md#readme)*
+*Complete documentation of the Simple Mode: [Simple Mode](UI/Simple.md#readme)*
 
 Let's check Simple mode first. This is a good place to learn about some basic usage concepts of Syntherrupter. 
 
@@ -126,11 +124,11 @@ At this point you may think again about the emergency stop. Imagine how much tim
 
 ### MIDI Live Mode and Lightsaber Mode
 
-They follow the same principles as Simple Mode. Since this is only the Getting Started guide, I recommend you to check the according wiki pages: [MIDI Live Mode](MIDI%20Live%20Mode.md#readme), [Lightsaber Mode](Lightsaber%20Mode.md#readme).
+They follow the same principles as Simple Mode. Since this is only the Getting Started guide, I recommend you to check the according wiki pages: [MIDI Live Mode](UI/MIDI%20Live.md#readme), [Lightsaber Mode](Lightsaber%20Mode.md#readme).
 
 ### Settings
 
-*Complete documentation of the Settings: [Settings](Settings.md#readme)
+*Complete documentation of the Settings: [Settings](UI/Settings.md#readme)*
 
 Let's leave the operation modes for now and look at the settings. 
 
@@ -144,6 +142,8 @@ There are 6 settings pages:
 
 #### Coil Limits
 
+*Complete documentation of the Coil Limits: [Coil Limits](UI/Coil%20Limits.md#readme)*
+
 Let's look at the Coil Limits because they cover the most important safety feature of Syntherrupter. These settings apply equally to all modes. In fact, all modes sit on top of what I call the "Core" of Syntherrupter. That's the code that actually generates all the output signals. Each mode can add tones to any outputs. The Core then checks all tones of all modes together against all the limits and generates an output signal that exceeds none of them. 
 
 The following limits can be set:
@@ -155,6 +155,8 @@ The following limits can be set:
 You can modify any of the values by tipping on it and typing a new value using the keypad at the bottom right. The settings will be applied when you hit the return button. 
 
 #### User Settings
+
+*Complete documentation of the User Settings: [User Settings](UI/Users.md#readme)*
 
 I'll quickly talk about this one because there're a few pitfalls.
 
