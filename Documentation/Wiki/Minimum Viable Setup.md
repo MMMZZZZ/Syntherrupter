@@ -2,6 +2,17 @@
 
 The minimum viable setup is the bare minimum you need to even run the Syntherrupter firmware. It won't be ready to use yet but it will allow you to flash firmwares and get to know the user interface. 
 
+## Index
+
+* [Index](#index)
+* [Firmware](#firmware)
+* [Tiva Microcontroller](#tiva-microcontroller)
+* [Display](#display)
+	* [Introduction](#introduction)
+	* [Suitable Models](#suitable-models)
+	* [Without a Display](#without-a-display)
+	* [Wiring](#wiring)
+
 ## Firmware
 
 You'll always need a Syntherrupter firmware, preferrably the latest release. You find all releases here: https://github.com/MMMZZZZ/Syntherrupter/releases/

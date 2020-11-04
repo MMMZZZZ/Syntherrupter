@@ -2,8 +2,10 @@
 
 [Back to the wiki main page](README.md)
 
+So you want to build your own Syntherrupter? Great! This page will guide you. First you'll learn about what you need to build one, then how you get it ready to use, and finally we'll take a quick tour through the user interface. 
+
 ## Index
-* [Introduction](#introduction)
+* [Index](#index)
 * [Hardware](#hardware)
 	* [Minimum Viable Setup](#minimum-viable-setup)
 	* [Options](#options)
@@ -16,12 +18,6 @@
 	* [MIDI Live Mode and Lightsaber Mode](#midi-live-mode-and-lightsaber-mode)
 	* [Settings](#settings)
 * [Done!](#done)
-
-## Introduction
-
-So you want to build your own Syntherrupter? Great! This page will guide you. First you'll learn about what you need to build one, then how you get it ready to use, and finally we'll take a quick tour through the user interface. 
-
-
 
 ## Hardware
 

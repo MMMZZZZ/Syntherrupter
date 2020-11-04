@@ -1,15 +1,14 @@
 # Syntherrupter Firmware Flashing
 
+This page covers how to flash a (new) firmware on your Syntherrupter. It requires everything to be wired up as described in the *[Wiring and Schematics](/Documentation/Wiring%20and%20Schematics)* folder.
+
 ## Index
-* [Introduction](#introduction)
+* [Index](#index)
 * [Note about beta versions](#note-about-beta-versions)
 * [Flashing Order and Recovery](#flashing-order-and-recovery)
 * [Tiva Flashing](#tiva-flashing)
 * [Nextion Flashing over USB/Serial](#nextion-flashing-over-usbserial)
 * [Nextion Flashing with a microSD card](#nextion-flashing-with-a-microsd-card)
-
-## Introduction
-This page covers how to flash a (new) firmware on your Syntherrupter. It requires everything to be wired up as described in the *[Wiring and Schematics](/Documentation/Wiring%20and%20Schematics)* folder.
 
 ## Note about beta versions
 Beta versions usually include new features that do not touch the core of Syntherrupter. This means it's *highly unlikely* that the update breaks the core's safety features, namely the specified maximum ontime, minimum offtime and maximum duty. However, you should not expect any part of the GUI or any of Syntherrupter's modes to be free of bugs. 

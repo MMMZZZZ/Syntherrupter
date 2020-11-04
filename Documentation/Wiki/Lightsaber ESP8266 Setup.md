@@ -1,18 +1,17 @@
 # Lightsaber ESP8266 Setup
 
-## Index
-* [Introduction](#introduction)
-* [Flashing for Windows Users](#flashing-for-windows-users)
-* [Flashing with cross-plattform tool](#flashing-with-cross-plattform-tool)
-* [Lightsaber ID setting](#lightsaber-id-setting)
-* [Transmitters, Receivers, Pairing](#transmitters-receivers-pairing)
-
-## Introduction
 This page covers how to get the ESP8266 (in the following: ESP) ready to work in the lightsabers. To build the lightsabers themselves, please have a look at the *Schematic and Wiring* folder.
 
 The lightsabers use ESP8266s to communicate with the Syntherrupter. They are cheap and supposed to work even in a noisy environment like a tesla coil. 
 
 The ESPs require their own firmware which has to be flashed once. Ideally they shouldn't require updates if there're new features, because they are not involved in the actual processing of the sensor data. This is completely handled by the Tiva microcontroller. 
+
+## Index
+* [Index](#index)
+* [Flashing for Windows Users](#flashing-for-windows-users)
+* [Flashing with cross-plattform tool](#flashing-with-cross-plattform-tool)
+* [Lightsaber ID setting](#lightsaber-id-setting)
+* [Transmitters, Receivers, Pairing](#transmitters-receivers-pairing)
 
 ## Flashing for Windows Users
 For Windows exists a graphical tool for flashing the ESPs. 
