@@ -1,6 +1,6 @@
 # Hardware Reference
 
-[Back to the wiki main page](/Documentation/wiki/README.md#readme)
+[Back to the wiki main page](/Documentation/Wiki/README.md#readme)
 
 This page and its subpages document every aspect of Syntherrupters hardware.
 
