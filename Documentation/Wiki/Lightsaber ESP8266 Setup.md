@@ -12,7 +12,7 @@ This page covers how to get the ESP8266 (in the following: ESP) ready to work in
 
 The lightsabers use ESP8266s to communicate with the Syntherrupter. They are cheap and supposed to work even in a noisy environment like a tesla coil. 
 
-The ESPs require their own firmware which has to be flashed once. Ideally they shouldn't require updates if there're new features, because they are not involved in the actual processing of the sensor data. This is completely handled by the Tiva microcontroller. Being realistic, they'll still get updates because in a week I'll find something to improve or to fix. 
+The ESPs require their own firmware which has to be flashed once. Ideally they shouldn't require updates if there're new features, because they are not involved in the actual processing of the sensor data. This is completely handled by the Tiva microcontroller. 
 
 ## Flashing for Windows Users
 For Windows exists a graphical tool for flashing the ESPs. 

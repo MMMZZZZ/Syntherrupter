@@ -3,6 +3,7 @@
 ## Index
 * [Introduction](#introduction)
 * [Note about beta versions](#note-about-beta-versions)
+* [Flashing Order and Recovery](#flashing-order-and-recovery)
 * [Tiva Flashing](#tiva-flashing)
 * [Nextion Flashing over USB/Serial](#nextion-flashing-over-usbserial)
 * [Nextion Flashing with a microSD card](#nextion-flashing-with-a-microsd-card)
@@ -12,6 +13,11 @@ This page covers how to flash a (new) firmware on your Syntherrupter. It require
 
 ## Note about beta versions
 Beta versions usually include new features that do not touch the core of Syntherrupter. This means it's *highly unlikely* that the update breaks the core's safety features, namely the specified maximum ontime, minimum offtime and maximum duty. However, you should not expect any part of the GUI or any of Syntherrupter's modes to be free of bugs. 
+
+## Flashing Order and Recovery
+Firmware updates always consist of a new Nextion and a new Tiva firmware. Unless the release notes say something different, you should update the Nextion firmware first. The reason is that you can always flash the Tiva microcontroller but in order to flash Nextion you need a working Syntherrupter that allows you to enter Nextion<->USB passthrough mode.
+
+Usually if a Nextion firmware update goes wrong, the Tiva microcontroller will automatically enter Nextion<->USB passthrough mode, allowing you to reflash the firmware. However, if you flashed f.ex. the wrong version it can happen that this check is successful but Syntherrupter is still unuasble. In this case you can either [update Nextion using a microSD card](#nextion-flashing-with-a-microsd-card), or disconnect the Nextion screen when powering up Syntherrupter. Wait 5 seconds, and reconnect. This makes sure that the Tiva firmware entered Nextion<->USB passthrough mode and you can [flash the Nextion firmware over USB](#nextion-flashing-over-usbserial) again. 
 
 ## Tiva Flashing
 
