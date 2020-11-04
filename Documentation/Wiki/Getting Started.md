@@ -124,7 +124,7 @@ At this point you may think again about the emergency stop. Imagine how much tim
 
 ### MIDI Live Mode and Lightsaber Mode
 
-They follow the same principles as Simple Mode. Since this is only the Getting Started guide, I recommend you to check the according wiki pages: [MIDI Live Mode](UI/MIDI%20Live.md#readme), [Lightsaber Mode](Lightsaber%20Mode.md#readme).
+They follow the same principles as Simple Mode. Since this is only the Getting Started guide, I recommend you to check the according wiki pages: [MIDI Live Mode](UI/MIDI%20Live.md#readme), [Lightsaber Mode](Lightsaber.md#readme).
 
 ### Settings
 
