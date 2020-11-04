@@ -39,7 +39,7 @@ Here's a demo of Syntherrupters stereo features with Thunderstruck. The only mod
 Have a look at the [releases page](https://github.com/MMMZZZZ/Syntherrupter/releases).
 
 ## Documentation
-Check the [Wiki](/Documentation/Wiki#syntherrupter-wiki). It's far from being complete, but the most important stuff is there.
+Check the [Wiki](/Documentation/Wiki#readme). It's far from being complete, but the most important stuff is there.
 
 ### ADSR Sounds
 The sound can be selected by the MIDI command "Program Change". In your MIDI software you can select it by changing the instrument of the channel. 
