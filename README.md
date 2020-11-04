@@ -36,10 +36,10 @@ Here's a demo of Syntherrupters stereo features with Thunderstruck. The only mod
 * Sounds boring, but for me it belongs to an interrupter as well: **Normal interrupter mode** where you can control the ontime, BPS and duty.
 
 ## Download and Installation
-Have a look at the [releases page](https://github.com/MMMZZZZ/Syntherrupter/releases) and the forum links below.
+Have a look at the [releases page](https://github.com/MMMZZZZ/Syntherrupter/releases).
 
 ## Documentation
-Check the [Wiki](/Documentation/Wiki). It's far from being complete, but the most important stuff is there.
+Check the [Wiki](/Documentation/Wiki#syntherrupter-wiki). It's far from being complete, but the most important stuff is there.
 
 ### ADSR Sounds
 The sound can be selected by the MIDI command "Program Change". In your MIDI software you can select it by changing the instrument of the channel. 
