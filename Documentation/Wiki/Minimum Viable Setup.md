@@ -21,7 +21,7 @@ You'll always need a Syntherrupter firmware, preferrably the latest release. You
 
 Read the release notes and download the attached ZIP file. It includes all the firmware binaries you'll need. 
 
-Details about how to flash those firmwares are described on a separate page: [Firmware Flashing](Firmware%20Flashing.md). 
+Details about how to flash those firmwares are described on a separate page: [Firmware Flashing](Firmware%20Flashing.md#readme). 
 
 ## Tiva Microcontroller
 The heart of Syntherrupter is the TM4C1294XL LaunchPad from TI. The Microcontroller is part of their *Tiva* family (Cortex M4F microcontrollers), hence I'll call it *Tiva* in the following.
