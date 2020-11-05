@@ -65,9 +65,9 @@ Syntherrupter supports three different users with different rights. By default y
 The Main Menu links everything together. It's the "root" of the user interface. 
 
 It contains 6 buttons. 
-* At top you have the three modes of operation of Syntherrupter: Simple, MIDI Live and Lightsaber. Clicking on them brings you the settings for that mode. 
+* At the top you have the three modes of operation of Syntherrupter: Simple, MIDI Live and Lightsaber. Click on them to bring up the controls for that mode. 
 * Then we have Help and Info, which is kind of a work in progress. I plan to put more info in there but for it only contains a Credits section and some info you'd probably not find by "trial&error". Don't worry, we'll get to it.
-* Next one in the row is Settings. This is where you configure things like Username/password, screen brightness, safety limits and many other things
+* Next one in the row is Settings. This is where you configure things like Username/password, screen brightness, safety limits and many other things. 
 * Last one is Switch User. It brings you back to the login page. At this point I should probably tell you, that the auto login password is `0`. 
 
 ### Simple Mode
@@ -78,9 +78,9 @@ Let's check Simple mode first. This is a good place to learn about some basic us
 
 #### The Sliders
 
-The page contains three sliders, for ontime, BPS/frequency and duty cycle. If you wonder why you need three, you're kinda right, three is redundant. This has two reasons: sometimes you want to control the "power" via the ontime, and sometimes by the duty cycle. The second reason is that no matter how you like to control the signal, you probably always want to know both values. First lesson: Syntherrupter aims for flexibility.
+The page contains three sliders, for ontime, BPS/frequency and duty cycle. If you wonder why you need three, you're kinda right, three is redundant. This has two reasons: sometimes you want to control the "power" via the ontime, and sometimes by the duty cycle. The second reason is that no matter how you like to control the signal, you probably always want to know both values. First lesson: 
 
-When you play with the sliders, you'll see that all values update automatically. If you increase the ontime, the duty increases, too. Where it gets interesting is when you change the BPS. Should it keep the ontime or keep the duty setting? Answer: It keeps whatever you edited last. Try it out, change the ontime, then the BPS. Now set the duty cycle and change the BPS again. Second lesson: Syntherrupter tries to be smart. 
+When you play with the sliders, you'll see that all values update automatically. If you increase the ontime, the duty increases, too. Where it gets interesting is when you change the BPS. Should it keep the ontime or keep the duty setting? Answer: It keeps whatever you edited last. Try it out, change the ontime, then the BPS. Now set the duty cycle and change the BPS again. 
 
 #### Selecting the outputs
 
