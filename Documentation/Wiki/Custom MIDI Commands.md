@@ -23,7 +23,7 @@ Currently Syntherrupter has support for the following NRPs (all values are decim
 |-|-|-|-|-|
 |Stereo Mapping, Control|42|0|X (Don't care)|Stereo Mapping Mode (see below)|
 |Stereo Mapping, Input Range|42|1|0-127: upper end|0-127: lower end|
-|Stereo Mapping, Output Range|42|1|0-127: upper end|0-127: lower end|
+|Stereo Mapping, Output Range|42|2|0-127: upper end|0-127: lower end|
 
 #### Stereo Mapping Modes
 
