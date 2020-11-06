@@ -77,7 +77,7 @@ private:
                 note->panVol[coilNum] = 1.0f;
             }
 
-            if (coilPan < 0.0f || channels[note->channel].notePanOmniMode)
+            if (coilPan < 0.0f || channels[note->channel].notePanMode == Channel::NOTE_PAN_OMNI)
             {
                 note->panVol[coilNum] = 1.0f;
             }

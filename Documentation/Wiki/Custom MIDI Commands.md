@@ -21,9 +21,21 @@ After finishing the modification of NRPs, the NRP number should be reset to 0x7f
 Currently Syntherrupter has support for the following NRPs (all values are decimal, not hex):
 |Parameter|NC|NF|DC|DF|
 |-|-|-|-|-|
-|Stereo Mapping, Control|42|0|X (Don't care)|0: Off (normal stereo), 1: On, 2: Omni Mode|
+|Stereo Mapping, Control|42|0|X (Don't care)|Stereo Mapping Mode (see below)|
 |Stereo Mapping, Input Range|42|1|0-127: upper end|0-127: lower end|
 |Stereo Mapping, Output Range|42|1|0-127: upper end|0-127: lower end|
+
+#### Stereo Mapping Modes
+
+Syntherrupter allows you to map notes to stereo positions based on different parameters. 
+* Mode 0: "Off". Disables Mapping completely. 
+* Mode 1: "Individual". Each note gets mapped based on its pitch (note number + pitch bend + tuning)
+* Mode 2: "Omni". All notes of this channel play on all outputs equally. The stereo position of the outputs is completely ignored by this channel. 
+* Mode 3-6: Because chords can cover a large pitch range, they appear on multiple outputs at the same time. This quickly leads to "everything being everywhere". The visual effect of precise voices moving around is gone. Just one big mess with some peaks here and there. These modes try to solve this issue by assigning all notes of a channel the same position. Now each channel has again a "sharp" position on the stereo scale.
+	* Mode 3: "Lowest". All notes of the channel get mapped based on the current lowest pitch.
+	* Mode 4: "Highest". All notes of the channel get mapped based on the current highest pitch.
+	* Mode 5: "Average". All notes of the channel get mapped based on the current average pitch.
+	* Mode 6: "Loudest". All notes of the channel get mapped based on the pitch of the note with the highest velocity. If multiple notes have the same velocity, the pitch of the most recent one is taken.
 
 ### Recommended Links
 If you've never used NRPs or Syntherrupters advanced features, you might have a look at the following helpful links:
