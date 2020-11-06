@@ -379,8 +379,8 @@ bool MIDI::processBuffer(uint32_t b)
                         while (note != 0)
                         {
                             Note* nextNote = note->nextChnNote;
-                            notelist.removeNote(note);
                             channels[*channel].removeNote(note);
+                            notelist.removeNote(note);
                             note = nextNote;
                         }
                         break;
@@ -674,6 +674,8 @@ void MIDI::process()
                         {
                             note->panChanged = (1 << COIL_COUNT) - 1;
                         }
+
+                        note = note->nextChnNote;
                     }
                     channel->controllersChanged = false;
                     channel->notesChanged       = false;
@@ -749,8 +751,8 @@ void MIDI::updateToneList()
 
             if (note->isDead())
             {
-                notelist.removeNote(note); // Removes tone from tonelists, too.
                 channels[note->channel].removeNote(note);
+                notelist.removeNote(note); // Removes tone from tonelists, too.
             }
             else if (channels[note->channel].coils & coilBit)
             {

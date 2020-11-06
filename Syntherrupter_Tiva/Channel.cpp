@@ -61,6 +61,7 @@ Note* Channel::getNote(uint8_t noteNum)
         {
             return note;
         }
+        note = note->nextChnNote;
     }
     return 0;
 }
@@ -81,14 +82,15 @@ void Channel::removeNote(Note* note)
     else
     {
         Note* prevNote = firstNote;
-        Note* currentNote = firstNote;
+        Note* currentNote = firstNote->nextChnNote;
         while (currentNote != 0)
         {
             if (currentNote == note)
             {
                 prevNote->nextChnNote = currentNote->nextChnNote;
-                currentNote = 0;
+                break;
             }
+            prevNote    = currentNote;
             currentNote = currentNote->nextChnNote;
         }
     }
