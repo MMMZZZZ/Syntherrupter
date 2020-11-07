@@ -23,11 +23,11 @@ MIDI Live mode allows you to play MIDI data received over any of Syntherrupters 
 
 ### Note Ontime
 
-Using the slider you can vary the nominal ontime of a single note within the [user's limits](User%20Settings.md#readme) The nominal ontime is the ontime you'll see on the output if ADSR/envelope is disabled, the MIDI volume is at max. and the note velocity is at max. 
+Using the slider you can vary the nominal ontime of a single note within the [user's limits](Users.md#readme) The nominal ontime is the ontime you'll see on the output if ADSR/envelope is disabled, the MIDI volume is at max. and the note velocity is at max. 
 
 ### Note Duty
 
-Using the slider you can vary the nominal duty of a single note within the [user's limits](User%20Settings.md#readme). Same principle as the note ontime. 
+Using the slider you can vary the nominal duty of a single note within the [user's limits](Users.md#readme). Same principle as the note ontime. 
 
 The reason for having an ontime and a duty setting at the same time is to allow "maximum" power across the entire note frequency range. Syntherrupter evaluates for each note what preset (ontime or duty) will result in the highest ontime, and uses this value. This effectively means that low notes will play at the duty setting specified and high notes play at the given ontime. 
 
