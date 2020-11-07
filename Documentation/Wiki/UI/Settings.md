@@ -8,6 +8,12 @@ From this page you can access all Settings. Except for a few (marked) exceptions
 * [Index](#index)
 * [What you see](#what-you-see)
 * [What you get](#what-you-get)
+	* [General Settings](#general-settings)
+	* [User Settings](#user-settings)
+	* [Envelope Settings](#envelope-settings)
+	* [Coil Limits](#coil-limits)
+	* [Nextion<->USB](#nextion-usb)
+	* [ESP<->USB](#esp-usb)
 
 ## What you see
 
