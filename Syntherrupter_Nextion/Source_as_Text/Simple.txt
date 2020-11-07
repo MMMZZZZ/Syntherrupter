@@ -293,6 +293,135 @@ Page Simple
             set6.val+=nOn6.val
         
     Components
+        Button bApply
+            Properties
+                Scope      : Local
+                Caption    : "Apply now"
+                Max. length: 15
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    // Return format: 'd', data byte 1, 2, 3, 4, 5
+                    // Data byte 1: Bits 0-5: coils to which settings apply.
+                    // Data byte 2: ontime[us] lower byte
+                    // Data byte 3: ontime[us] upper byte
+                    // Data byte 4: BPS lower byte
+                    // Data byte 5: BPS upper byte
+                    sys0=newData.val*TC_Settings.activeCoils.val
+                    if(sys0>0)
+                    {
+                        // Update Info below coil buttons
+                        if(btCoil1.val==1)
+                        {
+                            if(nOn.val>TC_Settings.coil1On.val)
+                            {
+                                nOn1.val=TC_Settings.coil1On.val
+                                nDuty1.val=nOn.val*nBPS.val/1000
+                            }else if(nDuty.val>TC_Settings.coil1Duty.val)
+                            {
+                                nDuty1.val=TC_Settings.coil1Duty.val
+                                nOn1.val=nDuty.val*1000/nBPS.val
+                            }else
+                            {
+                                nOn1.val=nOn.val
+                                nDuty1.val=nDuty.val
+                            }
+                            nBPS1.val=nBPS.val
+                        }
+                        if(btCoil2.val==1)
+                        {
+                            if(nOn.val>TC_Settings.coil2On.val)
+                            {
+                                nOn2.val=TC_Settings.coil2On.val
+                                nDuty2.val=nOn.val*nBPS.val/1000
+                            }else if(nDuty.val>TC_Settings.coil2Duty.val)
+                            {
+                                nDuty2.val=TC_Settings.coil2Duty.val
+                                nOn2.val=nDuty.val*1000/nBPS.val
+                            }else
+                            {
+                                nOn2.val=nOn.val
+                                nDuty2.val=nDuty.val
+                            }
+                            nBPS2.val=nBPS.val
+                        }
+                        if(btCoil3.val==1)
+                        {
+                            if(nOn.val>TC_Settings.coil3On.val)
+                            {
+                                nOn3.val=TC_Settings.coil3On.val
+                                nDuty3.val=nOn.val*nBPS.val/1000
+                            }else if(nDuty.val>TC_Settings.coil3Duty.val)
+                            {
+                                nDuty3.val=TC_Settings.coil3Duty.val
+                                nOn3.val=nDuty.val*1000/nBPS.val
+                            }else
+                            {
+                                nOn3.val=nOn.val
+                                nDuty3.val=nDuty.val
+                            }
+                            nBPS3.val=nBPS.val
+                        }
+                        if(btCoil4.val==1)
+                        {
+                            if(nOn.val>TC_Settings.coil4On.val)
+                            {
+                                nOn4.val=TC_Settings.coil4On.val
+                                nDuty4.val=nOn.val*nBPS.val/1000
+                            }else if(nDuty.val>TC_Settings.coil4Duty.val)
+                            {
+                                nDuty4.val=TC_Settings.coil4Duty.val
+                                nOn4.val=nDuty.val*1000/nBPS.val
+                            }else
+                            {
+                                nOn4.val=nOn.val
+                                nDuty4.val=nDuty.val
+                            }
+                            nBPS4.val=nBPS.val
+                        }
+                        if(btCoil5.val==1)
+                        {
+                            if(nOn.val>TC_Settings.coil5On.val)
+                            {
+                                nOn5.val=TC_Settings.coil5On.val
+                                nDuty5.val=nOn.val*nBPS.val/1000
+                            }else if(nDuty.val>TC_Settings.coil5Duty.val)
+                            {
+                                nDuty5.val=TC_Settings.coil5Duty.val
+                                nOn5.val=nDuty.val*1000/nBPS.val
+                            }else
+                            {
+                                nOn5.val=nOn.val
+                                nDuty5.val=nDuty.val
+                            }
+                            nBPS5.val=nBPS.val
+                        }
+                        if(btCoil6.val==1)
+                        {
+                            if(nOn.val>TC_Settings.coil6On.val)
+                            {
+                                nOn6.val=TC_Settings.coil6On.val
+                                nDuty6.val=nOn.val*nBPS.val/1000
+                            }else if(nDuty.val>TC_Settings.coil6Duty.val)
+                            {
+                                nDuty6.val=TC_Settings.coil6Duty.val
+                                nOn6.val=nDuty.val*1000/nBPS.val
+                            }else
+                            {
+                                nOn6.val=nOn.val
+                                nDuty6.val=nDuty.val
+                            }
+                            nBPS6.val=nBPS.val
+                        }
+                        prints "d",0
+                        prints TC_Settings.activeCoils.val,1
+                        prints nOn.val,2
+                        prints nBPS.val,2
+                        newData.val=0
+                    }
+                
         Text tHideBack
             Properties
                 Scope       : Local
@@ -1369,135 +1498,6 @@ Page Simple
                 
                 Touch Release Event
                     
-        Button bApply
-            Properties
-                Scope      : Local
-                Caption    : "Apply now"
-                Max. length: 15
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    // Return format: 'd', data byte 1, 2, 3, 4, 5
-                    // Data byte 1: Bits 0-5: coils to which settings apply.
-                    // Data byte 2: ontime[us] lower byte
-                    // Data byte 3: ontime[us] upper byte
-                    // Data byte 4: BPS lower byte
-                    // Data byte 5: BPS upper byte
-                    sys0=newData.val*TC_Settings.activeCoils.val
-                    if(sys0>0)
-                    {
-                        // Update Info below coil buttons
-                        if(btCoil1.val==1)
-                        {
-                            if(nOn.val>TC_Settings.coil1On.val)
-                            {
-                                nOn1.val=TC_Settings.coil1On.val
-                                nDuty1.val=nOn.val*nBPS.val/1000
-                            }else if(nDuty.val>TC_Settings.coil1Duty.val)
-                            {
-                                nDuty1.val=TC_Settings.coil1Duty.val
-                                nOn1.val=nDuty.val*1000/nBPS.val
-                            }else
-                            {
-                                nOn1.val=nOn.val
-                                nDuty1.val=nDuty.val
-                            }
-                            nBPS1.val=nBPS.val
-                        }
-                        if(btCoil2.val==1)
-                        {
-                            if(nOn.val>TC_Settings.coil2On.val)
-                            {
-                                nOn2.val=TC_Settings.coil2On.val
-                                nDuty2.val=nOn.val*nBPS.val/1000
-                            }else if(nDuty.val>TC_Settings.coil2Duty.val)
-                            {
-                                nDuty2.val=TC_Settings.coil2Duty.val
-                                nOn2.val=nDuty.val*1000/nBPS.val
-                            }else
-                            {
-                                nOn2.val=nOn.val
-                                nDuty2.val=nDuty.val
-                            }
-                            nBPS2.val=nBPS.val
-                        }
-                        if(btCoil3.val==1)
-                        {
-                            if(nOn.val>TC_Settings.coil3On.val)
-                            {
-                                nOn3.val=TC_Settings.coil3On.val
-                                nDuty3.val=nOn.val*nBPS.val/1000
-                            }else if(nDuty.val>TC_Settings.coil3Duty.val)
-                            {
-                                nDuty3.val=TC_Settings.coil3Duty.val
-                                nOn3.val=nDuty.val*1000/nBPS.val
-                            }else
-                            {
-                                nOn3.val=nOn.val
-                                nDuty3.val=nDuty.val
-                            }
-                            nBPS3.val=nBPS.val
-                        }
-                        if(btCoil4.val==1)
-                        {
-                            if(nOn.val>TC_Settings.coil4On.val)
-                            {
-                                nOn4.val=TC_Settings.coil4On.val
-                                nDuty4.val=nOn.val*nBPS.val/1000
-                            }else if(nDuty.val>TC_Settings.coil4Duty.val)
-                            {
-                                nDuty4.val=TC_Settings.coil4Duty.val
-                                nOn4.val=nDuty.val*1000/nBPS.val
-                            }else
-                            {
-                                nOn4.val=nOn.val
-                                nDuty4.val=nDuty.val
-                            }
-                            nBPS4.val=nBPS.val
-                        }
-                        if(btCoil5.val==1)
-                        {
-                            if(nOn.val>TC_Settings.coil5On.val)
-                            {
-                                nOn5.val=TC_Settings.coil5On.val
-                                nDuty5.val=nOn.val*nBPS.val/1000
-                            }else if(nDuty.val>TC_Settings.coil5Duty.val)
-                            {
-                                nDuty5.val=TC_Settings.coil5Duty.val
-                                nOn5.val=nDuty.val*1000/nBPS.val
-                            }else
-                            {
-                                nOn5.val=nOn.val
-                                nDuty5.val=nDuty.val
-                            }
-                            nBPS5.val=nBPS.val
-                        }
-                        if(btCoil6.val==1)
-                        {
-                            if(nOn.val>TC_Settings.coil6On.val)
-                            {
-                                nOn6.val=TC_Settings.coil6On.val
-                                nDuty6.val=nOn.val*nBPS.val/1000
-                            }else if(nDuty.val>TC_Settings.coil6Duty.val)
-                            {
-                                nDuty6.val=TC_Settings.coil6Duty.val
-                                nOn6.val=nDuty.val*1000/nBPS.val
-                            }else
-                            {
-                                nOn6.val=nOn.val
-                                nDuty6.val=nDuty.val
-                            }
-                            nBPS6.val=nBPS.val
-                        }
-                        prints "d",0
-                        prints TC_Settings.activeCoils.val,1
-                        prints nOn.val,2
-                        prints nBPS.val,2
-                        newData.val=0
-                    }
-                
         Variable fSliderInput
             Properties
                 Scope         : Local
