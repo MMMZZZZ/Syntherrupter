@@ -16,7 +16,7 @@ Set NRPs or send any MIDI command for the given MIDI channel.
 
 ## What you see
 
-![Channel Settings](/Documentation/Pictures/UI/Channel%20Settings.png)
+![Channel Settings](/Documentation/Pictures/UI/Channel%20Settings%2015.png)
 
 ## What you get
 
