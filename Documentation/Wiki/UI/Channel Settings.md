@@ -2,7 +2,7 @@
 
 [Back to the User Interface Reference page](README.md#readme)
 
-Set NRPs or send any MIDI command for the given MIDI channel.
+Set NRPs or send any MIDI command for the given MIDI channel. Note: Syntherrupter numerates MIDI channels from 0 to 15. Some programs however numerate them from 1 to 16. 
 
 ## Index
 * [Index](#index)
