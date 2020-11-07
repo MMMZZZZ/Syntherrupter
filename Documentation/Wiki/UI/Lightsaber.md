@@ -8,6 +8,11 @@ Description
 * [Index](#index)
 * [What you see](#what-you-see)
 * [What you get](#what-you-get)
+	* [Ontime](#ontime)
+	* [Lightsabers](#lightsabers)
+	* [Apply to Outputs and MIDI Coil Settings](#apply-to-outputs-and-midi-coil-settings)
+	* [Applying Manually, On Release or Immediately](#applying-manually-on-release-or-immediately)
+	* [Return to Main Menu](#return-to-main-menu)
 
 ## What you see
 
@@ -34,3 +39,7 @@ Unlike the information displayed in [Simple mode](Simple.md#apply-to-outputs), t
 ### Applying Manually, On Release or Immediately
 
 Works in the same way as described here: [Simple Mode](Simple.md#applying-manually-on-release-or-immediately).
+
+### Return to Main Menu
+
+Works in the same way as described here: [Simple Mode](Simple.md#return-to-main-menu).
