@@ -35,7 +35,7 @@ If you want all notes to play at the same ontime, simply set the duty slider to 
 
 ### Apply to Outputs and MIDI Coil Settings
 
-Whenever you change a setting it will affect the outputs selected here. 
+Whenever you change a setting it will affect the outputs selected here. You'll note that the values below the buttons change to your current settings.
 
 Keeping any of the buttons pressed to access the [MIDI Coil Settings](Coil%20Settings.md#readme) page. From there you'll be able to access the [MIDI Channel Settings](Channel%20Settings.md#readme), too. If you only have a single output, you'll see a "Channels|Pan" button instead which brings you to the same page.
 
