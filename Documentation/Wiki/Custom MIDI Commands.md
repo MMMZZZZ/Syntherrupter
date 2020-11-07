@@ -4,6 +4,10 @@ Syntherrupter's MIDI functions can be controlled via custom MIDI commands. Since
 ## Non-registered Parameters (NRP)
 Non-registered parameters allow control over up to 16383 controllers, each one with 14 bit resolution. These commands are not "vendor encoded" like SysEx messages (see below) therefore Syntherrupter only uses controller numbers that are not known to be used by any manufacturer. 
 
+If you've never used NRPs or Syntherrupters advanced features, you might have a look at the following helpful links:
+ * [Explanation about NRPs and how to use them](https://www.recordingblogs.com/wiki/midi-registered-parameter-number-rpn)
+ * [Syntherrupters stereo features in words and videos](https://highvoltageforum.net/index.php?topic=1020.msg8343#msg8343)
+
 NRPs are implemented via control change commands, which means that the controlled parameter does not affect the same parameter on another MIDI channel - just like other controllers like pedals, volume, pan, ...
 
 ### NRP Format
@@ -36,11 +40,6 @@ Syntherrupter allows you to map notes to stereo positions based on different par
 	* Mode 4: "Highest". All notes of the channel get mapped based on the current highest pitch.
 	* Mode 5: "Average". All notes of the channel get mapped based on the current average pitch.
 	* Mode 6: "Loudest". All notes of the channel get mapped based on the pitch of the note with the highest velocity. If multiple notes have the same velocity, the pitch of the most recent one is taken.
-
-### Recommended Links
-If you've never used NRPs or Syntherrupters advanced features, you might have a look at the following helpful links:
- * [Explanation about NRPs and how to use them](https://www.recordingblogs.com/wiki/midi-registered-parameter-number-rpn)
- * [Syntherrupters stereo features in words and videos](https://highvoltageforum.net/index.php?topic=1020.msg8343#msg8343)
 
 ## System Exclusive Messages (SysEx)
 SysEx messages were originally intended to allow manufacturers to implement completely custom commands within the MIDI protocol. Part of each command is a device manufacturer ID (DMID) to make sure the commands of different manufacturers don't interfer with each other. Hence, with your own ID you can implement whatever you want. 
