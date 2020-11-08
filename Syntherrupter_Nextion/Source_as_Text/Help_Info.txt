@@ -38,6 +38,9 @@ Page Help_Info
                 // Lightsaber Mode is active
                 tMLS.bco=6900
             }
+            // Load Help Enable Button
+            btHelp.val=helpMode.val
+            click btHelp,0
             //
             // Load Help Mode
             vis qrHelp,Help_Info.helpMode.val

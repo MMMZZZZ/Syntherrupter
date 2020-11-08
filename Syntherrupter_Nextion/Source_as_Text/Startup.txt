@@ -56,7 +56,7 @@ Page Startup
         Text tNxtFWVersion
             Properties
                 Scope       : Local
-                Initial Text: "v4.1.0-beta.5"
+                Initial Text: "v4.1.0-beta.6"
                 Max. length : 20
             
             Events
