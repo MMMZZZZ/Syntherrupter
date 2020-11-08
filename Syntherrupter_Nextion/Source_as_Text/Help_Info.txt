@@ -311,6 +311,12 @@ Page Help_Info
                     vis qrHelp,Help_Info.helpMode.val
                     ref_star
                 
+        Variable showHelp
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
         Hotspot fLoadColors
             Events
                 Touch Press Event
@@ -379,9 +385,3 @@ Page Help_Info
                 
                 Touch Release Event
                     
-        Variable showHelp
-            Properties
-                Scope         : Local
-                Type          : int32
-                Initial Value : 0
-            

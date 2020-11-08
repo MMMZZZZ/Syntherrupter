@@ -94,6 +94,36 @@ Page Startup
                 Initial String: "Warning! EEPROM contains no vaild configuration.\r\n      Please go to settings and check ALL values."
                 Max. length   : 100
             
+        Number comOk
+            Properties
+                Scope        : Local
+                Initial Value: 0
+            
+            Events
+                Touch Press Event
+                    ref_stop
+                    //
+                    // Load colors
+                    if(Settings.colorMode.val!=0)
+                    {
+                        Settings.backCol.val=8484
+                        Settings.frontCol2.val=33808
+                    }else
+                    {
+                        Settings.backCol.val=65535
+                        Settings.frontCol2.val=65535
+                    }
+                    click fLoadColors,1
+                    //
+                    // Init done
+                    vis 255,1
+                    vis comOk,0
+                    ref 0
+                    // Enable page refreshs again
+                    ref_star
+                
+                Touch Release Event
+                    
         Hotspot fLoadColors
             Events
                 Touch Press Event
@@ -153,36 +183,6 @@ Page Startup
                             b[sys0].pic2+=sys2
                         }
                     }
-                
-                Touch Release Event
-                    
-        Number comOk
-            Properties
-                Scope        : Local
-                Initial Value: 0
-            
-            Events
-                Touch Press Event
-                    ref_stop
-                    //
-                    // Load colors
-                    if(Settings.colorMode.val!=0)
-                    {
-                        Settings.backCol.val=8484
-                        Settings.frontCol2.val=33808
-                    }else
-                    {
-                        Settings.backCol.val=65535
-                        Settings.frontCol2.val=65535
-                    }
-                    click fLoadColors,1
-                    //
-                    // Init done
-                    vis 255,1
-                    vis comOk,0
-                    ref 0
-                    // Enable page refreshs again
-                    ref_star
                 
                 Touch Release Event
                     
