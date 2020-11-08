@@ -39,39 +39,54 @@ Page Help_Info
                 tMLS.bco=6900
             }
             //
+            // Load Help Mode
+            vis qrHelp,Help_Info.helpMode.val
+            tempStr.txt=tTitle.txt
+            showHelp.val=1
+            click 0,1
+            //
             // Enable page refreshs again
             ref_star
         
         Postinitialize Event
             
         Touch Press Event
-            if(Other_Settings.nBackOff.val!=0)
+            if(showHelp.val==0)
             {
-                // Default "stop" action.
-                // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                prints "mes",3
-                // Set all ontime and duty settings of all pages to 0.
-                // First come the global variables then the local variables.
-                Simple.ontime.val=0
-                Simple.duty.val=0
-                Simple.set1.val=Simple.set1.val&0x0000ffff
-                Simple.set2.val=Simple.set2.val&0x0000ffff
-                Simple.set3.val=Simple.set3.val&0x0000ffff
-                Simple.set4.val=Simple.set4.val&0x0000ffff
-                Simple.set5.val=Simple.set5.val&0x0000ffff
-                Simple.set6.val=Simple.set6.val&0x0000ffff
-                MIDI_Live.ontime.val=0
-                MIDI_Live.duty.val=0
-                MIDI_Live.set1.val=0
-                MIDI_Live.set2.val=0
-                MIDI_Live.set3.val=0
-                MIDI_Live.set4.val=0
-                MIDI_Live.set5.val=0
-                MIDI_Live.set6.val=0
-                Lightsaber.ontime.val=0
-                Lightsaber.ontimes12.val=0
-                Lightsaber.ontimes34.val=0
-                Lightsaber.ontimes56.val=0
+                // Normal Operation
+                if(Other_Settings.nBackOff.val!=0)
+                {
+                    // Default "stop" action.
+                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                    prints "mes",3
+                    // Set all ontime and duty settings of all pages to 0.
+                    // First come the global variables then the local variables.
+                    Simple.ontime.val=0
+                    Simple.duty.val=0
+                    Simple.set1.val=Simple.set1.val&0x0000ffff
+                    Simple.set2.val=Simple.set2.val&0x0000ffff
+                    Simple.set3.val=Simple.set3.val&0x0000ffff
+                    Simple.set4.val=Simple.set4.val&0x0000ffff
+                    Simple.set5.val=Simple.set5.val&0x0000ffff
+                    Simple.set6.val=Simple.set6.val&0x0000ffff
+                    MIDI_Live.ontime.val=0
+                    MIDI_Live.duty.val=0
+                    MIDI_Live.set1.val=0
+                    MIDI_Live.set2.val=0
+                    MIDI_Live.set3.val=0
+                    MIDI_Live.set4.val=0
+                    MIDI_Live.set5.val=0
+                    MIDI_Live.set6.val=0
+                    Lightsaber.ontime.val=0
+                    Lightsaber.ontimes12.val=0
+                    Lightsaber.ontimes34.val=0
+                    Lightsaber.ontimes56.val=0
+                }
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2f"
+                click qrHelp,0
             }
         
         Touch Release Event
@@ -147,7 +162,7 @@ Page Help_Info
         Text tButtons
             Properties
                 Scope       : Local
-                Initial Text: "Double lined Buttons"
+                Initial Text: "Help Mode:"
                 Max. length : 40
             
             Events
@@ -173,8 +188,8 @@ Page Help_Info
         Text tChnInfo
             Properties
                 Scope       : Local
-                Initial Text: "Buttons with a double outline have an alternate function when you keep them pressed. \r\nDouble lined return buttons f.ex. keep the mode running in background.\r\nOther double lined buttons can open additional settings."
-                Max. length : 300
+                Initial Text: "With Help Mode enabled, a QR code appears at the top right corner. It brings you immediately \r\nto the Syntherrupter Wiki section for this page. If you want help for a specific component, \r\npress the QR code (you'll notice the page title change), then press the component you want\r\nhelp for. The QR code now points to the specific section for this component in the wiki."
+                Max. length : 400
             
             Events
                 Touch Press Event
@@ -186,7 +201,7 @@ Page Help_Info
         Text tCreditsInfo
             Properties
                 Scope       : Local
-                Initial Text: "Forums with great people: highvoltageforum, Unofficial Nextion Forum.\r\nSpecial thanks to: Netzpfuscher\r\nMore info on GitHub\r\n\r\nDevelopped by Max Zuidberg"
+                Initial Text: "Forums with great people: highvoltageforum, Unofficial Nextion Forum.\r\nSpecial thanks to: Netzpfuscher\r\nMore info on https://github.com/MMMZZZZ/Syntherrupter#credits\r\n\r\nDevelopped by Max Zuidberg"
                 Max. length : 300
             
             Events
@@ -204,9 +219,94 @@ Page Help_Info
             
             Events
                 Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkf2f"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        page Menu
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Dual-state Button btHelp
+            Properties
+                Scope        : Local
+                Initial State: 0
+                Caption      : "Disabled"
+                Max. length  : 8
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkf2f"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(btHelp.val==0)
+                        {
+                            btHelp.txt="Disabled"
+                        }else
+                        {
+                            btHelp.txt="Enabled"
+                        }
+                        helpMode.val=btHelp.val
+                        vis qrHelp,helpMode.val
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Variable helpMode
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 0
+            
+        Variable tempStr
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: ""
+                Max. length   : 32
+            
+        QRCode qrHelp
+            Events
+                Touch Press Event
                     
                 Touch Release Event
-                    page Menu
+                    ref_stop
+                    if(showHelp.val==0)
+                    {
+                        showHelp.val=1
+                        tempStr.txt=tTitle.txt
+                        tTitle.txt="Get Help for..."
+                    }else
+                    {
+                        showHelp.val=0
+                        tTitle.txt=tempStr.txt
+                    }
+                    vis qrHelp,Help_Info.helpMode.val
+                    ref_star
                 
         Hotspot fLoadColors
             Events
@@ -257,6 +357,12 @@ Page Help_Info
                                 b[sys0].pic+=sys2
                                 b[sys0].pic2=b[sys0].pic+1
                             }
+                        }else if(sys1==58)
+                        {
+                            // Types that have bco, pco
+                            // QR Code
+                            b[sys0].bco=Settings.backCol.val
+                            b[sys0].pco=Settings.qrFrontCol.val
                         }else if(sys1==1)
                         {
                             // Types that have pic, pic2:
@@ -270,3 +376,9 @@ Page Help_Info
                 
                 Touch Release Event
                     
+        Variable showHelp
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            

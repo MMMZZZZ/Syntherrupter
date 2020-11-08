@@ -108,6 +108,12 @@ Page User_Settings
             vis idle,0
             newValTargetId.val=idle.id
             //
+            // Load Help Mode
+            vis qrHelp,Help_Info.helpMode.val
+            tempStr.txt=tTitle.txt
+            showHelp.val=1
+            click 0,1
+            //
             // Enable page refreshs again
             ref_star
         
@@ -143,33 +149,42 @@ Page User_Settings
             }
         
         Touch Press Event
-            if(Other_Settings.nBackOff.val!=0)
+            if(showHelp.val==0)
             {
-                // Default "stop" action.
-                // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                prints "mes",3
-                // Set all ontime and duty settings of all pages to 0.
-                // First come the global variables then the local variables.
-                Simple.ontime.val=0
-                Simple.duty.val=0
-                Simple.set1.val=Simple.set1.val&0x0000ffff
-                Simple.set2.val=Simple.set2.val&0x0000ffff
-                Simple.set3.val=Simple.set3.val&0x0000ffff
-                Simple.set4.val=Simple.set4.val&0x0000ffff
-                Simple.set5.val=Simple.set5.val&0x0000ffff
-                Simple.set6.val=Simple.set6.val&0x0000ffff
-                MIDI_Live.ontime.val=0
-                MIDI_Live.duty.val=0
-                MIDI_Live.set1.val=0
-                MIDI_Live.set2.val=0
-                MIDI_Live.set3.val=0
-                MIDI_Live.set4.val=0
-                MIDI_Live.set5.val=0
-                MIDI_Live.set6.val=0
-                Lightsaber.ontime.val=0
-                Lightsaber.ontimes12.val=0
-                Lightsaber.ontimes34.val=0
-                Lightsaber.ontimes56.val=0
+                // Normal Operation
+                if(Other_Settings.nBackOff.val!=0)
+                {
+                    // Default "stop" action.
+                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                    prints "mes",3
+                    // Set all ontime and duty settings of all pages to 0.
+                    // First come the global variables then the local variables.
+                    Simple.ontime.val=0
+                    Simple.duty.val=0
+                    Simple.set1.val=Simple.set1.val&0x0000ffff
+                    Simple.set2.val=Simple.set2.val&0x0000ffff
+                    Simple.set3.val=Simple.set3.val&0x0000ffff
+                    Simple.set4.val=Simple.set4.val&0x0000ffff
+                    Simple.set5.val=Simple.set5.val&0x0000ffff
+                    Simple.set6.val=Simple.set6.val&0x0000ffff
+                    MIDI_Live.ontime.val=0
+                    MIDI_Live.duty.val=0
+                    MIDI_Live.set1.val=0
+                    MIDI_Live.set2.val=0
+                    MIDI_Live.set3.val=0
+                    MIDI_Live.set4.val=0
+                    MIDI_Live.set5.val=0
+                    MIDI_Live.set6.val=0
+                    Lightsaber.ontime.val=0
+                    Lightsaber.ontimes12.val=0
+                    Lightsaber.ontimes34.val=0
+                    Lightsaber.ontimes56.val=0
+                }
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfaO"
+                click qrHelp,0
             }
         
         Touch Release Event
@@ -238,137 +253,153 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    // Store local component values in global variables. Note: Since a component consists of many different properties (like font size, color, position, ...) its memory footprint is much larger and it should not be global.
-                    click bOK,0
-                    u0Name.txt=tU0Name.txt
-                    u0Code.txt=tU0Code.txt
-                    u1Name.txt=tU1Name.txt
-                    u1Code.txt=tU1Code.txt
-                    u2Name.txt=tU2Name.txt
-                    u2Code.txt=tU2Code.txt
-                    u0Ontime.val=user0Ontime.val
-                    u0BPS.val=user0BPS.val
-                    u0Duty.val=user0Duty.val
-                    u1Ontime.val=user1Ontime.val
-                    u1BPS.val=user1BPS.val
-                    u1Duty.val=user1Duty.val
-                    u2Ontime.val=user2Ontime.val
-                    u2BPS.val=user2BPS.val
-                    u2Duty.val=user2Duty.val
-                    //
-                    // Serial Data format: 'u', Data Byte 1, 2, ...
-                    // Byte 1:
-                    //   Bit 6-7: User. Can be 0, 1 or 2.
-                    //   Bit   5: Indicates content of the following bytes. 0 = Name, 1 = Password
-                    //   Bit 0-4: Number of following bytes minus one. This means Name or password are at least 1 character and at most 32 characters.
-                    // Byte 2-x: Characters of the username/password without null termination character.
-                    //
-                    // sys0 will contain byte 1.
-                    // sys1 is used as temp variable
-                    // Start with user 0, name, then his password, then user 1 name, etc.
-                    strlen tU0Name.txt,sys0
-                    sys0-=1
-                    sys0=sys0&0x1f
-                    prints "u",1
-                    prints sys0,1
-                    sys0+=1
-                    prints tU0Name.txt,sys0
-                    //
-                    strlen tU0Code.txt,sys0
-                    sys0-=1
-                    sys0=sys0&0x1f
-                    sys1=1<<5
-                    sys0+=sys1
-                    prints "u",1
-                    prints sys0,1
-                    sys0+=1
-                    prints tU0Code.txt,sys0
-                    //
-                    strlen tU1Name.txt,sys0
-                    sys0-=1
-                    sys0=sys0&0x1f
-                    sys1=1<<6
-                    sys0+=sys1
-                    prints "u",1
-                    prints sys0,1
-                    sys0+=1
-                    prints tU1Name.txt,sys0
-                    //
-                    strlen tU1Code.txt,sys0
-                    sys0-=1
-                    sys0=sys0&0x1f
-                    sys1=1<<6
-                    sys0+=sys1
-                    sys1=1<<5
-                    sys0+=sys1
-                    prints "u",1
-                    prints sys0,1
-                    sys0+=1
-                    prints tU1Code.txt,sys0
-                    //
-                    strlen tU2Name.txt,sys0
-                    sys0-=1
-                    sys0=sys0&0x1f
-                    sys1=2<<6
-                    sys0+=sys1
-                    prints "u",1
-                    prints sys0,1
-                    sys0+=1
-                    prints tU2Name.txt,sys0
-                    //
-                    strlen tU2Code.txt,sys0
-                    sys0-=1
-                    sys0=sys0&0x1f
-                    sys1=2<<6
-                    sys0+=sys1
-                    sys1=1<<5
-                    sys0+=sys1
-                    prints "u",1
-                    prints sys0,1
-                    sys0+=1
-                    prints tU2Code.txt,sys0
-                    // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
-                    // Data byte 1:
-                    //    Bit 6-7: 0 = User settings
-                    //    Bit 0-5:User whose limits are being set (0,1 or 2)
-                    // Data byte 2-5: Bit field with settings
-                    //    Bit  0-11: Maximum allowed ontime [10us]
-                    //    Bit 12-22: Maximum allowed BPS/interrupt frequency [10Hz]
-                    //    Bit 23-31: Maximum allowed duty [1/1000]
-                    //
-                    // sys0 will contain the bit field (a.k.a. the data bytes 2-5)
-                    // sys1 is used as temp variable
-                    // sys2 is the coil number
-                    sys0=u0Ontime.val/10
-                    sys1=u0BPS.val/10
-                    sys1=sys1<<12
-                    sys0+=sys1
-                    sys1=u0Duty.val<<23
-                    sys0+=sys1
-                    prints "d",1
-                    prints 0,1
-                    prints sys0,4
-                    sys0=u1Ontime.val/10
-                    sys1=u1BPS.val/10
-                    sys1=sys1<<12
-                    sys0+=sys1
-                    sys1=u1Duty.val<<23
-                    sys0+=sys1
-                    prints "d",1
-                    prints 1,1
-                    prints sys0,4
-                    sys0=u2Ontime.val/10
-                    sys1=u2BPS.val/10
-                    sys1=sys1<<12
-                    sys0+=sys1
-                    sys1=u2Duty.val<<23
-                    sys0+=sys1
-                    prints "d",1
-                    prints 2,1
-                    prints sys0,4
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Store local component values in global variables. Note: Since a component consists of many different properties (like font size, color, position, ...) its memory footprint is much larger and it should not be global.
+                        click bOK,0
+                        u0Name.txt=tU0Name.txt
+                        u0Code.txt=tU0Code.txt
+                        u1Name.txt=tU1Name.txt
+                        u1Code.txt=tU1Code.txt
+                        u2Name.txt=tU2Name.txt
+                        u2Code.txt=tU2Code.txt
+                        u0Ontime.val=user0Ontime.val
+                        u0BPS.val=user0BPS.val
+                        u0Duty.val=user0Duty.val
+                        u1Ontime.val=user1Ontime.val
+                        u1BPS.val=user1BPS.val
+                        u1Duty.val=user1Duty.val
+                        u2Ontime.val=user2Ontime.val
+                        u2BPS.val=user2BPS.val
+                        u2Duty.val=user2Duty.val
+                        //
+                        // Serial Data format: 'u', Data Byte 1, 2, ...
+                        // Byte 1:
+                        //   Bit 6-7: User. Can be 0, 1 or 2.
+                        //   Bit   5: Indicates content of the following bytes. 0 = Name, 1 = Password
+                        //   Bit 0-4: Number of following bytes minus one. This means Name or password are at least 1 character and at most 32 characters.
+                        // Byte 2-x: Characters of the username/password without null termination character.
+                        //
+                        // sys0 will contain byte 1.
+                        // sys1 is used as temp variable
+                        // Start with user 0, name, then his password, then user 1 name, etc.
+                        strlen tU0Name.txt,sys0
+                        sys0-=1
+                        sys0=sys0&0x1f
+                        prints "u",1
+                        prints sys0,1
+                        sys0+=1
+                        prints tU0Name.txt,sys0
+                        //
+                        strlen tU0Code.txt,sys0
+                        sys0-=1
+                        sys0=sys0&0x1f
+                        sys1=1<<5
+                        sys0+=sys1
+                        prints "u",1
+                        prints sys0,1
+                        sys0+=1
+                        prints tU0Code.txt,sys0
+                        //
+                        strlen tU1Name.txt,sys0
+                        sys0-=1
+                        sys0=sys0&0x1f
+                        sys1=1<<6
+                        sys0+=sys1
+                        prints "u",1
+                        prints sys0,1
+                        sys0+=1
+                        prints tU1Name.txt,sys0
+                        //
+                        strlen tU1Code.txt,sys0
+                        sys0-=1
+                        sys0=sys0&0x1f
+                        sys1=1<<6
+                        sys0+=sys1
+                        sys1=1<<5
+                        sys0+=sys1
+                        prints "u",1
+                        prints sys0,1
+                        sys0+=1
+                        prints tU1Code.txt,sys0
+                        //
+                        strlen tU2Name.txt,sys0
+                        sys0-=1
+                        sys0=sys0&0x1f
+                        sys1=2<<6
+                        sys0+=sys1
+                        prints "u",1
+                        prints sys0,1
+                        sys0+=1
+                        prints tU2Name.txt,sys0
+                        //
+                        strlen tU2Code.txt,sys0
+                        sys0-=1
+                        sys0=sys0&0x1f
+                        sys1=2<<6
+                        sys0+=sys1
+                        sys1=1<<5
+                        sys0+=sys1
+                        prints "u",1
+                        prints sys0,1
+                        sys0+=1
+                        prints tU2Code.txt,sys0
+                        // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
+                        // Data byte 1:
+                        //    Bit 6-7: 0 = User settings
+                        //    Bit 0-5:User whose limits are being set (0,1 or 2)
+                        // Data byte 2-5: Bit field with settings
+                        //    Bit  0-11: Maximum allowed ontime [10us]
+                        //    Bit 12-22: Maximum allowed BPS/interrupt frequency [10Hz]
+                        //    Bit 23-31: Maximum allowed duty [1/1000]
+                        //
+                        // sys0 will contain the bit field (a.k.a. the data bytes 2-5)
+                        // sys1 is used as temp variable
+                        // sys2 is the coil number
+                        sys0=u0Ontime.val/10
+                        sys1=u0BPS.val/10
+                        sys1=sys1<<12
+                        sys0+=sys1
+                        sys1=u0Duty.val<<23
+                        sys0+=sys1
+                        prints "d",1
+                        prints 0,1
+                        prints sys0,4
+                        sys0=u1Ontime.val/10
+                        sys1=u1BPS.val/10
+                        sys1=sys1<<12
+                        sys0+=sys1
+                        sys1=u1Duty.val<<23
+                        sys0+=sys1
+                        prints "d",1
+                        prints 1,1
+                        prints sys0,4
+                        sys0=u2Ontime.val/10
+                        sys1=u2BPS.val/10
+                        sys1=sys1<<12
+                        sys0+=sys1
+                        sys1=u2Duty.val<<23
+                        sys0+=sys1
+                        prints "d",1
+                        prints 2,1
+                        prints sys0,4
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
                 
                 Touch Release Event
-                    page Settings
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        page Settings
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Text tU0Name
             Properties
@@ -378,14 +409,30 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(userNum.val!=0)
+                    if(showHelp.val==0)
                     {
-                        Keyboard.origin.val=dp
-                        Keyboard.target.val=u0Name.id
-                        Keyboard.sComp.txt="User 0 Name"
-                        page Keyboard
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(userNum.val!=0)
+                        {
+                            Keyboard.origin.val=dp
+                            Keyboard.target.val=u0Name.id
+                            Keyboard.sComp.txt="User 0 Name"
+                            page Keyboard
+                        }
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
                     }
                 
         Text tU0Code
@@ -396,16 +443,32 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    tU0Code.pw=0
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        tU0Code.pw=0
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
                 
                 Touch Release Event
-                    tU0Code.pw=1
-                    if(userNum.val!=0)
+                    if(showHelp.val==0)
                     {
-                        Keyboard.origin.val=dp
-                        Keyboard.target.val=u0Code.id
-                        Keyboard.sComp.txt="User 0 Code"
-                        page Keyboard
+                        // Normal Operation
+                        tU0Code.pw=1
+                        if(userNum.val!=0)
+                        {
+                            Keyboard.origin.val=dp
+                            Keyboard.target.val=u0Code.id
+                            Keyboard.sComp.txt="User 0 Code"
+                            page Keyboard
+                        }
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
                     }
                 
         Text tUserCode
@@ -429,14 +492,30 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(userNum.val!=0)
+                    if(showHelp.val==0)
                     {
-                        Keyboard.origin.val=dp
-                        Keyboard.target.val=u1Name.id
-                        Keyboard.sComp.txt="User 1 Name"
-                        page Keyboard
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(userNum.val!=0)
+                        {
+                            Keyboard.origin.val=dp
+                            Keyboard.target.val=u1Name.id
+                            Keyboard.sComp.txt="User 1 Name"
+                            page Keyboard
+                        }
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
                     }
                 
         Text tU1Code
@@ -447,16 +526,32 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    tU1Code.pw=0
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        tU1Code.pw=0
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
                 
                 Touch Release Event
-                    tU1Code.pw=1
-                    if(userNum.val!=0)
+                    if(showHelp.val==0)
                     {
-                        Keyboard.origin.val=dp
-                        Keyboard.target.val=u1Code.id
-                        Keyboard.sComp.txt="User 1 Code"
-                        page Keyboard
+                        // Normal Operation
+                        tU1Code.pw=1
+                        if(userNum.val!=0)
+                        {
+                            Keyboard.origin.val=dp
+                            Keyboard.target.val=u1Code.id
+                            Keyboard.sComp.txt="User 1 Code"
+                            page Keyboard
+                        }
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
                     }
                 
         Text tUserOntime
@@ -493,14 +588,30 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(userNum.val==2)
+                    if(showHelp.val==0)
                     {
-                        Keyboard.origin.val=dp
-                        Keyboard.target.val=u2Name.id
-                        Keyboard.sComp.txt="User 2 Name"
-                        page Keyboard
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(userNum.val==2)
+                        {
+                            Keyboard.origin.val=dp
+                            Keyboard.target.val=u2Name.id
+                            Keyboard.sComp.txt="User 2 Name"
+                            page Keyboard
+                        }
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
                     }
                 
         Text tU2Code
@@ -511,16 +622,32 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    tU2Code.pw=0
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        tU2Code.pw=0
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
                 
                 Touch Release Event
-                    tU2Code.pw=1
-                    if(userNum.val==2)
+                    if(showHelp.val==0)
                     {
-                        Keyboard.origin.val=dp
-                        Keyboard.target.val=u2Code.id
-                        Keyboard.sComp.txt="User 2 Code"
-                        page Keyboard
+                        // Normal Operation
+                        tU2Code.pw=1
+                        if(userNum.val==2)
+                        {
+                            Keyboard.origin.val=dp
+                            Keyboard.target.val=u2Code.id
+                            Keyboard.sComp.txt="User 2 Code"
+                            page Keyboard
+                        }
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
                     }
                 
         Variable tAutoCode
@@ -563,30 +690,46 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    if(User_Settings.userNum.val!=0)
+                    if(showHelp.val==0)
                     {
-                        // Reset push state of last selected value
-                        b[newValTargetId.val].bco=idle.bco
-                        b[newValTargetId.val].pco=idle.pco
-                        // Mark this field as pushed
-                        user0BPS.bco=idle.pco
-                        user0BPS.pco=idle.bco
-                        newValTargetId.val=user0BPS.id
-                        // A new value has been selected
-                        newSelect.val=1
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        if(User_Settings.userNum.val!=0)
+                        {
+                            // Reset push state of last selected value
+                            b[newValTargetId.val].bco=idle.bco
+                            b[newValTargetId.val].pco=idle.pco
+                            // Mark this field as pushed
+                            user0BPS.bco=idle.pco
+                            user0BPS.pco=idle.bco
+                            newValTargetId.val=user0BPS.id
+                            // A new value has been selected
+                            newSelect.val=1
+                        }
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
                     }
                 
                 Touch Release Event
-                    // Code for using the Keyboard page
-                    //if(tUser.txt!=u0Name.txt)
-                    //{
-                    //  Keyboard.origin.val=dp
-                    //  Keyboard.target.val=u0BPS.id
-                    //  Keyboard.sComp.txt="User 0 BPS"
-                    //  page Keyboard
-                    //}
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Code for using the Keyboard page
+                        //if(tUser.txt!=u0Name.txt)
+                        //{
+                        //  Keyboard.origin.val=dp
+                        //  Keyboard.target.val=u0BPS.id
+                        //  Keyboard.sComp.txt="User 0 BPS"
+                        //  page Keyboard
+                        //}
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Float user0Duty
             Properties
@@ -596,31 +739,47 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    // .val is in 10ths of percent
-                    // Check if values are legal
-                    click fCheck,0
-                    if(User_Settings.userNum.val!=0)
+                    if(showHelp.val==0)
                     {
-                        // Reset push state of last selected value
-                        b[newValTargetId.val].bco=idle.bco
-                        b[newValTargetId.val].pco=idle.pco
-                        // Mark this field as pushed
-                        user0Duty.bco=idle.pco
-                        user0Duty.pco=idle.bco
-                        newValTargetId.val=user0Duty.id
-                        // A new value has been selected
-                        newSelect.val=1
+                        // Normal Operation
+                        // .val is in 10ths of percent
+                        // Check if values are legal
+                        click fCheck,0
+                        if(User_Settings.userNum.val!=0)
+                        {
+                            // Reset push state of last selected value
+                            b[newValTargetId.val].bco=idle.bco
+                            b[newValTargetId.val].pco=idle.pco
+                            // Mark this field as pushed
+                            user0Duty.bco=idle.pco
+                            user0Duty.pco=idle.bco
+                            newValTargetId.val=user0Duty.id
+                            // A new value has been selected
+                            newSelect.val=1
+                        }
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
                     }
                 
                 Touch Release Event
-                    // Code for using the Keyboard page
-                    //if(tUser.txt!=u0Name.txt)
-                    //{
-                    //  Keyboard.origin.val=dp
-                    //  Keyboard.target.val=u0Duty.id
-                    //  Keyboard.sComp.txt="User 0 Duty"
-                    //  page Keyboard
-                    //}
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Code for using the Keyboard page
+                        //if(tUser.txt!=u0Name.txt)
+                        //{
+                        //  Keyboard.origin.val=dp
+                        //  Keyboard.target.val=u0Duty.id
+                        //  Keyboard.sComp.txt="User 0 Duty"
+                        //  page Keyboard
+                        //}
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Number user0Ontime
             Properties
@@ -629,30 +788,46 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    if(User_Settings.userNum.val!=0)
+                    if(showHelp.val==0)
                     {
-                        // Reset push state of last selected value
-                        b[newValTargetId.val].bco=idle.bco
-                        b[newValTargetId.val].pco=idle.pco
-                        // Mark this field as pushed
-                        user0Ontime.bco=idle.pco
-                        user0Ontime.pco=idle.bco
-                        newValTargetId.val=user0Ontime.id
-                        // A new value has been selected
-                        newSelect.val=1
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        if(User_Settings.userNum.val!=0)
+                        {
+                            // Reset push state of last selected value
+                            b[newValTargetId.val].bco=idle.bco
+                            b[newValTargetId.val].pco=idle.pco
+                            // Mark this field as pushed
+                            user0Ontime.bco=idle.pco
+                            user0Ontime.pco=idle.bco
+                            newValTargetId.val=user0Ontime.id
+                            // A new value has been selected
+                            newSelect.val=1
+                        }
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
                     }
                 
                 Touch Release Event
-                    // Code for using the Keyboard page
-                    //if(tUser.txt!=u0Name.txt)
-                    //{
-                    //  Keyboard.origin.val=dp
-                    //  Keyboard.target.val=u0Ontime.id
-                    //  Keyboard.sComp.txt="User 0 Ontime"
-                    //  page Keyboard
-                    //}
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Code for using the Keyboard page
+                        //if(tUser.txt!=u0Name.txt)
+                        //{
+                        //  Keyboard.origin.val=dp
+                        //  Keyboard.target.val=u0Ontime.id
+                        //  Keyboard.sComp.txt="User 0 Ontime"
+                        //  page Keyboard
+                        //}
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Number user1BPS
             Properties
@@ -661,30 +836,46 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    if(User_Settings.userNum.val==2)
+                    if(showHelp.val==0)
                     {
-                        // Reset push state of last selected value
-                        b[newValTargetId.val].bco=idle.bco
-                        b[newValTargetId.val].pco=idle.pco
-                        // Mark this field as pushed
-                        user1BPS.bco=idle.pco
-                        user1BPS.pco=idle.bco
-                        newValTargetId.val=user1BPS.id
-                        // A new value has been selected
-                        newSelect.val=1
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        if(User_Settings.userNum.val==2)
+                        {
+                            // Reset push state of last selected value
+                            b[newValTargetId.val].bco=idle.bco
+                            b[newValTargetId.val].pco=idle.pco
+                            // Mark this field as pushed
+                            user1BPS.bco=idle.pco
+                            user1BPS.pco=idle.bco
+                            newValTargetId.val=user1BPS.id
+                            // A new value has been selected
+                            newSelect.val=1
+                        }
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
                     }
                 
                 Touch Release Event
-                    // Code for using the Keyboard page
-                    //if(tUser.txt==u2Name.txt)
-                    //{
-                    //  Keyboard.origin.val=dp
-                    //  Keyboard.target.val=u1BPS.id
-                    //  Keyboard.sComp.txt="User 1 BPS"
-                    //  page Keyboard
-                    //}
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Code for using the Keyboard page
+                        //if(tUser.txt==u2Name.txt)
+                        //{
+                        //  Keyboard.origin.val=dp
+                        //  Keyboard.target.val=u1BPS.id
+                        //  Keyboard.sComp.txt="User 1 BPS"
+                        //  page Keyboard
+                        //}
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Float user1Duty
             Properties
@@ -694,30 +885,46 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // .val is in 10ths of percent
-                    if(User_Settings.userNum.val==2)
+                    if(showHelp.val==0)
                     {
-                        // Reset push state of last selected value
-                        b[newValTargetId.val].bco=idle.bco
-                        b[newValTargetId.val].pco=idle.pco
-                        // Mark this field as pushed
-                        user1Duty.bco=idle.pco
-                        user1Duty.pco=idle.bco
-                        newValTargetId.val=user1Duty.id
-                        // A new value has been selected
-                        newSelect.val=1
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // .val is in 10ths of percent
+                        if(User_Settings.userNum.val==2)
+                        {
+                            // Reset push state of last selected value
+                            b[newValTargetId.val].bco=idle.bco
+                            b[newValTargetId.val].pco=idle.pco
+                            // Mark this field as pushed
+                            user1Duty.bco=idle.pco
+                            user1Duty.pco=idle.bco
+                            newValTargetId.val=user1Duty.id
+                            // A new value has been selected
+                            newSelect.val=1
+                        }
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
                     }
                 
                 Touch Release Event
-                    //if(tUser.txt==u2Name.txt)
-                    //{
-                    //  Keyboard.origin.val=dp
-                    //  Keyboard.target.val=u1Duty.id
-                    //  Keyboard.sComp.txt="User 1 Duty"
-                    //  page Keyboard
-                    //}
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        //if(tUser.txt==u2Name.txt)
+                        //{
+                        //  Keyboard.origin.val=dp
+                        //  Keyboard.target.val=u1Duty.id
+                        //  Keyboard.sComp.txt="User 1 Duty"
+                        //  page Keyboard
+                        //}
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Number user1Ontime
             Properties
@@ -726,30 +933,46 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    if(User_Settings.userNum.val==2)
+                    if(showHelp.val==0)
                     {
-                        // Reset push state of last selected value
-                        b[newValTargetId.val].bco=idle.bco
-                        b[newValTargetId.val].pco=idle.pco
-                        // Mark this field as pushed
-                        user1Ontime.bco=idle.pco
-                        user1Ontime.pco=idle.bco
-                        newValTargetId.val=user1Ontime.id
-                        // A new value has been selected
-                        newSelect.val=1
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        if(User_Settings.userNum.val==2)
+                        {
+                            // Reset push state of last selected value
+                            b[newValTargetId.val].bco=idle.bco
+                            b[newValTargetId.val].pco=idle.pco
+                            // Mark this field as pushed
+                            user1Ontime.bco=idle.pco
+                            user1Ontime.pco=idle.bco
+                            newValTargetId.val=user1Ontime.id
+                            // A new value has been selected
+                            newSelect.val=1
+                        }
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
                     }
                 
                 Touch Release Event
-                    // Code for using the Keyboard page
-                    //if(tUser.txt==u2Name.txt)
-                    //{
-                    //  Keyboard.origin.val=dp
-                    //  Keyboard.target.val=u1Ontime.id
-                    //  Keyboard.sComp.txt="User 1 Ontime"
-                    //  page Keyboard
-                    //}
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Code for using the Keyboard page
+                        //if(tUser.txt==u2Name.txt)
+                        //{
+                        //  Keyboard.origin.val=dp
+                        //  Keyboard.target.val=u1Ontime.id
+                        //  Keyboard.sComp.txt="User 1 Ontime"
+                        //  page Keyboard
+                        //}
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Number user2BPS
             Properties
@@ -758,29 +981,45 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    if(userNum.val==2)
+                    if(showHelp.val==0)
                     {
-                        // Reset push state of last selected value
-                        b[newValTargetId.val].bco=idle.bco
-                        b[newValTargetId.val].pco=idle.pco
-                        // Mark this field as pushed
-                        user2BPS.bco=idle.pco
-                        user2BPS.pco=idle.bco
-                        newValTargetId.val=user2BPS.id
-                        // A new value has been selected
-                        newSelect.val=1
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        if(userNum.val==2)
+                        {
+                            // Reset push state of last selected value
+                            b[newValTargetId.val].bco=idle.bco
+                            b[newValTargetId.val].pco=idle.pco
+                            // Mark this field as pushed
+                            user2BPS.bco=idle.pco
+                            user2BPS.pco=idle.bco
+                            newValTargetId.val=user2BPS.id
+                            // A new value has been selected
+                            newSelect.val=1
+                        }
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
                     }
                 
                 Touch Release Event
-                    //if(tUser.txt==u2Name.txt)
-                    //{
-                    //  Keyboard.origin.val=dp
-                    //  Keyboard.target.val=u2BPS.id
-                    //  Keyboard.sComp.txt="User 2 BPS"
-                    //  page Keyboard
-                    //}
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        //if(tUser.txt==u2Name.txt)
+                        //{
+                        //  Keyboard.origin.val=dp
+                        //  Keyboard.target.val=u2BPS.id
+                        //  Keyboard.sComp.txt="User 2 BPS"
+                        //  page Keyboard
+                        //}
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Float user2Duty
             Properties
@@ -790,31 +1029,47 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    // .val is in 10ths of percent
-                    // This value is automatically determined by the microcontroller from the max coil settings.Currently it is only updated at startup.
-                    // Check if values are legal
-                    //click fCheck,0
-                    //if(tUser.txt==u2Name.txt)
-                    //{
-                    // Reset push state of last selected value
-                    //  b[newValTargetId.val].bco=idle.bco
-                    //  b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    //  user2Duty.bco=idle.pco
-                    //  user2Duty.pco=idle.bco
-                    //  newValTargetId.val=user2Duty.id
-                    // A new value has been selected
-                    //  newSelect.val=1
-                    //}
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // .val is in 10ths of percent
+                        // This value is automatically determined by the microcontroller from the max coil settings.Currently it is only updated at startup.
+                        // Check if values are legal
+                        //click fCheck,0
+                        //if(tUser.txt==u2Name.txt)
+                        //{
+                        // Reset push state of last selected value
+                        //  b[newValTargetId.val].bco=idle.bco
+                        //  b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        //  user2Duty.bco=idle.pco
+                        //  user2Duty.pco=idle.bco
+                        //  newValTargetId.val=user2Duty.id
+                        // A new value has been selected
+                        //  newSelect.val=1
+                        //}
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
                 
                 Touch Release Event
-                    //if(tUser.txt==u2Name.txt)
-                    //{
-                    //  Keyboard.origin.val=dp
-                    //  Keyboard.target.val=u2Duty.id
-                    //  Keyboard.sComp.txt="User 2 Duty"
-                    //  page Keyboard
-                    //}
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        //if(tUser.txt==u2Name.txt)
+                        //{
+                        //  Keyboard.origin.val=dp
+                        //  Keyboard.target.val=u2Duty.id
+                        //  Keyboard.sComp.txt="User 2 Duty"
+                        //  page Keyboard
+                        //}
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Number user2Ontime
             Properties
@@ -823,30 +1078,46 @@ Page User_Settings
             
             Events
                 Touch Press Event
-                    // This value is automatically determined by the microcontroller from the max coil settings.Currently it is only updated at startup.
-                    // Check if values are legal
-                    //click fCheck,0
-                    //if(tUser.txt==u2Name.txt)
-                    //{
-                    // Reset push state of last selected value
-                    //  b[newValTargetId.val].bco=idle.bco
-                    //  b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    //  user2Ontime.bco=idle.pco
-                    //  user2Ontime.pco=idle.bco
-                    //  newValTargetId.val=user2Ontime.id
-                    // A new value has been selected
-                    //  newSelect.val=1
-                    //}
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // This value is automatically determined by the microcontroller from the max coil settings.Currently it is only updated at startup.
+                        // Check if values are legal
+                        //click fCheck,0
+                        //if(tUser.txt==u2Name.txt)
+                        //{
+                        // Reset push state of last selected value
+                        //  b[newValTargetId.val].bco=idle.bco
+                        //  b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        //  user2Ontime.bco=idle.pco
+                        //  user2Ontime.pco=idle.bco
+                        //  newValTargetId.val=user2Ontime.id
+                        // A new value has been selected
+                        //  newSelect.val=1
+                        //}
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
                 
                 Touch Release Event
-                    //if(tUser.txt==u2Name.txt)
-                    //{
-                    //  Keyboard.origin.val=dp
-                    //  Keyboard.target.val=u2Ontime.id
-                    //  Keyboard.sComp.txt="User 2 Ontime"
-                    //  page Keyboard
-                    //}
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        //if(tUser.txt==u2Name.txt)
+                        //{
+                        //  Keyboard.origin.val=dp
+                        //  Keyboard.target.val=u2Ontime.id
+                        //  Keyboard.sComp.txt="User 2 Ontime"
+                        //  page Keyboard
+                        //}
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Text tus0
             Properties
@@ -1043,233 +1314,6 @@ Page User_Settings
                 Type          : int32
                 Initial Value : 100
             
-        Button b0
-            Properties
-                Scope      : Local
-                Caption    : "0"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                
-        Button b1
-            Properties
-                Scope      : Local
-                Caption    : "1"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                    b[newValTargetId.val].val+=1
-                
-        Button b2
-            Properties
-                Scope      : Local
-                Caption    : "2"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                    b[newValTargetId.val].val+=2
-                
-        Button b3
-            Properties
-                Scope      : Local
-                Caption    : "3"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                    b[newValTargetId.val].val+=3
-                
-        Button b4
-            Properties
-                Scope      : Local
-                Caption    : "4"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                    b[newValTargetId.val].val+=4
-                
-        Button b5
-            Properties
-                Scope      : Local
-                Caption    : "5"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                    b[newValTargetId.val].val+=5
-                
-        Button b6
-            Properties
-                Scope      : Local
-                Caption    : "6"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                    b[newValTargetId.val].val+=6
-                
-        Button b7
-            Properties
-                Scope      : Local
-                Caption    : "7"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                    b[newValTargetId.val].val+=7
-                
-        Button b8
-            Properties
-                Scope      : Local
-                Caption    : "8"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                    b[newValTargetId.val].val+=8
-                
-        Button b9
-            Properties
-                Scope      : Local
-                Caption    : "9"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                    b[newValTargetId.val].val+=9
-                
-        Button bClear
-            Properties
-                Scope      : Local
-                Caption    : "X"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    b[newValTargetId.val].val=0
-                
-        Button bOK
-            Properties
-                Scope      : Local
-                Caption    : "ok"
-                Max. length: 2
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    newValTargetId.val=idle.id
-                    // Check if values are legal
-                    click fCheck,0
-                
         Text tSelToMod
             Properties
                 Scope       : Local
@@ -1443,6 +1487,38 @@ Page User_Settings
                 
                 Touch Release Event
                     
+        Variable tempStr
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: ""
+                Max. length   : 32
+            
+        Variable showHelp
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
+        QRCode qrHelp
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    ref_stop
+                    if(showHelp.val==0)
+                    {
+                        showHelp.val=1
+                        tempStr.txt=tTitle.txt
+                        tTitle.txt="Get Help for..."
+                    }else
+                    {
+                        showHelp.val=0
+                        tTitle.txt=tempStr.txt
+                    }
+                    vis qrHelp,Help_Info.helpMode.val
+                    ref_star
+                
         Hotspot fLoadColors
             Events
                 Touch Press Event
@@ -1492,6 +1568,12 @@ Page User_Settings
                                 b[sys0].pic+=sys2
                                 b[sys0].pic2=b[sys0].pic+1
                             }
+                        }else if(sys1==58)
+                        {
+                            // Types that have bco, pco
+                            // QR Code
+                            b[sys0].bco=Settings.backCol.val
+                            b[sys0].pco=Settings.qrFrontCol.val
                         }else if(sys1==1)
                         {
                             // Types that have pic, pic2:
@@ -1505,3 +1587,421 @@ Page User_Settings
                 
                 Touch Release Event
                     
+        Button b1
+            Properties
+                Scope      : Local
+                Caption    : "1"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=1
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b2
+            Properties
+                Scope      : Local
+                Caption    : "2"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=2
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b3
+            Properties
+                Scope      : Local
+                Caption    : "3"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=3
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b4
+            Properties
+                Scope      : Local
+                Caption    : "4"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=4
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b5
+            Properties
+                Scope      : Local
+                Caption    : "5"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=5
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b6
+            Properties
+                Scope      : Local
+                Caption    : "6"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=6
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button bClear
+            Properties
+                Scope      : Local
+                Caption    : "X"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b0
+            Properties
+                Scope      : Local
+                Caption    : "0"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b9
+            Properties
+                Scope      : Local
+                Caption    : "9"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=9
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b8
+            Properties
+                Scope      : Local
+                Caption    : "8"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=8
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b7
+            Properties
+                Scope      : Local
+                Caption    : "7"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=7
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button bOK
+            Properties
+                Scope      : Local
+                Caption    : "ok"
+                Max. length: 2
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaO"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        newValTargetId.val=idle.id
+                        click fCheck,0
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                

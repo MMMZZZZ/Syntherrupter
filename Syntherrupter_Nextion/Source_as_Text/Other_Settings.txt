@@ -57,39 +57,54 @@ Page Other_Settings
             sys0-=sys1
             nSleepS.val=sys0
             //
+            // Load Help Mode
+            vis qrHelp,Help_Info.helpMode.val
+            tempStr.txt=tTitle.txt
+            showHelp.val=1
+            click 0,1
+            //
             // Enable page refreshs again
             ref_star
         
         Postinitialize Event
             
         Touch Press Event
-            if(Other_Settings.nBackOff.val!=0)
+            if(showHelp.val==0)
             {
-                // Default "stop" action.
-                // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                prints "mes",3
-                // Set all ontime and duty settings of all pages to 0.
-                // First come the global variables then the local variables.
-                Simple.ontime.val=0
-                Simple.duty.val=0
-                Simple.set1.val=Simple.set1.val&0x0000ffff
-                Simple.set2.val=Simple.set2.val&0x0000ffff
-                Simple.set3.val=Simple.set3.val&0x0000ffff
-                Simple.set4.val=Simple.set4.val&0x0000ffff
-                Simple.set5.val=Simple.set5.val&0x0000ffff
-                Simple.set6.val=Simple.set6.val&0x0000ffff
-                MIDI_Live.ontime.val=0
-                MIDI_Live.duty.val=0
-                MIDI_Live.set1.val=0
-                MIDI_Live.set2.val=0
-                MIDI_Live.set3.val=0
-                MIDI_Live.set4.val=0
-                MIDI_Live.set5.val=0
-                MIDI_Live.set6.val=0
-                Lightsaber.ontime.val=0
-                Lightsaber.ontimes12.val=0
-                Lightsaber.ontimes34.val=0
-                Lightsaber.ontimes56.val=0
+                // Normal Operation
+                if(Other_Settings.nBackOff.val!=0)
+                {
+                    // Default "stop" action.
+                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                    prints "mes",3
+                    // Set all ontime and duty settings of all pages to 0.
+                    // First come the global variables then the local variables.
+                    Simple.ontime.val=0
+                    Simple.duty.val=0
+                    Simple.set1.val=Simple.set1.val&0x0000ffff
+                    Simple.set2.val=Simple.set2.val&0x0000ffff
+                    Simple.set3.val=Simple.set3.val&0x0000ffff
+                    Simple.set4.val=Simple.set4.val&0x0000ffff
+                    Simple.set5.val=Simple.set5.val&0x0000ffff
+                    Simple.set6.val=Simple.set6.val&0x0000ffff
+                    MIDI_Live.ontime.val=0
+                    MIDI_Live.duty.val=0
+                    MIDI_Live.set1.val=0
+                    MIDI_Live.set2.val=0
+                    MIDI_Live.set3.val=0
+                    MIDI_Live.set4.val=0
+                    MIDI_Live.set5.val=0
+                    MIDI_Live.set6.val=0
+                    Lightsaber.ontime.val=0
+                    Lightsaber.ontimes12.val=0
+                    Lightsaber.ontimes34.val=0
+                    Lightsaber.ontimes56.val=0
+                }
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfgj"
+                click qrHelp,0
             }
         
         Touch Release Event
@@ -130,41 +145,57 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    click bOK,0
-                    // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
-                    // Data byte 1:
-                    //    Bit 6-7: 2 = Other Settings
-                    //    Bit 0-5: Settings page (a.k.a. meaning of the following bytes). Ranges from 0-10
-                    // Settings page 0
-                    //   Data byte 2: Button hold time LSB
-                    //   Data byte 3: Button hold time MSB
-                    //   Data byte 4: Delay until sleep in seconds LSB
-                    //   Data byte 5: Delay until sleep in seconds MSB
-                    // Settings page 1
-                    //   Data byte 2: Brightness
-                    //   Data byte 3:
-                    //     Bit 0: Background shutdown
-                    //     Bit 1: Dark Mode
-                    //
-                    // sys0 contains data byte 1
-                    sys0=0
-                    sys0=2<<6
-                    prints "d",1
-                    prints sys0,1
-                    prints nHoldTime.val,2
-                    prints thsp,2
-                    sys0+=1
-                    prints "d",1
-                    prints sys0,1
-                    prints dim,1
-                    sys0=Settings.colorMode.val
-                    sys0=sys0<<1
-                    sys0+=nBackOff.val
-                    prints sys0,1
-                    prints 0,2
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        click bOK,0
+                        // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
+                        // Data byte 1:
+                        //    Bit 6-7: 2 = Other Settings
+                        //    Bit 0-5: Settings page (a.k.a. meaning of the following bytes). Ranges from 0-10
+                        // Settings page 0
+                        //   Data byte 2: Button hold time LSB
+                        //   Data byte 3: Button hold time MSB
+                        //   Data byte 4: Delay until sleep in seconds LSB
+                        //   Data byte 5: Delay until sleep in seconds MSB
+                        // Settings page 1
+                        //   Data byte 2: Brightness
+                        //   Data byte 3:
+                        //     Bit 0: Background shutdown
+                        //     Bit 1: Dark Mode
+                        //
+                        // sys0 contains data byte 1
+                        sys0=0
+                        sys0=2<<6
+                        prints "d",1
+                        prints sys0,1
+                        prints nHoldTime.val,2
+                        prints thsp,2
+                        sys0+=1
+                        prints "d",1
+                        prints sys0,1
+                        prints dim,1
+                        sys0=Settings.colorMode.val
+                        sys0=sys0<<1
+                        sys0+=nBackOff.val
+                        prints sys0,1
+                        prints 0,2
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
+                    }
                 
                 Touch Release Event
-                    page Settings
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        page Settings
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Text tHoldTime
             Properties
@@ -186,20 +217,36 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal and if so, apply them
-                    click fCheckNApply,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nHoldTime.bco=idle.pco
-                    nHoldTime.pco=idle.bco
-                    newValTargetId.val=nHoldTime.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal and if so, apply them
+                        click fCheckNApply,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nHoldTime.bco=idle.pco
+                        nHoldTime.pco=idle.bco
+                        newValTargetId.val=nHoldTime.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Variable newValTargetId
             Properties
                 Scope         : Local
@@ -231,15 +278,31 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=10
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
                     }
                 
         Button b1
@@ -250,17 +313,33 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=10
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
                     }
-                    b[newValTargetId.val].val+=1
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=1
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button b2
             Properties
@@ -270,17 +349,33 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=10
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
                     }
-                    b[newValTargetId.val].val+=2
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=2
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button b3
             Properties
@@ -290,17 +385,33 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=10
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
                     }
-                    b[newValTargetId.val].val+=3
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=3
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button b4
             Properties
@@ -310,17 +421,33 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=10
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
                     }
-                    b[newValTargetId.val].val+=4
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=4
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button b5
             Properties
@@ -330,17 +457,33 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=10
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
                     }
-                    b[newValTargetId.val].val+=5
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=5
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button b6
             Properties
@@ -350,17 +493,33 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=10
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
                     }
-                    b[newValTargetId.val].val+=6
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=6
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button b7
             Properties
@@ -370,17 +529,33 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=10
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
                     }
-                    b[newValTargetId.val].val+=7
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=7
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button b8
             Properties
@@ -390,17 +565,33 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=10
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
                     }
-                    b[newValTargetId.val].val+=8
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=8
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button b9
             Properties
@@ -410,17 +601,33 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=10
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
                     }
-                    b[newValTargetId.val].val+=9
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=9
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button bClear
             Properties
@@ -430,9 +637,25 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
+                    }
+                
                 Touch Release Event
-                    b[newValTargetId.val].val=0
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button bOK
             Properties
@@ -442,12 +665,28 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
+                    }
+                
                 Touch Release Event
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    newValTargetId.val=idle.id
-                    click fCheckNApply,0
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        newValTargetId.val=idle.id
+                        click fCheckNApply,0
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Text tBrightness
             Properties
@@ -471,20 +710,36 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal and if so, apply them
-                    click fCheckNApply,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // No value selected to modify
-                    newValTargetId.val=idle.id
-                    // A new value has been selected
-                    newSelect.val=0
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal and if so, apply them
+                        click fCheckNApply,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // No value selected to modify
+                        newValTargetId.val=idle.id
+                        // A new value has been selected
+                        newSelect.val=0
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
+                    }
                 
                 Touch Release Event
-                    sys0=sBrightness.val*sBrightness.val
-                    sys0/=sBrightness.maxval
-                    dim=sys0
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        sys0=sBrightness.val*sBrightness.val
+                        sys0/=sBrightness.maxval
+                        dim=sys0
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
                 Touch Move
                     sys0=sBrightness.val*sBrightness.val
@@ -545,20 +800,36 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal and if so, apply them
-                    click fCheckNApply,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nSleepMin.bco=idle.pco
-                    nSleepMin.pco=idle.bco
-                    newValTargetId.val=nSleepMin.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal and if so, apply them
+                        click fCheckNApply,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nSleepMin.bco=idle.pco
+                        nSleepMin.pco=idle.bco
+                        newValTargetId.val=nSleepMin.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nSleepS
             Properties
                 Scope        : Local
@@ -566,20 +837,36 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal and if so, apply them
-                    click fCheckNApply,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nSleepS.bco=idle.pco
-                    nSleepS.pco=idle.bco
-                    newValTargetId.val=nSleepS.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal and if so, apply them
+                        click fCheckNApply,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nSleepS.bco=idle.pco
+                        nSleepS.pco=idle.bco
+                        newValTargetId.val=nSleepS.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Text tMin
             Properties
                 Scope       : Local
@@ -667,20 +954,36 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal and if so, apply them
-                    click fCheckNApply,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nBackOff.bco=idle.pco
-                    nBackOff.pco=idle.bco
-                    newValTargetId.val=nBackOff.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal and if so, apply them
+                        click fCheckNApply,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nBackOff.bco=idle.pco
+                        nBackOff.pco=idle.bco
+                        newValTargetId.val=nBackOff.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Text tUser
             Properties
                 Scope       : Local
@@ -742,20 +1045,38 @@ Page Other_Settings
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(Settings.colorMode.val==0)
+                    if(showHelp.val==0)
                     {
-                        Settings.backCol.val=8484
-                        Settings.frontCol2.val=33808
-                        Settings.colorMode.val=1
+                        // Normal Operation
                     }else
                     {
-                        Settings.backCol.val=65535
-                        Settings.frontCol2.val=65535
-                        Settings.colorMode.val=0
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgj"
                     }
-                    click fLoadColors,1
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(Settings.colorMode.val==0)
+                        {
+                            Settings.backCol.val=8484
+                            Settings.frontCol2.val=33808
+                            Settings.qrFrontCol.val=46652
+                            Settings.colorMode.val=1
+                        }else
+                        {
+                            Settings.backCol.val=65535
+                            Settings.frontCol2.val=65535
+                            Settings.qrFrontCol.val=6900
+                            Settings.colorMode.val=0
+                        }
+                        click fLoadColors,1
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Text tSelToMod
             Properties
@@ -770,6 +1091,38 @@ Page Other_Settings
                 
                 Touch Release Event
                     
+        Variable tempStr
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: ""
+                Max. length   : 32
+            
+        Variable showHelp
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
+        QRCode qrHelp
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    ref_stop
+                    if(showHelp.val==0)
+                    {
+                        showHelp.val=1
+                        tempStr.txt=tTitle.txt
+                        tTitle.txt="Get Help for..."
+                    }else
+                    {
+                        showHelp.val=0
+                        tTitle.txt=tempStr.txt
+                    }
+                    vis qrHelp,Help_Info.helpMode.val
+                    ref_star
+                
         Hotspot fLoadColors
             Events
                 Touch Press Event
@@ -819,6 +1172,12 @@ Page Other_Settings
                                 b[sys0].pic+=sys2
                                 b[sys0].pic2=b[sys0].pic+1
                             }
+                        }else if(sys1==58)
+                        {
+                            // Types that have bco, pco
+                            // QR Code
+                            b[sys0].bco=Settings.backCol.val
+                            b[sys0].pco=Settings.qrFrontCol.val
                         }else if(sys1==1)
                         {
                             // Types that have pic, pic2:

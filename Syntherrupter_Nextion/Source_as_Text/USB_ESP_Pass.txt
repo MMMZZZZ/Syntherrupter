@@ -7,6 +7,12 @@ Page USB_ESP_Pass
             // Load colors
             click fLoadColors,1
             //
+            // Load Help Mode
+            vis qrHelp,Help_Info.helpMode.val
+            tempStr.txt=tTitle.txt
+            showHelp.val=1
+            click 0,1
+            //
             // Enable page refreshs again
             ref_star
         
@@ -15,7 +21,16 @@ Page USB_ESP_Pass
             prints "meu",0
         
         Touch Press Event
-            
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfgx"
+                click qrHelp,0
+            }
+        
         Touch Release Event
             
         Page Exit Event
@@ -43,6 +58,38 @@ Page USB_ESP_Pass
                     
                 Touch Release Event
                     
+        Variable tempStr
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: ""
+                Max. length   : 32
+            
+        Variable showHelp
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
+        QRCode qrHelp
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    ref_stop
+                    if(showHelp.val==0)
+                    {
+                        showHelp.val=1
+                        tempStr.txt=tTitle.txt
+                        tTitle.txt="Get Help for..."
+                    }else
+                    {
+                        showHelp.val=0
+                        tTitle.txt=tempStr.txt
+                    }
+                    vis qrHelp,Help_Info.helpMode.val
+                    ref_star
+                
         Hotspot fLoadColors
             Events
                 Touch Press Event
@@ -92,6 +139,12 @@ Page USB_ESP_Pass
                                 b[sys0].pic+=sys2
                                 b[sys0].pic2=b[sys0].pic+1
                             }
+                        }else if(sys1==58)
+                        {
+                            // Types that have bco, pco
+                            // QR Code
+                            b[sys0].bco=Settings.backCol.val
+                            b[sys0].pco=Settings.qrFrontCol.val
                         }else if(sys1==1)
                         {
                             // Types that have pic, pic2:

@@ -163,6 +163,12 @@ Page TC_Settings
                 vis bOK,0
             }
             //
+            // Load Help Mode
+            vis qrHelp,Help_Info.helpMode.val
+            tempStr.txt=tTitle.txt
+            showHelp.val=1
+            click 0,1
+            //
             // Enable page refreshs again
             ref_star
         
@@ -192,33 +198,42 @@ Page TC_Settings
             }
         
         Touch Press Event
-            if(Other_Settings.nBackOff.val!=0)
+            if(showHelp.val==0)
             {
-                // Default "stop" action.
-                // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                prints "mes",3
-                // Set all ontime and duty settings of all pages to 0.
-                // First come the global variables then the local variables.
-                Simple.ontime.val=0
-                Simple.duty.val=0
-                Simple.set1.val=Simple.set1.val&0x0000ffff
-                Simple.set2.val=Simple.set2.val&0x0000ffff
-                Simple.set3.val=Simple.set3.val&0x0000ffff
-                Simple.set4.val=Simple.set4.val&0x0000ffff
-                Simple.set5.val=Simple.set5.val&0x0000ffff
-                Simple.set6.val=Simple.set6.val&0x0000ffff
-                MIDI_Live.ontime.val=0
-                MIDI_Live.duty.val=0
-                MIDI_Live.set1.val=0
-                MIDI_Live.set2.val=0
-                MIDI_Live.set3.val=0
-                MIDI_Live.set4.val=0
-                MIDI_Live.set5.val=0
-                MIDI_Live.set6.val=0
-                Lightsaber.ontime.val=0
-                Lightsaber.ontimes12.val=0
-                Lightsaber.ontimes34.val=0
-                Lightsaber.ontimes56.val=0
+                // Normal Operation
+                if(Other_Settings.nBackOff.val!=0)
+                {
+                    // Default "stop" action.
+                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                    prints "mes",3
+                    // Set all ontime and duty settings of all pages to 0.
+                    // First come the global variables then the local variables.
+                    Simple.ontime.val=0
+                    Simple.duty.val=0
+                    Simple.set1.val=Simple.set1.val&0x0000ffff
+                    Simple.set2.val=Simple.set2.val&0x0000ffff
+                    Simple.set3.val=Simple.set3.val&0x0000ffff
+                    Simple.set4.val=Simple.set4.val&0x0000ffff
+                    Simple.set5.val=Simple.set5.val&0x0000ffff
+                    Simple.set6.val=Simple.set6.val&0x0000ffff
+                    MIDI_Live.ontime.val=0
+                    MIDI_Live.duty.val=0
+                    MIDI_Live.set1.val=0
+                    MIDI_Live.set2.val=0
+                    MIDI_Live.set3.val=0
+                    MIDI_Live.set4.val=0
+                    MIDI_Live.set5.val=0
+                    MIDI_Live.set6.val=0
+                    Lightsaber.ontime.val=0
+                    Lightsaber.ontimes12.val=0
+                    Lightsaber.ontimes34.val=0
+                    Lightsaber.ontimes56.val=0
+                }
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgK"
+                click qrHelp,0
             }
         
         Touch Release Event
@@ -226,7 +241,7 @@ Page TC_Settings
         Page Exit Event
             
     Components
-        Text tHideBack
+        Text tHideBack2
             Properties
                 Scope       : Local
                 Initial Text: " "
@@ -238,7 +253,7 @@ Page TC_Settings
                 
                 Touch Release Event
                     
-        Text tHideBack2
+        Text tHideBack
             Properties
                 Scope       : Local
                 Initial Text: " "
@@ -271,242 +286,258 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    click bOK,0
-                    // Store local component values in global variables. Note: Since a component consists of many different properties (like font size, color, position, ...) its memory footprint is much larger and it should not be global.
-                    // Since min offtime and max MIDI voices are not used elsewhere in the GUI they are packed into the same variable, where minOff occupies the lower 16 bit, and voices the uppe 16 bit.
-                    // Set user 2 limits to max Coil limits.
-                    //   sys0 = max ontime of all coils
-                    //   sys1 = max duty of all coils
-                    sys0=0
-                    sys1=0
-                    if(maxCoilCount.val>=1)
+                    if(showHelp.val==0)
                     {
-                        coil1On.val=nCoil1On.val
-                        coil1OffVoices.val=nCoil1Voices.val<<16
-                        coil1OffVoices.val+=nCoil1MinOff.val
-                        coil1Duty.val=nCoil1Duty.val
-                        if(coil1On.val>sys0)
+                        // Normal Operation
+                        click bOK,0
+                        // Store local component values in global variables. Note: Since a component consists of many different properties (like font size, color, position, ...) its memory footprint is much larger and it should not be global.
+                        // Since min offtime and max MIDI voices are not used elsewhere in the GUI they are packed into the same variable, where minOff occupies the lower 16 bit, and voices the uppe 16 bit.
+                        // Set user 2 limits to max Coil limits.
+                        //   sys0 = max ontime of all coils
+                        //   sys1 = max duty of all coils
+                        sys0=0
+                        sys1=0
+                        if(maxCoilCount.val>=1)
                         {
-                            sys0=coil1On.val
+                            coil1On.val=nCoil1On.val
+                            coil1OffVoices.val=nCoil1Voices.val<<16
+                            coil1OffVoices.val+=nCoil1MinOff.val
+                            coil1Duty.val=nCoil1Duty.val
+                            if(coil1On.val>sys0)
+                            {
+                                sys0=coil1On.val
+                            }
+                            if(coil1Duty.val>sys1)
+                            {
+                                sys1=coil1Duty.val
+                            }
                         }
-                        if(coil1Duty.val>sys1)
+                        if(maxCoilCount.val>=2)
                         {
-                            sys1=coil1Duty.val
+                            coil2On.val=nCoil2On.val
+                            coil2OffVoices.val=nCoil2Voices.val<<16
+                            coil2OffVoices.val+=nCoil2MinOff.val
+                            coil2Duty.val=nCoil2Duty.val
+                            if(coil2On.val>sys0)
+                            {
+                                sys0=coil2On.val
+                            }
+                            if(coil2Duty.val>sys1)
+                            {
+                                sys1=coil2Duty.val
+                            }
                         }
-                    }
-                    if(maxCoilCount.val>=2)
+                        if(maxCoilCount.val>=3)
+                        {
+                            coil3On.val=nCoil3On.val
+                            coil3OffVoices.val=nCoil3Voices.val<<16
+                            coil3OffVoices.val+=nCoil3MinOff.val
+                            coil3Duty.val=nCoil3Duty.val
+                            if(coil3On.val>sys0)
+                            {
+                                sys0=coil3On.val
+                            }
+                            if(coil3Duty.val>sys1)
+                            {
+                                sys1=coil3Duty.val
+                            }
+                        }
+                        if(maxCoilCount.val>=4)
+                        {
+                            coil4On.val=nCoil4On.val
+                            coil4OffVoices.val=nCoil4Voices.val<<16
+                            coil4OffVoices.val+=nCoil4MinOff.val
+                            coil4Duty.val=nCoil4Duty.val
+                            if(coil4On.val>sys0)
+                            {
+                                sys0=coil4On.val
+                            }
+                            if(coil4Duty.val>sys1)
+                            {
+                                sys1=coil4Duty.val
+                            }
+                        }
+                        if(maxCoilCount.val>=5)
+                        {
+                            coil5On.val=nCoil5On.val
+                            coil5OffVoices.val=nCoil5Voices.val<<16
+                            coil5OffVoices.val+=nCoil5MinOff.val
+                            coil5Duty.val=nCoil5Duty.val
+                            if(coil5On.val>sys0)
+                            {
+                                sys0=coil5On.val
+                            }
+                            if(coil5Duty.val>sys1)
+                            {
+                                sys1=coil5Duty.val
+                            }
+                        }
+                        if(maxCoilCount.val>=6)
+                        {
+                            coil6On.val=nCoil6On.val
+                            coil6OffVoices.val=nCoil6Voices.val<<16
+                            coil6OffVoices.val+=nCoil6MinOff.val
+                            coil6Duty.val=nCoil6Duty.val
+                            if(coil6On.val>sys0)
+                            {
+                                sys0=coil6On.val
+                            }
+                            if(coil6Duty.val>sys1)
+                            {
+                                sys1=coil6Duty.val
+                            }
+                        }
+                        User_Settings.u2Ontime.val=sys0
+                        User_Settings.u2Duty.val=sys1
+                        // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
+                        // Data byte 1:
+                        //    Bit 6-7: 1 = Coil settings.
+                        //    Bit 0-5:Tesla Coil whose limits are being set (1, 2, 3, 4, 5 or 6)
+                        // Data byte 2-5: Bit field with settings
+                        //    Bit  0-11: Maximum allowed ontime [10us]
+                        //    Bit 12-15: Maximum number of simultaneous voices in MIDI playback minus one.
+                        //    Bit 16-22: Minimum offtime after each ontime [10us]
+                        //    Bit 23-31: Maximum allowed duty [1/1000]
+                        //
+                        // sys0 will contain the bit field (a.k.a. the data bytes 2-5)
+                        // sys1 is used as temp variable
+                        // sys2 is data byte 1
+                        if(maxCoilCount.val>=1)
+                        {
+                            sys0=coil1On.val/10
+                            sys1=coil1OffVoices.val>>16
+                            sys1=sys1&0x0000ffff
+                            sys1-=1
+                            sys1=sys1<<12
+                            sys0+=sys1
+                            sys1=coil1OffVoices.val&0x0000ffff
+                            sys1/=10
+                            sys1=sys1<<16
+                            sys0+=sys1
+                            sys1=coil1Duty.val<<23
+                            sys0+=sys1
+                            sys2=1<<6
+                            sys2+=1
+                            prints "d",1
+                            prints sys2,1
+                            prints sys0,4
+                        }
+                        if(maxCoilCount.val>=2)
+                        {
+                            sys0=coil2On.val/10
+                            sys1=coil2OffVoices.val>>16
+                            sys1=sys1&0x0000ffff
+                            sys1-=1
+                            sys1=sys1<<12
+                            sys0+=sys1
+                            sys1=coil2OffVoices.val&0x0000ffff
+                            sys1/=10
+                            sys1=sys1<<16
+                            sys0+=sys1
+                            sys1=coil2Duty.val<<23
+                            sys0+=sys1
+                            sys2=1<<6
+                            sys2+=2
+                            prints "d",1
+                            prints sys2,1
+                            prints sys0,4
+                        }
+                        if(maxCoilCount.val>=3)
+                        {
+                            sys0=coil3On.val/10
+                            sys1=coil3OffVoices.val>>16
+                            sys1=sys1&0x0000ffff
+                            sys1-=1
+                            sys1=sys1<<12
+                            sys0+=sys1
+                            sys1=coil3OffVoices.val&0x0000ffff
+                            sys1/=10
+                            sys1=sys1<<16
+                            sys0+=sys1
+                            sys1=coil3Duty.val<<23
+                            sys0+=sys1
+                            prints "d",1
+                            sys2=1<<6
+                            sys2+=3
+                            prints sys2,1
+                            prints sys0,4
+                        }
+                        if(maxCoilCount.val>=4)
+                        {
+                            sys0=coil4On.val/10
+                            sys1=coil4OffVoices.val>>16
+                            sys1=sys1&0x0000ffff
+                            sys1-=1
+                            sys1=sys1<<12
+                            sys0+=sys1
+                            sys1=coil4OffVoices.val&0x0000ffff
+                            sys1/=10
+                            sys1=sys1<<16
+                            sys0+=sys1
+                            sys1=coil4Duty.val<<23
+                            sys0+=sys1
+                            sys2=1<<6
+                            sys2+=4
+                            prints "d",1
+                            prints sys2,1
+                            prints sys0,4
+                        }
+                        if(maxCoilCount.val>=5)
+                        {
+                            sys0=coil5On.val/10
+                            sys1=coil5OffVoices.val>>16
+                            sys1=sys1&0x0000ffff
+                            sys1-=1
+                            sys1=sys1<<12
+                            sys0+=sys1
+                            sys1=coil5OffVoices.val&0x0000ffff
+                            sys1/=10
+                            sys1=sys1<<16
+                            sys0+=sys1
+                            sys1=coil5Duty.val<<23
+                            sys0+=sys1
+                            sys2=1<<6
+                            sys2+=5
+                            prints "d",1
+                            prints sys2,1
+                            prints sys0,4
+                        }
+                        if(maxCoilCount.val>=6)
+                        {
+                            sys0=coil6On.val/10
+                            sys1=coil6OffVoices.val>>16
+                            sys1=sys1&0x0000ffff
+                            sys1-=1
+                            sys1=sys1<<12
+                            sys0+=sys1
+                            sys1=coil6OffVoices.val&0x0000ffff
+                            sys1/=10
+                            sys1=sys1<<16
+                            sys0+=sys1
+                            sys1=coil6Duty.val<<23
+                            sys0+=sys1
+                            sys2=1<<6
+                            sys2+=6
+                            prints "d",1
+                            prints sys2,1
+                            prints sys0,4
+                        }
+                    }else
                     {
-                        coil2On.val=nCoil2On.val
-                        coil2OffVoices.val=nCoil2Voices.val<<16
-                        coil2OffVoices.val+=nCoil2MinOff.val
-                        coil2Duty.val=nCoil2Duty.val
-                        if(coil2On.val>sys0)
-                        {
-                            sys0=coil2On.val
-                        }
-                        if(coil2Duty.val>sys1)
-                        {
-                            sys1=coil2Duty.val
-                        }
-                    }
-                    if(maxCoilCount.val>=3)
-                    {
-                        coil3On.val=nCoil3On.val
-                        coil3OffVoices.val=nCoil3Voices.val<<16
-                        coil3OffVoices.val+=nCoil3MinOff.val
-                        coil3Duty.val=nCoil3Duty.val
-                        if(coil3On.val>sys0)
-                        {
-                            sys0=coil3On.val
-                        }
-                        if(coil3Duty.val>sys1)
-                        {
-                            sys1=coil3Duty.val
-                        }
-                    }
-                    if(maxCoilCount.val>=4)
-                    {
-                        coil4On.val=nCoil4On.val
-                        coil4OffVoices.val=nCoil4Voices.val<<16
-                        coil4OffVoices.val+=nCoil4MinOff.val
-                        coil4Duty.val=nCoil4Duty.val
-                        if(coil4On.val>sys0)
-                        {
-                            sys0=coil4On.val
-                        }
-                        if(coil4Duty.val>sys1)
-                        {
-                            sys1=coil4Duty.val
-                        }
-                    }
-                    if(maxCoilCount.val>=5)
-                    {
-                        coil5On.val=nCoil5On.val
-                        coil5OffVoices.val=nCoil5Voices.val<<16
-                        coil5OffVoices.val+=nCoil5MinOff.val
-                        coil5Duty.val=nCoil5Duty.val
-                        if(coil5On.val>sys0)
-                        {
-                            sys0=coil5On.val
-                        }
-                        if(coil5Duty.val>sys1)
-                        {
-                            sys1=coil5Duty.val
-                        }
-                    }
-                    if(maxCoilCount.val>=6)
-                    {
-                        coil6On.val=nCoil6On.val
-                        coil6OffVoices.val=nCoil6Voices.val<<16
-                        coil6OffVoices.val+=nCoil6MinOff.val
-                        coil6Duty.val=nCoil6Duty.val
-                        if(coil6On.val>sys0)
-                        {
-                            sys0=coil6On.val
-                        }
-                        if(coil6Duty.val>sys1)
-                        {
-                            sys1=coil6Duty.val
-                        }
-                    }
-                    User_Settings.u2Ontime.val=sys0
-                    User_Settings.u2Duty.val=sys1
-                    // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
-                    // Data byte 1:
-                    //    Bit 6-7: 1 = Coil settings.
-                    //    Bit 0-5:Tesla Coil whose limits are being set (1, 2, 3, 4, 5 or 6)
-                    // Data byte 2-5: Bit field with settings
-                    //    Bit  0-11: Maximum allowed ontime [10us]
-                    //    Bit 12-15: Maximum number of simultaneous voices in MIDI playback minus one.
-                    //    Bit 16-22: Minimum offtime after each ontime [10us]
-                    //    Bit 23-31: Maximum allowed duty [1/1000]
-                    //
-                    // sys0 will contain the bit field (a.k.a. the data bytes 2-5)
-                    // sys1 is used as temp variable
-                    // sys2 is data byte 1
-                    if(maxCoilCount.val>=1)
-                    {
-                        sys0=coil1On.val/10
-                        sys1=coil1OffVoices.val>>16
-                        sys1=sys1&0x0000ffff
-                        sys1-=1
-                        sys1=sys1<<12
-                        sys0+=sys1
-                        sys1=coil1OffVoices.val&0x0000ffff
-                        sys1/=10
-                        sys1=sys1<<16
-                        sys0+=sys1
-                        sys1=coil1Duty.val<<23
-                        sys0+=sys1
-                        sys2=1<<6
-                        sys2+=1
-                        prints "d",1
-                        prints sys2,1
-                        prints sys0,4
-                    }
-                    if(maxCoilCount.val>=2)
-                    {
-                        sys0=coil2On.val/10
-                        sys1=coil2OffVoices.val>>16
-                        sys1=sys1&0x0000ffff
-                        sys1-=1
-                        sys1=sys1<<12
-                        sys0+=sys1
-                        sys1=coil2OffVoices.val&0x0000ffff
-                        sys1/=10
-                        sys1=sys1<<16
-                        sys0+=sys1
-                        sys1=coil2Duty.val<<23
-                        sys0+=sys1
-                        sys2=1<<6
-                        sys2+=2
-                        prints "d",1
-                        prints sys2,1
-                        prints sys0,4
-                    }
-                    if(maxCoilCount.val>=3)
-                    {
-                        sys0=coil3On.val/10
-                        sys1=coil3OffVoices.val>>16
-                        sys1=sys1&0x0000ffff
-                        sys1-=1
-                        sys1=sys1<<12
-                        sys0+=sys1
-                        sys1=coil3OffVoices.val&0x0000ffff
-                        sys1/=10
-                        sys1=sys1<<16
-                        sys0+=sys1
-                        sys1=coil3Duty.val<<23
-                        sys0+=sys1
-                        prints "d",1
-                        sys2=1<<6
-                        sys2+=3
-                        prints sys2,1
-                        prints sys0,4
-                    }
-                    if(maxCoilCount.val>=4)
-                    {
-                        sys0=coil4On.val/10
-                        sys1=coil4OffVoices.val>>16
-                        sys1=sys1&0x0000ffff
-                        sys1-=1
-                        sys1=sys1<<12
-                        sys0+=sys1
-                        sys1=coil4OffVoices.val&0x0000ffff
-                        sys1/=10
-                        sys1=sys1<<16
-                        sys0+=sys1
-                        sys1=coil4Duty.val<<23
-                        sys0+=sys1
-                        sys2=1<<6
-                        sys2+=4
-                        prints "d",1
-                        prints sys2,1
-                        prints sys0,4
-                    }
-                    if(maxCoilCount.val>=5)
-                    {
-                        sys0=coil5On.val/10
-                        sys1=coil5OffVoices.val>>16
-                        sys1=sys1&0x0000ffff
-                        sys1-=1
-                        sys1=sys1<<12
-                        sys0+=sys1
-                        sys1=coil5OffVoices.val&0x0000ffff
-                        sys1/=10
-                        sys1=sys1<<16
-                        sys0+=sys1
-                        sys1=coil5Duty.val<<23
-                        sys0+=sys1
-                        sys2=1<<6
-                        sys2+=5
-                        prints "d",1
-                        prints sys2,1
-                        prints sys0,4
-                    }
-                    if(maxCoilCount.val>=6)
-                    {
-                        sys0=coil6On.val/10
-                        sys1=coil6OffVoices.val>>16
-                        sys1=sys1&0x0000ffff
-                        sys1-=1
-                        sys1=sys1<<12
-                        sys0+=sys1
-                        sys1=coil6OffVoices.val&0x0000ffff
-                        sys1/=10
-                        sys1=sys1<<16
-                        sys0+=sys1
-                        sys1=coil6Duty.val<<23
-                        sys0+=sys1
-                        sys2=1<<6
-                        sys2+=6
-                        prints "d",1
-                        prints sys2,1
-                        prints sys0,4
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
                     }
                 
                 Touch Release Event
-                    page Settings
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        page Settings
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Variable coil1Chn
             Properties
@@ -570,20 +601,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil1On.bco=idle.pco
-                    nCoil1On.pco=idle.bco
-                    newValTargetId.val=nCoil1On.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil1On.bco=idle.pco
+                        nCoil1On.pco=idle.bco
+                        newValTargetId.val=nCoil1On.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Text tMaxOn
             Properties
                 Scope       : Local
@@ -701,20 +748,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil1MinOff.bco=idle.pco
-                    nCoil1MinOff.pco=idle.bco
-                    newValTargetId.val=nCoil1MinOff.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil1MinOff.bco=idle.pco
+                        nCoil1MinOff.pco=idle.bco
+                        newValTargetId.val=nCoil1MinOff.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Float nCoil1Duty
             Properties
                 Scope           : Local
@@ -723,20 +786,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil1Duty.bco=idle.pco
-                    nCoil1Duty.pco=idle.bco
-                    newValTargetId.val=nCoil1Duty.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil1Duty.bco=idle.pco
+                        nCoil1Duty.pco=idle.bco
+                        newValTargetId.val=nCoil1Duty.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nCoil2On
             Properties
                 Scope        : Local
@@ -744,20 +823,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil2On.bco=idle.pco
-                    nCoil2On.pco=idle.bco
-                    newValTargetId.val=nCoil2On.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil2On.bco=idle.pco
+                        nCoil2On.pco=idle.bco
+                        newValTargetId.val=nCoil2On.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nCoil2MinOff
             Properties
                 Scope        : Local
@@ -765,20 +860,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil2MinOff.bco=idle.pco
-                    nCoil2MinOff.pco=idle.bco
-                    newValTargetId.val=nCoil2MinOff.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil2MinOff.bco=idle.pco
+                        nCoil2MinOff.pco=idle.bco
+                        newValTargetId.val=nCoil2MinOff.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Float nCoil2Duty
             Properties
                 Scope           : Local
@@ -787,20 +898,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil2Duty.bco=idle.pco
-                    nCoil2Duty.pco=idle.bco
-                    newValTargetId.val=nCoil2Duty.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil2Duty.bco=idle.pco
+                        nCoil2Duty.pco=idle.bco
+                        newValTargetId.val=nCoil2Duty.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nCoil3On
             Properties
                 Scope        : Local
@@ -808,20 +935,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil3On.bco=idle.pco
-                    nCoil3On.pco=idle.bco
-                    newValTargetId.val=nCoil3On.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil3On.bco=idle.pco
+                        nCoil3On.pco=idle.bco
+                        newValTargetId.val=nCoil3On.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nCoil3MinOff
             Properties
                 Scope        : Local
@@ -829,20 +972,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil3MinOff.bco=idle.pco
-                    nCoil3MinOff.pco=idle.bco
-                    newValTargetId.val=nCoil3MinOff.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil3MinOff.bco=idle.pco
+                        nCoil3MinOff.pco=idle.bco
+                        newValTargetId.val=nCoil3MinOff.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Float nCoil3Duty
             Properties
                 Scope           : Local
@@ -851,20 +1010,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil3Duty.bco=idle.pco
-                    nCoil3Duty.pco=idle.bco
-                    newValTargetId.val=nCoil3Duty.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil3Duty.bco=idle.pco
+                        nCoil3Duty.pco=idle.bco
+                        newValTargetId.val=nCoil3Duty.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nCoil4On
             Properties
                 Scope        : Local
@@ -872,20 +1047,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil4On.bco=idle.pco
-                    nCoil4On.pco=idle.bco
-                    newValTargetId.val=nCoil4On.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil4On.bco=idle.pco
+                        nCoil4On.pco=idle.bco
+                        newValTargetId.val=nCoil4On.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nCoil4MinOff
             Properties
                 Scope        : Local
@@ -893,20 +1084,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil4MinOff.bco=idle.pco
-                    nCoil4MinOff.pco=idle.bco
-                    newValTargetId.val=nCoil4MinOff.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil4MinOff.bco=idle.pco
+                        nCoil4MinOff.pco=idle.bco
+                        newValTargetId.val=nCoil4MinOff.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Float nCoil4Duty
             Properties
                 Scope           : Local
@@ -915,20 +1122,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil4Duty.bco=idle.pco
-                    nCoil4Duty.pco=idle.bco
-                    newValTargetId.val=nCoil4Duty.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil4Duty.bco=idle.pco
+                        nCoil4Duty.pco=idle.bco
+                        newValTargetId.val=nCoil4Duty.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nCoil5On
             Properties
                 Scope        : Local
@@ -936,20 +1159,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil5On.bco=idle.pco
-                    nCoil5On.pco=idle.bco
-                    newValTargetId.val=nCoil5On.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil5On.bco=idle.pco
+                        nCoil5On.pco=idle.bco
+                        newValTargetId.val=nCoil5On.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nCoil5MinOff
             Properties
                 Scope        : Local
@@ -957,20 +1196,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil5MinOff.bco=idle.pco
-                    nCoil5MinOff.pco=idle.bco
-                    newValTargetId.val=nCoil5MinOff.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil5MinOff.bco=idle.pco
+                        nCoil5MinOff.pco=idle.bco
+                        newValTargetId.val=nCoil5MinOff.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Float nCoil5Duty
             Properties
                 Scope           : Local
@@ -979,20 +1234,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil5Duty.bco=idle.pco
-                    nCoil5Duty.pco=idle.bco
-                    newValTargetId.val=nCoil5Duty.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil5Duty.bco=idle.pco
+                        nCoil5Duty.pco=idle.bco
+                        newValTargetId.val=nCoil5Duty.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nCoil6On
             Properties
                 Scope        : Local
@@ -1000,20 +1271,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil6On.bco=idle.pco
-                    nCoil6On.pco=idle.bco
-                    newValTargetId.val=nCoil6On.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil6On.bco=idle.pco
+                        nCoil6On.pco=idle.bco
+                        newValTargetId.val=nCoil6On.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nCoil6MinOff
             Properties
                 Scope        : Local
@@ -1021,20 +1308,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil6MinOff.bco=idle.pco
-                    nCoil6MinOff.pco=idle.bco
-                    newValTargetId.val=nCoil6MinOff.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil6MinOff.bco=idle.pco
+                        nCoil6MinOff.pco=idle.bco
+                        newValTargetId.val=nCoil6MinOff.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Float nCoil6Duty
             Properties
                 Scope           : Local
@@ -1043,230 +1346,35 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil6Duty.bco=idle.pco
-                    nCoil6Duty.pco=idle.bco
-                    newValTargetId.val=nCoil6Duty.id
-                    // A new value has been selected
-                    newSelect.val=1
-                
-                Touch Release Event
-                    
-        Button b0
-            Properties
-                Scope      : Local
-                Caption    : "0"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil6Duty.bco=idle.pco
+                        nCoil6Duty.pco=idle.bco
+                        newValTargetId.val=nCoil6Duty.id
+                        // A new value has been selected
+                        newSelect.val=1
                     }else
                     {
-                        b[newValTargetId.val].val*=10
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
                     }
                 
-        Button b1
-            Properties
-                Scope      : Local
-                Caption    : "1"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
                 Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=10
+                        // Show Help
+                        click qrHelp,0
                     }
-                    b[newValTargetId.val].val+=1
-                
-        Button b2
-            Properties
-                Scope      : Local
-                Caption    : "2"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                    b[newValTargetId.val].val+=2
-                
-        Button b3
-            Properties
-                Scope      : Local
-                Caption    : "3"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                    b[newValTargetId.val].val+=3
-                
-        Button b4
-            Properties
-                Scope      : Local
-                Caption    : "4"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                    b[newValTargetId.val].val+=4
-                
-        Button b5
-            Properties
-                Scope      : Local
-                Caption    : "5"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                    b[newValTargetId.val].val+=5
-                
-        Button b6
-            Properties
-                Scope      : Local
-                Caption    : "6"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                    b[newValTargetId.val].val+=6
-                
-        Button b7
-            Properties
-                Scope      : Local
-                Caption    : "7"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                    b[newValTargetId.val].val+=7
-                
-        Button b8
-            Properties
-                Scope      : Local
-                Caption    : "8"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                    b[newValTargetId.val].val+=8
-                
-        Button b9
-            Properties
-                Scope      : Local
-                Caption    : "9"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
-                    {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
-                    }else
-                    {
-                        b[newValTargetId.val].val*=10
-                    }
-                    b[newValTargetId.val].val+=9
-                
-        Button bClear
-            Properties
-                Scope      : Local
-                Caption    : "X"
-                Max. length: 1
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    b[newValTargetId.val].val=0
                 
         Button bOK
             Properties
@@ -1276,12 +1384,28 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
+                
                 Touch Release Event
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    newValTargetId.val=idle.id
-                    click fCheck,0
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        newValTargetId.val=idle.id
+                        click fCheck,0
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Float idle
             Properties
@@ -1659,20 +1783,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil1Voices.bco=idle.pco
-                    nCoil1Voices.pco=idle.bco
-                    newValTargetId.val=nCoil1Voices.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil1Voices.bco=idle.pco
+                        nCoil1Voices.pco=idle.bco
+                        newValTargetId.val=nCoil1Voices.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nCoil2Voices
             Properties
                 Scope        : Local
@@ -1680,20 +1820,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil2Voices.bco=idle.pco
-                    nCoil2Voices.pco=idle.bco
-                    newValTargetId.val=nCoil2Voices.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil2Voices.bco=idle.pco
+                        nCoil2Voices.pco=idle.bco
+                        newValTargetId.val=nCoil2Voices.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nCoil3Voices
             Properties
                 Scope        : Local
@@ -1701,20 +1857,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil3Voices.bco=idle.pco
-                    nCoil3Voices.pco=idle.bco
-                    newValTargetId.val=nCoil3Voices.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil3Voices.bco=idle.pco
+                        nCoil3Voices.pco=idle.bco
+                        newValTargetId.val=nCoil3Voices.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nCoil4Voices
             Properties
                 Scope        : Local
@@ -1722,20 +1894,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil4Voices.bco=idle.pco
-                    nCoil4Voices.pco=idle.bco
-                    newValTargetId.val=nCoil4Voices.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil4Voices.bco=idle.pco
+                        nCoil4Voices.pco=idle.bco
+                        newValTargetId.val=nCoil4Voices.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nCoil5Voices
             Properties
                 Scope        : Local
@@ -1743,20 +1931,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil5Voices.bco=idle.pco
-                    nCoil5Voices.pco=idle.bco
-                    newValTargetId.val=nCoil5Voices.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil5Voices.bco=idle.pco
+                        nCoil5Voices.pco=idle.bco
+                        newValTargetId.val=nCoil5Voices.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nCoil6Voices
             Properties
                 Scope        : Local
@@ -1764,20 +1968,36 @@ Page TC_Settings
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nCoil6Voices.bco=idle.pco
-                    nCoil6Voices.pco=idle.bco
-                    newValTargetId.val=nCoil6Voices.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nCoil6Voices.bco=idle.pco
+                        nCoil6Voices.pco=idle.bco
+                        newValTargetId.val=nCoil6Voices.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Variable maxVoices
             Properties
                 Scope         : Global
@@ -1836,6 +2056,38 @@ Page TC_Settings
                 
                 Touch Release Event
                     
+        Variable tempStr
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: ""
+                Max. length   : 32
+            
+        Variable showHelp
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
+        QRCode qrHelp
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    ref_stop
+                    if(showHelp.val==0)
+                    {
+                        showHelp.val=1
+                        tempStr.txt=tTitle.txt
+                        tTitle.txt="Get Help for..."
+                    }else
+                    {
+                        showHelp.val=0
+                        tTitle.txt=tempStr.txt
+                    }
+                    vis qrHelp,Help_Info.helpMode.val
+                    ref_star
+                
         Hotspot fLoadColors
             Events
                 Touch Press Event
@@ -1885,6 +2137,12 @@ Page TC_Settings
                                 b[sys0].pic+=sys2
                                 b[sys0].pic2=b[sys0].pic+1
                             }
+                        }else if(sys1==58)
+                        {
+                            // Types that have bco, pco
+                            // QR Code
+                            b[sys0].bco=Settings.backCol.val
+                            b[sys0].pco=Settings.qrFrontCol.val
                         }else if(sys1==1)
                         {
                             // Types that have pic, pic2:
@@ -1898,3 +2156,390 @@ Page TC_Settings
                 
                 Touch Release Event
                     
+        Button b1
+            Properties
+                Scope      : Local
+                Caption    : "1"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=1
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b2
+            Properties
+                Scope      : Local
+                Caption    : "2"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=2
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b3
+            Properties
+                Scope      : Local
+                Caption    : "3"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=3
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b4
+            Properties
+                Scope      : Local
+                Caption    : "4"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=4
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b5
+            Properties
+                Scope      : Local
+                Caption    : "5"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=5
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b6
+            Properties
+                Scope      : Local
+                Caption    : "6"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=6
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button bClear
+            Properties
+                Scope      : Local
+                Caption    : "X"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b0
+            Properties
+                Scope      : Local
+                Caption    : "0"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b9
+            Properties
+                Scope      : Local
+                Caption    : "9"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=9
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b8
+            Properties
+                Scope      : Local
+                Caption    : "8"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=8
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button b7
+            Properties
+                Scope      : Local
+                Caption    : "7"
+                Max. length: 1
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgK"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=10
+                        }
+                        b[newValTargetId.val].val+=7
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                

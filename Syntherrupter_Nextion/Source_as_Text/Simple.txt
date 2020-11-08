@@ -219,6 +219,12 @@ Page Simple
             // Tell the microcontroller: Mode: SImple
             prints "msi",0
             //
+            // Load Help Mode
+            vis qrHelp,Help_Info.helpMode.val
+            tempStr.txt=tTitle.txt
+            showHelp.val=1
+            click 0,1
+            //
             // Enable page refreshs again
             ref_star
         
@@ -227,49 +233,58 @@ Page Simple
             click bApply,0
         
         Touch Press Event
-            if(Other_Settings.nBackOff.val!=0)
+            if(showHelp.val==0)
             {
-                // Default "stop" action.
-                // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                prints "mes",3
-                // Set all ontime and duty settings of all pages to 0.
-                // First come the global variables then the local variables.
-                Simple.ontime.val=0
-                Simple.duty.val=0
-                Simple.set1.val=Simple.set1.val&0x0000ffff
-                Simple.set2.val=Simple.set2.val&0x0000ffff
-                Simple.set3.val=Simple.set3.val&0x0000ffff
-                Simple.set4.val=Simple.set4.val&0x0000ffff
-                Simple.set5.val=Simple.set5.val&0x0000ffff
-                Simple.set6.val=Simple.set6.val&0x0000ffff
-                MIDI_Live.ontime.val=0
-                MIDI_Live.duty.val=0
-                MIDI_Live.set1.val=0
-                MIDI_Live.set2.val=0
-                MIDI_Live.set3.val=0
-                MIDI_Live.set4.val=0
-                MIDI_Live.set5.val=0
-                MIDI_Live.set6.val=0
-                Lightsaber.ontime.val=0
-                Lightsaber.ontimes12.val=0
-                Lightsaber.ontimes34.val=0
-                Lightsaber.ontimes56.val=0
-                nOn.val=0
-                sOn.val=0
-                nOn1.val=0
-                nOn2.val=0
-                nOn3.val=0
-                nOn4.val=0
-                nOn5.val=0
-                nOn6.val=0
-                nDuty.val=0
-                sDuty.val=0
-                nDuty1.val=0
-                nDuty2.val=0
-                nDuty3.val=0
-                nDuty4.val=0
-                nDuty5.val=0
-                nDuty6.val=0
+                // Normal Operation
+                if(Other_Settings.nBackOff.val!=0)
+                {
+                    // Default "stop" action.
+                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                    prints "mes",3
+                    // Set all ontime and duty settings of all pages to 0.
+                    // First come the global variables then the local variables.
+                    Simple.ontime.val=0
+                    Simple.duty.val=0
+                    Simple.set1.val=Simple.set1.val&0x0000ffff
+                    Simple.set2.val=Simple.set2.val&0x0000ffff
+                    Simple.set3.val=Simple.set3.val&0x0000ffff
+                    Simple.set4.val=Simple.set4.val&0x0000ffff
+                    Simple.set5.val=Simple.set5.val&0x0000ffff
+                    Simple.set6.val=Simple.set6.val&0x0000ffff
+                    MIDI_Live.ontime.val=0
+                    MIDI_Live.duty.val=0
+                    MIDI_Live.set1.val=0
+                    MIDI_Live.set2.val=0
+                    MIDI_Live.set3.val=0
+                    MIDI_Live.set4.val=0
+                    MIDI_Live.set5.val=0
+                    MIDI_Live.set6.val=0
+                    Lightsaber.ontime.val=0
+                    Lightsaber.ontimes12.val=0
+                    Lightsaber.ontimes34.val=0
+                    Lightsaber.ontimes56.val=0
+                    nOn.val=0
+                    sOn.val=0
+                    nOn1.val=0
+                    nOn2.val=0
+                    nOn3.val=0
+                    nOn4.val=0
+                    nOn5.val=0
+                    nOn6.val=0
+                    nDuty.val=0
+                    sDuty.val=0
+                    nDuty1.val=0
+                    nDuty2.val=0
+                    nDuty3.val=0
+                    nDuty4.val=0
+                    nDuty5.val=0
+                    nDuty6.val=0
+                }
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2j"
+                click qrHelp,0
             }
         
         Touch Release Event
@@ -301,125 +316,141 @@ Page Simple
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    // Return format: 'd', data byte 1, 2, 3, 4, 5
-                    // Data byte 1: Bits 0-5: coils to which settings apply.
-                    // Data byte 2: ontime[us] lower byte
-                    // Data byte 3: ontime[us] upper byte
-                    // Data byte 4: BPS lower byte
-                    // Data byte 5: BPS upper byte
-                    sys0=newData.val*TC_Settings.activeCoils.val
-                    if(sys0>0)
+                    if(showHelp.val==0)
                     {
-                        // Update Info below coil buttons
-                        if(btCoil1.val==1)
+                        // Normal operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaL"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        // Return format: 'd', data byte 1, 2, 3, 4, 5
+                        // Data byte 1: Bits 0-5: coils to which settings apply.
+                        // Data byte 2: ontime[us] lower byte
+                        // Data byte 3: ontime[us] upper byte
+                        // Data byte 4: BPS lower byte
+                        // Data byte 5: BPS upper byte
+                        sys0=newData.val*TC_Settings.activeCoils.val
+                        if(sys0>0)
                         {
-                            if(nOn.val>TC_Settings.coil1On.val)
+                            // Update Info below coil buttons
+                            if(btCoil1.val==1)
                             {
-                                nOn1.val=TC_Settings.coil1On.val
-                                nDuty1.val=nOn.val*nBPS.val/1000
-                            }else if(nDuty.val>TC_Settings.coil1Duty.val)
-                            {
-                                nDuty1.val=TC_Settings.coil1Duty.val
-                                nOn1.val=nDuty.val*1000/nBPS.val
-                            }else
-                            {
-                                nOn1.val=nOn.val
-                                nDuty1.val=nDuty.val
+                                if(nOn.val>TC_Settings.coil1On.val)
+                                {
+                                    nOn1.val=TC_Settings.coil1On.val
+                                    nDuty1.val=nOn.val*nBPS.val/1000
+                                }else if(nDuty.val>TC_Settings.coil1Duty.val)
+                                {
+                                    nDuty1.val=TC_Settings.coil1Duty.val
+                                    nOn1.val=nDuty.val*1000/nBPS.val
+                                }else
+                                {
+                                    nOn1.val=nOn.val
+                                    nDuty1.val=nDuty.val
+                                }
+                                nBPS1.val=nBPS.val
                             }
-                            nBPS1.val=nBPS.val
-                        }
-                        if(btCoil2.val==1)
-                        {
-                            if(nOn.val>TC_Settings.coil2On.val)
+                            if(btCoil2.val==1)
                             {
-                                nOn2.val=TC_Settings.coil2On.val
-                                nDuty2.val=nOn.val*nBPS.val/1000
-                            }else if(nDuty.val>TC_Settings.coil2Duty.val)
-                            {
-                                nDuty2.val=TC_Settings.coil2Duty.val
-                                nOn2.val=nDuty.val*1000/nBPS.val
-                            }else
-                            {
-                                nOn2.val=nOn.val
-                                nDuty2.val=nDuty.val
+                                if(nOn.val>TC_Settings.coil2On.val)
+                                {
+                                    nOn2.val=TC_Settings.coil2On.val
+                                    nDuty2.val=nOn.val*nBPS.val/1000
+                                }else if(nDuty.val>TC_Settings.coil2Duty.val)
+                                {
+                                    nDuty2.val=TC_Settings.coil2Duty.val
+                                    nOn2.val=nDuty.val*1000/nBPS.val
+                                }else
+                                {
+                                    nOn2.val=nOn.val
+                                    nDuty2.val=nDuty.val
+                                }
+                                nBPS2.val=nBPS.val
                             }
-                            nBPS2.val=nBPS.val
-                        }
-                        if(btCoil3.val==1)
-                        {
-                            if(nOn.val>TC_Settings.coil3On.val)
+                            if(btCoil3.val==1)
                             {
-                                nOn3.val=TC_Settings.coil3On.val
-                                nDuty3.val=nOn.val*nBPS.val/1000
-                            }else if(nDuty.val>TC_Settings.coil3Duty.val)
-                            {
-                                nDuty3.val=TC_Settings.coil3Duty.val
-                                nOn3.val=nDuty.val*1000/nBPS.val
-                            }else
-                            {
-                                nOn3.val=nOn.val
-                                nDuty3.val=nDuty.val
+                                if(nOn.val>TC_Settings.coil3On.val)
+                                {
+                                    nOn3.val=TC_Settings.coil3On.val
+                                    nDuty3.val=nOn.val*nBPS.val/1000
+                                }else if(nDuty.val>TC_Settings.coil3Duty.val)
+                                {
+                                    nDuty3.val=TC_Settings.coil3Duty.val
+                                    nOn3.val=nDuty.val*1000/nBPS.val
+                                }else
+                                {
+                                    nOn3.val=nOn.val
+                                    nDuty3.val=nDuty.val
+                                }
+                                nBPS3.val=nBPS.val
                             }
-                            nBPS3.val=nBPS.val
-                        }
-                        if(btCoil4.val==1)
-                        {
-                            if(nOn.val>TC_Settings.coil4On.val)
+                            if(btCoil4.val==1)
                             {
-                                nOn4.val=TC_Settings.coil4On.val
-                                nDuty4.val=nOn.val*nBPS.val/1000
-                            }else if(nDuty.val>TC_Settings.coil4Duty.val)
-                            {
-                                nDuty4.val=TC_Settings.coil4Duty.val
-                                nOn4.val=nDuty.val*1000/nBPS.val
-                            }else
-                            {
-                                nOn4.val=nOn.val
-                                nDuty4.val=nDuty.val
+                                if(nOn.val>TC_Settings.coil4On.val)
+                                {
+                                    nOn4.val=TC_Settings.coil4On.val
+                                    nDuty4.val=nOn.val*nBPS.val/1000
+                                }else if(nDuty.val>TC_Settings.coil4Duty.val)
+                                {
+                                    nDuty4.val=TC_Settings.coil4Duty.val
+                                    nOn4.val=nDuty.val*1000/nBPS.val
+                                }else
+                                {
+                                    nOn4.val=nOn.val
+                                    nDuty4.val=nDuty.val
+                                }
+                                nBPS4.val=nBPS.val
                             }
-                            nBPS4.val=nBPS.val
-                        }
-                        if(btCoil5.val==1)
-                        {
-                            if(nOn.val>TC_Settings.coil5On.val)
+                            if(btCoil5.val==1)
                             {
-                                nOn5.val=TC_Settings.coil5On.val
-                                nDuty5.val=nOn.val*nBPS.val/1000
-                            }else if(nDuty.val>TC_Settings.coil5Duty.val)
-                            {
-                                nDuty5.val=TC_Settings.coil5Duty.val
-                                nOn5.val=nDuty.val*1000/nBPS.val
-                            }else
-                            {
-                                nOn5.val=nOn.val
-                                nDuty5.val=nDuty.val
+                                if(nOn.val>TC_Settings.coil5On.val)
+                                {
+                                    nOn5.val=TC_Settings.coil5On.val
+                                    nDuty5.val=nOn.val*nBPS.val/1000
+                                }else if(nDuty.val>TC_Settings.coil5Duty.val)
+                                {
+                                    nDuty5.val=TC_Settings.coil5Duty.val
+                                    nOn5.val=nDuty.val*1000/nBPS.val
+                                }else
+                                {
+                                    nOn5.val=nOn.val
+                                    nDuty5.val=nDuty.val
+                                }
+                                nBPS5.val=nBPS.val
                             }
-                            nBPS5.val=nBPS.val
-                        }
-                        if(btCoil6.val==1)
-                        {
-                            if(nOn.val>TC_Settings.coil6On.val)
+                            if(btCoil6.val==1)
                             {
-                                nOn6.val=TC_Settings.coil6On.val
-                                nDuty6.val=nOn.val*nBPS.val/1000
-                            }else if(nDuty.val>TC_Settings.coil6Duty.val)
-                            {
-                                nDuty6.val=TC_Settings.coil6Duty.val
-                                nOn6.val=nDuty.val*1000/nBPS.val
-                            }else
-                            {
-                                nOn6.val=nOn.val
-                                nDuty6.val=nDuty.val
+                                if(nOn.val>TC_Settings.coil6On.val)
+                                {
+                                    nOn6.val=TC_Settings.coil6On.val
+                                    nDuty6.val=nOn.val*nBPS.val/1000
+                                }else if(nDuty.val>TC_Settings.coil6Duty.val)
+                                {
+                                    nDuty6.val=TC_Settings.coil6Duty.val
+                                    nOn6.val=nDuty.val*1000/nBPS.val
+                                }else
+                                {
+                                    nOn6.val=nOn.val
+                                    nDuty6.val=nDuty.val
+                                }
+                                nBPS6.val=nBPS.val
                             }
-                            nBPS6.val=nBPS.val
+                            prints "d",0
+                            prints TC_Settings.activeCoils.val,1
+                            prints nOn.val,2
+                            prints nBPS.val,2
+                            newData.val=0
                         }
-                        prints "d",0
-                        prints TC_Settings.activeCoils.val,1
-                        prints nOn.val,2
-                        prints nBPS.val,2
-                        newData.val=0
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
                     }
                 
         Text tHideBack
@@ -455,12 +486,28 @@ Page Simple
             
             Events
                 Touch Press Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaL"
+                    }
+                
                 Touch Release Event
-                    vis bModeRelease,0
-                    vis bModeManual,1
-                    vis bApply,1
-                    sMode.txt=bModeManual.txt
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        vis bModeRelease,0
+                        vis bModeManual,1
+                        vis bApply,1
+                        sMode.txt=bModeManual.txt
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Slider sOn
             Properties
@@ -471,74 +518,94 @@ Page Simple
             
             Events
                 Touch Press Event
-                    keepOntime.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        keepOntime.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaJ"
+                    }
                 
                 Touch Release Event
-                    fSliderInput.val=sOn.maxval
-                    fSliderOutput.val=userOnLimit.val
-                    fSlider.val=sOn.val
-                    click fSlider,1 // final Ontime value
-                    // Reduce resolution according to slider range for more "consistent" steps.
-                    sys0=1
-                    if(fSlider.val>=10000)
+                    if(showHelp.val==0)
                     {
-                        sys0=1000
-                    }else if(fSlider.val>=5000)
-                    {
-                        sys0=500
-                    }else if(fSlider.val>=1000)
-                    {
-                        sys0=100
-                    }else if(fSlider.val>=500)
-                    {
-                        sys0=50
-                    }else if(fSlider.val>=100)
-                    {
-                        sys0=10
-                    }else if(fSlider.val>=50)
-                    {
-                        sys0=5
-                    }
-                    fSlider.val/=sys0
-                    fSlider.val*=sys0
-                    sys1=nBPS.val*fSlider.val/1000 // resulting duty cycle
-                    if(sys1<=userDutyLimit.val)
-                    {
-                        if(nOn.val!=fSlider.val)
+                        // Normal operation
+                        fSliderInput.val=sOn.maxval
+                        fSliderOutput.val=userOnLimit.val
+                        fSlider.val=sOn.val
+                        click fSlider,1 // final Ontime value
+                        // Reduce resolution according to slider range for more "consistent" steps.
+                        sys0=1
+                        if(fSlider.val>=10000)
                         {
-                            nOn.val=fSlider.val
-                            nDuty.val=sys1
-                            fSliderInput.val=sDuty.maxval
-                            fSliderOutput.val=userDutyLimit.val
-                            fSlider.val=nDuty.val
-                            click fSlider,0
-                            // Round to multiple of five
-                            fSlider.val/=5
-                            fSlider.val*=5
-                            sDuty.val=fSlider.val
-                            newData.val=1
+                            sys0=1000
+                        }else if(fSlider.val>=5000)
+                        {
+                            sys0=500
+                        }else if(fSlider.val>=1000)
+                        {
+                            sys0=100
+                        }else if(fSlider.val>=500)
+                        {
+                            sys0=50
+                        }else if(fSlider.val>=100)
+                        {
+                            sys0=10
+                        }else if(fSlider.val>=50)
+                        {
+                            sys0=5
                         }
-                    }
-                    // to understand the following lines have a look at the Touch Move code.
-                    // what you would actually wanna do is put the code above in touch move and perform a click event on touch move here (because your can press/release a slider, changing its value without moving it).
-                    // However "click" can only execute press/release events, so it gets more complicated...
-                    if(sMode.txt==bModeRelease.txt)
+                        fSlider.val/=sys0
+                        fSlider.val*=sys0
+                        sys1=nBPS.val*fSlider.val/1000 // resulting duty cycle
+                        if(sys1<=userDutyLimit.val)
+                        {
+                            if(nOn.val!=fSlider.val)
+                            {
+                                nOn.val=fSlider.val
+                                nDuty.val=sys1
+                                fSliderInput.val=sDuty.maxval
+                                fSliderOutput.val=userDutyLimit.val
+                                fSlider.val=nDuty.val
+                                click fSlider,0
+                                // Round to multiple of five
+                                fSlider.val/=5
+                                fSlider.val*=5
+                                sDuty.val=fSlider.val
+                                newData.val=1
+                            }
+                        }
+                        // to understand the following lines have a look at the Touch Move code.
+                        // what you would actually wanna do is put the code above in touch move and perform a click event on touch move here (because your can press/release a slider, changing its value without moving it).
+                        // However "click" can only execute press/release events, so it gets more complicated...
+                        if(sMode.txt==bModeRelease.txt)
+                        {
+                            click bApply,0
+                        }
+                        if(sMode.txt==bModeImmediate.txt)
+                        {
+                            click bApply,0
+                        }
+                    }else
                     {
-                        click bApply,0
-                    }
-                    if(sMode.txt==bModeImmediate.txt)
-                    {
-                        click bApply,0
+                        // Show Help
+                        click qrHelp,0
                     }
                 
                 Touch Move
-                    // Prevent double data transmission on move.
-                    sMode.txt+="M"
-                    click sOn,0
-                    sMode.txt-=1
-                    if(sMode.txt==bModeImmediate.txt)
+                    if(showHelp.val==0)
                     {
-                        click bApply,0
+                        // Normal operation
+                        // Prevent double data transmission on move.
+                        sMode.txt+="M"
+                        click sOn,0
+                        sMode.txt-=1
+                        if(sMode.txt==bModeImmediate.txt)
+                        {
+                            click bApply,0
+                        }
                     }
                 
         Text tOn
@@ -575,94 +642,114 @@ Page Simple
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    // Note: nDuty.val is actually in 10ths of percent.
-                    fSliderInput.val=sBPS.maxval
-                    fSliderOutput.val=userBPSLimit.val
-                    fSlider.val=sBPS.val
-                    click fSlider,1
-                    // Reduce resolution according to slider range for more "consistent" steps.
-                    sys0=1
-                    if(fSlider.val>=10000)
+                    if(showHelp.val==0)
                     {
-                        sys0=1000
-                    }else if(fSlider.val>=5000)
+                        // Normal operation
+                    }else
                     {
-                        sys0=500
-                    }else if(fSlider.val>=1000)
-                    {
-                        sys0=100
-                    }else if(fSlider.val>=500)
-                    {
-                        sys0=50
-                    }else if(fSlider.val>=100)
-                    {
-                        sys0=10
-                    }else if(fSlider.val>=50)
-                    {
-                        sys0=5
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaU"
                     }
-                    fSlider.val/=sys0
-                    fSlider.val*=sys0
-                    temp.val=fSlider.val // final BPS value
-                    // Depending on whether ontime or duty was set, calculate the resulting value for the other one and check if it's legal.
-                    if(keepOntime.val>0)
+                
+                Touch Release Event
+                    if(showHelp.val==0)
                     {
-                        sys1=nOn.val*temp.val/1000 // resulting duty cycle
-                        if(sys1<=userDutyLimit.val)
+                        // Normal operation
+                        // Note: nDuty.val is actually in 10ths of percent.
+                        fSliderInput.val=sBPS.maxval
+                        fSliderOutput.val=userBPSLimit.val
+                        fSlider.val=sBPS.val
+                        click fSlider,1
+                        // Reduce resolution according to slider range for more "consistent" steps.
+                        sys0=1
+                        if(fSlider.val>=10000)
                         {
-                            nDuty.val=sys1
-                            fSliderInput.val=sDuty.maxval
-                            fSliderOutput.val=userDutyLimit.val
-                            fSlider.val=nDuty.val
-                            click fSlider,0
-                            sDuty.val=fSlider.val
+                            sys0=1000
+                        }else if(fSlider.val>=5000)
+                        {
+                            sys0=500
+                        }else if(fSlider.val>=1000)
+                        {
+                            sys0=100
+                        }else if(fSlider.val>=500)
+                        {
+                            sys0=50
+                        }else if(fSlider.val>=100)
+                        {
+                            sys0=10
+                        }else if(fSlider.val>=50)
+                        {
+                            sys0=5
+                        }
+                        fSlider.val/=sys0
+                        fSlider.val*=sys0
+                        temp.val=fSlider.val // final BPS value
+                        // Depending on whether ontime or duty was set, calculate the resulting value for the other one and check if it's legal.
+                        if(keepOntime.val>0)
+                        {
+                            sys1=nOn.val*temp.val/1000 // resulting duty cycle
+                            if(sys1<=userDutyLimit.val)
+                            {
+                                nDuty.val=sys1
+                                fSliderInput.val=sDuty.maxval
+                                fSliderOutput.val=userDutyLimit.val
+                                fSlider.val=nDuty.val
+                                click fSlider,0
+                                sDuty.val=fSlider.val
+                            }else
+                            {
+                                temp.val=nBPS.val
+                            }
                         }else
                         {
-                            temp.val=nBPS.val
+                            sys1=nDuty.val*1000/temp.val // Resulting Ontime
+                            if(sys1<=userOnLimit.val)
+                            {
+                                nOn.val=sys1
+                                fSliderInput.val=sOn.maxval
+                                fSliderOutput.val=userOnLimit.val
+                                fSlider.val=nOn.val
+                                click fSlider,0
+                                sOn.val=fSlider.val
+                            }else
+                            {
+                                temp.val=nBPS.val
+                            }
+                        }
+                        if(nBPS.val!=temp.val)
+                        {
+                            nBPS.val=temp.val
+                            newData.val=1
+                        }
+                        // to understand the following lines have a look at the Touch Move code.
+                        // what you would actually wanna do is put the code above in touch move and perform a click event on touch move here (because your can press/release a slider, changing its value without moving it).
+                        // However "click" can only execute press/release events, so it gets more complicated...
+                        if(sMode.txt==bModeRelease.txt)
+                        {
+                            click bApply,0
+                        }
+                        if(sMode.txt==bModeImmediate.txt)
+                        {
+                            click bApply,0
                         }
                     }else
                     {
-                        sys1=nDuty.val*1000/temp.val // Resulting Ontime
-                        if(sys1<=userOnLimit.val)
-                        {
-                            nOn.val=sys1
-                            fSliderInput.val=sOn.maxval
-                            fSliderOutput.val=userOnLimit.val
-                            fSlider.val=nOn.val
-                            click fSlider,0
-                            sOn.val=fSlider.val
-                        }else
-                        {
-                            temp.val=nBPS.val
-                        }
-                    }
-                    if(nBPS.val!=temp.val)
-                    {
-                        nBPS.val=temp.val
-                        newData.val=1
-                    }
-                    // to understand the following lines have a look at the Touch Move code.
-                    // what you would actually wanna do is put the code above in touch move and perform a click event on touch move here (because your can press/release a slider, changing its value without moving it).
-                    // However "click" can only execute press/release events, so it gets more complicated...
-                    if(sMode.txt==bModeRelease.txt)
-                    {
-                        click bApply,0
-                    }
-                    if(sMode.txt==bModeImmediate.txt)
-                    {
-                        click bApply,0
+                        // Show Help
+                        click qrHelp,0
                     }
                 
                 Touch Move
-                    // Prevent double data transmission on move.
-                    sMode.txt+="M"
-                    click sBPS,0
-                    sMode.txt-=1
-                    if(sMode.txt==bModeImmediate.txt)
+                    if(showHelp.val==0)
                     {
-                        click bApply,0
+                        // Normal operation
+                        // Prevent double data transmission on move.
+                        sMode.txt+="M"
+                        click sBPS,0
+                        sMode.txt-=1
+                        if(sMode.txt==bModeImmediate.txt)
+                        {
+                            click bApply,0
+                        }
                     }
                 
         Text tBPS
@@ -699,52 +786,72 @@ Page Simple
             
             Events
                 Touch Press Event
-                    keepOntime.val=0
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        keepOntime.val=0
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaT"
+                    }
                 
                 Touch Release Event
-                    // Note: nDuty.val is actually in 10ths of percent. .
-                    fSliderInput.val=sDuty.maxval
-                    fSliderOutput.val=userDutyLimit.val
-                    fSlider.val=sDuty.val
-                    click fSlider,1
-                    sys1=fSlider.val*1000/nBPS.val // Resulting Ontime
-                    if(sys1<=userOnLimit.val)
+                    if(showHelp.val==0)
                     {
-                        if(sDuty.val!=fSlider.val)
+                        // Normal operation
+                        // Note: nDuty.val is actually in 10ths of percent. .
+                        fSliderInput.val=sDuty.maxval
+                        fSliderOutput.val=userDutyLimit.val
+                        fSlider.val=sDuty.val
+                        click fSlider,1
+                        sys1=fSlider.val*1000/nBPS.val // Resulting Ontime
+                        if(sys1<=userOnLimit.val)
                         {
-                            newData.val=1
-                            nDuty.val=fSlider.val
-                            nOn.val=sys1
-                            fSliderInput.val=sOn.maxval
-                            fSliderOutput.val=userOnLimit.val
-                            fSlider.val=nOn.val
-                            click fSlider,0
-                            // Round to multiple of five
-                            fSlider.val/=5
-                            fSlider.val*=5
-                            sOn.val=fSlider.val
+                            if(sDuty.val!=fSlider.val)
+                            {
+                                newData.val=1
+                                nDuty.val=fSlider.val
+                                nOn.val=sys1
+                                fSliderInput.val=sOn.maxval
+                                fSliderOutput.val=userOnLimit.val
+                                fSlider.val=nOn.val
+                                click fSlider,0
+                                // Round to multiple of five
+                                fSlider.val/=5
+                                fSlider.val*=5
+                                sOn.val=fSlider.val
+                            }
                         }
-                    }
-                    // to understand the following lines have a look at the Touch Move code.
-                    // what you would actually wanna do is put the code above in touch move and perform a click event on touch move here (because your can press/release a slider, changing its value without moving it).
-                    // However "click" can only execute press/release events, so it gets more complicated...
-                    if(sMode.txt==bModeRelease.txt)
+                        // to understand the following lines have a look at the Touch Move code.
+                        // what you would actually wanna do is put the code above in touch move and perform a click event on touch move here (because your can press/release a slider, changing its value without moving it).
+                        // However "click" can only execute press/release events, so it gets more complicated...
+                        if(sMode.txt==bModeRelease.txt)
+                        {
+                            click bApply,0
+                        }
+                        if(sMode.txt==bModeImmediate.txt)
+                        {
+                            click bApply,0
+                        }
+                    }else
                     {
-                        click bApply,0
-                    }
-                    if(sMode.txt==bModeImmediate.txt)
-                    {
-                        click bApply,0
+                        // Show Help
+                        click qrHelp,0
                     }
                 
                 Touch Move
-                    // Prevent double data transmission on move.
-                    sMode.txt+="M"
-                    click sDuty,0
-                    sMode.txt-=1
-                    if(sMode.txt==bModeImmediate.txt)
+                    if(showHelp.val==0)
                     {
-                        click bApply,0
+                        // Normal operation
+                        // Prevent double data transmission on move.
+                        sMode.txt+="M"
+                        click sDuty,0
+                        sMode.txt-=1
+                        if(sMode.txt==bModeImmediate.txt)
+                        {
+                            click bApply,0
+                        }
                     }
                 
         Text tDuty
@@ -805,16 +912,32 @@ Page Simple
             
             Events
                 Touch Press Event
-                    // If button is hold, return without "exiting" simple mode (keep it running in background.
-                    tmReturn.en=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        // If button is hold, return without "exiting" simple mode (keep it running in background.
+                        tmReturn.en=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfat"
+                    }
                 
                 Touch Release Event
-                    tmReturn.en=0
-                    // Leaving MIDI Live Mode. Mode is now inactive
-                    Settings.activeModes.val=Settings.activeModes.val^1
-                    // Mode: EXit.
-                    prints "mex",0
-                    page Menu
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        tmReturn.en=0
+                        // Leaving MIDI Live Mode. Mode is now inactive
+                        Settings.activeModes.val=Settings.activeModes.val^1
+                        // Mode: EXit.
+                        prints "mex",0
+                        page Menu
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Float nDuty
             Properties
@@ -863,11 +986,27 @@ Page Simple
             
             Events
                 Touch Press Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaL"
+                    }
+                
                 Touch Release Event
-                    vis bModeImmediate,0
-                    vis bModeRelease,1
-                    sMode.txt=bModeRelease.txt
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        vis bModeImmediate,0
+                        vis bModeRelease,1
+                        sMode.txt=bModeRelease.txt
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button bModeManual
             Properties
@@ -877,12 +1016,28 @@ Page Simple
             
             Events
                 Touch Press Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaL"
+                    }
+                
                 Touch Release Event
-                    vis bApply,0
-                    vis bModeManual,0
-                    vis bModeImmediate,1
-                    sMode.txt=bModeImmediate.txt
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        vis bApply,0
+                        vis bModeManual,0
+                        vis bModeImmediate,1
+                        sMode.txt=bModeImmediate.txt
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Variable sMode
             Properties
@@ -913,20 +1068,36 @@ Page Simple
             
             Events
                 Touch Press Event
-                    sCoil.txt=btCoil1.txt
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        sCoil.txt=btCoil1.txt
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfak"
+                    }
                 
                 Touch Release Event
-                    // A coil might have been enabled, and thus does not have the currently displayed values.
-                    newData.val=1
-                    // Bit 0-5 correspond to the state of the buttons btCoil1-btCoil6
-                    sys0=btCoil1.val
-                    sys0=btCoil2.val*2+sys0
-                    sys0=btCoil3.val*4+sys0
-                    sys0=btCoil4.val*8+sys0
-                    sys0=btCoil5.val*16+sys0
-                    sys0=btCoil6.val*32+sys0
-                    // Store settings
-                    TC_Settings.activeCoils.val=sys0
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        // A coil might have been enabled, and thus does not have the currently displayed values.
+                        newData.val=1
+                        // Bit 0-5 correspond to the state of the buttons btCoil1-btCoil6
+                        sys0=btCoil1.val
+                        sys0=btCoil2.val*2+sys0
+                        sys0=btCoil3.val*4+sys0
+                        sys0=btCoil4.val*8+sys0
+                        sys0=btCoil5.val*16+sys0
+                        sys0=btCoil6.val*32+sys0
+                        // Store settings
+                        TC_Settings.activeCoils.val=sys0
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Dual-state Button btCoil2
             Properties
@@ -937,10 +1108,26 @@ Page Simple
             
             Events
                 Touch Press Event
-                    sCoil.txt=btCoil2.txt
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        sCoil.txt=btCoil2.txt
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfak"
+                    }
                 
                 Touch Release Event
-                    click btCoil1,0
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        click btCoil1,0
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Dual-state Button btCoil3
             Properties
@@ -951,10 +1138,26 @@ Page Simple
             
             Events
                 Touch Press Event
-                    sCoil.txt=btCoil3.txt
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        sCoil.txt=btCoil3.txt
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfak"
+                    }
                 
                 Touch Release Event
-                    click btCoil1,0
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        click btCoil1,0
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Dual-state Button btCoil4
             Properties
@@ -965,10 +1168,26 @@ Page Simple
             
             Events
                 Touch Press Event
-                    sCoil.txt=btCoil4.txt
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        sCoil.txt=btCoil4.txt
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfak"
+                    }
                 
                 Touch Release Event
-                    click btCoil1,0
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        click btCoil1,0
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Dual-state Button btCoil5
             Properties
@@ -979,10 +1198,26 @@ Page Simple
             
             Events
                 Touch Press Event
-                    sCoil.txt=btCoil5.txt
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        sCoil.txt=btCoil5.txt
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfak"
+                    }
                 
                 Touch Release Event
-                    click btCoil1,0
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        click btCoil1,0
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Dual-state Button btCoil6
             Properties
@@ -993,10 +1228,26 @@ Page Simple
             
             Events
                 Touch Press Event
-                    sCoil.txt=btCoil6.txt
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        sCoil.txt=btCoil6.txt
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfak"
+                    }
                 
                 Touch Release Event
-                    click btCoil1,0
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        click btCoil1,0
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Text tus
             Properties
@@ -1684,6 +1935,38 @@ Page Simple
                 
                 Touch Release Event
                     
+        Variable tempStr
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: ""
+                Max. length   : 32
+            
+        Variable showHelp
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
+        QRCode qrHelp
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    ref_stop
+                    if(showHelp.val==0)
+                    {
+                        showHelp.val=1
+                        tempStr.txt=tTitle.txt
+                        tTitle.txt="Get Help for..."
+                    }else
+                    {
+                        showHelp.val=0
+                        tTitle.txt=tempStr.txt
+                    }
+                    vis qrHelp,Help_Info.helpMode.val
+                    ref_star
+                
         Hotspot fLoadColors
             Events
                 Touch Press Event
@@ -1733,6 +2016,12 @@ Page Simple
                                 b[sys0].pic+=sys2
                                 b[sys0].pic2=b[sys0].pic+1
                             }
+                        }else if(sys1==58)
+                        {
+                            // Types that have bco, pco
+                            // QR Code
+                            b[sys0].bco=Settings.backCol.val
+                            b[sys0].pco=Settings.qrFrontCol.val
                         }else if(sys1==1)
                         {
                             // Types that have pic, pic2:

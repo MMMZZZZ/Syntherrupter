@@ -73,6 +73,12 @@ Page MIDI_Chn_Set
                 }
             }
             //
+            // Load Help Mode
+            vis qrHelp,Help_Info.helpMode.val
+            tempStr.txt=tTitle.txt
+            showHelp.val=1
+            click 0,1
+            //
             // Enable page refreshs again
             ref_star
         
@@ -126,33 +132,42 @@ Page MIDI_Chn_Set
             line sys2,sys0,sys2,sys1,tNRPN.pco
         
         Touch Press Event
-            if(Other_Settings.nBackOff.val!=0)
+            if(showHelp.val==0)
             {
-                // Default "stop" action.
-                // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                prints "mes",3
-                // Set all ontime and duty settings of all pages to 0.
-                // First come the global variables then the local variables.
-                Simple.ontime.val=0
-                Simple.duty.val=0
-                Simple.set1.val=Simple.set1.val&0x0000ffff
-                Simple.set2.val=Simple.set2.val&0x0000ffff
-                Simple.set3.val=Simple.set3.val&0x0000ffff
-                Simple.set4.val=Simple.set4.val&0x0000ffff
-                Simple.set5.val=Simple.set5.val&0x0000ffff
-                Simple.set6.val=Simple.set6.val&0x0000ffff
-                MIDI_Live.ontime.val=0
-                MIDI_Live.duty.val=0
-                MIDI_Live.set1.val=0
-                MIDI_Live.set2.val=0
-                MIDI_Live.set3.val=0
-                MIDI_Live.set4.val=0
-                MIDI_Live.set5.val=0
-                MIDI_Live.set6.val=0
-                Lightsaber.ontime.val=0
-                Lightsaber.ontimes12.val=0
-                Lightsaber.ontimes34.val=0
-                Lightsaber.ontimes56.val=0
+                // Normal Operation
+                if(Other_Settings.nBackOff.val!=0)
+                {
+                    // Default "stop" action.
+                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                    prints "mes",3
+                    // Set all ontime and duty settings of all pages to 0.
+                    // First come the global variables then the local variables.
+                    Simple.ontime.val=0
+                    Simple.duty.val=0
+                    Simple.set1.val=Simple.set1.val&0x0000ffff
+                    Simple.set2.val=Simple.set2.val&0x0000ffff
+                    Simple.set3.val=Simple.set3.val&0x0000ffff
+                    Simple.set4.val=Simple.set4.val&0x0000ffff
+                    Simple.set5.val=Simple.set5.val&0x0000ffff
+                    Simple.set6.val=Simple.set6.val&0x0000ffff
+                    MIDI_Live.ontime.val=0
+                    MIDI_Live.duty.val=0
+                    MIDI_Live.set1.val=0
+                    MIDI_Live.set2.val=0
+                    MIDI_Live.set3.val=0
+                    MIDI_Live.set4.val=0
+                    MIDI_Live.set5.val=0
+                    MIDI_Live.set6.val=0
+                    Lightsaber.ontime.val=0
+                    Lightsaber.ontimes12.val=0
+                    Lightsaber.ontimes34.val=0
+                    Lightsaber.ontimes56.val=0
+                }
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfgu"
+                click qrHelp,0
             }
         
         Touch Release Event
@@ -217,12 +232,28 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    // Since this code is also executed by the previous/next buttons, it can't be here, otherwise you would see a Touch Press Event on this button, too.
-                    click fStore,1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Since this code is also executed by the previous/next buttons, it can't be here, otherwise you would see a Touch Press Event on this button, too.
+                        click fStore,1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgo"
+                    }
                 
                 Touch Release Event
-                    // Go back to origin page.
-                    page origin.val
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Go back to origin page.
+                        page origin.val
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Text tChan
             Properties
@@ -271,21 +302,37 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    // Save current state and send it to the microcontroller
-                    click fStore,1
-                    // Set previous coil
-                    if(chnNum.val>0)
+                    if(showHelp.val==0)
                     {
-                        chnNum.val-=1
+                        // Normal Operation
+                        // Save current state and send it to the microcontroller
+                        click fStore,1
+                        // Set previous coil
+                        if(chnNum.val>0)
+                        {
+                            chnNum.val-=1
+                        }else
+                        {
+                            chnNum.val=15
+                        }
+                        // Reload page for previous coil
+                        page MIDI_Chn_Set
                     }else
                     {
-                        chnNum.val=15
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgr"
                     }
-                    // Reload page for previous coil
-                    page MIDI_Chn_Set
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Button bNext
             Properties
                 Scope      : Local
@@ -294,21 +341,37 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    // Save current state and send it to the microcontroller
-                    click fStore,1
-                    // Set next coil
-                    if(chnNum.val<15)
+                    if(showHelp.val==0)
                     {
-                        chnNum.val+=1
+                        // Normal Operation
+                        // Save current state and send it to the microcontroller
+                        click fStore,1
+                        // Set next coil
+                        if(chnNum.val<15)
+                        {
+                            chnNum.val+=1
+                        }else
+                        {
+                            chnNum.val=0
+                        }
+                        // Reload page for previous coil
+                        page MIDI_Chn_Set
                     }else
                     {
-                        chnNum.val=0
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgr"
                     }
-                    // Reload page for previous coil
-                    page MIDI_Chn_Set
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number fStore
             Properties
                 Scope        : Local
@@ -397,15 +460,31 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=base.val
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=base.val
+                        }
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
                     }
                 
         Button b1
@@ -416,17 +495,33 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=base.val
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
                     }
-                    b[newValTargetId.val].val+=1
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=base.val
+                        }
+                        b[newValTargetId.val].val+=1
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button b2
             Properties
@@ -436,17 +531,33 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=base.val
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
                     }
-                    b[newValTargetId.val].val+=2
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=base.val
+                        }
+                        b[newValTargetId.val].val+=2
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button b3
             Properties
@@ -456,17 +567,33 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=base.val
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
                     }
-                    b[newValTargetId.val].val+=3
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=base.val
+                        }
+                        b[newValTargetId.val].val+=3
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button b4
             Properties
@@ -476,17 +603,33 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=base.val
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
                     }
-                    b[newValTargetId.val].val+=4
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=base.val
+                        }
+                        b[newValTargetId.val].val+=4
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button b5
             Properties
@@ -496,17 +639,33 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=base.val
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
                     }
-                    b[newValTargetId.val].val+=5
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=base.val
+                        }
+                        b[newValTargetId.val].val+=5
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button b6
             Properties
@@ -516,17 +675,33 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=base.val
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
                     }
-                    b[newValTargetId.val].val+=6
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=base.val
+                        }
+                        b[newValTargetId.val].val+=6
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button b7
             Properties
@@ -536,17 +711,33 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=base.val
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
                     }
-                    b[newValTargetId.val].val+=7
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=base.val
+                        }
+                        b[newValTargetId.val].val+=7
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button b8
             Properties
@@ -556,17 +747,33 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=base.val
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
                     }
-                    b[newValTargetId.val].val+=8
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=base.val
+                        }
+                        b[newValTargetId.val].val+=8
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button b9
             Properties
@@ -576,17 +783,33 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=base.val
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
                     }
-                    b[newValTargetId.val].val+=9
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=base.val
+                        }
+                        b[newValTargetId.val].val+=9
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button bClear
             Properties
@@ -596,9 +819,25 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
+                    }
+                
                 Touch Release Event
-                    b[newValTargetId.val].val=0
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        b[newValTargetId.val].val=0
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button bOK
             Properties
@@ -608,16 +847,32 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
+                    }
+                
                 Touch Release Event
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    newValTargetId.val=idle.id
-                    //
-                    // Make sure the values will be transmitted.
-                    NRPData.val+=1
-                    MIDIData.val+=1
-                    click fStore,1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        newValTargetId.val=idle.id
+                        //
+                        // Make sure the values will be transmitted.
+                        NRPData.val+=1
+                        MIDIData.val+=1
+                        click fStore,1
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Text fCheck
             Properties
@@ -700,20 +955,36 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nNumCoarse.bco=idle.pco
-                    nNumCoarse.pco=idle.bco
-                    newValTargetId.val=nNumCoarse.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nNumCoarse.bco=idle.pco
+                        nNumCoarse.pco=idle.bco
+                        newValTargetId.val=nNumCoarse.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgV"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Text tNRPN
             Properties
                 Scope       : Local
@@ -760,20 +1031,36 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nNumFine.bco=idle.pco
-                    nNumFine.pco=idle.bco
-                    newValTargetId.val=nNumFine.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nNumFine.bco=idle.pco
+                        nNumFine.pco=idle.bco
+                        newValTargetId.val=nNumFine.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgV"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nDataCoarse
             Properties
                 Scope        : Local
@@ -781,20 +1068,36 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nDataCoarse.bco=idle.pco
-                    nDataCoarse.pco=idle.bco
-                    newValTargetId.val=nDataCoarse.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nDataCoarse.bco=idle.pco
+                        nDataCoarse.pco=idle.bco
+                        newValTargetId.val=nDataCoarse.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgV"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Text tData
             Properties
                 Scope       : Local
@@ -841,20 +1144,36 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nDataFine.bco=idle.pco
-                    nDataFine.pco=idle.bco
-                    newValTargetId.val=nDataFine.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nDataFine.bco=idle.pco
+                        nDataFine.pco=idle.bco
+                        newValTargetId.val=nDataFine.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfgV"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Text tMIDICmd
             Properties
                 Scope       : Local
@@ -882,17 +1201,33 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=base.val
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
                     }
-                    b[newValTargetId.val].val+=10
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=base.val
+                        }
+                        b[newValTargetId.val].val+=10
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button bB
             Properties
@@ -902,17 +1237,33 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=base.val
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
                     }
-                    b[newValTargetId.val].val+=11
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=base.val
+                        }
+                        b[newValTargetId.val].val+=11
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button bC
             Properties
@@ -922,17 +1273,33 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=base.val
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
                     }
-                    b[newValTargetId.val].val+=12
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=base.val
+                        }
+                        b[newValTargetId.val].val+=12
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button bD
             Properties
@@ -942,17 +1309,33 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=base.val
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
                     }
-                    b[newValTargetId.val].val+=13
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=base.val
+                        }
+                        b[newValTargetId.val].val+=13
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button bE
             Properties
@@ -962,17 +1345,33 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=base.val
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
                     }
-                    b[newValTargetId.val].val+=14
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=base.val
+                        }
+                        b[newValTargetId.val].val+=14
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Button bF
             Properties
@@ -982,17 +1381,33 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(newSelect.val!=0)
+                    if(showHelp.val==0)
                     {
-                        newSelect.val=0
-                        b[newValTargetId.val].val=0
+                        // Normal Operation
                     }else
                     {
-                        b[newValTargetId.val].val*=base.val
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
                     }
-                    b[newValTargetId.val].val+=15
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(newSelect.val!=0)
+                        {
+                            newSelect.val=0
+                            b[newValTargetId.val].val=0
+                        }else
+                        {
+                            b[newValTargetId.val].val*=base.val
+                        }
+                        b[newValTargetId.val].val+=15
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
                 
         Text tStatus
             Properties
@@ -1040,20 +1455,36 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nStatus.bco=idle.pco
-                    nStatus.pco=idle.bco
-                    newValTargetId.val=nStatus.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nStatus.bco=idle.pco
+                        nStatus.pco=idle.bco
+                        newValTargetId.val=nStatus.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgw"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nData1
             Properties
                 Scope        : Local
@@ -1061,20 +1492,36 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nData1.bco=idle.pco
-                    nData1.pco=idle.bco
-                    newValTargetId.val=nData1.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nData1.bco=idle.pco
+                        nData1.pco=idle.bco
+                        newValTargetId.val=nData1.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgw"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Number nData2
             Properties
                 Scope        : Local
@@ -1082,20 +1529,36 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    // Check if values are legal
-                    click fCheck,0
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    nData2.bco=idle.pco
-                    nData2.pco=idle.bco
-                    newValTargetId.val=nData2.id
-                    // A new value has been selected
-                    newSelect.val=1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Check if values are legal
+                        click fCheck,0
+                        // Reset push state of last selected value
+                        b[newValTargetId.val].bco=idle.bco
+                        b[newValTargetId.val].pco=idle.pco
+                        // Mark this field as pushed
+                        nData2.bco=idle.pco
+                        nData2.pco=idle.bco
+                        newValTargetId.val=nData2.id
+                        // A new value has been selected
+                        newSelect.val=1
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfgw"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Button bBase
             Properties
                 Scope      : Local
@@ -1104,44 +1567,60 @@ Page MIDI_Chn_Set
             
             Events
                 Touch Press Event
-                    
-                Touch Release Event
-                    if(bBase.txt==sDec.txt)
+                    if(showHelp.val==0)
                     {
-                        bBase.txt=sHex.txt
-                        base.val=16
-                        nNumCoarse.format=2
-                        nNumFine.format=2
-                        nDataCoarse.format=2
-                        nDataFine.format=2
-                        nStatus.format=2
-                        nData1.format=2
-                        nData2.format=2
-                        tKeep.txt=sKeepStart.txt+"0x80"+sKeepEnd.txt
-                        vis bA,1
-                        vis bB,1
-                        vis bC,1
-                        vis bD,1
-                        vis bE,1
-                        vis bF,1
+                        // Normal Operation
                     }else
                     {
-                        bBase.txt=sDec.txt
-                        base.val=10
-                        nNumCoarse.format=0
-                        nNumFine.format=0
-                        nDataCoarse.format=0
-                        nDataFine.format=0
-                        nStatus.format=0
-                        nData1.format=0
-                        nData2.format=0
-                        tKeep.txt=sKeepStart.txt+"128"+sKeepEnd.txt
-                        vis bA,0
-                        vis bB,0
-                        vis bC,0
-                        vis bD,0
-                        vis bE,0
-                        vis bF,0
+                        // Show Help
+                        qrHelp.txt="git.io/Jkfga"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        if(bBase.txt==sDec.txt)
+                        {
+                            bBase.txt=sHex.txt
+                            base.val=16
+                            nNumCoarse.format=2
+                            nNumFine.format=2
+                            nDataCoarse.format=2
+                            nDataFine.format=2
+                            nStatus.format=2
+                            nData1.format=2
+                            nData2.format=2
+                            tKeep.txt=sKeepStart.txt+"0x80"+sKeepEnd.txt
+                            vis bA,1
+                            vis bB,1
+                            vis bC,1
+                            vis bD,1
+                            vis bE,1
+                            vis bF,1
+                        }else
+                        {
+                            bBase.txt=sDec.txt
+                            base.val=10
+                            nNumCoarse.format=0
+                            nNumFine.format=0
+                            nDataCoarse.format=0
+                            nDataFine.format=0
+                            nStatus.format=0
+                            nData1.format=0
+                            nData2.format=0
+                            tKeep.txt=sKeepStart.txt+"128"+sKeepEnd.txt
+                            vis bA,0
+                            vis bB,0
+                            vis bC,0
+                            vis bD,0
+                            vis bE,0
+                            vis bF,0
+                        }
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
                     }
                 
         Text tSelToMod
@@ -1275,6 +1754,38 @@ Page MIDI_Chn_Set
                 
                 Touch Release Event
                     
+        Variable tempStr
+            Properties
+                Scope         : Local
+                Type          : String
+                Initial String: ""
+                Max. length   : 32
+            
+        Variable showHelp
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
+        QRCode qrHelp
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    ref_stop
+                    if(showHelp.val==0)
+                    {
+                        showHelp.val=1
+                        tempStr.txt=tTitle.txt
+                        tTitle.txt="Get Help for..."
+                    }else
+                    {
+                        showHelp.val=0
+                        tTitle.txt=tempStr.txt
+                    }
+                    vis qrHelp,Help_Info.helpMode.val
+                    ref_star
+                
         Hotspot fLoadColors
             Events
                 Touch Press Event
@@ -1324,6 +1835,12 @@ Page MIDI_Chn_Set
                                 b[sys0].pic+=sys2
                                 b[sys0].pic2=b[sys0].pic+1
                             }
+                        }else if(sys1==58)
+                        {
+                            // Types that have bco, pco
+                            // QR Code
+                            b[sys0].bco=Settings.backCol.val
+                            b[sys0].pco=Settings.qrFrontCol.val
                         }else if(sys1==1)
                         {
                             // Types that have pic, pic2:
