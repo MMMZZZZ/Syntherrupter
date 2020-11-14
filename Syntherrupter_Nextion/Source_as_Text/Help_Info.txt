@@ -257,6 +257,8 @@ Page Help_Info
                     }else
                     {
                         // Show Help
+                        // Undo button toggle
+                        btHelp.val=1-btHelp.val
                         qrHelp.txt="git.io/Jkf2f"
                     }
                 

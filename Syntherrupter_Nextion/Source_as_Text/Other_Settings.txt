@@ -45,7 +45,7 @@ Page Other_Settings
             //
             newValTargetId.val=idle.id
             // Set dark mode button state
-            bDark.val=Settings.colorMode.val
+            btDark.val=Settings.colorMode.val
             //
             // Load settings from global variables.
             fSqrt.val=dim*sBrightness.maxval
@@ -1036,7 +1036,7 @@ Page Other_Settings
                 
                 Touch Release Event
                     
-        Dual-state Button bDark
+        Dual-state Button btDark
             Properties
                 Scope        : Local
                 Initial State: 0
@@ -1051,6 +1051,8 @@ Page Other_Settings
                     }else
                     {
                         // Show Help
+                        // Undo button toggle
+                        btDark.val=1-btDark.val
                         qrHelp.txt="git.io/Jkfgj"
                     }
                 
