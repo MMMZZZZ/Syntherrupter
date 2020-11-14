@@ -6,7 +6,10 @@ The Help and Info page allows you to control the "Help QR" and contains a short 
 
 ## Index
 * [Index](#index)
-* [Content](#content)
+* [What you see](#what-you-see)
+* [What you get](#what-you-get)
+  * [Help Mode](#help-mode)
+  * [Credits](#credits)
 
 ## What you see
 
