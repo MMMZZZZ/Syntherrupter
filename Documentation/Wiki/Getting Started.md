@@ -62,13 +62,15 @@ Syntherrupter supports three different users with different rights. By default y
 
 ### Main Menu
 
+*Complete documentation of the main menu: [Main Menu](UI/Menu.md#readme)*
+
 The Main Menu links everything together. It's the "root" of the user interface. 
 
 It contains 6 buttons. 
 * At the top you have the three modes of operation of Syntherrupter: Simple, MIDI Live and Lightsaber. Click on them to bring up the controls for that mode. 
-* Then we have Help and Info, which is kind of a work in progress. I plan to put more info in there but for it only contains a Credits section and some info you'd probably not find by "trial&error". Don't worry, we'll get to it.
+* Then we have Help and Info. You should check it out if you're new and still need to look up many things in the wiki. 
 * Next one in the row is Settings. This is where you configure things like Username/password, screen brightness, safety limits and many other things. 
-* Last one is Switch User. It brings you back to the login page. At this point I should probably tell you, that the auto login password is `0`. 
+* Last one is Switch User at the bottom. It brings you back to the login page. At this point I should probably tell you, that the auto login password is `0`. 
 
 ### Simple Mode
 
