@@ -21,6 +21,6 @@ The Help and Info page allows you to control the "Help QR" and contains a short 
 
 Mostly explained on-screen. Help mode shows a QR code at the top right (not visible when disabled), which links to the wiki article or even article section when activated. While not every wiki article offers the same level of details, the QR code works on every page. 
 
-## Credits
+### Credits
 
 As much Credits as I could fit on the screen. Full version on [Syntherrupters main page](/README.md#Credits). Oh, and a note about who I am. Hi!
