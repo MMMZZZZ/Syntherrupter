@@ -197,27 +197,28 @@ bool MIDI::processBuffer(uint32_t b)
             }
             else if (*dataBytes == 2)
             {
-
-                channels[*channel].controllersChanged = true;
                 switch (*controller)
                 {
                     default:
-                        channels[*channel].controllersChanged = false;
                         break;
                     case 0x01: // Modulation Wheel
                         channels[*channel].modulation = *c1 / 128.0f;
+                        channels[*channel].controllersChanged = true;
                         break;
                     case 0x02: // Breath Controller
 
                         break;
                     case 0x07: // Channel Volume
                         channels[*channel].volume = *c1 / 128.0f;
+                        channels[*channel].controllersChanged = true;
                         break;
                     case 0x0A: // Pan
-                            channels[*channel].pan = *c1 / 128.0f;
+                        channels[*channel].pan = *c1 / 128.0f;
+                        channels[*channel].controllersChanged = true;
                         break;
                     case 0x0B: // Expression coarse
                         channels[*channel].expression = *c1 / 128.0f;
+                        channels[*channel].controllersChanged = true;
                         break;
                     case 0x40: // Sustain Pedal
                         if (*c1 >= 64)
@@ -228,6 +229,7 @@ bool MIDI::processBuffer(uint32_t b)
                         {
                             channels[*channel].sustainPedal = false;
                         }
+                        channels[*channel].controllersChanged = true;
                         break;
                     case 0x43: // Damper Pedal
                         if (*c1 >= 64)
@@ -238,6 +240,7 @@ bool MIDI::processBuffer(uint32_t b)
                         {
                             channels[*channel].damperPedal = false;
                         }
+                        channels[*channel].controllersChanged = true;
                         break;
                     case 0x62: // Non Registered Parameter Number, fine
                         channels[*channel].NRPN &= 0xff00;
@@ -245,9 +248,6 @@ bool MIDI::processBuffer(uint32_t b)
 
                         // Can't receive RP and NRP data at the same time.
                         channels[*channel].RPN   = 0x7f7f;
-
-                        // Address changes don't affect anything else
-                        channels[*channel].controllersChanged = false;
                         break;
                     case 0x63: // Non Registered Parameter Number, coarse
                         channels[*channel].NRPN &= 0x00ff;
@@ -255,9 +255,6 @@ bool MIDI::processBuffer(uint32_t b)
 
                         // Can't receive RP and NRP data at the same time.
                         channels[*channel].RPN   = 0x7f7f;
-
-                        // Address changes don't affect anything else
-                        channels[*channel].controllersChanged = false;
                         break;
                     case 0x64: // Registered Parameter Number, fine
                         channels[*channel].RPN &= 0xff00;
@@ -265,9 +262,6 @@ bool MIDI::processBuffer(uint32_t b)
 
                         // Can't receive RP and NRP data at the same time.
                         channels[*channel].NRPN = 0x7f7f;
-
-                        // Address changes don't affect anything else
-                        channels[*channel].controllersChanged = false;
                         break;
                     case 0x65: // Registered Parameter Number, coarse
                         channels[*channel].RPN &= 0x00ff;
@@ -275,11 +269,12 @@ bool MIDI::processBuffer(uint32_t b)
 
                         // Can't receive RP and NRP data at the same time.
                         channels[*channel].NRPN = 0x7f7f;
-
-                        // Address changes don't affect anything else
-                        channels[*channel].controllersChanged = false;
                         break;
                     case 0x06: // (N)RPN Data Entry, coase
+                    {
+                        bool previousState = channels[*channel].controllersChanged;
+                        channels[*channel].controllersChanged = true;
+
                         // Registered Parameter
                         if (channels[*channel].RPN == 0) // Pitch bend range
                         {
@@ -287,7 +282,6 @@ bool MIDI::processBuffer(uint32_t b)
                             channels[*channel].pitchBendRange  =   channels[*channel].pitchBendRangeCoarse
                                                                  + channels[*channel].pitchBendRangeFine / 100.0f;
                             channels[*channel].pitchBendRange /= 8192.0f;
-                            channels[*channel].controllersChanged = true;
                         }
                         else if (channels[*channel].RPN == 1) // Fine tuning
                         {
@@ -296,7 +290,6 @@ bool MIDI::processBuffer(uint32_t b)
                                                         + channels[*channel].fineTuningFine) - 8192.0f;
                             channels[*channel].tuning /= 4096.0f;
                             channels[*channel].tuning += channels[*channel].coarseTuning;
-                            channels[*channel].controllersChanged = true;
                         }
                         else if (channels[*channel].RPN == 2) // Coarse tuning
                         {
@@ -305,32 +298,33 @@ bool MIDI::processBuffer(uint32_t b)
                                                         + channels[*channel].fineTuningFine) - 8192.0f;
                             channels[*channel].tuning /= 4096.0f;
                             channels[*channel].tuning += channels[*channel].coarseTuning;
-                            channels[*channel].controllersChanged = true;
                         }
                         // Non-Registered Parameter
                         else if (channels[*channel].NRPN == (42 << 8) + 1) // Note pan mode - source range upper limit
                         {
                             channels[*channel].notePanSourceRangeHigh = *c1;
-                            channels[*channel].controllersChanged = true;
                         }
                         else if (channels[*channel].NRPN == (42 << 8) + 2) // Note pan mode - target range upper limit
                         {
                             channels[*channel].notePanTargetRangeHigh = *c1 / 128.0f;
-                            channels[*channel].controllersChanged = true;
                         }
                         else
                         {
-                            channels[*channel].controllersChanged = false;
+                            channels[*channel].controllersChanged = previousState;
                         }
                         break;
+                    }
                     case 0x26: // (N)RPN Data Entry, fine
+                    {
+                        bool previousState = channels[*channel].controllersChanged;
+                        channels[*channel].controllersChanged = true;
+
                         if (channels[*channel].RPN == 0) // Pitch bend range
                         {
                             channels[*channel].pitchBendRangeFine = *c1;
                             channels[*channel].pitchBendRange  =   channels[*channel].pitchBendRangeCoarse
                                                                  + channels[*channel].pitchBendRangeFine / 100.0f;
                             channels[*channel].pitchBendRange /= 8192.0f;
-                            channels[*channel].controllersChanged = true;
                         }
                         else if (channels[*channel].RPN == 1) // Fine tuning
                         {
@@ -344,7 +338,6 @@ bool MIDI::processBuffer(uint32_t b)
                             channels[*channel].tuning /= 4096.0f;
                             channels[*channel].tuning += channels[*channel].coarseTuning;
                         }
-
                         // Non-Registered Parameter
                         else if (channels[*channel].NRPN == (42 << 8) + 0) // Note pan mode - enable/disable
                         {
@@ -370,9 +363,10 @@ bool MIDI::processBuffer(uint32_t b)
                         }
                         else
                         {
-                            channels[*channel].controllersChanged = false;
+                            channels[*channel].controllersChanged = previousState;
                         }
                         break;
+                    }
                     case 0x78: // All Sounds off
                     {
                         Note* note = channels[*channel].firstNote;
