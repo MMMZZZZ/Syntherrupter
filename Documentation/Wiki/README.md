@@ -16,9 +16,10 @@ Welcome to the Syntherrupter wiki. This is a collection of how-tos and documenta
 The High Voltage Forum topic contains quite a subjects that haven't made their way into this wiki yet. Hence they're linked below.
 
 * [My best MIDI sources](https://highvoltageforum.net/index.php?topic=1020.msg8661#msg8661)
-* [A bunch of demo videos with a tesla coil](https://highvoltageforum.net/index.php?topic=1020.msg9299#msg9299). Thanks futurist!
+* [A bunch of demo videos with a tesla coil](https://highvoltageforum.net/index.php?topic=1020.msg9299#msg9299). Thanks futurist! And just below that post you'll find a video from AstRii, too.
 * [What the n-tau parameter does to envelopes (ADSR)](https://highvoltageforum.net/index.php?topic=1020.msg8850#msg8850). Post is outdated, picture not.
 * [Envelope (ADSR) editor and looping](https://highvoltageforum.net/index.php?topic=1020.msg9082#msg9082)
 * [What is MIDI? What is ADSR? Is it the same?](https://highvoltageforum.net/index.php?topic=1020.msg9120#msg9120)
 * [In-depth explanation of note duty vs note ontime](https://highvoltageforum.net/index.php?topic=1020.msg8564#msg8564)
 * [AstRiis Syntherrupter build with 4 outputs](https://highvoltageforum.net/index.php?topic=1267.msg9292#msg9292)
+* If you happen to have a Nextion Intelligent Screen (Indicated by a P in the model number), or a TJC X series screen, you need to make changes to the Nextion source file. You need to modify [the sliders](https://highvoltageforum.net/index.php?topic=1020.msg9670#msg9670) and [the code for dark mode](https://highvoltageforum.net/index.php?topic=1020.msg9682#msg9682)
