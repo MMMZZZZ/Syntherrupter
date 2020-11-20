@@ -53,7 +53,7 @@ I recommend buying them from the official shop.
 
 The R at the end is important! It indicates that its the version with *resistive* touch. There are also versions with *capacitive* touch, marked by a `C` and versions with *no touch*, marked with an `N`. 
 
-The enhanced series offer features like a realtime clock but this is not used by Synhterrupter because it's made for the basic series without those features. So why would you pay extra for something you can't use? Simple answer: the basic series is not available from Mouser. Depending where you are and how much money you're willing to spend, you may want to buy everything from one source like Mouser.  
+Among other things that are useless for Syntherrupter the enhanced series offers more than twice the processing power. This allows for a more responsive UI. In addition not every store has all of those displays. Mouser offers only the most expensive one from the list. 
 
 Plot twist: Nextion is actually just a rebranding. The displays originally come from the chinese manufacturer TJC. Buying directly from those is 30-50% cheaper but they only sell within China so you have to use an import service like Superbuy. Still cheaper than buying a Nextion but also slower. 
 
