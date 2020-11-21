@@ -41,7 +41,7 @@ Any change automatically updates the ontime value, too.
 
 ### Apply to Outputs
 
-This section is only visible if you have more than one output. 
+This part of the UI is only visible if you have more than one output. 
 
 Each output is represented by a button. This button doesn't show whether the output is active, but whether your next change will affect this output. If you want to change the outputs 1 and 3 you select these two, and deselect all the other outputs. Any change you make will only affect those two outputs. The others continue to operate on whatever settings they currentley are.
 
@@ -51,6 +51,8 @@ Unlike the values displayed in [MIDI Live mode](MIDI%20Live.md#apply-to-outputs-
 
 ### Applying Manually, On Release or Immediately
 
+*This section applies equally to all modes (Simple, [MIDI Live](MIDI%20Live.md#readme) and [Lightsaber](Lightsaber.md#readme)). Hence you may have been redirected to this section from a different mode.*
+
 By default new values are applied *On Release* to the selected outputs, meaning that they get applied as soon as you release any of the three sliders. 
 
 Pressing the *On Release* button will change the mode to *Manually* and another button appears: *Apply Now*. This gives the user the control when exactly he wants to apply new settings and allows f.ex. to change multiple values at the same time. 
@@ -59,6 +61,8 @@ Pressing the *Manually* button changes the mode again. The third and last mode a
 
 ### Return to Main Menu
 
+*This section applies equally to all modes (Simple, [MIDI Live](MIDI%20Live.md#readme) and [Lightsaber](Lightsaber.md#readme). Hence you may have been redirected to this section from a different mode.*
+
 A simple press of the *Return* button stops Simple mode and brings the user back to the [Main Menu](Menu.md#readme). 
 
-Keeping the button pressed brings the user back to the [Main Menu](Menu.md#readme), too. However, Simple mode won't be stopped. It continues to run in the background. This can be done for all modes.
+Keeping the button pressed brings the user back to the [Main Menu](Menu.md#readme), too. However, Simple mode won't be stopped. It continues to run in the background. There are no limitations to this feature. Any combination of modes can run simultaneously.
