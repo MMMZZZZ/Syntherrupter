@@ -5,7 +5,16 @@ You can control up to 6 different coils simultaneously. On each coil you can pla
 
 By Max Zuidberg. Credits [below](#credits).
 
+## Index 
+
+* [Demo Videos](#demo-videos)
+* [Pictures](#pictures)
+* [Features](#features)
+* [Documentation and Getting Started](#documentation-and-getting-started)
+* [Credits](#credits)
+
 ## Demo Videos
+
 Syntherrupter playing "I Want It All" - a MIDI with ~6 voices, pitch bending, sometimes very fast notes, and other effects.
 
 [![Syntherrupter Demo - I Want It All](http://img.youtube.com/vi/H2ykCsD_b5g/0.jpg)](http://www.youtube.com/watch?v=H2ykCsD_b5g)
@@ -17,6 +26,7 @@ Here's a demo of Syntherrupters stereo features with Thunderstruck. The only mod
 [![Syntherrupter Demo - I Want It All](http://img.youtube.com/vi/Tyts9u0le6A/0.jpg)](http://www.youtube.com/watch?v=Tyts9u0le6A)
 
 ## Pictures
+
 My own version currently looks like this (with Dark Mode on):
 
 ![Syntherrupter Max Top](/Documentation/Pictures/Syntherrupter_Max_Top.jpeg)
@@ -28,6 +38,7 @@ There's an optical receiver that's not needed. The transmitter has a little BC54
 ![Syntherrupter Max Inside](/Documentation/Pictures/Syntherrupter_Max_Internal.jpeg)
 
 ## Features
+
 * A unique and truly awesome name: Syntherrupter. ;D 
 * **Easy to build**. Except for the optical transmitters the other parts are "ready to use" modules that can be connected without soldering or custom PCBs.
 * **Over 10 voice polyphony** including effects like pitch bend, modulation and different "instruments". Yes, you can - within limits - change how your coil sounds.
@@ -39,9 +50,11 @@ There's an optical receiver that's not needed. The transmitter has a little BC54
 * Sounds boring, but for me it belongs to an interrupter as well: **Normal interrupter mode** where you can control the ontime, BPS and duty.
 
 ## Documentation and Getting Started
+
 Check the [Wiki](/Documentation/Wiki#readme). It's far from being complete, but the most important stuff - like a Getting Started Guide - is there.
 
 ### ADSR Sounds
+
 The sound can be selected by the MIDI command "Program Change". In your MIDI software you can select it by changing the instrument of the channel. 
 
 The programs 1-63 can be modified by the user using the ADSR Editor. The programs 20-39 are stored in EEPROM. Unless modified by the user, they are simply constant ontime. All other programs have the following characteristics at startup:
@@ -61,6 +74,7 @@ The programs 1-63 can be modified by the user using the ADSR Editor. The program
 If you wonder why you would want to exceed the given ontime, it is an "efficient" way to get louder notes even with high voice count without tripping your circuit breaker. Since the ontime drops pretty fast after the attack you can consider the ontime on the display more like an average ontime. Note that all these ADSR settings do not allow to exceed your coil limits (->Settings->Coil Setttings). 
 
 ### Other documentation
+
 The forum threads (especially the english one) contain many posts and videos explaining and demonstrating the features of v2.x.x, v3.x.x and v4.x.x. Anything that's not yet been described in the wiki can be found there.
 
 English: https://highvoltageforum.net/index.php?topic=1020.0
@@ -68,7 +82,8 @@ English: https://highvoltageforum.net/index.php?topic=1020.0
 German: http://forum.mosfetkiller.de/viewtopic.php?f=9&t=64458
 
 
-### Credits
+## Credits
+
 [Netzpfuscher and his awesome UD3](https://highvoltageforum.net/index.php?topic=188.0). Thank you for the initial help with polyphony and the awesome lightsaber idea.
 
 [TMaxElectronics](https://tmax-electronics.de/easteregg/). Many great discussions about MIDI, Interrupters, C/C++ worst practices, and much more. And for developping a competing interrupter - keeps the development going. 
