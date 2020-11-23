@@ -1,6 +1,6 @@
 # General Settings
 
-[Back to the User Interface Reference page](README.md#readme)
+[Back to the Settings Menu page](Settings.md#readme)
 
 The General Settings mainly control user interface stuff.
 
