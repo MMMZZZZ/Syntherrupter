@@ -425,24 +425,40 @@ Page Settings
                 Type          : int32
                 Initial Value : 0
             
+        Variable applyingMode
+            Properties
+                Scope         : Global
+                Type          : int32
+                Initial Value : 1
+            
         QRCode qrHelp
+            Properties
+                Scope       : Local
+                Initial Text: "git.io/JkvOK"
+                Max. length : 16
+            
             Events
                 Touch Press Event
                     
                 Touch Release Event
-                    ref_stop
                     if(showHelp.val==0)
                     {
                         showHelp.val=1
                         tempStr.txt=tTitle.txt
-                        tTitle.txt="Get Help for..."
+                        tTitle.txt="Get Help/Link for..."
+                        // keep QR code on top
+                        ref qrHelp
+                        // Show modified title before stopping screen refreshs.
+                        doevents
+                        ref_stop
                     }else
                     {
                         showHelp.val=0
                         tTitle.txt=tempStr.txt
+                        // keep QR code on top
+                        ref qrHelp
+                        ref_star
                     }
-                    vis qrHelp,Help_Info.helpMode.val
-                    ref_star
                 
         Hotspot fLoadColors
             Events

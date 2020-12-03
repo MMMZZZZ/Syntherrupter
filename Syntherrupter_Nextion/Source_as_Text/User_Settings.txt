@@ -734,7 +734,7 @@ Page User_Settings
         Float user0Duty
             Properties
                 Scope           : Local
-                Initial Value   : 0
+                Initial Value   : 60
                 Divide by [10^x]: 1
             
             Events
@@ -784,7 +784,7 @@ Page User_Settings
         Number user0Ontime
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 100
             
             Events
                 Touch Press Event
@@ -880,7 +880,7 @@ Page User_Settings
         Float user1Duty
             Properties
                 Scope           : Local
-                Initial Value   : 0
+                Initial Value   : 80
                 Divide by [10^x]: 1
             
             Events
@@ -929,7 +929,7 @@ Page User_Settings
         Number user1Ontime
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 8211
             
             Events
                 Touch Press Event
@@ -1024,7 +1024,7 @@ Page User_Settings
         Float user2Duty
             Properties
                 Scope           : Local
-                Initial Value   : 0
+                Initial Value   : 100
                 Divide by [10^x]: 1
             
             Events
@@ -1074,7 +1074,7 @@ Page User_Settings
         Number user2Ontime
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 200
             
             Events
                 Touch Press Event
@@ -1317,7 +1317,7 @@ Page User_Settings
         Text tSelToMod
             Properties
                 Scope       : Local
-                Initial Text: "Select any value to modify."
+                Initial Text: "Select any values to modify."
                 Max. length : 30
             
             Events
@@ -1500,25 +1500,6 @@ Page User_Settings
                 Type          : int32
                 Initial Value : 0
             
-        QRCode qrHelp
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    ref_stop
-                    if(showHelp.val==0)
-                    {
-                        showHelp.val=1
-                        tempStr.txt=tTitle.txt
-                        tTitle.txt="Get Help for..."
-                    }else
-                    {
-                        showHelp.val=0
-                        tTitle.txt=tempStr.txt
-                    }
-                    vis qrHelp,Help_Info.helpMode.val
-                    ref_star
-                
         Button b1
             Properties
                 Scope      : Local
@@ -1935,6 +1916,35 @@ Page User_Settings
                     {
                         // Show Help
                         click qrHelp,0
+                    }
+                
+        QRCode qrHelp
+            Properties
+                Scope       : Local
+                Initial Text: "git.io/JkvOK"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        showHelp.val=1
+                        tempStr.txt=tTitle.txt
+                        tTitle.txt="Get Help/Link for..."
+                        // keep QR code on top
+                        ref qrHelp
+                        // Show modified title before stopping screen refreshs.
+                        doevents
+                        ref_stop
+                    }else
+                    {
+                        showHelp.val=0
+                        tTitle.txt=tempStr.txt
+                        // keep QR code on top
+                        ref qrHelp
+                        ref_star
                     }
                 
         Hotspot fLoadColors

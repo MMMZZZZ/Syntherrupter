@@ -44,15 +44,11 @@ Page Lightsaber
             //
             tmLSButtonHold.tim=Other_Settings.nHoldTime.val
             tmReturn.tim=Other_Settings.nHoldTime.val
-            // Default update mode is on release.
-            vis bModeImmediate,0
-            vis bModeManual,0
-            vis bApply,0
-            vis bModeRelease,1
-            sMode.txt=bModeRelease.txt
             // Functions shall be invisible
             vis fSqrt,0
             vis fSlider,0
+            vis fLoadColors,0
+            vis fApply,0
             // Hide buttons for unavailable tesla coils
             if(TC_Settings.maxCoilCount.val<6)
             {
@@ -181,6 +177,7 @@ Page Lightsaber
             fSlider.val=nOn.val
             click fSlider,0
             sOn.val=fSlider.val
+            sOnOld.val=sOn.val
             // Tell the microcontroller: Mode: LightSaber
             prints "mls",3
             //
@@ -194,8 +191,12 @@ Page Lightsaber
             ref_star
         
         Postinitialize Event
+            // View current mode of applying
+            Settings.applyingMode.val--
+            click bMode,0
+            //
             // Make sure the microcontroller is up-to-date
-            click bApply,0
+            click fApply,0
         
         Touch Press Event
             if(showHelp.val==0)
@@ -356,28 +357,31 @@ Page Lightsaber
                         // to understand the following lines have a look at the Touch Move code.
                         // what you would actually wanna do is put the code above in touch move and perform a click event on touch move here (because your can press/release a slider, changing its value without moving it).
                         // However "click" can only execute press/release events, so it gets more complicated...
-                        if(sMode.txt==bModeRelease.txt)
+                        if(Settings.applyingMode.val>=1)
                         {
-                            click bApply,0
+                            click fApply,0
                         }
-                        if(sMode.txt==bModeImmediate.txt)
-                        {
-                            click bApply,0
-                        }
+                        // Store slider position in case of a "help touch"
+                        sOnOld.val=sOn.val
                     }else
                     {
                         // Show Help
+                        // Restore slider position after a "help touch"
+                        sOn.val=sOnOld.val
                         click qrHelp,0
                     }
                 
                 Touch Move
-                    // Prevent double data transmission on move.
-                    sMode.txt+="M"
-                    click sOn,0
-                    sMode.txt-=1
-                    if(sMode.txt==bModeImmediate.txt)
+                    if(showHelp.val==0)
                     {
-                        click bApply,0
+                        // Normal operation// Prevent double data transmission on move.
+                        Settings.applyingMode.val*=-1
+                        click sOn,0
+                        Settings.applyingMode.val*=-1
+                        if(Settings.applyingMode.val==2)
+                        {
+                            click fApply,0
+                        }
                     }
                 
         Number nOn
@@ -440,220 +444,6 @@ Page Lightsaber
                 
                 Touch Release Event
                     
-        Variable sMode
-            Properties
-                Scope         : Local
-                Type          : String
-                Initial String: "newtxt"
-                Max. length   : 16
-            
-        Button bModeRelease
-            Properties
-                Scope      : Local
-                Caption    : "On Release"
-                Max. length: 15
-            
-            Events
-                Touch Press Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                    }else
-                    {
-                        // Show Help
-                        qrHelp.txt="git.io/Jkf23"
-                    }
-                
-                Touch Release Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                        vis bModeRelease,0
-                        vis bModeManual,1
-                        vis bApply,1
-                        sMode.txt=bModeManual.txt
-                    }else
-                    {
-                        // Show Help
-                        click qrHelp,0
-                    }
-                
-        Button bApply
-            Properties
-                Scope      : Local
-                Caption    : "Apply now"
-                Max. length: 15
-            
-            Events
-                Touch Press Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                    }else
-                    {
-                        // Show Help
-                        qrHelp.txt="git.io/Jkf23"
-                    }
-                
-                Touch Release Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                        // Return format: 'd', data byte 1, 2, 3, 4, 5
-                        // Data byte 1:
-                        //   Bit 0-5: Bitfield with coils to which the settings apply.
-                        // Data byte 2: Command type.
-                        //   Here: type 0: assigned lightsabers and ontime.
-                        // Data byte 3: data1
-                        //   Here: Bit 0-7: Bitfield with lightsabers to which the coils shall listen
-                        // Data byte 4: lower data2 byte
-                        // Data byte 5: upper data2 byte
-                        //  Here: data2=ontime [us]
-                        sys0=newData.val*TC_Settings.activeCoils.val
-                        if(sys0>0)
-                        {
-                            // Update Info below coil buttons
-                            tempString.txt=""
-                            if(ls1.val==1)
-                            {
-                                tempString.txt+=ls1.txt
-                            }else
-                            {
-                                tempString.txt+="_"
-                            }
-                            if(ls2.val==1)
-                            {
-                                tempString.txt+=ls2.txt
-                            }else
-                            {
-                                tempString.txt+="_"
-                            }
-                            if(ls3.val==1)
-                            {
-                                tempString.txt+=ls3.txt
-                            }else
-                            {
-                                tempString.txt+="_"
-                            }
-                            if(ls4.val==1)
-                            {
-                                tempString.txt+=ls4.txt
-                            }else
-                            {
-                                tempString.txt+="_"
-                            }
-                            if(btCoil1.val==1)
-                            {
-                                nOn1.val=nOn.val
-                                tLS1.txt=tempString.txt
-                            }
-                            if(btCoil2.val==1)
-                            {
-                                nOn2.val=nOn.val
-                                tLS2.txt=tempString.txt
-                            }
-                            if(btCoil3.val==1)
-                            {
-                                nOn3.val=nOn.val
-                                tLS3.txt=tempString.txt
-                            }
-                            if(btCoil4.val==1)
-                            {
-                                nOn4.val=nOn.val
-                                tLS4.txt=tempString.txt
-                            }
-                            if(btCoil5.val==1)
-                            {
-                                nOn5.val=nOn.val
-                                tLS5.txt=tempString.txt
-                            }
-                            if(btCoil6.val==1)
-                            {
-                                nOn6.val=nOn.val
-                                tLS6.txt=tempString.txt
-                            }
-                            // sys1: active lightsabers
-                            sys1=ls4.val
-                            sys1=sys1<<1
-                            sys1+=ls3.val
-                            sys1=sys1<<1
-                            sys1+=ls2.val
-                            sys1=sys1<<1
-                            sys1+=ls1.val
-                            prints "d",0
-                            prints sys0,1
-                            prints 0,1
-                            prints sys1,1
-                            prints nOn.val,2
-                            newData.val=0
-                        }
-                    }else
-                    {
-                        // Show Help
-                        click qrHelp,0
-                    }
-                
-        Button bModeImmediate
-            Properties
-                Scope      : Local
-                Caption    : "Immediately"
-                Max. length: 15
-            
-            Events
-                Touch Press Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                    }else
-                    {
-                        // Show Help
-                        qrHelp.txt="git.io/Jkf23"
-                    }
-                
-                Touch Release Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                        vis bModeImmediate,0
-                        vis bModeRelease,1
-                        sMode.txt=bModeRelease.txt
-                    }else
-                    {
-                        // Show Help
-                        click qrHelp,0
-                    }
-                
-        Button bModeManual
-            Properties
-                Scope      : Local
-                Caption    : "Manually"
-                Max. length: 15
-            
-            Events
-                Touch Press Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                    }else
-                    {
-                        // Show Help
-                        qrHelp.txt="git.io/Jkf23"
-                    }
-                
-                Touch Release Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                        vis bApply,0
-                        vis bModeManual,0
-                        vis bModeImmediate,1
-                        sMode.txt=bModeImmediate.txt
-                    }else
-                    {
-                        // Show Help
-                        click qrHelp,0
-                    }
-                
         Text tus
             Properties
                 Scope       : Local
@@ -858,13 +648,43 @@ Page Lightsaber
                 Running    : No
             
             Events
-                Touch Press Event
-                    p
-                    e
-                
-                Touch Release Event
-                    p
-                    e
+                Timer Event
+                    // Return format: 'd', data byte 1, 2, 3, 4, 5
+                    // Data byte 1:
+                    //   Here: unused. .
+                    // Data byte 2: Command type.
+                    //   Here: type 2: Set ESP8266 ID.
+                    // Data byte 3: data1
+                    //   Here: ESP8266 ID
+                    // Data byte 4: lower data2 byte
+                    // Data byte 5: upper data2 byte
+                    //  Here: data2 unused.
+                    //
+                    // Stop timer and prevent update
+                    tmLSButtonHold.en=0
+                    newData.val=0
+                    // Determine origin
+                    if(lsID.val==1)
+                    {
+                        sys0=ls1.id
+                    }else if(lsID.val==2)
+                    {
+                        sys0=ls2.id
+                    }else if(lsID.val==3)
+                    {
+                        sys0=ls3.id
+                    }else if(lsID.val==4)
+                    {
+                        sys0=ls4.id
+                    }
+                    // Undo origin press.
+                    p[dp].b[sys0].val=1-p[dp].b[sys0].val
+                    // Send command
+                    prints "d",1
+                    prints 0,1
+                    prints 1,1
+                    prints lsID.val,1
+                    prints 0,2
                 
         Variable lsID
             Properties
@@ -1063,13 +883,10 @@ Page Lightsaber
                 Running    : No
             
             Events
-                Touch Press Event
-                    p
-                    e
-                
-                Touch Release Event
-                    p
-                    e
+                Timer Event
+                    tmReturn.en=0
+                    // Leave page but keep MIDI Live Mode active in background.
+                    page Menu
                 
         Text tMML
             Properties
@@ -1286,9 +1103,9 @@ Page Lightsaber
                     {
                         // Normal Operation
                         tmLSButtonHold.en=0
-                        if(sMode.txt==bModeRelease.txt||sMode.txt==bModeImmediate.txt)
+                        if(Settings.applyingMode.val>=1)
                         {
-                            click bApply,0
+                            click fApply,0
                         }
                     }else
                     {
@@ -1538,24 +1355,274 @@ Page Lightsaber
                 Initial Value : 0
             
         QRCode qrHelp
+            Properties
+                Scope       : Local
+                Initial Text: "git.io/JkvOK"
+                Max. length : 16
+            
             Events
                 Touch Press Event
                     
                 Touch Release Event
-                    ref_stop
                     if(showHelp.val==0)
                     {
                         showHelp.val=1
                         tempStr.txt=tTitle.txt
-                        tTitle.txt="Get Help for..."
+                        tTitle.txt="Get Help/Link for..."
+                        // keep QR code on top
+                        ref qrHelp
+                        // Show modified title before stopping screen refreshs.
+                        doevents
+                        ref_stop
                     }else
                     {
                         showHelp.val=0
                         tTitle.txt=tempStr.txt
+                        // keep QR code on top
+                        ref qrHelp
+                        ref_star
                     }
-                    vis qrHelp,Help_Info.helpMode.val
-                    ref_star
                 
+        Button bApply
+            Properties
+                Scope      : Local
+                Caption    : "Apply now"
+                Max. length: 15
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/Jkf26"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        click fApply,0
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Button bMode
+            Properties
+                Scope      : Local
+                Caption    : "Manually"
+                Max. length: 15
+            
+            Events
+                Touch Press Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                    }else
+                    {
+                        // Show Help
+                        qrHelp.txt="git.io/JkfaL"
+                    }
+                
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        // Normal operation
+                        // WORKAROUND. Hiding a component when the page background color changed doesnt work properly.
+                        // ref 0 takes to long, ref component doesnt work. hence: manually draw a rectangle of the right color in this area
+                        // and disable the components touch events.
+                        Settings.applyingMode.val++
+                        if(Settings.applyingMode.val==2)
+                        {
+                            bMode.txt="Immediately"
+                            // Manually hide Apply button. "vis xxx,0" causes flickering.
+                            fill bApply.x,bApply.y,bApply.w,bApply.h,b[0].bco
+                            tsw bApply,0
+                        }else if(Settings.applyingMode.val==1)
+                        {
+                            bMode.txt="On Release"
+                            // Manually hide Apply button. "vis xxx,0" causes flickering.
+                            fill bApply.x,bApply.y,bApply.w,bApply.h,b[0].bco
+                            tsw bApply,0
+                        }else // higher than allowed, jump back to 0
+                        {
+                            Settings.applyingMode.val=0
+                            bMode.txt="Manually"
+                            // Manually show Apply button. "vis xxx,0" causes flickering.
+                            ref bApply
+                            tsw bApply,1
+                        }
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
+        Hotspot fApply
+            Events
+                Touch Press Event
+                    // Changes all page components according to the current color set.
+                    // Note: This component has to be the last component of the page.
+                    //
+                    // sys0: component id
+                    // sys1: component type
+                    // sys2: picture id offset for current color mode
+                    sys2=Settings.colorMode.val*Settings.picCount.val
+                    for(sys0=0;sys0<fLoadColors.id;sys0++)
+                    {
+                        // More convenient for typing
+                        sys1=b[sys0].type
+                        if(sys1==121)
+                        {
+                            // Types that have bco
+                            // page
+                            if(b[sys0].bco!=Settings.backCol2.val)
+                            {
+                                b[sys0].bco=Settings.backCol.val
+                            }
+                        }else if(sys1==54||sys1==59||sys1==116||sys1==55)
+                        {
+                            // Types that have bco, pco, and sta:
+                            // number, float, text, scroll text
+                            if(b[sys0].sta==1)
+                            {
+                                if(b[sys0].bco!=Settings.backCol2.val)
+                                {
+                                    b[sys0].bco=Settings.backCol.val
+                                    b[sys0].pco=Settings.frontCol.val
+                                }else
+                                {
+                                    b[sys0].pco=Settings.frontCol2.val
+                                }
+                            }
+                        }else if(sys1==98||sys1==53)
+                        {
+                            // Types that have pco, pic, pco2, pic2, sta:
+                            // button, dual-state button
+                            if(b[sys0].sta==2)
+                            {
+                                b[sys0].pco=Settings.frontCol.val
+                                b[sys0].pco2=Settings.backCol.val
+                                b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                                b[sys0].pic+=sys2
+                                b[sys0].pic2=b[sys0].pic+1
+                            }
+                        }else if(sys1==58)
+                        {
+                            // Types that have bco, pco
+                            // QR Code
+                            b[sys0].bco=Settings.backCol.val
+                            b[sys0].pco=Settings.qrFrontCol.val
+                        }else if(sys1==1)
+                        {
+                            // Types that have pic, pic2:
+                            // slider
+                            b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                            b[sys0].pic+=sys2
+                            b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
+                            b[sys0].pic2+=sys2
+                        }
+                    }
+                
+                Touch Release Event
+                    // Return format: 'd', data byte 1, 2, 3, 4, 5
+                    // Data byte 1:
+                    //   Bit 0-5: Bitfield with coils to which the settings apply.
+                    // Data byte 2: Command type.
+                    //   Here: type 0: assigned lightsabers and ontime.
+                    // Data byte 3: data1
+                    //   Here: Bit 0-7: Bitfield with lightsabers to which the coils shall listen
+                    // Data byte 4: lower data2 byte
+                    // Data byte 5: upper data2 byte
+                    //  Here: data2=ontime [us]
+                    sys0=newData.val*TC_Settings.activeCoils.val
+                    if(sys0>0)
+                    {
+                        // Update Info below coil buttons
+                        tempString.txt=""
+                        if(ls1.val==1)
+                        {
+                            tempString.txt+=ls1.txt
+                        }else
+                        {
+                            tempString.txt+="_"
+                        }
+                        if(ls2.val==1)
+                        {
+                            tempString.txt+=ls2.txt
+                        }else
+                        {
+                            tempString.txt+="_"
+                        }
+                        if(ls3.val==1)
+                        {
+                            tempString.txt+=ls3.txt
+                        }else
+                        {
+                            tempString.txt+="_"
+                        }
+                        if(ls4.val==1)
+                        {
+                            tempString.txt+=ls4.txt
+                        }else
+                        {
+                            tempString.txt+="_"
+                        }
+                        if(btCoil1.val==1)
+                        {
+                            nOn1.val=nOn.val
+                            tLS1.txt=tempString.txt
+                        }
+                        if(btCoil2.val==1)
+                        {
+                            nOn2.val=nOn.val
+                            tLS2.txt=tempString.txt
+                        }
+                        if(btCoil3.val==1)
+                        {
+                            nOn3.val=nOn.val
+                            tLS3.txt=tempString.txt
+                        }
+                        if(btCoil4.val==1)
+                        {
+                            nOn4.val=nOn.val
+                            tLS4.txt=tempString.txt
+                        }
+                        if(btCoil5.val==1)
+                        {
+                            nOn5.val=nOn.val
+                            tLS5.txt=tempString.txt
+                        }
+                        if(btCoil6.val==1)
+                        {
+                            nOn6.val=nOn.val
+                            tLS6.txt=tempString.txt
+                        }
+                        // sys1: active lightsabers
+                        sys1=ls4.val
+                        sys1=sys1<<1
+                        sys1+=ls3.val
+                        sys1=sys1<<1
+                        sys1+=ls2.val
+                        sys1=sys1<<1
+                        sys1+=ls1.val
+                        prints "d",0
+                        prints sys0,1
+                        prints 0,1
+                        prints sys1,1
+                        prints nOn.val,2
+                        newData.val=0
+                    }
+                
+        Variable sOnOld
+            Properties
+                Scope         : Local
+                Type          : int32
+                Initial Value : 0
+            
         Hotspot fLoadColors
             Events
                 Touch Press Event

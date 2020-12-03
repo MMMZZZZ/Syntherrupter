@@ -175,6 +175,18 @@ Page MIDI_Chn_Set
         Page Exit Event
             
     Components
+        Text tHideBack4
+            Properties
+                Scope       : Local
+                Initial Text: " "
+                Max. length : 1
+            
+            Events
+                Touch Press Event
+                    // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+                
+                Touch Release Event
+                    
         Text tHideBack3
             Properties
                 Scope       : Local
@@ -951,7 +963,7 @@ Page MIDI_Chn_Set
         Number nNumCoarse
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 42
             
             Events
                 Touch Press Event
@@ -1064,7 +1076,7 @@ Page MIDI_Chn_Set
         Number nDataCoarse
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 8364
             
             Events
                 Touch Press Event
@@ -1140,7 +1152,7 @@ Page MIDI_Chn_Set
         Number nDataFine
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 8364
             
             Events
                 Touch Press Event
@@ -1592,12 +1604,18 @@ Page MIDI_Chn_Set
                             nData1.format=2
                             nData2.format=2
                             tKeep.txt=sKeepStart.txt+"0x80"+sKeepEnd.txt
-                            vis bA,1
-                            vis bB,1
-                            vis bC,1
-                            vis bD,1
-                            vis bE,1
-                            vis bF,1
+                            tsw bA,1
+                            tsw bB,1
+                            tsw bC,1
+                            tsw bD,1
+                            tsw bE,1
+                            tsw bF,1
+                            ref bA
+                            ref bB
+                            ref bC
+                            ref bD
+                            ref bE
+                            ref bF
                         }else
                         {
                             bBase.txt=sDec.txt
@@ -1610,12 +1628,18 @@ Page MIDI_Chn_Set
                             nData1.format=0
                             nData2.format=0
                             tKeep.txt=sKeepStart.txt+"128"+sKeepEnd.txt
-                            vis bA,0
-                            vis bB,0
-                            vis bC,0
-                            vis bD,0
-                            vis bE,0
-                            vis bF,0
+                            // WORKAROUND. Hiding a component when the page background color changed doesnt work properly.
+                            // ref 0 takes to long, ref component doesnt work. hence: manually draw a rectangle of the right color in this area.
+                            // Crude. But necessary. Thx Nextion.
+                            sys0=bF.x+bF.w-bA.x
+                            sys1=bF.y+bF.h-bA.y
+                            fill bA.x,bA.y,sys0,sys1,b[0].bco
+                            tsw bA,0
+                            tsw bB,0
+                            tsw bC,0
+                            tsw bD,0
+                            tsw bE,0
+                            tsw bF,0
                         }
                     }else
                     {
@@ -1694,7 +1718,7 @@ Page MIDI_Chn_Set
             Properties
                 Scope         : Global
                 Type          : int32
-                Initial Value : 0
+                Initial Value : 704643072
             
         Variable MIDIData
             Properties
@@ -1768,23 +1792,33 @@ Page MIDI_Chn_Set
                 Initial Value : 0
             
         QRCode qrHelp
+            Properties
+                Scope       : Local
+                Initial Text: "git.io/JkvOK"
+                Max. length : 16
+            
             Events
                 Touch Press Event
                     
                 Touch Release Event
-                    ref_stop
                     if(showHelp.val==0)
                     {
                         showHelp.val=1
                         tempStr.txt=tTitle.txt
-                        tTitle.txt="Get Help for..."
+                        tTitle.txt="Get Help/Link for..."
+                        // keep QR code on top
+                        ref qrHelp
+                        // Show modified title before stopping screen refreshs.
+                        doevents
+                        ref_stop
                     }else
                     {
                         showHelp.val=0
                         tTitle.txt=tempStr.txt
+                        // keep QR code on top
+                        ref qrHelp
+                        ref_star
                     }
-                    vis qrHelp,Help_Info.helpMode.val
-                    ref_star
                 
         Hotspot fLoadColors
             Events

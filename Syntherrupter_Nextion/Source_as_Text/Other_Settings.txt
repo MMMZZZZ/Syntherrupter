@@ -213,7 +213,7 @@ Page Other_Settings
         Number nHoldTime
             Properties
                 Scope        : Global
-                Initial Value: 0
+                Initial Value: 250
             
             Events
                 Touch Press Event
@@ -796,7 +796,7 @@ Page Other_Settings
         Number nSleepMin
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 5
             
             Events
                 Touch Press Event
@@ -833,7 +833,7 @@ Page Other_Settings
         Number nSleepS
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 30
             
             Events
                 Touch Press Event
@@ -950,7 +950,7 @@ Page Other_Settings
         Number nBackOff
             Properties
                 Scope        : Global
-                Initial Value: 0
+                Initial Value: 1
             
             Events
                 Touch Press Event
@@ -1060,15 +1060,18 @@ Page Other_Settings
                     if(showHelp.val==0)
                     {
                         // Normal Operation
+                        // REMEMBER TO CHANGE Startup.comOK!
                         if(Settings.colorMode.val==0)
                         {
                             Settings.backCol.val=8484
-                            Settings.frontCol2.val=33808
-                            Settings.qrFrontCol.val=46652
+                            Settings.frontCol.val=40476
+                            Settings.frontCol2.val=40476//33808
+                            Settings.qrFrontCol.val=40476
                             Settings.colorMode.val=1
                         }else
                         {
                             Settings.backCol.val=65535
+                            Settings.frontCol.val=6900
                             Settings.frontCol2.val=65535
                             Settings.qrFrontCol.val=6900
                             Settings.colorMode.val=0
@@ -1107,23 +1110,33 @@ Page Other_Settings
                 Initial Value : 0
             
         QRCode qrHelp
+            Properties
+                Scope       : Local
+                Initial Text: "git.io/JkvOK"
+                Max. length : 16
+            
             Events
                 Touch Press Event
                     
                 Touch Release Event
-                    ref_stop
                     if(showHelp.val==0)
                     {
                         showHelp.val=1
                         tempStr.txt=tTitle.txt
-                        tTitle.txt="Get Help for..."
+                        tTitle.txt="Get Help/Link for..."
+                        // keep QR code on top
+                        ref qrHelp
+                        // Show modified title before stopping screen refreshs.
+                        doevents
+                        ref_stop
                     }else
                     {
                         showHelp.val=0
                         tTitle.txt=tempStr.txt
+                        // keep QR code on top
+                        ref qrHelp
+                        ref_star
                     }
-                    vis qrHelp,Help_Info.helpMode.val
-                    ref_star
                 
         Hotspot fLoadColors
             Events

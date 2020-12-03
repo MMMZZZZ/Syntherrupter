@@ -858,7 +858,7 @@ Page Env_Settings
         Number nStep
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 1
             
             Events
                 Touch Press Event
@@ -908,7 +908,7 @@ Page Env_Settings
         Float nNTau
             Properties
                 Scope           : Local
-                Initial Value   : 0
+                Initial Value   : 30
                 Divide by [10^x]: 1
             
             Events
@@ -975,7 +975,7 @@ Page Env_Settings
         Number nDur
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 10
             
             Events
                 Touch Press Event
@@ -1012,7 +1012,7 @@ Page Env_Settings
         Float nAmp
             Properties
                 Scope           : Local
-                Initial Value   : 0
+                Initial Value   : 10
                 Divide by [10^x]: 1
             
             Events
@@ -1301,7 +1301,7 @@ Page Env_Settings
             Properties
                 Scope         : Global
                 Type          : int32
-                Initial Value : 4
+                Initial Value : 8
             
         Text tRelease1
             Properties
@@ -1319,7 +1319,7 @@ Page Env_Settings
         Number nMaxSteps1
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 99
             
             Events
                 Touch Press Event
@@ -1366,7 +1366,7 @@ Page Env_Settings
         Number nNext
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 2
             
             Events
                 Touch Press Event
@@ -1453,7 +1453,7 @@ Page Env_Settings
         Number nProg
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 1
             
             Events
                 Touch Press Event
@@ -1527,7 +1527,7 @@ Page Env_Settings
         Number nMaxSteps2
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 99
             
             Events
                 Touch Press Event
@@ -1585,23 +1585,33 @@ Page Env_Settings
                 Initial Value : 0
             
         QRCode qrHelp
+            Properties
+                Scope       : Local
+                Initial Text: "git.io/JkvOK"
+                Max. length : 16
+            
             Events
                 Touch Press Event
                     
                 Touch Release Event
-                    ref_stop
                     if(showHelp.val==0)
                     {
                         showHelp.val=1
                         tempStr.txt=tTitle.txt
-                        tTitle.txt="Get Help for..."
+                        tTitle.txt="Get Help/Link for..."
+                        // keep QR code on top
+                        ref qrHelp
+                        // Show modified title before stopping screen refreshs.
+                        doevents
+                        ref_stop
                     }else
                     {
                         showHelp.val=0
                         tTitle.txt=tempStr.txt
+                        // keep QR code on top
+                        ref qrHelp
+                        ref_star
                     }
-                    vis qrHelp,Help_Info.helpMode.val
-                    ref_star
                 
         Hotspot fLoadColors
             Events

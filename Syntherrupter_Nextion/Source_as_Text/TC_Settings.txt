@@ -744,7 +744,7 @@ Page TC_Settings
         Number nCoil1MinOff
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 101
             
             Events
                 Touch Press Event
@@ -781,7 +781,7 @@ Page TC_Settings
         Float nCoil1Duty
             Properties
                 Scope           : Local
-                Initial Value   : 0
+                Initial Value   : 101
                 Divide by [10^x]: 1
             
             Events
@@ -856,7 +856,7 @@ Page TC_Settings
         Number nCoil2MinOff
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 102
             
             Events
                 Touch Press Event
@@ -893,7 +893,7 @@ Page TC_Settings
         Float nCoil2Duty
             Properties
                 Scope           : Local
-                Initial Value   : 0
+                Initial Value   : 102
                 Divide by [10^x]: 1
             
             Events
@@ -968,7 +968,7 @@ Page TC_Settings
         Number nCoil3MinOff
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 103
             
             Events
                 Touch Press Event
@@ -1005,7 +1005,7 @@ Page TC_Settings
         Float nCoil3Duty
             Properties
                 Scope           : Local
-                Initial Value   : 0
+                Initial Value   : 103
                 Divide by [10^x]: 1
             
             Events
@@ -1080,7 +1080,7 @@ Page TC_Settings
         Number nCoil4MinOff
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 104
             
             Events
                 Touch Press Event
@@ -1117,7 +1117,7 @@ Page TC_Settings
         Float nCoil4Duty
             Properties
                 Scope           : Local
-                Initial Value   : 0
+                Initial Value   : 104
                 Divide by [10^x]: 1
             
             Events
@@ -1192,7 +1192,7 @@ Page TC_Settings
         Number nCoil5MinOff
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 105
             
             Events
                 Touch Press Event
@@ -1229,7 +1229,7 @@ Page TC_Settings
         Float nCoil5Duty
             Properties
                 Scope           : Local
-                Initial Value   : 0
+                Initial Value   : 105
                 Divide by [10^x]: 1
             
             Events
@@ -1304,7 +1304,7 @@ Page TC_Settings
         Number nCoil6MinOff
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 106
             
             Events
                 Touch Press Event
@@ -1341,7 +1341,7 @@ Page TC_Settings
         Float nCoil6Duty
             Properties
                 Scope           : Local
-                Initial Value   : 0
+                Initial Value   : 106
                 Divide by [10^x]: 1
             
             Events
@@ -1779,7 +1779,7 @@ Page TC_Settings
         Number nCoil1Voices
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 1
             
             Events
                 Touch Press Event
@@ -1816,7 +1816,7 @@ Page TC_Settings
         Number nCoil2Voices
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 2
             
             Events
                 Touch Press Event
@@ -1853,7 +1853,7 @@ Page TC_Settings
         Number nCoil3Voices
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 3
             
             Events
                 Touch Press Event
@@ -1890,7 +1890,7 @@ Page TC_Settings
         Number nCoil4Voices
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 4
             
             Events
                 Touch Press Event
@@ -1927,7 +1927,7 @@ Page TC_Settings
         Number nCoil5Voices
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 5
             
             Events
                 Touch Press Event
@@ -1964,7 +1964,7 @@ Page TC_Settings
         Number nCoil6Voices
             Properties
                 Scope        : Local
-                Initial Value: 0
+                Initial Value: 6
             
             Events
                 Touch Press Event
@@ -2069,25 +2069,6 @@ Page TC_Settings
                 Type          : int32
                 Initial Value : 0
             
-        QRCode qrHelp
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    ref_stop
-                    if(showHelp.val==0)
-                    {
-                        showHelp.val=1
-                        tempStr.txt=tTitle.txt
-                        tTitle.txt="Get Help for..."
-                    }else
-                    {
-                        showHelp.val=0
-                        tTitle.txt=tempStr.txt
-                    }
-                    vis qrHelp,Help_Info.helpMode.val
-                    ref_star
-                
         Button b1
             Properties
                 Scope      : Local
@@ -2473,6 +2454,35 @@ Page TC_Settings
                     {
                         // Show Help
                         click qrHelp,0
+                    }
+                
+        QRCode qrHelp
+            Properties
+                Scope       : Local
+                Initial Text: "git.io/JkvOK"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        showHelp.val=1
+                        tempStr.txt=tTitle.txt
+                        tTitle.txt="Get Help/Link for..."
+                        // keep QR code on top
+                        ref qrHelp
+                        // Show modified title before stopping screen refreshs.
+                        doevents
+                        ref_stop
+                    }else
+                    {
+                        showHelp.val=0
+                        tTitle.txt=tempStr.txt
+                        // keep QR code on top
+                        ref qrHelp
+                        ref_star
                     }
                 
         Hotspot fLoadColors

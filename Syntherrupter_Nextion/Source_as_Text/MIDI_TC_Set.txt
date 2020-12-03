@@ -1498,13 +1498,63 @@ Page MIDI_TC_Set
                 Running    : No
             
             Events
-                Touch Press Event
-                    p
-                    e
-                
-                Touch Release Event
-                    p
-                    e
+                Timer Event
+                    tmButtonHold.en=0
+                    MIDI_Chn_Set.origin.val=dp
+                    covx sChnNum.txt,MIDI_Chn_Set.chnNum.val,0,0
+                    // Button has been hold, not pressed. Revert state change.
+                    if(sChnNum.txt==btChn0.txt)
+                    {
+                        btChn0.val=1-btChn0.val
+                    }else if(sChnNum.txt==btChn1.txt)
+                    {
+                        btChn1.val=1-btChn1.val
+                    }else if(sChnNum.txt==btChn2.txt)
+                    {
+                        btChn2.val=1-btChn2.val
+                    }else if(sChnNum.txt==btChn3.txt)
+                    {
+                        btChn3.val=1-btChn3.val
+                    }else if(sChnNum.txt==btChn4.txt)
+                    {
+                        btChn4.val=1-btChn4.val
+                    }else if(sChnNum.txt==btChn5.txt)
+                    {
+                        btChn5.val=1-btChn5.val
+                    }else if(sChnNum.txt==btChn6.txt)
+                    {
+                        btChn6.val=1-btChn6.val
+                    }else if(sChnNum.txt==btChn7.txt)
+                    {
+                        btChn7.val=1-btChn7.val
+                    }else if(sChnNum.txt==btChn8.txt)
+                    {
+                        btChn8.val=1-btChn8.val
+                    }else if(sChnNum.txt==btChn9.txt)
+                    {
+                        btChn9.val=1-btChn9.val
+                    }else if(sChnNum.txt==btChn10.txt)
+                    {
+                        btChn10.val=1-btChn10.val
+                    }else if(sChnNum.txt==btChn11.txt)
+                    {
+                        btChn11.val=1-btChn11.val
+                    }else if(sChnNum.txt==btChn12.txt)
+                    {
+                        btChn12.val=1-btChn12.val
+                    }else if(sChnNum.txt==btChn13.txt)
+                    {
+                        btChn13.val=1-btChn13.val
+                    }else if(sChnNum.txt==btChn14.txt)
+                    {
+                        btChn14.val=1-btChn14.val
+                    }else if(sChnNum.txt==btChn15.txt)
+                    {
+                        btChn15.val=1-btChn15.val
+                    }
+                    // Store settings before leaving the page
+                    click fStore,1
+                    page MIDI_Chn_Set
                 
         Variable sChnNum
             Properties
@@ -1579,23 +1629,33 @@ Page MIDI_TC_Set
                 Initial Value : 0
             
         QRCode qrHelp
+            Properties
+                Scope       : Local
+                Initial Text: "git.io/JkvOK"
+                Max. length : 16
+            
             Events
                 Touch Press Event
                     
                 Touch Release Event
-                    ref_stop
                     if(showHelp.val==0)
                     {
                         showHelp.val=1
                         tempStr.txt=tTitle.txt
-                        tTitle.txt="Get Help for..."
+                        tTitle.txt="Get Help/Link for..."
+                        // keep QR code on top
+                        ref qrHelp
+                        // Show modified title before stopping screen refreshs.
+                        doevents
+                        ref_stop
                     }else
                     {
                         showHelp.val=0
                         tTitle.txt=tempStr.txt
+                        // keep QR code on top
+                        ref qrHelp
+                        ref_star
                     }
-                    vis qrHelp,Help_Info.helpMode.val
-                    ref_star
                 
         Hotspot fLoadColors
             Events

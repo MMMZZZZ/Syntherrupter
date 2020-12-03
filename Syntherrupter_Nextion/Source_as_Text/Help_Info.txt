@@ -204,16 +204,34 @@ Page Help_Info
         Text tCreditsInfo
             Properties
                 Scope       : Local
-                Initial Text: "Forums with great people: highvoltageforum, Unofficial Nextion Forum.\r\nSpecial thanks to: Netzpfuscher\r\nMore info on https://github.com/MMMZZZZ/Syntherrupter#credits\r\n\r\nDevelopped by Max Zuidberg"
+                Initial Text: "Forums with great people: High Voltage Forum, Unofficial Nextion Forum.\r\nSpecial thanks to: Jens Kerrines (a.k.a. Netzpfuscher)\r\nMore info on github.com/MMMZZZZ/Syntherrupter#credits (Use Help Mode to get QR code)\r\n\r\nDevelopped by Max Zuidberg"
                 Max. length : 300
             
             Events
                 Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click 0,1
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                        // Make this object "transparent" for clicks and click background.
+                        click 0,1
+                    }else
+                    {
+                        // Show Help
+                        // Undo button toggle
+                        btHelp.val=1-btHelp.val
+                        qrHelp.txt="git.io/JkZ39"
+                    }
                 
                 Touch Release Event
-                    
+                    if(showHelp.val==0)
+                    {
+                        // Normal Operation
+                    }else
+                    {
+                        // Show Help
+                        click qrHelp,0
+                    }
+                
         Button bReturn
             Properties
                 Scope      : Local
@@ -294,31 +312,41 @@ Page Help_Info
                 Initial String: ""
                 Max. length   : 32
             
-        QRCode qrHelp
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    ref_stop
-                    if(showHelp.val==0)
-                    {
-                        showHelp.val=1
-                        tempStr.txt=tTitle.txt
-                        tTitle.txt="Get Help for..."
-                    }else
-                    {
-                        showHelp.val=0
-                        tTitle.txt=tempStr.txt
-                    }
-                    vis qrHelp,Help_Info.helpMode.val
-                    ref_star
-                
         Variable showHelp
             Properties
                 Scope         : Local
                 Type          : int32
                 Initial Value : 0
             
+        QRCode qrHelp
+            Properties
+                Scope       : Local
+                Initial Text: "git.io/JkvOK"
+                Max. length : 16
+            
+            Events
+                Touch Press Event
+                    
+                Touch Release Event
+                    if(showHelp.val==0)
+                    {
+                        showHelp.val=1
+                        tempStr.txt=tTitle.txt
+                        tTitle.txt="Get Help/Link for..."
+                        // keep QR code on top
+                        ref qrHelp
+                        // Show modified title before stopping screen refreshs.
+                        doevents
+                        ref_stop
+                    }else
+                    {
+                        showHelp.val=0
+                        tTitle.txt=tempStr.txt
+                        // keep QR code on top
+                        ref qrHelp
+                        ref_star
+                    }
+                
         Hotspot fLoadColors
             Events
                 Touch Press Event

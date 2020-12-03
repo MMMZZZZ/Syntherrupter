@@ -104,14 +104,20 @@ Page Startup
                     ref_stop
                     //
                     // Load colors
-                    if(Settings.colorMode.val!=0)
+                    if(Settings.colorMode.val==0)
                     {
                         Settings.backCol.val=8484
-                        Settings.frontCol2.val=33808
+                        Settings.frontCol.val=40476
+                        Settings.frontCol2.val=40476//33808
+                        Settings.qrFrontCol.val=40476
+                        Settings.colorMode.val=1
                     }else
                     {
                         Settings.backCol.val=65535
+                        Settings.frontCol.val=6900
                         Settings.frontCol2.val=65535
+                        Settings.qrFrontCol.val=6900
+                        Settings.colorMode.val=0
                     }
                     click fLoadColors,1
                     //
