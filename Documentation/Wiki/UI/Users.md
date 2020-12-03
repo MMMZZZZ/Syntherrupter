@@ -29,13 +29,13 @@ The whole point of having different users is to limit the rights and possibiliti
 |  | **User 0 (Guest)** | **User 1 (Normal)** | **User 2 (Admin)** |
 |---|---|---|---|
 | **Role** | Guests/Kids that may not know what they are doing. Can't do anything wrong. | Every day operation within the coil limits.  | Allowed to do everything.  |
-| **Access to Settings** | No | Limited | Yes |
-| **Settings: Serial Passthrough / Firmware Update** |  | No | Yes |
+| **Access to Settings** | No (Since v4.1.0) | Limited | Yes |
+| **Settings: Serial Passthrough / Firmware Update** | N/A  | No | Yes |
 | **Settings: Coil Limits** | N/A | No | Yes |
 | **User Limits: View/Change User 0** | N/A | Yes | Yes |
 | **User Limits: View User 1** | N/A | Yes | Yes |
 | **User Limits: Change User 1** | N/A | Only name and password | Yes |
-| **User Limits: View/Change User 2** | N/A | No | Yes, [except ontime and duty settings](#) |
+| **User Limits: View/Change User 2** | N/A | No | Yes, [except ontime and duty settings](#max-ontime-max-bps-max-duty) |
 
 
 ### Table Layout
