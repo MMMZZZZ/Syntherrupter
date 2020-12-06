@@ -1,4 +1,9 @@
 Page Settings
+    Attributes
+        ID    : 0
+        Scope : local
+        Locked: no
+    
     Events
         Preinitialize Event
             // Prevent page refreshs until postinit
@@ -57,8 +62,6 @@ Page Settings
             // Enable page refreshs again
             ref_star
         
-        Postinitialize Event
-            
         Touch Press Event
             if(showHelp.val==0)
             {
@@ -98,433 +101,477 @@ Page Settings
                 click qrHelp,0
             }
         
+Variable (int32) activeModes
+    Attributes
+        ID           : 1
+        Scope        : global
+        Locked       : no
+        Initial value: 0
+    
+Variable (int32) backCol
+    Attributes
+        ID           : 2
+        Scope        : global
+        Locked       : no
+        Initial value: 65535
+    
+Variable (int32) backCol2
+    Attributes
+        ID           : 3
+        Scope        : global
+        Locked       : no
+        Initial value: 4589
+    
+Variable (int32) frontCol
+    Attributes
+        ID           : 16
+        Scope        : global
+        Locked       : no
+        Initial value: 6900
+    
+Variable (int32) frontCol2
+    Attributes
+        ID           : 17
+        Scope        : global
+        Locked       : no
+        Initial value: 65535
+    
+Variable (int32) picCount
+    Attributes
+        ID           : 18
+        Scope        : global
+        Locked       : no
+        Initial value: 31
+    
+Variable (int32) colorMode
+    Attributes
+        ID           : 19
+        Scope        : global
+        Locked       : no
+        Initial value: 0
+    
+Variable (int32) qrFrontCol
+    Attributes
+        ID           : 20
+        Scope        : global
+        Locked       : no
+        Initial value: 6900
+    
+Variable (string) tempStr
+    Attributes
+        ID            : 21
+        Scope         : local
+        Locked        : no
+        Text          : 
+        Max. Text Size: 32
+    
+Variable (int32) showHelp
+    Attributes
+        ID           : 22
+        Scope        : local
+        Locked       : no
+        Initial value: 0
+    
+Variable (int32) applyingMode
+    Attributes
+        ID           : 23
+        Scope        : global
+        Locked       : no
+        Initial value: 1
+    
+Text tTitle
+    Attributes
+        ID                 : 5
+        Scope              : local
+        Locked             : no
+        Associated Keyboard: none
+        Font ID            : 1
+        Text               : Settings
+        Max. Text Size     : 22
+    
+Text tUser
+    Attributes
+        ID                 : 10
+        Scope              : local
+        Locked             : no
+        Associated Keyboard: none
+        Font ID            : 2
+        Text               :  Guest
+        Max. Text Size     : 32
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMSI
+    Attributes
+        ID                 : 11
+        Scope              : local
+        Locked             : no
+        Associated Keyboard: none
+        Font ID            : 2
+        Text               : Simple
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMML
+    Attributes
+        ID                 : 12
+        Scope              : local
+        Locked             : no
+        Associated Keyboard: none
+        Font ID            : 2
+        Text               : MIDI Live
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMLS
+    Attributes
+        ID                 : 13
+        Scope              : local
+        Locked             : no
+        Associated Keyboard: none
+        Font ID            : 2
+        Text               : Lightsaber
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+QR Code qrHelp
+    Attributes
+        ID            : 24
+        Scope         : local
+        Locked        : no
+        Text          : git.io/JkvOK
+        Max. Text Size: 16
+    
+    Events
         Touch Release Event
-            
-        Page Exit Event
-            
-    Components
-        Variable activeModes
-            Properties
-                Scope         : Global
-                Type          : int32
-                Initial Value : 0
-            
-        Variable backCol
-            Properties
-                Scope         : Global
-                Type          : int32
-                Initial Value : 65535
-            
-        Variable backCol2
-            Properties
-                Scope         : Global
-                Type          : int32
-                Initial Value : 4589
-            
-        Button bCoilSettings
-            Properties
-                Scope      : Local
-                Caption    : "Coil Limits"
-                Max. length: 20
-            
-            Events
-                Touch Press Event
-                    if(showHelp.val==0)
+            if(showHelp.val==0)
+            {
+                showHelp.val=1
+                tempStr.txt=tTitle.txt
+                tTitle.txt="Get Help/Link for..."
+                // keep QR code on top
+                ref qrHelp
+                // Show modified title before stopping screen refreshs.
+                doevents
+                ref_stop
+            }else
+            {
+                showHelp.val=0
+                tTitle.txt=tempStr.txt
+                // keep QR code on top
+                ref qrHelp
+                ref_star
+            }
+        
+Button bCoilSettings
+    Attributes
+        ID            : 4
+        Scope         : local
+        Locked        : no
+        Font ID       : 0
+        Initial state : Unpressed
+        Text          : Coil Limits
+        Max. Text Size: 20
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2x"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                page TC_Settings
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bReturn
+    Attributes
+        ID            : 6
+        Scope         : local
+        Locked        : no
+        Font ID       : 0
+        Initial state : Unpressed
+        Text          : Save
+        Max. Text Size: 10
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf78"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Mode: EXit.
+                prints "mex",0
+                page Menu
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bNXTUpdate
+    Attributes
+        ID            : 7
+        Scope         : local
+        Locked        : no
+        Font ID       : 0
+        Initial state : Unpressed
+        Text          : Nextion<->USB
+        Max. Text Size: 20
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2p"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                page USB_NXT_Pass
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bGeneral
+    Attributes
+        ID            : 8
+        Scope         : local
+        Locked        : no
+        Font ID       : 0
+        Initial state : Unpressed
+        Text          : General
+        Max. Text Size: 20
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2b"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                page Other_Settings
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bUsers
+    Attributes
+        ID            : 9
+        Scope         : local
+        Locked        : no
+        Font ID       : 0
+        Initial state : Unpressed
+        Text          : Users
+        Max. Text Size: 20
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2N"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                page User_Settings
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bEnvelope
+    Attributes
+        ID            : 14
+        Scope         : local
+        Locked        : no
+        Font ID       : 0
+        Initial state : Unpressed
+        Text          : Envelopes
+        Max. Text Size: 20
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2A"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                page Env_Settings
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bESPUpdate
+    Attributes
+        ID            : 15
+        Scope         : local
+        Locked        : no
+        Font ID       : 0
+        Initial state : Unpressed
+        Text          : ESP<->USB
+        Max. Text Size: 20
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2h"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                page USB_ESP_Pass
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Hotspot fLoadColors
+    Attributes
+        ID    : 25
+        Scope : local
+        Locked: no
+    
+    Events
+        Touch Press Event
+            // Changes all page components according to the current color set.
+            // Note: This component has to be the last component of the page.
+            //
+            // sys0: component id
+            // sys1: component type
+            // sys2: picture id offset for current color mode
+            sys2=Settings.colorMode.val*Settings.picCount.val
+            for(sys0=0;sys0<fLoadColors.id;sys0++)
+            {
+                // More convenient for typing
+                sys1=b[sys0].type
+                if(sys1==121)
+                {
+                    // Types that have bco
+                    // page
+                    if(b[sys0].bco!=Settings.backCol2.val)
                     {
-                        // Normal Operation
-                    }else
-                    {
-                        // Show Help
-                        qrHelp.txt="git.io/Jkf2x"
+                        b[sys0].bco=Settings.backCol.val
                     }
-                
-                Touch Release Event
-                    if(showHelp.val==0)
+                }else if(sys1==54||sys1==59||sys1==116||sys1==55)
+                {
+                    // Types that have bco, pco, and sta:
+                    // number, float, text, scroll text
+                    if(b[sys0].sta==1)
                     {
-                        // Normal Operation
-                        page TC_Settings
-                    }else
-                    {
-                        // Show Help
-                        click qrHelp,0
-                    }
-                
-        Text tTitle
-            Properties
-                Scope       : Local
-                Initial Text: "Settings"
-                Max. length : 22
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    
-        Button bReturn
-            Properties
-                Scope      : Local
-                Caption    : "Save"
-                Max. length: 10
-            
-            Events
-                Touch Press Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                    }else
-                    {
-                        // Show Help
-                        qrHelp.txt="git.io/Jkf78"
-                    }
-                
-                Touch Release Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                        // Mode: EXit.
-                        prints "mex",0
-                        page Menu
-                    }else
-                    {
-                        // Show Help
-                        click qrHelp,0
-                    }
-                
-        Button bNXTUpdate
-            Properties
-                Scope      : Local
-                Caption    : "Nextion<->USB"
-                Max. length: 20
-            
-            Events
-                Touch Press Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                    }else
-                    {
-                        // Show Help
-                        qrHelp.txt="git.io/Jkf2p"
-                    }
-                
-                Touch Release Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                        page USB_NXT_Pass
-                    }else
-                    {
-                        // Show Help
-                        click qrHelp,0
-                    }
-                
-        Button bGeneral
-            Properties
-                Scope      : Local
-                Caption    : "General"
-                Max. length: 20
-            
-            Events
-                Touch Press Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                    }else
-                    {
-                        // Show Help
-                        qrHelp.txt="git.io/Jkf2b"
-                    }
-                
-                Touch Release Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                        page Other_Settings
-                    }else
-                    {
-                        // Show Help
-                        click qrHelp,0
-                    }
-                
-        Button bUsers
-            Properties
-                Scope      : Local
-                Caption    : "Users"
-                Max. length: 20
-            
-            Events
-                Touch Press Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                    }else
-                    {
-                        // Show Help
-                        qrHelp.txt="git.io/Jkf2N"
-                    }
-                
-                Touch Release Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                        page User_Settings
-                    }else
-                    {
-                        // Show Help
-                        click qrHelp,0
-                    }
-                
-        Text tUser
-            Properties
-                Scope       : Local
-                Initial Text: " Guest"
-                Max. length : 32
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click 0,1
-                
-                Touch Release Event
-                    
-        Text tMSI
-            Properties
-                Scope       : Local
-                Initial Text: "Simple"
-                Max. length : 16
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click 0,1
-                
-                Touch Release Event
-                    
-        Text tMML
-            Properties
-                Scope       : Local
-                Initial Text: "MIDI Live"
-                Max. length : 16
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click 0,1
-                
-                Touch Release Event
-                    
-        Text tMLS
-            Properties
-                Scope       : Local
-                Initial Text: "Lightsaber"
-                Max. length : 16
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click 0,1
-                
-                Touch Release Event
-                    
-        Button bEnvelope
-            Properties
-                Scope      : Local
-                Caption    : "Envelopes"
-                Max. length: 20
-            
-            Events
-                Touch Press Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                    }else
-                    {
-                        // Show Help
-                        qrHelp.txt="git.io/Jkf2A"
-                    }
-                
-                Touch Release Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                        page Env_Settings
-                    }else
-                    {
-                        // Show Help
-                        click qrHelp,0
-                    }
-                
-        Button bESPUpdate
-            Properties
-                Scope      : Local
-                Caption    : "ESP<->USB"
-                Max. length: 20
-            
-            Events
-                Touch Press Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                    }else
-                    {
-                        // Show Help
-                        qrHelp.txt="git.io/Jkf2h"
-                    }
-                
-                Touch Release Event
-                    if(showHelp.val==0)
-                    {
-                        // Normal Operation
-                        page USB_ESP_Pass
-                    }else
-                    {
-                        // Show Help
-                        click qrHelp,0
-                    }
-                
-        Variable frontCol
-            Properties
-                Scope         : Global
-                Type          : int32
-                Initial Value : 6900
-            
-        Variable frontCol2
-            Properties
-                Scope         : Global
-                Type          : int32
-                Initial Value : 65535
-            
-        Variable picCount
-            Properties
-                Scope         : Global
-                Type          : int32
-                Initial Value : 31
-            
-        Variable colorMode
-            Properties
-                Scope         : Global
-                Type          : int32
-                Initial Value : 0
-            
-        Variable qrFrontCol
-            Properties
-                Scope         : Global
-                Type          : int32
-                Initial Value : 6900
-            
-        Variable tempStr
-            Properties
-                Scope         : Local
-                Type          : String
-                Initial String: ""
-                Max. length   : 32
-            
-        Variable showHelp
-            Properties
-                Scope         : Local
-                Type          : int32
-                Initial Value : 0
-            
-        Variable applyingMode
-            Properties
-                Scope         : Global
-                Type          : int32
-                Initial Value : 1
-            
-        QRCode qrHelp
-            Properties
-                Scope       : Local
-                Initial Text: "git.io/JkvOK"
-                Max. length : 16
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    if(showHelp.val==0)
-                    {
-                        showHelp.val=1
-                        tempStr.txt=tTitle.txt
-                        tTitle.txt="Get Help/Link for..."
-                        // keep QR code on top
-                        ref qrHelp
-                        // Show modified title before stopping screen refreshs.
-                        doevents
-                        ref_stop
-                    }else
-                    {
-                        showHelp.val=0
-                        tTitle.txt=tempStr.txt
-                        // keep QR code on top
-                        ref qrHelp
-                        ref_star
-                    }
-                
-        Hotspot fLoadColors
-            Events
-                Touch Press Event
-                    // Changes all page components according to the current color set.
-                    // Note: This component has to be the last component of the page.
-                    //
-                    // sys0: component id
-                    // sys1: component type
-                    // sys2: picture id offset for current color mode
-                    sys2=Settings.colorMode.val*Settings.picCount.val
-                    for(sys0=0;sys0<fLoadColors.id;sys0++)
-                    {
-                        // More convenient for typing
-                        sys1=b[sys0].type
-                        if(sys1==121)
+                        if(b[sys0].bco!=Settings.backCol2.val)
                         {
-                            // Types that have bco
-                            // page
-                            if(b[sys0].bco!=Settings.backCol2.val)
-                            {
-                                b[sys0].bco=Settings.backCol.val
-                            }
-                        }else if(sys1==54||sys1==59||sys1==116||sys1==55)
-                        {
-                            // Types that have bco, pco, and sta:
-                            // number, float, text, scroll text
-                            if(b[sys0].sta==1)
-                            {
-                                if(b[sys0].bco!=Settings.backCol2.val)
-                                {
-                                    b[sys0].bco=Settings.backCol.val
-                                    b[sys0].pco=Settings.frontCol.val
-                                }else
-                                {
-                                    b[sys0].pco=Settings.frontCol2.val
-                                }
-                            }
-                        }else if(sys1==98||sys1==53)
-                        {
-                            // Types that have pco, pic, pco2, pic2, sta:
-                            // button, dual-state button
-                            if(b[sys0].sta==2)
-                            {
-                                b[sys0].pco=Settings.frontCol.val
-                                b[sys0].pco2=Settings.backCol.val
-                                b[sys0].pic=b[sys0].pic%Settings.picCount.val
-                                b[sys0].pic+=sys2
-                                b[sys0].pic2=b[sys0].pic+1
-                            }
-                        }else if(sys1==58)
-                        {
-                            // Types that have bco, pco
-                            // QR Code
                             b[sys0].bco=Settings.backCol.val
-                            b[sys0].pco=Settings.qrFrontCol.val
-                        }else if(sys1==1)
+                            b[sys0].pco=Settings.frontCol.val
+                        }else
                         {
-                            // Types that have pic, pic2:
-                            // slider
-                            b[sys0].pic=b[sys0].pic%Settings.picCount.val
-                            b[sys0].pic+=sys2
-                            b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
-                            b[sys0].pic2+=sys2
+                            b[sys0].pco=Settings.frontCol2.val
                         }
                     }
-                
-                Touch Release Event
-                    
+                }else if(sys1==98||sys1==53)
+                {
+                    // Types that have pco, pic, pco2, pic2, sta:
+                    // button, dual-state button
+                    if(b[sys0].sta==2)
+                    {
+                        b[sys0].pco=Settings.frontCol.val
+                        b[sys0].pco2=Settings.backCol.val
+                        b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                        b[sys0].pic+=sys2
+                        b[sys0].pic2=b[sys0].pic+1
+                    }
+                }else if(sys1==58)
+                {
+                    // Types that have bco, pco
+                    // QR Code
+                    b[sys0].bco=Settings.backCol.val
+                    b[sys0].pco=Settings.qrFrontCol.val
+                }else if(sys1==1)
+                {
+                    // Types that have pic, pic2:
+                    // slider
+                    b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                    b[sys0].pic+=sys2
+                    b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
+                    b[sys0].pic2+=sys2
+                }
+            }
+        
