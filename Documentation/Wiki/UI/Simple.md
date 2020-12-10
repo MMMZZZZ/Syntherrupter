@@ -23,19 +23,19 @@ Simple mode allows you to generate classic, single tone interrupter signals. You
 
 ### Ontime
 
-Using the slider you can vary the ontime within the [user's limits](User%20Settings.md#readme). 
+Using the slider you can vary the ontime within the [user's limits](Users.md#readme). 
 
 Any change automatically updates the duty value, too.
 
 ### BPS
 
-Using the slider you can vary the BPS (Bans Per Second, frequency) within the [user's limits](User%20Settings.md#readme).
+Using the slider you can vary the BPS (Bans Per Second, frequency) within the [user's limits](Users.md#readme).
 
 Any change automatically updates the ontime or duty value, too. Your most recent change will be preserved. F.ex. if you set the ontime, then adjust the BPS, you ontime setting will be preserved and the duty value adjusted according to your changes. 
 
 ### Duty
 
-Using the slider you can vary the duty cycle within the [user's limits](User%20Settings.md#readme).
+Using the slider you can vary the duty cycle within the [user's limits](Users.md#readme).
 
 Any change automatically updates the ontime value, too.
 
