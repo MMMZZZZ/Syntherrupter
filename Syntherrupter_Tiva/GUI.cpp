@@ -138,8 +138,8 @@ void GUI::init()
 
                 nxt.printf("%s.u%iName.txt=\"%s\"\xff\xff\xff",
                            AllUsersPage, user, EEPROMSettings::userNames[user]);
-                nxt.printf("%s.u%iCode.txt=\"%s\"\xff\xff\xff",
-                           AllUsersPage, user, EEPROMSettings::userPwds[user]);
+                //nxt.printf("%s.u%iCode.txt=\"%s\"\xff\xff\xff",
+                //           AllUsersPage, user, EEPROMSettings::userPwds[user]);
                 nxt.printf("%s.u%iOntime.val=%i\xff\xff\xff",
                            AllUsersPage, user, maxOntimeUS);
                 nxt.printf("%s.u%iBPS.val=%i\xff\xff\xff",
@@ -168,6 +168,11 @@ void GUI::init()
 
             // Give time to the UART to send the data
             System::delayUS(20000);
+
+            // Show password reset info.
+            nxt.sendCmd("tStartup.font=0");
+            nxt.sendCmd("tStartup.txt=\"Password Reset Mode\r\rGo to settings, enter new passwords,\r save, reflash normal firmware.\"");
+
         }
         else
         {
