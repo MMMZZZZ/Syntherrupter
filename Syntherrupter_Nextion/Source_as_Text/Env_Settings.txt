@@ -178,7 +178,7 @@ Number nStep
             }else
             {
                 // Show Help
-                qrHelp.txt="git.io/Jkfg7"
+                qrHelp.txt="git.io/JLxS1"
             }
         
         Touch Release Event
@@ -218,7 +218,7 @@ Number nDur
             }else
             {
                 // Show Help
-                qrHelp.txt="git.io/Jkfg7"
+                qrHelp.txt="git.io/JLxSy"
             }
         
         Touch Release Event
@@ -280,7 +280,7 @@ Number nNext
             }else
             {
                 // Show Help
-                qrHelp.txt="git.io/Jkfg7"
+                qrHelp.txt="git.io/JLxSM"
             }
         
         Touch Release Event
@@ -320,7 +320,7 @@ Number nProg
             }else
             {
                 // Show Help
-                qrHelp.txt="git.io/Jkfg7"
+                qrHelp.txt="git.io/JLxSX"
             }
         
         Touch Release Event
@@ -382,7 +382,7 @@ XFloat nNTau
             }else
             {
                 // Show Help
-                qrHelp.txt="git.io/Jkfg7"
+                qrHelp.txt="git.io/JLxSS"
             }
         
         Touch Release Event
@@ -422,7 +422,7 @@ XFloat nAmp
             }else
             {
                 // Show Help
-                qrHelp.txt="git.io/Jkfg7"
+                qrHelp.txt="git.io/JLxSD"
             }
         
         Touch Release Event
@@ -1337,7 +1337,7 @@ Button bSet
             }else
             {
                 // Show Help
-                qrHelp.txt="git.io/Jkfg7"
+                qrHelp.txt="git.io/JLxS9"
             }
         
         Touch Release Event
@@ -1500,7 +1500,7 @@ Button bReturn
             }else
             {
                 // Show Help
-                qrHelp.txt="git.io/Jkfg7"
+                qrHelp.txt="git.io/JLxSH"
             }
         
         Touch Release Event

@@ -169,7 +169,7 @@ Number nHoldTime
             }else
             {
                 // Show Help
-                qrHelp.txt="git.io/Jkfgj"
+                qrHelp.txt="git.io/JLxSn"
             }
         
         Touch Release Event
@@ -209,7 +209,7 @@ Number nSleepMin
             }else
             {
                 // Show Help
-                qrHelp.txt="git.io/Jkfgj"
+                qrHelp.txt="git.io/JLxSW"
             }
         
         Touch Release Event
@@ -249,7 +249,7 @@ Number nSleepS
             }else
             {
                 // Show Help
-                qrHelp.txt="git.io/Jkfgj"
+                qrHelp.txt="git.io/JLxSW"
             }
         
         Touch Release Event
@@ -318,7 +318,7 @@ Number nBackOff
             }else
             {
                 // Show Help
-                qrHelp.txt="git.io/Jkfgj"
+                qrHelp.txt="git.io/JLxSl"
             }
         
         Touch Release Event
@@ -625,7 +625,7 @@ Slider sBrightness
             }else
             {
                 // Show Help
-                qrHelp.txt="git.io/Jkfgj"
+                qrHelp.txt="git.io/JLxSC"
             }
         
         Touch Release Event
@@ -1177,7 +1177,7 @@ Dual-state Button btDark
                 // Show Help
                 // Undo button toggle
                 btDark.val=1-btDark.val
-                qrHelp.txt="git.io/Jkfgj"
+                qrHelp.txt="git.io/JLxS8"
             }
         
         Touch Release Event

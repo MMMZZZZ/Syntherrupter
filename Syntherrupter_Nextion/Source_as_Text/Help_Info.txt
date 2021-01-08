@@ -254,7 +254,7 @@ Text tCreditsInfo
                 // Show Help
                 // Undo button toggle
                 btHelp.val=1-btHelp.val
-                qrHelp.txt="git.io/JkZ39"
+                qrHelp.txt="git.io/JLxS0"
             }
         
         Touch Release Event
@@ -346,7 +346,7 @@ Dual-state Button btHelp
                 // Show Help
                 // Undo button toggle
                 btHelp.val=1-btHelp.val
-                qrHelp.txt="git.io/Jkf2f"
+                qrHelp.txt="git.io/JLxSR"
             }
         
         Touch Release Event

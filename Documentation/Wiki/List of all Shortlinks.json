@@ -69,7 +69,8 @@
     },
     "README": {
         "Syntherrupter Wiki": "https://git.io/Jkfgs",
-        "Content": "https://git.io/JkfgG"
+        "Content": "https://git.io/JkfgG",
+        "External Content": "https://git.io/JLxSu"
     },
     "HW\\Lightsaber Receiver": {
         "Lightsaber Receiver": "https://git.io/JkfgZ",
@@ -90,6 +91,7 @@
         "Hardware Reference": "https://git.io/Jkfg0",
         "Content": "https://git.io/JkfgE"
     },
+    "Tutorials\\Getting Started with Envelopes": {},
     "UI\\Channel Settings": {
         "Channel Settings": "https://git.io/Jkfgu",
         "Index": "https://git.io/Jkfgz",
@@ -121,7 +123,17 @@
     "UI\\Envelope": {
         "Envelope Editor": "https://git.io/Jkfg7",
         "Index": "https://git.io/Jkfg5",
-        "Content": "https://git.io/Jkfgd"
+        "What you see": "https://git.io/JLxSi",
+        "What you get": "https://git.io/JLxSP",
+        "Program": "https://git.io/JLxSX",
+        "Step": "https://git.io/JLxS1",
+        "Next Step": "https://git.io/JLxSM",
+        "Amplitude": "https://git.io/JLxSD",
+        "Duration": "https://git.io/JLxSy",
+        "n-tau": "https://git.io/JLxSS",
+        "Set Values": "https://git.io/JLxS9",
+        "Return": "https://git.io/JLxSH",
+        "Envelope Examples": "https://git.io/JLxSQ"
     },
     "UI\\Error": {
         "Error Page": "https://git.io/Jkfgb",
@@ -131,17 +143,27 @@
     "UI\\ESP-USB": {
         "ESP8266<->USB Passthrough": "https://git.io/Jkfgx",
         "Index": "https://git.io/Jkfgp",
-        "Content": "https://git.io/Jkfgh"
+        "What you see": "https://git.io/JLxS3",
+        "Related Articles": "https://git.io/JLxSs"
     },
     "UI\\General": {
         "General Settings": "https://git.io/Jkfgj",
         "Index": "https://git.io/Jkf2e",
-        "Content": "https://git.io/Jkf2v"
+        "What you see": "https://git.io/JLxSG",
+        "What you get": "https://git.io/JLxSZ",
+        "Button hold time": "https://git.io/JLxSn",
+        "Display Brightness": "https://git.io/JLxSC",
+        "Enter Sleep after": "https://git.io/JLxSW",
+        "Background shutdown": "https://git.io/JLxSl",
+        "Dark Mode": "https://git.io/JLxS8"
     },
     "UI\\Help and Info": {
         "Help and Info": "https://git.io/Jkf2f",
         "Index": "https://git.io/Jkf2J",
-        "Content": "https://git.io/Jkf2U"
+        "What you see": "https://git.io/JLxS4",
+        "What you get": "https://git.io/JLxSB",
+        "Help Mode": "https://git.io/JLxSR",
+        "Credits": "https://git.io/JLxS0"
     },
     "UI\\Lightsaber": {
         "Lightsaber Mode": "https://git.io/Jkf2T",
@@ -186,7 +208,7 @@
     "UI\\Nextion-USB": {
         "Nextion<->USB Passthrough": "https://git.io/Jkf2X",
         "Index": "https://git.io/Jkf21",
-        "Content": "https://git.io/Jkf2M"
+        "What you see": "https://git.io/JLxSE"
     },
     "UI\\README": {
         "User Interface Reference": "https://git.io/Jkf2D",
@@ -225,6 +247,14 @@
     "UI\\Users": {
         "User Settings": "https://git.io/JkfaO",
         "Index": "https://git.io/Jkfa3",
-        "Content": "https://git.io/Jkfas"
+        "What you see": "https://git.io/JLxSg",
+        "What you get": "https://git.io/JLxS2",
+        "User Rights": "https://git.io/JLxSa",
+        "Table Layout": "https://git.io/JLxSV",
+        "Name": "https://git.io/JLxSw",
+        "Password": "https://git.io/JLxSr",
+        "Auto Login": "https://git.io/JLxSo",
+        "Max. Ontime, Max. BPS, Max. Duty": "https://git.io/JLxSK",
+        "Return": "https://git.io/JLxS6"
     }
 }
