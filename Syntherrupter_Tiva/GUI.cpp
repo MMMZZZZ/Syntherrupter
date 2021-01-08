@@ -171,7 +171,7 @@ void GUI::init()
 
             // Show password reset info.
             nxt.sendCmd("tStartup.font=0");
-            nxt.sendCmd("tStartup.txt=\"Password Reset Mode\r\rGo to settings, enter new passwords,\r save, reflash normal firmware.\"");
+            nxt.sendCmd("tStartup.txt=\"Password Reset Mode\\r\\rGo to settings, enter new passwords, \\rsave, reflash normal firmware.\"");
 
             // Give time to the UART to send the data
             System::delayUS(20000);
