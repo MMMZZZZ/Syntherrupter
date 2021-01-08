@@ -220,25 +220,35 @@ Page Simple
             sOnOld.val=sOn.val
             sBPSOld.val=sBPS.val
             sDutyOld.val=sDuty.val
-            // Tell the microcontroller: Mode: SImple
-            prints "msi",0
             //
-            // Load Help Mode
-            vis qrHelp,Help_Info.helpMode.val
-            tempStr.txt=tTitle.txt
-            showHelp.val=1
-            click 0,1
-            //
-            // Enable page refreshs again
-            ref_star
-        
-        Postinitialize Event
             // View current mode of applying
+            vis bMode,0
+            vis bApply,0
             Settings.applyingMode.val--
             click bMode,0
             //
             // Make sure the microcontroller is up-to-date
             click fApply,0
+            // Tell the microcontroller: Mode: SImple
+            prints "msi",0
+            //
+            // Load Help Mode
+            if(Help_Info.helpMode.val==0)
+            {
+                vis qrHelp,0
+                fill qrHelp.x,qrHelp.y,qrHelp.w,qrHelp.h,b[0].bco
+            }else
+            {
+                tempStr.txt=tTitle.txt
+                showHelp.val=1
+                click 0,1
+            }
+            //
+            // Enable page refreshs again
+            ref_star
+        
+        Postinitialize Event
+            vis bMode,1
         
         Touch Press Event
             if(showHelp.val==0)
@@ -1625,28 +1635,23 @@ Button bMode
             {
                 // Normal operation
                 // WORKAROUND. Hiding a component when the page background color changed doesnt work properly.
-                // ref 0 takes to long, ref component doesnt work. hence: manually draw a rectangle of the right color in this area
-                // and disable the components touch events.
+                // ref 0 takes to long, ref component doesnt work. hence: manually draw a rectangle of the right color in this area.
                 Settings.applyingMode.val++
                 if(Settings.applyingMode.val==2)
                 {
                     bMode.txt="Immediately"
-                    // Manually hide Apply button. "vis xxx,0" causes flickering.
+                    vis bApply,0
                     fill bApply.x,bApply.y,bApply.w,bApply.h,b[0].bco
-                    tsw bApply,0
                 }else if(Settings.applyingMode.val==1)
                 {
                     bMode.txt="On Release"
-                    // Manually hide Apply button. "vis xxx,0" causes flickering.
+                    vis bApply,0
                     fill bApply.x,bApply.y,bApply.w,bApply.h,b[0].bco
-                    tsw bApply,0
                 }else // higher than allowed, jump back to 0
                 {
                     Settings.applyingMode.val=0
                     bMode.txt="Manually"
-                    // Manually show Apply button. "vis xxx,0" causes flickering.
-                    ref bApply
-                    tsw bApply,1
+                    vis bApply,1
                 }
             }else
             {

@@ -36,7 +36,7 @@ Number comOk
             {
                 Settings.backCol.val=8484
                 Settings.frontCol.val=40476
-                Settings.frontCol2.val=40476//33808
+                Settings.frontCol2.val=40476
                 Settings.qrFrontCol.val=40476
                 Settings.colorMode.val=1
             }else

@@ -80,10 +80,16 @@ Page MIDI_Chn_Set
             }
             //
             // Load Help Mode
-            vis qrHelp,Help_Info.helpMode.val
-            tempStr.txt=tTitle.txt
-            showHelp.val=1
-            click 0,1
+            if(Help_Info.helpMode.val==0)
+            {
+                vis qrHelp,0
+                fill qrHelp.x,qrHelp.y,qrHelp.w,qrHelp.h,b[0].bco
+            }else
+            {
+                tempStr.txt=tTitle.txt
+                showHelp.val=1
+                click 0,1
+            }
             //
             // Enable page refreshs again
             ref_star
@@ -1887,18 +1893,12 @@ Button bBase
                     nData1.format=2
                     nData2.format=2
                     tKeep.txt=sKeepStart.txt+"0x80"+sKeepEnd.txt
-                    tsw bA,1
-                    tsw bB,1
-                    tsw bC,1
-                    tsw bD,1
-                    tsw bE,1
-                    tsw bF,1
-                    ref bA
-                    ref bB
-                    ref bC
-                    ref bD
-                    ref bE
-                    ref bF
+                    vis bA,1
+                    vis bB,1
+                    vis bC,1
+                    vis bD,1
+                    vis bE,1
+                    vis bF,1
                 }else
                 {
                     bBase.txt=sDec.txt
@@ -1911,18 +1911,26 @@ Button bBase
                     nData1.format=0
                     nData2.format=0
                     tKeep.txt=sKeepStart.txt+"128"+sKeepEnd.txt
+                    // Normal operation
                     // WORKAROUND. Hiding a component when the page background color changed doesnt work properly.
                     // ref 0 takes to long, ref component doesnt work. hence: manually draw a rectangle of the right color in this area.
-                    // Crude. But necessary. Thx Nextion.
-                    sys0=bF.x+bF.w-bA.x
-                    sys1=bF.y+bF.h-bA.y
-                    fill bA.x,bA.y,sys0,sys1,b[0].bco
-                    tsw bA,0
-                    tsw bB,0
-                    tsw bC,0
-                    tsw bD,0
-                    tsw bE,0
-                    tsw bF,0
+                    //sys0=bF.x+bF.w-bA.x
+                    //sys1=bF.y+bF.h-bA.y
+                    //fill bA.x,bA.y,sys0,sys1,b[0].bco
+                    ref_stop
+                    vis bA,0
+                    fill bA.x,bA.y,bA.w,bA.h,b[0].bco
+                    vis bB,0
+                    fill bB.x,bB.y,bB.w,bB.h,b[0].bco
+                    vis bC,0
+                    fill bC.x,bC.y,bC.w,bC.h,b[0].bco
+                    vis bD,0
+                    fill bD.x,bD.y,bD.w,bD.h,b[0].bco
+                    vis bE,0
+                    fill bE.x,bE.y,bE.w,bE.h,b[0].bco
+                    vis bF,0
+                    fill bF.x,bF.y,bF.w,bF.h,b[0].bco
+                    ref_star
                 }
             }else
             {

@@ -113,10 +113,16 @@ Page MIDI_TC_Set
             click btPanDis,0
             //
             // Load Help Mode
-            vis qrHelp,Help_Info.helpMode.val
-            tempStr.txt=tTitle.txt
-            showHelp.val=1
-            click 0,1
+            if(Help_Info.helpMode.val==0)
+            {
+                vis qrHelp,0
+                fill qrHelp.x,qrHelp.y,qrHelp.w,qrHelp.h,b[0].bco
+            }else
+            {
+                tempStr.txt=tTitle.txt
+                showHelp.val=1
+                click 0,1
+            }
             //
             // Enable page refreshs again
             ref_star

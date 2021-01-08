@@ -64,10 +64,16 @@ Page Other_Settings
             nSleepS.val=sys0
             //
             // Load Help Mode
-            vis qrHelp,Help_Info.helpMode.val
-            tempStr.txt=tTitle.txt
-            showHelp.val=1
-            click 0,1
+            if(Help_Info.helpMode.val==0)
+            {
+                vis qrHelp,0
+                fill qrHelp.x,qrHelp.y,qrHelp.w,qrHelp.h,b[0].bco
+            }else
+            {
+                tempStr.txt=tTitle.txt
+                showHelp.val=1
+                click 0,1
+            }
             //
             // Enable page refreshs again
             ref_star
@@ -1183,7 +1189,7 @@ Dual-state Button btDark
                 {
                     Settings.backCol.val=8484
                     Settings.frontCol.val=40476
-                    Settings.frontCol2.val=40476//33808
+                    Settings.frontCol2.val=40476
                     Settings.qrFrontCol.val=40476
                     Settings.colorMode.val=1
                 }else
