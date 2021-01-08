@@ -14,8 +14,9 @@ ByteBuffer            MIDI::otherBuffer;
 constexpr ByteBuffer* MIDI::BUFFER_LIST[];
 Channel               MIDI::channels[];
 NoteList              MIDI::notelist;
-uint32_t              MIDI::notesCount         = 0;
-bool                  MIDI::playing            = false;
+uint32_t              MIDI::notesCount = 0;
+bool                  MIDI::playing = false;
+float                 MIDI::freqTable[128];
 MIDIProgram           MIDI::programs[MAX_PROGRAMS];
 constexpr float       MIDI::ADSR_LEGACY_PROGRAMS[MIDI::ADSR_PROGRAM_COUNT + 1][8];
 
@@ -61,6 +62,11 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPor
             programs[prog   ].setDataPoint(dataPnt, ADSR_LEGACY_PROGRAMS[prog][i*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][i*2+1], 0.0f, nextPnt);
             programs[prog+10].setDataPoint(dataPnt, ADSR_LEGACY_PROGRAMS[prog][i*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][i*2+1], 3.0f, nextPnt);
         }
+    }
+
+    for (uint32_t note = 0; note < 128; note++)
+    {
+        freqTable[note] = exp2f((note - 69.0f) / 12.0f) * 440.0f;
     }
 }
 
@@ -602,7 +608,7 @@ void MIDI::process()
                                 note->pitch =   float(note->number)
                                               + channel->pitchBend * channel->pitchBendRange
                                               + channel->tuning;
-                                note->frequency = exp2f((note->pitch - 69.0f) / 12.0f) * 440.0f;
+                                note->frequency = getFreq(note->pitch);
                                 note->periodUS = 1e6f / note->frequency;
 
                                 // Determine MIDI volume, including all effects that are not time-dependant.

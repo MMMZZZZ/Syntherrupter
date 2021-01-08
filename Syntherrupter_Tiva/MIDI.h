@@ -107,6 +107,27 @@ private:
         }
     };
     static void removeDeadNotes();
+    static float getFreq(float pitch)
+    {
+        if (pitch <= 0)
+        {
+            return freqTable[0];
+        }
+        else if (pitch >= 127.0f)
+        {
+            return freqTable[127];
+        }
+        else
+        {
+            uint32_t intPitch = pitch;
+            float fracPitch = pitch - intPitch;
+            float freq = freqTable[intPitch];
+            freq += (freqTable[intPitch + 1] - freq) * fracPitch;
+            return freq;
+        }
+    };
+
+    static float freqTable[128];
 
     static constexpr uint32_t ADSR_PROGRAM_COUNT     = 9;
     // TODO: The following list is missing the newer sounds.
