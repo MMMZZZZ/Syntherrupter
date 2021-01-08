@@ -6,6 +6,7 @@ Welcome to the Syntherrupter wiki. This is a collection of how-tos and documenta
 
 * [Getting Started](Getting%20Started.md#readme). Start here if you're new. 
 * [Firmware Flashing](Firmware%20Flashing.md#readme). How to flash Syntherrupter for the first time or update its firmware.
+* [Password Reset](Password%20Reset.md#readme). Forgot your password or need to reset it? Here's how you do it.
 * [Lightsaber ESP8266 Setup](Lightsaber%20ESP8266%20Setup.md#readme). How to flash and use the ESP8266 which the lightsabers are based on.
 * [Hardware Reference](HW/README.md#readme). Schematics, parts, wiring, etc.
 * [User Interface Reference](UI/README.md#readme). Documentation of all UI features and functions.
