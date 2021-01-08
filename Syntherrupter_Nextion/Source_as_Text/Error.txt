@@ -1,16 +1,16 @@
 Page Error
     Attributes
-        ID    : 0
-        Scope : local
-        Locked: no
+        ID               : 0
+        Scope            : local
+        Send Component ID: disabled
+        Locked           : no
     
 Text tTitle
     Attributes
         ID                 : 1
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 1
         Text               : Unspecified Error
         Max. Text Size     : 25
     
@@ -18,9 +18,8 @@ Text tError
     Attributes
         ID                 : 2
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 0
         Text               : No details available.
         Max. Text Size     : 25
     

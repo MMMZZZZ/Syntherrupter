@@ -1,8 +1,9 @@
 Page USB_ESP_Pass
     Attributes
-        ID    : 0
-        Scope : local
-        Locked: no
+        ID               : 0
+        Scope            : local
+        Send Component ID: disabled
+        Locked           : no
     
     Events
         Preinitialize Event
@@ -40,24 +41,21 @@ Variable (string) tempStr
     Attributes
         ID            : 3
         Scope         : local
-        Locked        : no
         Text          : 
         Max. Text Size: 32
     
 Variable (int32) showHelp
     Attributes
-        ID           : 4
-        Scope        : local
-        Locked       : no
-        Initial value: 0
+        ID   : 4
+        Scope: local
+        Value: 0
     
 Text tTitle
     Attributes
         ID                 : 1
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 1
         Text               : ESP<->USB Passthrough
         Max. Text Size     : 25
     
@@ -65,19 +63,18 @@ Text tInfo
     Attributes
         ID                 : 2
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 0
         Text               : The ESP is now connected to the USB serial port. \r\nUse this to upload a new firmware or to \r\ncommunicate with the device. \r\nNotes:\r\n  * To leave passthrough mode, you need to \r\n     power cycle Syntherrupter.\r\n  * To upload a new ESP firmware you need to\r\n     pull ESPs GPIO0 pin to ground.
         Max. Text Size     : 384
     
 QR Code qrHelp
     Attributes
-        ID            : 5
-        Scope         : local
-        Locked        : no
-        Text          : git.io/JkvOK
-        Max. Text Size: 16
+        ID               : 5
+        Scope            : local
+        Send Component ID: disabled
+        Text             : git.io/JkvOK
+        Max. Text Size   : 16
     
     Events
         Touch Release Event
@@ -102,9 +99,9 @@ QR Code qrHelp
         
 Hotspot fLoadColors
     Attributes
-        ID    : 6
-        Scope : local
-        Locked: no
+        ID               : 6
+        Scope            : local
+        Send Component ID: disabled
     
     Events
         Touch Press Event

@@ -1,8 +1,9 @@
 Page Settings
     Attributes
-        ID    : 0
-        Scope : local
-        Locked: no
+        ID               : 0
+        Scope            : local
+        Send Component ID: disabled
+        Locked           : no
     
     Events
         Preinitialize Event
@@ -103,89 +104,77 @@ Page Settings
         
 Variable (int32) activeModes
     Attributes
-        ID           : 1
-        Scope        : global
-        Locked       : no
-        Initial value: 0
+        ID   : 1
+        Scope: global
+        Value: 0
     
 Variable (int32) backCol
     Attributes
-        ID           : 2
-        Scope        : global
-        Locked       : no
-        Initial value: 65535
+        ID   : 2
+        Scope: global
+        Value: 65535
     
 Variable (int32) backCol2
     Attributes
-        ID           : 3
-        Scope        : global
-        Locked       : no
-        Initial value: 4589
+        ID   : 3
+        Scope: global
+        Value: 4589
     
 Variable (int32) frontCol
     Attributes
-        ID           : 16
-        Scope        : global
-        Locked       : no
-        Initial value: 6900
+        ID   : 16
+        Scope: global
+        Value: 6900
     
 Variable (int32) frontCol2
     Attributes
-        ID           : 17
-        Scope        : global
-        Locked       : no
-        Initial value: 65535
+        ID   : 17
+        Scope: global
+        Value: 65535
     
 Variable (int32) picCount
     Attributes
-        ID           : 18
-        Scope        : global
-        Locked       : no
-        Initial value: 31
+        ID   : 18
+        Scope: global
+        Value: 31
     
 Variable (int32) colorMode
     Attributes
-        ID           : 19
-        Scope        : global
-        Locked       : no
-        Initial value: 0
+        ID   : 19
+        Scope: global
+        Value: 0
     
 Variable (int32) qrFrontCol
     Attributes
-        ID           : 20
-        Scope        : global
-        Locked       : no
-        Initial value: 6900
+        ID   : 20
+        Scope: global
+        Value: 6900
     
 Variable (string) tempStr
     Attributes
         ID            : 21
         Scope         : local
-        Locked        : no
         Text          : 
         Max. Text Size: 32
     
 Variable (int32) showHelp
     Attributes
-        ID           : 22
-        Scope        : local
-        Locked       : no
-        Initial value: 0
+        ID   : 22
+        Scope: local
+        Value: 0
     
 Variable (int32) applyingMode
     Attributes
-        ID           : 23
-        Scope        : global
-        Locked       : no
-        Initial value: 1
+        ID   : 23
+        Scope: global
+        Value: 1
     
 Text tTitle
     Attributes
         ID                 : 5
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 1
         Text               : Settings
         Max. Text Size     : 22
     
@@ -193,9 +182,8 @@ Text tUser
     Attributes
         ID                 : 10
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               :  Guest
         Max. Text Size     : 32
     
@@ -208,9 +196,8 @@ Text tMSI
     Attributes
         ID                 : 11
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : Simple
         Max. Text Size     : 16
     
@@ -223,9 +210,8 @@ Text tMML
     Attributes
         ID                 : 12
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : MIDI Live
         Max. Text Size     : 16
     
@@ -238,9 +224,8 @@ Text tMLS
     Attributes
         ID                 : 13
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : Lightsaber
         Max. Text Size     : 16
     
@@ -251,11 +236,11 @@ Text tMLS
         
 QR Code qrHelp
     Attributes
-        ID            : 24
-        Scope         : local
-        Locked        : no
-        Text          : git.io/JkvOK
-        Max. Text Size: 16
+        ID               : 24
+        Scope            : local
+        Send Component ID: disabled
+        Text             : git.io/JkvOK
+        Max. Text Size   : 16
     
     Events
         Touch Release Event
@@ -280,13 +265,12 @@ QR Code qrHelp
         
 Button bCoilSettings
     Attributes
-        ID            : 4
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : Coil Limits
-        Max. Text Size: 20
+        ID               : 4
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Coil Limits
+        Max. Text Size   : 20
     
     Events
         Touch Press Event
@@ -312,13 +296,12 @@ Button bCoilSettings
         
 Button bReturn
     Attributes
-        ID            : 6
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : Save
-        Max. Text Size: 10
+        ID               : 6
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Save
+        Max. Text Size   : 10
     
     Events
         Touch Press Event
@@ -346,13 +329,12 @@ Button bReturn
         
 Button bNXTUpdate
     Attributes
-        ID            : 7
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : Nextion<->USB
-        Max. Text Size: 20
+        ID               : 7
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Nextion<->USB
+        Max. Text Size   : 20
     
     Events
         Touch Press Event
@@ -378,13 +360,12 @@ Button bNXTUpdate
         
 Button bGeneral
     Attributes
-        ID            : 8
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : General
-        Max. Text Size: 20
+        ID               : 8
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : General
+        Max. Text Size   : 20
     
     Events
         Touch Press Event
@@ -410,13 +391,12 @@ Button bGeneral
         
 Button bUsers
     Attributes
-        ID            : 9
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : Users
-        Max. Text Size: 20
+        ID               : 9
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Users
+        Max. Text Size   : 20
     
     Events
         Touch Press Event
@@ -442,13 +422,12 @@ Button bUsers
         
 Button bEnvelope
     Attributes
-        ID            : 14
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : Envelopes
-        Max. Text Size: 20
+        ID               : 14
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Envelopes
+        Max. Text Size   : 20
     
     Events
         Touch Press Event
@@ -474,13 +453,12 @@ Button bEnvelope
         
 Button bESPUpdate
     Attributes
-        ID            : 15
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : ESP<->USB
-        Max. Text Size: 20
+        ID               : 15
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : ESP<->USB
+        Max. Text Size   : 20
     
     Events
         Touch Press Event
@@ -506,9 +484,9 @@ Button bESPUpdate
         
 Hotspot fLoadColors
     Attributes
-        ID    : 25
-        Scope : local
-        Locked: no
+        ID               : 25
+        Scope            : local
+        Send Component ID: disabled
     
     Events
         Touch Press Event

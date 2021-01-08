@@ -1,8 +1,9 @@
 Page Menu
     Attributes
-        ID    : 0
-        Scope : local
-        Locked: no
+        ID               : 0
+        Scope            : local
+        Send Component ID: disabled
+        Locked           : no
     
     Events
         Preinitialize Event
@@ -100,24 +101,21 @@ Variable (string) tempStr
     Attributes
         ID            : 12
         Scope         : local
-        Locked        : no
         Text          : 
         Max. Text Size: 32
     
 Variable (int32) showHelp
     Attributes
-        ID           : 13
-        Scope        : local
-        Locked       : no
-        Initial value: 0
+        ID   : 13
+        Scope: local
+        Value: 0
     
 Text tTitle
     Attributes
         ID                 : 1
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 1
         Text               : Menu
         Max. Text Size     : 22
     
@@ -130,9 +128,8 @@ Text tUser
     Attributes
         ID                 : 7
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               :  Guest
         Max. Text Size     : 32
     
@@ -145,9 +142,8 @@ Text tMSI
     Attributes
         ID                 : 8
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : Simple
         Max. Text Size     : 16
     
@@ -160,9 +156,8 @@ Text tMML
     Attributes
         ID                 : 9
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : MIDI Live
         Max. Text Size     : 16
     
@@ -175,9 +170,8 @@ Text tMLS
     Attributes
         ID                 : 10
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : Lightsaber
         Max. Text Size     : 16
     
@@ -188,11 +182,11 @@ Text tMLS
         
 QR Code qrHelp
     Attributes
-        ID            : 14
-        Scope         : local
-        Locked        : no
-        Text          : git.io/JkvOK
-        Max. Text Size: 16
+        ID               : 14
+        Scope            : local
+        Send Component ID: disabled
+        Text             : git.io/JkvOK
+        Max. Text Size   : 16
     
     Events
         Touch Release Event
@@ -217,13 +211,12 @@ QR Code qrHelp
         
 Button bSimple
     Attributes
-        ID            : 2
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : Simple
-        Max. Text Size: 10
+        ID               : 2
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Simple
+        Max. Text Size   : 10
     
     Events
         Touch Press Event
@@ -249,13 +242,12 @@ Button bSimple
         
 Button bMIDILive
     Attributes
-        ID            : 3
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : MIDI Live
-        Max. Text Size: 10
+        ID               : 3
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : MIDI Live
+        Max. Text Size   : 10
     
     Events
         Touch Press Event
@@ -281,13 +273,12 @@ Button bMIDILive
         
 Button bSettings
     Attributes
-        ID            : 4
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : Settings
-        Max. Text Size: 10
+        ID               : 4
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Settings
+        Max. Text Size   : 10
     
     Events
         Touch Press Event
@@ -313,13 +304,12 @@ Button bSettings
         
 Button bSwitchUser
     Attributes
-        ID            : 5
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : Switch User
-        Max. Text Size: 20
+        ID               : 5
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Switch User
+        Max. Text Size   : 20
     
     Events
         Touch Press Event
@@ -346,13 +336,12 @@ Button bSwitchUser
         
 Button bLightsaber
     Attributes
-        ID            : 6
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : Lightsaber
-        Max. Text Size: 10
+        ID               : 6
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Lightsaber
+        Max. Text Size   : 10
     
     Events
         Touch Press Event
@@ -378,13 +367,12 @@ Button bLightsaber
         
 Button bHelp
     Attributes
-        ID            : 11
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : Help & Info
-        Max. Text Size: 20
+        ID               : 11
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Help & Info
+        Max. Text Size   : 20
     
     Events
         Touch Press Event
@@ -410,9 +398,9 @@ Button bHelp
         
 Hotspot fLoadColors
     Attributes
-        ID    : 15
-        Scope : local
-        Locked: no
+        ID               : 15
+        Scope            : local
+        Send Component ID: disabled
     
     Events
         Touch Press Event

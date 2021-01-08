@@ -1,8 +1,9 @@
 Page Startup
     Attributes
-        ID    : 0
-        Scope : local
-        Locked: no
+        ID               : 0
+        Scope            : local
+        Send Component ID: disabled
+        Locked           : no
     
     Events
         Preinitialize Event
@@ -15,7 +16,6 @@ Variable (string) sNoConfig
     Attributes
         ID            : 6
         Scope         : local
-        Locked        : no
         Text          : Warning! EEPROM contains no vaild configuration.\r\n      Please go to settings and check ALL values.
         Max. Text Size: 100
     
@@ -23,10 +23,9 @@ Number comOk
     Attributes
         ID                 : 7
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -61,9 +60,8 @@ Text tStartup
     Attributes
         ID                 : 1
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 3
         Text               : SYNTHERRUPTER
         Max. Text Size     : 100
     
@@ -92,9 +90,8 @@ Text tNxtFW
     Attributes
         ID                 : 2
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : Nextion Firmware:
         Max. Text Size     : 20
     
@@ -102,9 +99,8 @@ Text tNxtFWVersion
     Attributes
         ID                 : 3
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : v4.1.0-beta.7
         Max. Text Size     : 20
     
@@ -112,9 +108,8 @@ Text tTivaFW
     Attributes
         ID                 : 4
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : Tiva Firmware:
         Max. Text Size     : 20
     
@@ -122,9 +117,8 @@ Text tTivaFWVersion
     Attributes
         ID                 : 5
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : v0.0.0-beta.0
         Max. Text Size     : 20
     
@@ -134,9 +128,9 @@ Text tTivaFWVersion
         
 Hotspot fLoadColors
     Attributes
-        ID    : 8
-        Scope : local
-        Locked: no
+        ID               : 8
+        Scope            : local
+        Send Component ID: disabled
     
     Events
         Touch Press Event

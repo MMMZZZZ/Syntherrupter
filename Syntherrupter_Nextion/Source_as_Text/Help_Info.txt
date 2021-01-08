@@ -1,8 +1,9 @@
 Page Help_Info
     Attributes
-        ID    : 0
-        Scope : local
-        Locked: no
+        ID               : 0
+        Scope            : local
+        Send Component ID: disabled
+        Locked           : no
     
     Events
         Preinitialize Event
@@ -97,33 +98,29 @@ Page Help_Info
         
 Variable (int32) helpMode
     Attributes
-        ID           : 12
-        Scope        : global
-        Locked       : no
-        Initial value: 0
+        ID   : 12
+        Scope: global
+        Value: 0
     
 Variable (string) tempStr
     Attributes
         ID            : 13
         Scope         : local
-        Locked        : no
         Text          : 
         Max. Text Size: 32
     
 Variable (int32) showHelp
     Attributes
-        ID           : 14
-        Scope        : local
-        Locked       : no
-        Initial value: 0
+        ID   : 14
+        Scope: local
+        Value: 0
     
 Text tTitle
     Attributes
         ID                 : 1
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 1
         Text               : Help and Information
         Max. Text Size     : 22
     
@@ -136,9 +133,8 @@ Text tUser
     Attributes
         ID                 : 2
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               :  Guest
         Max. Text Size     : 32
     
@@ -151,9 +147,8 @@ Text tMSI
     Attributes
         ID                 : 3
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : Simple
         Max. Text Size     : 16
     
@@ -166,9 +161,8 @@ Text tMML
     Attributes
         ID                 : 4
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : MIDI Live
         Max. Text Size     : 16
     
@@ -181,9 +175,8 @@ Text tMLS
     Attributes
         ID                 : 5
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : Lightsaber
         Max. Text Size     : 16
     
@@ -196,9 +189,8 @@ Text tButtons
     Attributes
         ID                 : 6
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 0
         Text               : Help Mode:
         Max. Text Size     : 40
     
@@ -211,9 +203,8 @@ Text tCredits
     Attributes
         ID                 : 7
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 0
         Text               : Credits
         Max. Text Size     : 40
     
@@ -226,9 +217,8 @@ Text tChnInfo
     Attributes
         ID                 : 8
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : With Help Mode enabled, a QR code appears at the top right corner. It brings you immediately \r\nto the Syntherrupter Wiki section for this page. If you want help for a specific component, \r\npress the QR code (you'll notice the page title change), then press the component you want\r\nhelp for. The QR code now points to the specific section for this component in the wiki.
         Max. Text Size     : 400
     
@@ -241,9 +231,8 @@ Text tCreditsInfo
     Attributes
         ID                 : 9
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : Forums with great people: High Voltage Forum, Unofficial Nextion Forum.\r\nSpecial thanks to: Jens Kerrines (a.k.a. Netzpfuscher)\r\nMore info on github.com/MMMZZZZ/Syntherrupter#credits (Use Help Mode to get QR code)\r\n\r\nDevelopped by Max Zuidberg
         Max. Text Size     : 300
     
@@ -274,11 +263,11 @@ Text tCreditsInfo
         
 QR Code qrHelp
     Attributes
-        ID            : 15
-        Scope         : local
-        Locked        : no
-        Text          : git.io/JkvOK
-        Max. Text Size: 16
+        ID               : 15
+        Scope            : local
+        Send Component ID: disabled
+        Text             : git.io/JkvOK
+        Max. Text Size   : 16
     
     Events
         Touch Release Event
@@ -303,13 +292,12 @@ QR Code qrHelp
         
 Button bReturn
     Attributes
-        ID            : 10
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : Return
-        Max. Text Size: 10
+        ID               : 10
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Return
+        Max. Text Size   : 10
     
     Events
         Touch Press Event
@@ -335,13 +323,12 @@ Button bReturn
         
 Dual-state Button btHelp
     Attributes
-        ID            : 11
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : Disabled
-        Max. Text Size: 8
+        ID               : 11
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Disabled
+        Max. Text Size   : 8
     
     Events
         Touch Press Event
@@ -377,9 +364,9 @@ Dual-state Button btHelp
         
 Hotspot fLoadColors
     Attributes
-        ID    : 16
-        Scope : local
-        Locked: no
+        ID               : 16
+        Scope            : local
+        Send Component ID: disabled
     
     Events
         Touch Press Event

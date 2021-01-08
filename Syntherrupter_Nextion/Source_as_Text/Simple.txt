@@ -1,8 +1,9 @@
 Page Simple
     Attributes
-        ID    : 0
-        Scope : local
-        Locked: no
+        ID               : 0
+        Scope            : local
+        Send Component ID: disabled
+        Locked           : no
     
     Events
         Preinitialize Event
@@ -316,173 +317,149 @@ Variable (string) sCoil
     Attributes
         ID            : 26
         Scope         : local
-        Locked        : no
         Text          : 0
         Max. Text Size: 3
     
 Variable (int32) newData
     Attributes
-        ID           : 27
-        Scope        : local
-        Locked       : no
-        Initial value: 0
+        ID   : 27
+        Scope: local
+        Value: 0
     
 Variable (int32) ontime
     Attributes
-        ID           : 28
-        Scope        : global
-        Locked       : no
-        Initial value: 0
+        ID   : 28
+        Scope: global
+        Value: 0
     
 Variable (int32) BPS
     Attributes
-        ID           : 29
-        Scope        : global
-        Locked       : no
-        Initial value: 100
+        ID   : 29
+        Scope: global
+        Value: 100
     
 Variable (int32) duty
     Attributes
-        ID           : 30
-        Scope        : global
-        Locked       : no
-        Initial value: 0
+        ID   : 30
+        Scope: global
+        Value: 0
     
 Variable (int32) fSliderInput
     Attributes
-        ID           : 67
-        Scope        : local
-        Locked       : no
-        Initial value: 0
+        ID   : 67
+        Scope: local
+        Value: 0
     
 Variable (int32) fSliderOutput
     Attributes
-        ID           : 68
-        Scope        : local
-        Locked       : no
-        Initial value: 0
+        ID   : 68
+        Scope: local
+        Value: 0
     
 Variable (int32) userOnLimit
     Attributes
-        ID           : 69
-        Scope        : local
-        Locked       : no
-        Initial value: 0
+        ID   : 69
+        Scope: local
+        Value: 0
     
 Variable (int32) userDutyLimit
     Attributes
-        ID           : 70
-        Scope        : local
-        Locked       : no
-        Initial value: 0
+        ID   : 70
+        Scope: local
+        Value: 0
     
 Variable (int32) userBPSLimit
     Attributes
-        ID           : 71
-        Scope        : local
-        Locked       : no
-        Initial value: 0
+        ID   : 71
+        Scope: local
+        Value: 0
     
 Variable (int32) keepOntime
     Attributes
-        ID           : 72
-        Scope        : local
-        Locked       : no
-        Initial value: 1
+        ID   : 72
+        Scope: local
+        Value: 1
     
 Variable (int32) temp
     Attributes
-        ID           : 73
-        Scope        : local
-        Locked       : no
-        Initial value: 0
+        ID   : 73
+        Scope: local
+        Value: 0
     
 Variable (int32) set1
     Attributes
-        ID           : 76
-        Scope        : global
-        Locked       : no
-        Initial value: 0
+        ID   : 76
+        Scope: global
+        Value: 0
     
 Variable (int32) set2
     Attributes
-        ID           : 77
-        Scope        : global
-        Locked       : no
-        Initial value: 0
+        ID   : 77
+        Scope: global
+        Value: 0
     
 Variable (int32) set3
     Attributes
-        ID           : 78
-        Scope        : global
-        Locked       : no
-        Initial value: 0
+        ID   : 78
+        Scope: global
+        Value: 0
     
 Variable (int32) set4
     Attributes
-        ID           : 79
-        Scope        : global
-        Locked       : no
-        Initial value: 0
+        ID   : 79
+        Scope: global
+        Value: 0
     
 Variable (int32) set5
     Attributes
-        ID           : 80
-        Scope        : global
-        Locked       : no
-        Initial value: 0
+        ID   : 80
+        Scope: global
+        Value: 0
     
 Variable (int32) set6
     Attributes
-        ID           : 81
-        Scope        : global
-        Locked       : no
-        Initial value: 0
+        ID   : 81
+        Scope: global
+        Value: 0
     
 Variable (string) tempStr
     Attributes
         ID            : 86
         Scope         : local
-        Locked        : no
         Text          : 
         Max. Text Size: 32
     
 Variable (int32) showHelp
     Attributes
-        ID           : 87
-        Scope        : local
-        Locked       : no
-        Initial value: 0
+        ID   : 87
+        Scope: local
+        Value: 0
     
 Variable (int32) sOnOld
     Attributes
-        ID           : 89
-        Scope        : local
-        Locked       : no
-        Initial value: 0
+        ID   : 89
+        Scope: local
+        Value: 0
     
 Variable (int32) sDutyOld
     Attributes
-        ID           : 90
-        Scope        : local
-        Locked       : no
-        Initial value: 0
+        ID   : 90
+        Scope: local
+        Value: 0
     
 Variable (int32) sBPSOld
     Attributes
-        ID           : 91
-        Scope        : local
-        Locked       : no
-        Initial value: 0
+        ID   : 91
+        Scope: local
+        Value: 0
     
 Number nOn
     Attributes
         ID                 : 6
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 0
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -493,10 +470,9 @@ Number nBPS
     Attributes
         ID                 : 9
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 0
-        Initial value      : 100
+        Value              : 100
     
     Events
         Touch Press Event
@@ -507,10 +483,9 @@ Number fSqrt
     Attributes
         ID                 : 12
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 0
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -546,10 +521,9 @@ Number nOn1
     Attributes
         ID                 : 31
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -560,10 +534,9 @@ Number nBPS1
     Attributes
         ID                 : 33
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -574,10 +547,9 @@ Number nOn2
     Attributes
         ID                 : 34
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -588,10 +560,9 @@ Number nBPS2
     Attributes
         ID                 : 36
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -602,10 +573,9 @@ Number nOn3
     Attributes
         ID                 : 37
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -616,10 +586,9 @@ Number nBPS3
     Attributes
         ID                 : 39
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -630,10 +599,9 @@ Number nOn4
     Attributes
         ID                 : 40
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -644,10 +612,9 @@ Number nBPS4
     Attributes
         ID                 : 42
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -658,10 +625,9 @@ Number nOn5
     Attributes
         ID                 : 43
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -672,10 +638,9 @@ Number nBPS5
     Attributes
         ID                 : 45
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -686,10 +651,9 @@ Number nOn6
     Attributes
         ID                 : 46
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -700,10 +664,9 @@ Number nBPS6
     Attributes
         ID                 : 48
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -714,10 +677,9 @@ Number fSlider
     Attributes
         ID                 : 74
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 0
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -759,10 +721,9 @@ XFloat nDuty
     Attributes
         ID                 : 14
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 0
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -773,10 +734,9 @@ XFloat nDuty1
     Attributes
         ID                 : 61
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -787,10 +747,9 @@ XFloat nDuty2
     Attributes
         ID                 : 62
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -801,10 +760,9 @@ XFloat nDuty3
     Attributes
         ID                 : 63
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -815,10 +773,9 @@ XFloat nDuty4
     Attributes
         ID                 : 64
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -829,10 +786,9 @@ XFloat nDuty5
     Attributes
         ID                 : 65
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -843,10 +799,9 @@ XFloat nDuty6
     Attributes
         ID                 : 66
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
-        Initial value      : 0
+        Value              : 0
     
     Events
         Touch Press Event
@@ -857,9 +812,8 @@ Text tHideBack
     Attributes
         ID                 : 2
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 0
         Text               :  
         Max. Text Size     : 1
     
@@ -871,9 +825,8 @@ Text tTitle
     Attributes
         ID                 : 3
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 1
         Text               : Simple Mode
         Max. Text Size     : 22
     
@@ -886,9 +839,8 @@ Text tOn
     Attributes
         ID                 : 5
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 0
         Text               : Ontime:     us
         Max. Text Size     : 20
     
@@ -901,9 +853,8 @@ Text tBPS
     Attributes
         ID                 : 8
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 0
         Text               : BPS:
         Max. Text Size     : 20
     
@@ -916,9 +867,8 @@ Text tDuty
     Attributes
         ID                 : 11
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 0
         Text               : Duty:
         Max. Text Size     : 20
     
@@ -931,9 +881,8 @@ Text tHz
     Attributes
         ID                 : 15
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 0
         Text               : Hz
         Max. Text Size     : 2
     
@@ -946,9 +895,8 @@ Text tPerc
     Attributes
         ID                 : 16
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 0
         Text               : %
         Max. Text Size     : 1
     
@@ -961,9 +909,8 @@ Text tCoil
     Attributes
         ID                 : 18
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 0
         Text               : Apply to:
         Max. Text Size     : 20
     
@@ -976,9 +923,8 @@ Text tus
     Attributes
         ID                 : 25
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 0
         Text               : 탎
         Max. Text Size     : 2
     
@@ -991,9 +937,8 @@ Text tus1
     Attributes
         ID                 : 32
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : 탎
         Max. Text Size     : 2
     
@@ -1006,9 +951,8 @@ Text tus2
     Attributes
         ID                 : 35
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : 탎
         Max. Text Size     : 2
     
@@ -1021,9 +965,8 @@ Text tus3
     Attributes
         ID                 : 38
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : 탎
         Max. Text Size     : 2
     
@@ -1036,9 +979,8 @@ Text tus4
     Attributes
         ID                 : 41
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : 탎
         Max. Text Size     : 2
     
@@ -1051,9 +993,8 @@ Text tus5
     Attributes
         ID                 : 44
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : 탎
         Max. Text Size     : 2
     
@@ -1066,9 +1007,8 @@ Text tus6
     Attributes
         ID                 : 47
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : 탎
         Max. Text Size     : 2
     
@@ -1081,9 +1021,8 @@ Text tPerc6
     Attributes
         ID                 : 49
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : %
         Max. Text Size     : 2
     
@@ -1096,9 +1035,8 @@ Text tPerc1
     Attributes
         ID                 : 50
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : %
         Max. Text Size     : 2
     
@@ -1111,9 +1049,8 @@ Text tPerc2
     Attributes
         ID                 : 51
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : %
         Max. Text Size     : 2
     
@@ -1126,9 +1063,8 @@ Text tPerc3
     Attributes
         ID                 : 52
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : %
         Max. Text Size     : 2
     
@@ -1141,9 +1077,8 @@ Text tPerc5
     Attributes
         ID                 : 53
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : %
         Max. Text Size     : 2
     
@@ -1156,9 +1091,8 @@ Text tPerc4
     Attributes
         ID                 : 54
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : %
         Max. Text Size     : 2
     
@@ -1171,9 +1105,8 @@ Text tHz6
     Attributes
         ID                 : 55
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : Hz
         Max. Text Size     : 2
     
@@ -1186,9 +1119,8 @@ Text tHz1
     Attributes
         ID                 : 56
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : Hz
         Max. Text Size     : 2
     
@@ -1201,9 +1133,8 @@ Text tHz2
     Attributes
         ID                 : 57
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : Hz
         Max. Text Size     : 2
     
@@ -1216,9 +1147,8 @@ Text tHz3
     Attributes
         ID                 : 58
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : Hz
         Max. Text Size     : 2
     
@@ -1231,9 +1161,8 @@ Text tHz5
     Attributes
         ID                 : 59
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : Hz
         Max. Text Size     : 2
     
@@ -1246,9 +1175,8 @@ Text tHz4
     Attributes
         ID                 : 60
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : Hz
         Max. Text Size     : 2
     
@@ -1261,9 +1189,8 @@ Text tUser
     Attributes
         ID                 : 82
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               :  Guest
         Max. Text Size     : 32
     
@@ -1276,9 +1203,8 @@ Text tMSI
     Attributes
         ID                 : 83
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : Simple
         Max. Text Size     : 16
     
@@ -1291,9 +1217,8 @@ Text tMML
     Attributes
         ID                 : 84
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : MIDI Live
         Max. Text Size     : 16
     
@@ -1306,9 +1231,8 @@ Text tMLS
     Attributes
         ID                 : 85
         Scope              : local
-        Locked             : no
+        Send Component ID  : disabled
         Associated Keyboard: none
-        Font ID            : 2
         Text               : Lightsaber
         Max. Text Size     : 16
     
@@ -1319,11 +1243,11 @@ Text tMLS
         
 QR Code qrHelp
     Attributes
-        ID            : 92
-        Scope         : local
-        Locked        : no
-        Text          : git.io/JkvOK
-        Max. Text Size: 16
+        ID               : 92
+        Scope            : local
+        Send Component ID: disabled
+        Text             : git.io/JkvOK
+        Max. Text Size   : 16
     
     Events
         Touch Release Event
@@ -1350,10 +1274,8 @@ Slider sOn
     Attributes
         ID               : 4
         Scope            : local
-        Locked           : no
-        Direction        : horizontal
-        Cursor width     : 255
-        Initial position : 0
+        Send Component ID: disabled
+        Position         : 0
         Upper range limit: 439
         Lower range limit: 0
         Channel count    : 25
@@ -1440,10 +1362,8 @@ Slider sBPS
     Attributes
         ID               : 7
         Scope            : local
-        Locked           : no
-        Direction        : horizontal
-        Cursor width     : 255
-        Initial position : 44
+        Send Component ID: disabled
+        Position         : 44
         Upper range limit: 439
         Lower range limit: 0
         Channel count    : 25
@@ -1550,10 +1470,8 @@ Slider sDuty
     Attributes
         ID               : 10
         Scope            : local
-        Locked           : no
-        Direction        : horizontal
-        Cursor width     : 255
-        Initial position : 0
+        Send Component ID: disabled
+        Position         : 0
         Upper range limit: 439
         Lower range limit: 0
         Channel count    : 25
@@ -1616,13 +1534,12 @@ Slider sDuty
         
 Button bApply
     Attributes
-        ID            : 1
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : Apply now
-        Max. Text Size: 15
+        ID               : 1
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Apply now
+        Max. Text Size   : 15
     
     Events
         Touch Press Event
@@ -1647,13 +1564,12 @@ Button bApply
         
 Button bReturn
     Attributes
-        ID            : 13
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : Return
-        Max. Text Size: 10
+        ID               : 13
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Return
+        Max. Text Size   : 10
     
     Events
         Touch Press Event
@@ -1686,13 +1602,12 @@ Button bReturn
         
 Button bMode
     Attributes
-        ID            : 17
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : Manually
-        Max. Text Size: 15
+        ID               : 17
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Manually
+        Max. Text Size   : 15
     
     Events
         Touch Press Event
@@ -1741,13 +1656,12 @@ Button bMode
         
 Dual-state Button btCoil1
     Attributes
-        ID            : 19
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : 1
-        Max. Text Size: 3
+        ID               : 19
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 1
+        Max. Text Size   : 3
     
     Events
         Touch Press Event
@@ -1784,13 +1698,12 @@ Dual-state Button btCoil1
         
 Dual-state Button btCoil2
     Attributes
-        ID            : 20
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : 2
-        Max. Text Size: 4
+        ID               : 20
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 2
+        Max. Text Size   : 4
     
     Events
         Touch Press Event
@@ -1817,13 +1730,12 @@ Dual-state Button btCoil2
         
 Dual-state Button btCoil3
     Attributes
-        ID            : 21
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : 3
-        Max. Text Size: 4
+        ID               : 21
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 3
+        Max. Text Size   : 4
     
     Events
         Touch Press Event
@@ -1850,13 +1762,12 @@ Dual-state Button btCoil3
         
 Dual-state Button btCoil4
     Attributes
-        ID            : 22
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : 4
-        Max. Text Size: 4
+        ID               : 22
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 4
+        Max. Text Size   : 4
     
     Events
         Touch Press Event
@@ -1883,13 +1794,12 @@ Dual-state Button btCoil4
         
 Dual-state Button btCoil5
     Attributes
-        ID            : 23
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : 5
-        Max. Text Size: 4
+        ID               : 23
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 5
+        Max. Text Size   : 4
     
     Events
         Touch Press Event
@@ -1916,13 +1826,12 @@ Dual-state Button btCoil5
         
 Dual-state Button btCoil6
     Attributes
-        ID            : 24
-        Scope         : local
-        Locked        : no
-        Font ID       : 0
-        Initial state : Unpressed
-        Text          : 6
-        Max. Text Size: 4
+        ID               : 24
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 6
+        Max. Text Size   : 4
     
     Events
         Touch Press Event
@@ -1949,9 +1858,9 @@ Dual-state Button btCoil6
         
 Hotspot fApply
     Attributes
-        ID    : 88
-        Scope : local
-        Locked: no
+        ID               : 88
+        Scope            : local
+        Send Component ID: disabled
     
     Events
         Touch Press Event
@@ -2140,9 +2049,9 @@ Hotspot fApply
         
 Hotspot fLoadColors
     Attributes
-        ID    : 93
-        Scope : local
-        Locked: no
+        ID               : 93
+        Scope            : local
+        Send Component ID: disabled
     
     Events
         Touch Press Event
@@ -2213,7 +2122,6 @@ Timer tmReturn
     Attributes
         ID         : 75
         Scope      : local
-        Locked     : no
         Period (ms): 250
         Enabled    : no
     
