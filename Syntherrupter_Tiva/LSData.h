@@ -83,7 +83,7 @@ public:
         static float slowVol{0};
         slowVol = filtered(volume, slowVol, 0.5);
 
-        float frequency = exp2f((43.0f - 69.0f - slowVol) / 12.0f) * 440.0f;
+        float frequency = exp2f((45.0f - 69.0f - 4*slowVol) / 12.0f) * 440.0f;
 
         float periodUS = 1e6f / frequency;
 
