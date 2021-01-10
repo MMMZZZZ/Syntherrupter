@@ -109,7 +109,7 @@ private:
     static void removeDeadNotes();
     static float getFreq(float pitch)
     {
-        if (pitch <= 0)
+        if (pitch <= 0.0f)
         {
             return freqTable[0];
         }
