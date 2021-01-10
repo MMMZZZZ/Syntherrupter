@@ -603,7 +603,7 @@ void MIDI::process()
                             note->changed = false;
                             note->toneChanged = (1 << COIL_COUNT) - 1;
 
-                            if (note->number <= 127 && note->velocity)
+                            if (note->number <= 127 && (note->velocity || channel->sustainPedal))
                             {
                                 note->pitch =   float(note->number)
                                               + channel->pitchBend * channel->pitchBendRange
@@ -612,12 +612,15 @@ void MIDI::process()
                                 note->periodUS = 1e6f / note->frequency;
 
                                 // Determine MIDI volume, including all effects that are not time-dependant.
-                                note->rawVolume = note->velocity / 128.0f;
-                                if (channel->damperPedal)
+                                if (note->velocity)
                                 {
-                                    note->rawVolume *= 0.6f;
+                                    note->rawVolume = note->velocity / 128.0f;
+                                    if (channel->damperPedal)
+                                    {
+                                        note->rawVolume *= 0.6f;
+                                    }
+                                    note->rawVolume *= channel->volume * channel->expression;
                                 }
-                                note->rawVolume *= channel->volume * channel->expression;
                             }
                             else if (!channel->sustainPedal)
                             {
