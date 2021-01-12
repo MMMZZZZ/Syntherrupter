@@ -32,20 +32,22 @@ Number comOk
             ref_stop
             //
             // Load colors
-            if(Settings.colorMode.val!=0)
-            {
-                Settings.backCol.val=8484
-                Settings.frontCol.val=40476
-                Settings.frontCol2.val=40476
-                Settings.qrFrontCol.val=40476
-                Settings.colorMode.val=1
-            }else
+            if(Settings.colorMode.val==0)
             {
                 Settings.backCol.val=65535
+                Settings.backCol2.val=4589
+                Settings.backSelectCol2.val=6900
                 Settings.frontCol.val=6900
                 Settings.frontCol2.val=65535
                 Settings.qrFrontCol.val=6900
-                Settings.colorMode.val=0
+            }else
+            {
+                Settings.backCol.val=8484
+                Settings.backCol2.val=2145
+                Settings.backSelectCol2.val=16904
+                Settings.frontCol.val=40476
+                Settings.frontCol2.val=40476
+                Settings.qrFrontCol.val=40476
             }
             click fLoadColors,1
             //
@@ -149,7 +151,10 @@ Hotspot fLoadColors
                 {
                     // Types that have bco
                     // page
-                    if(b[sys0].bco!=Settings.backCol2.val)
+                    if(b[sys0].bco==Settings.backCol2Deflt.val)
+                    {
+                        b[sys0].bco=Settings.backCol2.val
+                    }else
                     {
                         b[sys0].bco=Settings.backCol.val
                     }
@@ -159,13 +164,14 @@ Hotspot fLoadColors
                     // number, float, text, scroll text
                     if(b[sys0].sta==1)
                     {
-                        if(b[sys0].bco!=Settings.backCol2.val)
+                        if(b[sys0].bco==Settings.backCol2Deflt.val)
+                        {
+                            b[sys0].bco=Settings.backCol2.val
+                            b[sys0].pco=Settings.frontCol2.val
+                        }else
                         {
                             b[sys0].bco=Settings.backCol.val
                             b[sys0].pco=Settings.frontCol.val
-                        }else
-                        {
-                            b[sys0].pco=Settings.frontCol2.val
                         }
                     }
                 }else if(sys1==98||sys1==53)
@@ -180,6 +186,12 @@ Hotspot fLoadColors
                         b[sys0].pic+=sys2
                         b[sys0].pic2=b[sys0].pic+1
                     }
+                }else if(sys1==58)
+                {
+                    // Types that have bco, pco
+                    // QR Code
+                    b[sys0].bco=Settings.backCol.val
+                    b[sys0].pco=Settings.qrFrontCol.val
                 }else if(sys1==1)
                 {
                     // Types that have pic, pic2:

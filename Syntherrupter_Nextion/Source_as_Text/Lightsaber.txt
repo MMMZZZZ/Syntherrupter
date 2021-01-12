@@ -10,8 +10,12 @@ Page Lightsaber
             // Prevent page refreshs until postinit
             ref_stop
             //
+            // Entered Lightsaber Mode. Lightsaber is now active
+            Settings.activeModes.val=Settings.activeModes.val|4
+            //
             // Load colors
             click fLoadColors,1
+            click fLoadModes,1
             //
             // Display username
             if(User_Settings.userNum.val==0)
@@ -25,28 +29,8 @@ Page Lightsaber
                 tUser.txt=" "+User_Settings.u2Name.txt
             }
             //
-            // Entered Lightsaber Mode. Lightsaber Mode is now active
-            Settings.activeModes.val=Settings.activeModes.val|4
-            //
-            // Display all active modes
-            sys0=Settings.activeModes.val&1
-            if(sys0!=0)
-            {
-                // Simple Mode is active
-                tMSI.bco=6900
-            }
-            sys0=Settings.activeModes.val&2
-            if(sys0!=0)
-            {
-                // MIDI Live Mode is active
-                tMML.bco=6900
-            }
-            sys0=Settings.activeModes.val&4
-            if(sys0!=0)
-            {
-                // Lightsaber Mode is active
-                tMLS.bco=6900
-            }
+            vis fLoadModes,0
+            vis fLoadColors,0
             //
             tmLSButtonHold.tim=Other_Settings.nHoldTime.val
             tmReturn.tim=Other_Settings.nHoldTime.val
@@ -426,7 +410,7 @@ Variable (int32) showHelp
     
 Variable (int32) sOnOld
     Attributes
-        ID   : 72
+        ID   : 71
         Scope: local
         Value: 0
     
@@ -913,7 +897,7 @@ Text tLS5
         
 QR Code qrHelp
     Attributes
-        ID               : 68
+        ID               : 73
         Scope            : local
         Send Component ID: disabled
         Text             : git.io/JkvOK
@@ -1057,7 +1041,7 @@ Button bReturn
         
 Button bApply
     Attributes
-        ID               : 69
+        ID               : 68
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1087,7 +1071,7 @@ Button bApply
         
 Button bMode
     Attributes
-        ID               : 70
+        ID               : 69
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1473,7 +1457,7 @@ Dual-state Button ls4
         
 Hotspot fApply
     Attributes
-        ID               : 71
+        ID               : 70
         Scope            : local
         Send Component ID: disabled
     
@@ -1632,9 +1616,39 @@ Hotspot fApply
                 newData.val=0
             }
         
+Hotspot fLoadModes
+    Attributes
+        ID               : 72
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Load active modes
+            sys0=Settings.activeModes.val&4
+            if(sys0!=0)
+            {
+                // Lightsaber Mode is active
+                tMLS.bco=Settings.backSelectCol2.val
+            }
+            //
+            // Display all active modes
+            sys0=Settings.activeModes.val&1
+            if(sys0!=0)
+            {
+                // Simple Mode is active
+                tMSI.bco=Settings.backSelectCol2.val
+            }
+            sys0=Settings.activeModes.val&2
+            if(sys0!=0)
+            {
+                // MIDI Live Mode is active
+                tMML.bco=Settings.backSelectCol2.val
+            }
+        
 Hotspot fLoadColors
     Attributes
-        ID               : 73
+        ID               : 74
         Scope            : local
         Send Component ID: disabled
     
@@ -1655,7 +1669,10 @@ Hotspot fLoadColors
                 {
                     // Types that have bco
                     // page
-                    if(b[sys0].bco!=Settings.backCol2.val)
+                    if(b[sys0].bco==Settings.backCol2Deflt.val)
+                    {
+                        b[sys0].bco=Settings.backCol2.val
+                    }else
                     {
                         b[sys0].bco=Settings.backCol.val
                     }
@@ -1665,13 +1682,14 @@ Hotspot fLoadColors
                     // number, float, text, scroll text
                     if(b[sys0].sta==1)
                     {
-                        if(b[sys0].bco!=Settings.backCol2.val)
+                        if(b[sys0].bco==Settings.backCol2Deflt.val)
+                        {
+                            b[sys0].bco=Settings.backCol2.val
+                            b[sys0].pco=Settings.frontCol2.val
+                        }else
                         {
                             b[sys0].bco=Settings.backCol.val
                             b[sys0].pco=Settings.frontCol.val
-                        }else
-                        {
-                            b[sys0].pco=Settings.frontCol2.val
                         }
                     }
                 }else if(sys1==98||sys1==53)

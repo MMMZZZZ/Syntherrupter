@@ -126,7 +126,10 @@ Hotspot fLoadColors
                 {
                     // Types that have bco
                     // page
-                    if(b[sys0].bco!=Settings.backCol2.val)
+                    if(b[sys0].bco==Settings.backCol2Deflt.val)
+                    {
+                        b[sys0].bco=Settings.backCol2.val
+                    }else
                     {
                         b[sys0].bco=Settings.backCol.val
                     }
@@ -136,13 +139,14 @@ Hotspot fLoadColors
                     // number, float, text, scroll text
                     if(b[sys0].sta==1)
                     {
-                        if(b[sys0].bco!=Settings.backCol2.val)
+                        if(b[sys0].bco==Settings.backCol2Deflt.val)
+                        {
+                            b[sys0].bco=Settings.backCol2.val
+                            b[sys0].pco=Settings.frontCol2.val
+                        }else
                         {
                             b[sys0].bco=Settings.backCol.val
                             b[sys0].pco=Settings.frontCol.val
-                        }else
-                        {
-                            b[sys0].pco=Settings.frontCol2.val
                         }
                     }
                 }else if(sys1==98||sys1==53)

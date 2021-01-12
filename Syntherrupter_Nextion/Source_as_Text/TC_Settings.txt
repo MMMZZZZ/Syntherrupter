@@ -12,6 +12,7 @@ Page TC_Settings
             //
             // Load colors
             click fLoadColors,1
+            click fLoadModes,1
             //
             // Display username
             if(User_Settings.userNum.val==0)
@@ -24,26 +25,9 @@ Page TC_Settings
             {
                 tUser.txt=" "+User_Settings.u2Name.txt
             }
-            sys0=Settings.activeModes.val&4
-            if(sys0!=0)
-            {
-                // Lightsaber Mode is active
-                tMLS.bco=6900
-            }
             //
-            // Display all active modes
-            sys0=Settings.activeModes.val&1
-            if(sys0!=0)
-            {
-                // Simple Mode is active
-                tMSI.bco=6900
-            }
-            sys0=Settings.activeModes.val&2
-            if(sys0!=0)
-            {
-                // MIDI Live Mode is active
-                tMML.bco=6900
-            }
+            vis fLoadModes,0
+            vis fLoadColors,0
             //
             // This page should only be accessible for user 2.
             // Power on default for all MIDI channel assignments and active coils is 1 (all assigned and active).
@@ -1868,7 +1852,7 @@ Text tMLS
         
 QR Code qrHelp
     Attributes
-        ID               : 89
+        ID               : 90
         Scope            : local
         Send Component ID: disabled
         Text             : git.io/JkvOK
@@ -2613,9 +2597,39 @@ Button b7
                 click qrHelp,0
             }
         
+Hotspot fLoadModes
+    Attributes
+        ID               : 89
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Load active modes
+            sys0=Settings.activeModes.val&4
+            if(sys0!=0)
+            {
+                // Lightsaber Mode is active
+                tMLS.bco=Settings.backSelectCol2.val
+            }
+            //
+            // Display all active modes
+            sys0=Settings.activeModes.val&1
+            if(sys0!=0)
+            {
+                // Simple Mode is active
+                tMSI.bco=Settings.backSelectCol2.val
+            }
+            sys0=Settings.activeModes.val&2
+            if(sys0!=0)
+            {
+                // MIDI Live Mode is active
+                tMML.bco=Settings.backSelectCol2.val
+            }
+        
 Hotspot fLoadColors
     Attributes
-        ID               : 90
+        ID               : 91
         Scope            : local
         Send Component ID: disabled
     
@@ -2636,7 +2650,10 @@ Hotspot fLoadColors
                 {
                     // Types that have bco
                     // page
-                    if(b[sys0].bco!=Settings.backCol2.val)
+                    if(b[sys0].bco==Settings.backCol2Deflt.val)
+                    {
+                        b[sys0].bco=Settings.backCol2.val
+                    }else
                     {
                         b[sys0].bco=Settings.backCol.val
                     }
@@ -2646,13 +2663,14 @@ Hotspot fLoadColors
                     // number, float, text, scroll text
                     if(b[sys0].sta==1)
                     {
-                        if(b[sys0].bco!=Settings.backCol2.val)
+                        if(b[sys0].bco==Settings.backCol2Deflt.val)
+                        {
+                            b[sys0].bco=Settings.backCol2.val
+                            b[sys0].pco=Settings.frontCol2.val
+                        }else
                         {
                             b[sys0].bco=Settings.backCol.val
                             b[sys0].pco=Settings.frontCol.val
-                        }else
-                        {
-                            b[sys0].pco=Settings.frontCol2.val
                         }
                     }
                 }else if(sys1==98||sys1==53)
