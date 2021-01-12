@@ -7,35 +7,11 @@ By Max Zuidberg. Credits [below](#credits).
 
 ## Index 
 
-* [Demo Videos](#demo-videos)
-* [Pictures](#pictures)
 * [Features](#features)
+* [Pictures](#pictures)
+* [Demo Videos](#demo-videos)
 * [Documentation and Getting Started](#documentation-and-getting-started)
 * [Credits](#credits)
-
-## Demo Videos
-
-Syntherrupter playing "I Want It All" - a MIDI with ~6 voices, pitch bending, sometimes very fast notes, and other effects.
-
-[![Syntherrupter Demo - I Want It All](http://img.youtube.com/vi/H2ykCsD_b5g/0.jpg)](http://www.youtube.com/watch?v=H2ykCsD_b5g)
-
-Here's a demo of Syntherrupters stereo features with Thunderstruck. The only modification made to the MIDI file, were the commands that set up Syntherrupters stereo mode (documented [here](/Documentation/Wiki/Custom%20MIDI%20Commands.md)). The mapping of the notes to the coils (represented by LEDs) in done automatically.
-
-*"I must say that the Omni-mode is what I have dreamt about for years, I am really looking forward to use that feature (and not so much that I now have to build 6 identical coils)"* ([from Mads Barnkob](https://highvoltageforum.net/index.php?topic=1020.msg8430#msg8430))
-
-[![Syntherrupter Demo - I Want It All](http://img.youtube.com/vi/Tyts9u0le6A/0.jpg)](http://www.youtube.com/watch?v=Tyts9u0le6A)
-
-## Pictures
-
-My own version currently looks like this (with Dark Mode on):
-
-![Syntherrupter Max Top](/Documentation/Pictures/Syntherrupter_Max_Top.jpeg)
-
-Left to right: On/Off switch, charge port, USB Serial port, optical out (only one for now):
-![Syntherrupter Max Back](/Documentation/Pictures/Syntherrupter_Max_Back.jpeg)
-
-There's an optical receiver that's not needed. The transmitter has a little BC547C BJT to drive it with the 60mA it needs. The cable mess on the right is 1 USB cable from the powerbanks charge port to Syntherrupters charge port, and 1 USB cable from the Powerbank to the Tiva LaunchPad, whose ground wire goes to the switch. Nothing complicated. 
-![Syntherrupter Max Inside](/Documentation/Pictures/Syntherrupter_Max_Internal.jpeg)
 
 ## Features
 
@@ -48,6 +24,29 @@ There's an optical receiver that's not needed. The transmitter has a little BC54
 * **Lightsabers**! An ESP8266, an IMU and a battery form a lightsaber that connects to Syntherrupter and allows "lightsaber-effects" to be played on your tesla coils! (credits: Netzpfuscher)
 * Different users with different limits. This is useful if you want to rent the coil to someone else who does not know the coils (thermal?) limits as well as you do.
 * Sounds boring, but for me it belongs to an interrupter as well: **Normal interrupter mode** where you can control the ontime, BPS and duty.
+* **[Documentation/Wiki](/Documentation/Wiki#readme)**
+
+## Pictures
+
+![UI Preview](/Documentation/Pictures/UI/MIDI%20Live%20Dark.png)
+
+My own version. Left to right: On/Off switch, charge port, serial port, optical out (only one for now):
+![Syntherrupter Max Back](/Documentation/Pictures/Syntherrupter_Max_Back.jpeg)
+
+(Can be even simpler than this!)
+![Syntherrupter Max Inside](/Documentation/Pictures/Syntherrupter_Max_Internal.jpeg)
+
+## Demo Videos
+
+Syntherrupter playing "I Want It All" - a MIDI with ~6 voices, pitch bending, sometimes very fast notes, and other effects.
+
+[![Syntherrupter Demo - I Want It All](http://img.youtube.com/vi/H2ykCsD_b5g/0.jpg)](http://www.youtube.com/watch?v=H2ykCsD_b5g)
+
+Here's a demo of Syntherrupters stereo features with Thunderstruck. The only modification made to the MIDI file, were the commands that set up Syntherrupters stereo mode (documented [here](/Documentation/Wiki/Custom%20MIDI%20Commands.md)). The mapping of the notes to the coils (represented by LEDs) in done automatically.
+
+*"I must say that the Omni-mode is what I have dreamt about for years, I am really looking forward to use that feature (and not so much that I now have to build 6 identical coils)"* ([from Mads Barnkob](https://highvoltageforum.net/index.php?topic=1020.msg8430#msg8430))
+
+[![Syntherrupter Demo - I Want It All](http://img.youtube.com/vi/Tyts9u0le6A/0.jpg)](http://www.youtube.com/watch?v=Tyts9u0le6A)
 
 ## Documentation and Getting Started
 
