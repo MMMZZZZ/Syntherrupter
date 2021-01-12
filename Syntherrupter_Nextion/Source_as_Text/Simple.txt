@@ -195,7 +195,7 @@ Page Simple
             fSliderOutput.val=userOnLimit.val
             fSlider.val=nOn.val
             click fSlider,0
-            sBPS.val=fSlider.val
+            sOn.val=fSlider.val
             fSliderInput.val=sBPS.maxval
             fSliderOutput.val=userBPSLimit.val
             fSlider.val=nBPS.val
