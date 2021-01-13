@@ -38,7 +38,7 @@ void Channel::resetControllers()
     coarseTuning                 = 0;
     RPN                          = 0x7f7f;
     NRPN                         = 0x7f7f;
-    changed                      = true;
+    controllersChanged           = true;
 }
 
 void Channel::resetNRPs()
@@ -47,7 +47,119 @@ void Channel::resetNRPs()
     notePanSourceRangeHigh = 1.0f;
     notePanTargetRangeLow  = 0.0f;
     notePanTargetRangeHigh = 1.0f;
-    notePanEnabled         = false;
-    notePanOmniMode        = false;
-    changed                      = true;
+    notePanMode            = NOTE_PAN_OFF;
+    controllersChanged     = true;
+}
+
+Note* Channel::getNote(uint8_t noteNum)
+{
+    Note* note = firstNote;
+
+    while (note != 0)
+    {
+        if(noteNum == note->number)
+        {
+            return note;
+        }
+        note = note->nextChnNote;
+    }
+    return 0;
+}
+
+void Channel::addNote(Note* note)
+{
+    note->nextChnNote = firstNote;
+    firstNote = note;
+    noteCount++;
+}
+
+void Channel::removeNote(Note* note)
+{
+    if (note == firstNote)
+    {
+        firstNote = firstNote->nextChnNote;
+    }
+    else
+    {
+        Note* prevNote = firstNote;
+        Note* currentNote = firstNote->nextChnNote;
+        while (currentNote != 0)
+        {
+            if (currentNote == note)
+            {
+                prevNote->nextChnNote = currentNote->nextChnNote;
+                break;
+            }
+            prevNote    = currentNote;
+            currentNote = currentNote->nextChnNote;
+        }
+    }
+
+    note->nextChnNote = 0;
+    noteCount--;
+}
+
+void Channel::notePanDataUpdate()
+{
+    Note* note = firstNote;
+
+    float temp = 0.0f;
+
+    switch (notePanMode)
+    {
+        case NOTE_PAN_LOWEST:
+        {
+            temp = 265.0f;
+            while (note != 0)
+            {
+                if (note->pitch < temp)
+                {
+                    temp = note->pitch;
+                    notePan = note->pitch;
+                }
+                note = note->nextChnNote;
+            }
+            break;
+        }
+        case NOTE_PAN_HIGHEST:
+        {
+            temp = 0.0f;
+            while (note != 0)
+            {
+                if (note->pitch > temp)
+                {
+                    temp = note->pitch;
+                    notePan = note->pitch;
+                }
+                note = note->nextChnNote;
+            }
+            break;
+        }
+        case NOTE_PAN_AVG:
+        {
+            temp = 0.0f;
+            while (note != 0)
+            {
+                temp += note->pitch;
+                note = note->nextChnNote;
+            }
+            temp /= noteCount;
+            notePan = note->pitch;
+            break;
+        }
+        case NOTE_PAN_LOUDEST:
+        {
+            temp = 0.0f;
+            while (note != 0)
+            {
+                if (note->velocity > temp)
+                {
+                    temp = note->velocity;
+                    notePan = note->pitch;
+                }
+                note = note->nextChnNote;
+            }
+            break;
+        }
+    }
 }

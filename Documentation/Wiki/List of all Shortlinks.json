@@ -1,0 +1,260 @@
+{
+    "Custom MIDI Commands": {
+        "Custom MIDI Commands": "https://git.io/JkfzZ",
+        "Non-registered Parameters (NRP)": "https://git.io/Jkfzn",
+        "NRP Format": "https://git.io/JkfzC",
+        "Syntherrupters NRPs": "https://git.io/JkfzW",
+        "Stereo Mapping Modes": "https://git.io/Jkfzl",
+        "System Exclusive Messages (SysEx)": "https://git.io/Jkfz8",
+        "SysEx format": "https://git.io/Jkfz4",
+        "Syntherrupters SysEx Messages": "https://git.io/JkfzB"
+    },
+    "Firmware Flashing": {
+        "Syntherrupter Firmware Flashing": "https://git.io/JkfzR",
+        "Index": "https://git.io/Jkfz0",
+        "Note about beta versions": "https://git.io/JkfzE",
+        "Flashing Order and Recovery": "https://git.io/Jkfzu",
+        "Tiva Flashing": "https://git.io/Jkfzz",
+        "Requirements": "https://git.io/Jkfzg",
+        "Steps for Driver Installation": "https://git.io/Jkfz2",
+        "Steps for Flashing": "https://git.io/Jkfza",
+        "Nextion Flashing over USB/Serial": "https://git.io/JkfzV",
+        "Steps": "https://git.io/Jkfzw",
+        "Nextion Flashing with a microSD card": "https://git.io/Jkfzr"
+    },
+    "Getting Started": {
+        "Getting Started with Syntherrupter": "https://git.io/Jkfzo",
+        "Index": "https://git.io/JkfzK",
+        "Hardware": "https://git.io/Jkfz6",
+        "Minimum Viable Setup": "https://git.io/Jkfzi",
+        "Options": "https://git.io/JkfzP",
+        "Firmware": "https://git.io/JkfzX",
+        "User Interface": "https://git.io/Jkfz1",
+        "First Start": "https://git.io/JkfzM",
+        "Login Page": "https://git.io/JkfzD",
+        "Main Menu": "https://git.io/Jkfzy",
+        "Simple Mode": "https://git.io/JkfzS",
+        "The Sliders": "https://git.io/JkfzH",
+        "Selecting the outputs": "https://git.io/JkfzQ",
+        "Apply manually or automatically": "https://git.io/Jkfz7",
+        "Emergency stop": "https://git.io/Jkfz5",
+        "Running Modes in Parallel": "https://git.io/Jkfzd",
+        "MIDI Live Mode and Lightsaber Mode": "https://git.io/JkfzF",
+        "Settings": "https://git.io/Jkfzb",
+        "Coil Limits": "https://git.io/JkfzN",
+        "User Settings": "https://git.io/JkfzA",
+        "Applying and Storing": "https://git.io/Jkfzx",
+        "Done!": "https://git.io/Jkfzp"
+    },
+    "Lightsaber ESP8266 Setup": {
+        "Lightsaber ESP8266 Setup": "https://git.io/Jkfzh",
+        "Index": "https://git.io/Jkfzj",
+        "Flashing for Windows Users": "https://git.io/Jkfge",
+        "Requirements": "https://git.io/Jkfgv",
+        "Steps": "https://git.io/Jkfgf",
+        "Flashing with cross-plattform tool": "https://git.io/JkfgJ",
+        "Lightsaber ID setting": "https://git.io/JkfgU",
+        "Transmitters, Receivers, Pairing": "https://git.io/JkfgT"
+    },
+    "Minimum Viable Setup": {
+        "Minimum Viable Setup": "https://git.io/Jkfgk",
+        "Index": "https://git.io/JkfgI",
+        "Firmware": "https://git.io/JkfgL",
+        "Tiva Microcontroller": "https://git.io/Jkfgt",
+        "Display": "https://git.io/Jkfgq",
+        "Introduction": "https://git.io/Jkfgm",
+        "Suitable Models": "https://git.io/JkfgY",
+        "Without a display": "https://git.io/JkfgO",
+        "Wiring": "https://git.io/Jkfg3"
+    },
+    "README": {
+        "Syntherrupter Wiki": "https://git.io/Jkfgs",
+        "Content": "https://git.io/JkfgG",
+        "External Content": "https://git.io/JLxSu"
+    },
+    "HW\\Lightsaber Receiver": {
+        "Lightsaber Receiver": "https://git.io/JkfgZ",
+        "Communication Pins": "https://git.io/Jkfgn",
+        "Schematic and Pinout": "https://git.io/Jkfgc"
+    },
+    "HW\\MIDI Input": {
+        "MIDI Input Jack": "https://git.io/JkfgC",
+        "Communication Pin": "https://git.io/JkfgW",
+        "Schematic": "https://git.io/Jkfgl"
+    },
+    "HW\\Optical Outputs": {
+        "Optical Outputs": "https://git.io/Jkfg8",
+        "Output Pins and Limits": "https://git.io/Jkfg4",
+        "Schematic": "https://git.io/JkfgB"
+    },
+    "HW\\README": {
+        "Hardware Reference": "https://git.io/Jkfg0",
+        "Content": "https://git.io/JkfgE"
+    },
+    "Tutorials\\Getting Started with Envelopes": {},
+    "UI\\Channel Settings": {
+        "Channel Settings": "https://git.io/Jkfgu",
+        "Index": "https://git.io/Jkfgz",
+        "What you see": "https://git.io/Jkfgg",
+        "What you get": "https://git.io/Jkfg2",
+        "Keypad": "https://git.io/Jkfga",
+        "NRP Editor": "https://git.io/JkfgV",
+        "MIDI Command": "https://git.io/Jkfgw",
+        "Previous/Next Channel": "https://git.io/Jkfgr",
+        "Return to MIDI Coil Settings": "https://git.io/Jkfgo"
+    },
+    "UI\\Coil Limits": {
+        "Coil Limits": "https://git.io/JkfgK",
+        "Index": "https://git.io/Jkfg6",
+        "Content": "https://git.io/Jkfgi"
+    },
+    "UI\\Coil Settings": {
+        "Coil Settings": "https://git.io/JkfgP",
+        "Index": "https://git.io/JkfgX",
+        "What you see": "https://git.io/Jkfg1",
+        "What you get": "https://git.io/JkfgM",
+        "Assign MIDI Channels": "https://git.io/JkfgD",
+        "Stereo Settings": "https://git.io/Jkfgy",
+        "Pan Slider": "https://git.io/JkfgS",
+        "Reach Slider and Mode": "https://git.io/Jkfg9",
+        "Previous/Next Coil": "https://git.io/JkfgH",
+        "Return to MIDI Live Mode": "https://git.io/JkfgQ"
+    },
+    "UI\\Envelope": {
+        "Envelope Editor": "https://git.io/Jkfg7",
+        "Index": "https://git.io/Jkfg5",
+        "What you see": "https://git.io/JLxSi",
+        "What you get": "https://git.io/JLxSP",
+        "Program": "https://git.io/JLxSX",
+        "Step": "https://git.io/JLxS1",
+        "Next Step": "https://git.io/JLxSM",
+        "Amplitude": "https://git.io/JLxSD",
+        "Duration": "https://git.io/JLxSy",
+        "n-tau": "https://git.io/JLxSS",
+        "Set Values": "https://git.io/JLxS9",
+        "Return": "https://git.io/JLxSH",
+        "Envelope Examples": "https://git.io/JLxSQ"
+    },
+    "UI\\Error": {
+        "Error Page": "https://git.io/Jkfgb",
+        "Index": "https://git.io/JkfgN",
+        "Content": "https://git.io/JkfgA"
+    },
+    "UI\\ESP-USB": {
+        "ESP8266<->USB Passthrough": "https://git.io/Jkfgx",
+        "Index": "https://git.io/Jkfgp",
+        "What you see": "https://git.io/JLxS3",
+        "Related Articles": "https://git.io/JLxSs"
+    },
+    "UI\\General": {
+        "General Settings": "https://git.io/Jkfgj",
+        "Index": "https://git.io/Jkf2e",
+        "What you see": "https://git.io/JLxSG",
+        "What you get": "https://git.io/JLxSZ",
+        "Button hold time": "https://git.io/JLxSn",
+        "Display Brightness": "https://git.io/JLxSC",
+        "Enter Sleep after": "https://git.io/JLxSW",
+        "Background shutdown": "https://git.io/JLxSl",
+        "Dark Mode": "https://git.io/JLxS8"
+    },
+    "UI\\Help and Info": {
+        "Help and Info": "https://git.io/Jkf2f",
+        "Index": "https://git.io/Jkf2J",
+        "What you see": "https://git.io/JLxS4",
+        "What you get": "https://git.io/JLxSB",
+        "Help Mode": "https://git.io/JLxSR",
+        "Credits": "https://git.io/JLxS0"
+    },
+    "UI\\Lightsaber": {
+        "Lightsaber Mode": "https://git.io/Jkf2T",
+        "Index": "https://git.io/Jkf2k",
+        "What you see": "https://git.io/Jkf2I",
+        "What you get": "https://git.io/Jkf2L",
+        "Ontime": "https://git.io/Jkf2m",
+        "Lightsabers": "https://git.io/Jkf2Y",
+        "Apply to Outputs and MIDI Coil Settings": "https://git.io/Jkf2O",
+        "Applying Manually, On Release or Immediately": "https://git.io/Jkf23",
+        "Return to Main Menu": "https://git.io/Jkf2s"
+    },
+    "UI\\Log In": {
+        "Log In": "https://git.io/Jkf2G",
+        "Index": "https://git.io/Jkf2Z",
+        "Content": "https://git.io/Jkf2n"
+    },
+    "UI\\Menu": {
+        "Main Menu": "https://git.io/Jkf2c",
+        "Index": "https://git.io/Jkf2C",
+        "What you see": "https://git.io/Jkf2W",
+        "What you get": "https://git.io/Jkf2l",
+        "Simple": "https://git.io/Jkf2R",
+        "MIDI Live": "https://git.io/Jkf20",
+        "Lightsaber": "https://git.io/Jkf2E",
+        "Help and Info": "https://git.io/Jkf2u",
+        "Settings": "https://git.io/Jkf2z",
+        "Switch User": "https://git.io/Jkf2g"
+    },
+    "UI\\MIDI Live": {
+        "MIDI Live Mode": "https://git.io/Jkf22",
+        "Index": "https://git.io/Jkf2a",
+        "What you see": "https://git.io/Jkf2V",
+        "What you get": "https://git.io/Jkf2w",
+        "Note Ontime": "https://git.io/Jkf2r",
+        "Note Duty": "https://git.io/Jkf2o",
+        "Apply to Outputs and MIDI Coil Settings": "https://git.io/Jkf2K",
+        "Applying Manually, On Release or Immediately": "https://git.io/Jkf26",
+        "NRP Reset": "https://git.io/Jkf2i",
+        "Return to Main Menu": "https://git.io/Jkf2P"
+    },
+    "UI\\Nextion-USB": {
+        "Nextion<->USB Passthrough": "https://git.io/Jkf2X",
+        "Index": "https://git.io/Jkf21",
+        "What you see": "https://git.io/JLxSE"
+    },
+    "UI\\README": {
+        "User Interface Reference": "https://git.io/Jkf2D",
+        "Structure": "https://git.io/Jkf2S"
+    },
+    "UI\\Settings": {
+        "Settings": "https://git.io/Jkf2Q",
+        "Index": "https://git.io/Jkf27",
+        "What you see": "https://git.io/Jkf25",
+        "What you get": "https://git.io/Jkf2d",
+        "General Settings": "https://git.io/Jkf2b",
+        "User Settings": "https://git.io/Jkf2N",
+        "Envelope Settings": "https://git.io/Jkf2A",
+        "Coil Limits": "https://git.io/Jkf2x",
+        "Nextion<->USB": "https://git.io/Jkf2p",
+        "ESP<->USB": "https://git.io/Jkf2h",
+        "Save/Return to Main Menu": "https://git.io/Jkf78"
+    },
+    "UI\\Simple": {
+        "Simple Mode": "https://git.io/Jkf2j",
+        "Index": "https://git.io/Jkfae",
+        "What you see": "https://git.io/Jkfav",
+        "What you get": "https://git.io/Jkfaf",
+        "Ontime": "https://git.io/JkfaJ",
+        "BPS": "https://git.io/JkfaU",
+        "Duty": "https://git.io/JkfaT",
+        "Apply to Outputs": "https://git.io/Jkfak",
+        "Applying Manually, On Release or Immediately": "https://git.io/JkfaL",
+        "Return to Main Menu": "https://git.io/Jkfat"
+    },
+    "UI\\Startup": {
+        "Startup": "https://git.io/Jkfaq",
+        "Index": "https://git.io/Jkfam",
+        "Content": "https://git.io/JkfaY"
+    },
+    "UI\\Users": {
+        "User Settings": "https://git.io/JkfaO",
+        "Index": "https://git.io/Jkfa3",
+        "What you see": "https://git.io/JLxSg",
+        "What you get": "https://git.io/JLxS2",
+        "User Rights": "https://git.io/JLxSa",
+        "Table Layout": "https://git.io/JLxSV",
+        "Name": "https://git.io/JLxSw",
+        "Password": "https://git.io/JLxSr",
+        "Auto Login": "https://git.io/JLxSo",
+        "Max. Ontime, Max. BPS, Max. Duty": "https://git.io/JLxSK",
+        "Return": "https://git.io/JLxS6"
+    }
+}

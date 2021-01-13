@@ -17,7 +17,6 @@
 #include "Channel.h"
 #include "UART.h"
 #include "ByteBuffer.h"
-#include "Note.h"
 #include "ToneList.h"
 #include "NoteList.h"
 #include "MIDIProgram.h"
@@ -28,7 +27,9 @@ class MIDI
 public:
     MIDI();
     virtual ~MIDI();
-    static void init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPort, uint32_t midiUartRx, uint32_t midiUartTx, void (*midiISR)(void));
+    static void init(uint32_t usbBaudRate, void (*usbISR)(void),
+                     uint32_t midiUartPort, uint32_t midiUartRx,
+                     uint32_t midiUartTx, void (*midiISR)(void));
     void updateToneList();
     void setCoilsToneList(ToneList* tonelist)
     {
@@ -51,6 +52,8 @@ public:
     static Channel channels[16];
     static UART usbUart, midiUart;
     static ByteBuffer otherBuffer;
+    static constexpr uint32_t MAX_PROGRAMS = 64;
+    static MIDIProgram programs[MAX_PROGRAMS];
 
 private:
     static bool processBuffer(uint32_t b);
@@ -74,7 +77,7 @@ private:
                 note->panVol[coilNum] = 1.0f;
             }
 
-            if (coilPan < 0.0f || channels[note->channel].notePanOmniMode)
+            if (coilPan < 0.0f || channels[note->channel].notePanMode == Channel::NOTE_PAN_OMNI)
             {
                 note->panVol[coilNum] = 1.0f;
             }
@@ -104,6 +107,27 @@ private:
         }
     };
     static void removeDeadNotes();
+    static float getFreq(float pitch)
+    {
+        if (pitch <= 0.0f)
+        {
+            return freqTable[0];
+        }
+        else if (pitch >= 127.0f)
+        {
+            return freqTable[127];
+        }
+        else
+        {
+            uint32_t intPitch = pitch;
+            float fracPitch = pitch - intPitch;
+            float freq = freqTable[intPitch];
+            freq += (freqTable[intPitch + 1] - freq) * fracPitch;
+            return freq;
+        }
+    };
+
+    static float freqTable[128];
 
     static constexpr uint32_t ADSR_PROGRAM_COUNT     = 9;
     // TODO: The following list is missing the newer sounds.
@@ -131,20 +155,13 @@ private:
               {3.0f, 1.0f /    3000.0f,     1.0f, 1.0f /   27000.0f,     0.00f, 1.0f /   400000.0f,     0.0f, 1.0f /       1.0f},
     };
 
-    static constexpr uint32_t effectResolutionUS = 963;
-
-    static constexpr uint32_t MAX_PROGRAMS = 64;
-    static MIDIProgram programs[MAX_PROGRAMS];
+    static constexpr uint32_t effectResolutionUS = 2000;
 
     static constexpr uint32_t    BUFFER_COUNT = 3;
     static constexpr ByteBuffer* BUFFER_LIST[BUFFER_COUNT] = {&(usbUart.buffer), &(midiUart.buffer), &otherBuffer};;
-    static uint8_t               bufferMidiStatus[BUFFER_COUNT];
     static constexpr uint32_t MAX_NOTES_COUNT = 64;
-    static Note               unorderedNotes[MAX_NOTES_COUNT];
-    static Note*              notes[MAX_NOTES_COUNT];
     static NoteList notelist;
     static uint32_t           notesCount;
-    static uint32_t dataBytes;
     ToneList* tonelist;
     float absFreq               =  0.0f;
     float singleNoteMaxDuty     =  0.0f;
@@ -160,7 +177,6 @@ private:
     bool coilPanChanged         = false;
     bool panConstVol            = false;
 
-    static float ADSRTimeUS;
     static bool playing;
     static constexpr float LFO_PERIOD_US          = 200000.0f;
 };

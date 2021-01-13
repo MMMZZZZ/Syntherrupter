@@ -1,0 +1,1794 @@
+Page Env_Settings
+    Attributes
+        ID               : 0
+        Scope            : local
+        Send Component ID: disabled
+        Locked           : no
+    
+    Events
+        Preinitialize Event
+            // Prevent page refreshs until postinit
+            ref_stop
+            //
+            // Load colors
+            click fLoadColors,1
+            click fLoadModes,1
+            //
+            // Display username
+            if(User_Settings.userNum.val==0)
+            {
+                tUser.txt=" "+User_Settings.u0Name.txt
+            }else if(User_Settings.userNum.val==1)
+            {
+                tUser.txt=" "+User_Settings.u1Name.txt
+            }else if(User_Settings.userNum.val==2)
+            {
+                tUser.txt=" "+User_Settings.u2Name.txt
+            }
+            //
+            vis fLoadModes,0
+            vis fLoadColors,0
+            // Display maxSteps
+            nMaxSteps1.val=maxSteps.val
+            nMaxSteps2.val=maxSteps.val
+            //
+            // Idle field is just used for default text/background color and as target for the numpad if no component is selected. Ergo should be hidden like functions.
+            vis idle,0
+            vis fCheck,0
+            //
+            // Set newValTargetId to idle
+            newValTargetId.val=idle.id
+            // First step is step 0, which cant be release
+            vis tRelease1,0
+            vis tRelease2,0
+            // Currently no dedicated EEPROM button needs to be displayed
+            vis bSaveEEPROM,0
+            //
+            // Load Help Mode
+            if(Help_Info.helpMode.val==0)
+            {
+                vis qrHelp,0
+                fill qrHelp.x,qrHelp.y,qrHelp.w,qrHelp.h,b[0].bco
+            }else
+            {
+                tempStr.txt=tTitle.txt
+                showHelp.val=1
+                click 0,1
+            }
+            //
+            // Enable page refreshs again
+            ref_star
+        
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(Other_Settings.nBackOff.val!=0)
+                {
+                    // Default "stop" action.
+                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                    prints "mes",3
+                    // Set all ontime and duty settings of all pages to 0.
+                    // First come the global variables then the local variables.
+                    Simple.ontime.val=0
+                    Simple.duty.val=0
+                    Simple.set1.val=Simple.set1.val&0x0000ffff
+                    Simple.set2.val=Simple.set2.val&0x0000ffff
+                    Simple.set3.val=Simple.set3.val&0x0000ffff
+                    Simple.set4.val=Simple.set4.val&0x0000ffff
+                    Simple.set5.val=Simple.set5.val&0x0000ffff
+                    Simple.set6.val=Simple.set6.val&0x0000ffff
+                    MIDI_Live.ontime.val=0
+                    MIDI_Live.duty.val=0
+                    MIDI_Live.set1.val=0
+                    MIDI_Live.set2.val=0
+                    MIDI_Live.set3.val=0
+                    MIDI_Live.set4.val=0
+                    MIDI_Live.set5.val=0
+                    MIDI_Live.set6.val=0
+                    Lightsaber.ontime.val=0
+                    Lightsaber.ontimes12.val=0
+                    Lightsaber.ontimes34.val=0
+                    Lightsaber.ontimes56.val=0
+                }
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg7"
+                click qrHelp,0
+            }
+        
+Variable (int32) newValTargetId
+    Attributes
+        ID   : 32
+        Scope: local
+        Value: 68
+    
+Variable (int32) newSelect
+    Attributes
+        ID   : 33
+        Scope: local
+        Value: 0
+    
+Variable (int32) maxSteps
+    Attributes
+        ID   : 36
+        Scope: global
+        Value: 8
+    
+Variable (int32) changedValues
+    Attributes
+        ID   : 46
+        Scope: local
+        Value: 0
+    
+Variable (string) tempStr
+    Attributes
+        ID            : 50
+        Scope         : local
+        Text          : 
+        Max. Text Size: 32
+    
+Variable (int32) showHelp
+    Attributes
+        ID   : 51
+        Scope: local
+        Value: 0
+    
+Number nStep
+    Attributes
+        ID                 : 23
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Reset push state of last selected value
+                b[newValTargetId.val].bco=idle.bco
+                b[newValTargetId.val].pco=idle.pco
+                // Mark this field as pushed
+                newValTargetId.val=nStep.id
+                b[newValTargetId.val].bco=idle.pco
+                b[newValTargetId.val].pco=idle.bco
+                // A new value has been selected
+                newSelect.val=1
+                // Check values
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxS1"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Number nDur
+    Attributes
+        ID                 : 27
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 10
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Reset push state of last selected value
+                b[newValTargetId.val].bco=idle.bco
+                b[newValTargetId.val].pco=idle.pco
+                // Mark this field as pushed
+                newValTargetId.val=nDur.id
+                b[newValTargetId.val].bco=idle.pco
+                b[newValTargetId.val].pco=idle.bco
+                // A new value has been selected
+                newSelect.val=1
+                // Check values
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSy"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Number nMaxSteps1
+    Attributes
+        ID                 : 38
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 99
+    
+    Events
+        Touch Press Event
+            // Reset push state of last selected value
+            b[newValTargetId.val].bco=idle.bco
+            b[newValTargetId.val].pco=idle.pco
+            // Mark this field as pushed
+            newValTargetId.val=nStep.id
+            b[newValTargetId.val].bco=idle.pco
+            b[newValTargetId.val].pco=idle.bco
+            // A new value has been selected
+            newSelect.val=1
+            // Check if values are legal
+            click fCheck,0
+        
+Number nNext
+    Attributes
+        ID                 : 41
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Reset push state of last selected value
+                b[newValTargetId.val].bco=idle.bco
+                b[newValTargetId.val].pco=idle.pco
+                // Mark this field as pushed
+                newValTargetId.val=nNext.id
+                b[newValTargetId.val].bco=idle.pco
+                b[newValTargetId.val].pco=idle.bco
+                // A new value has been selected
+                newSelect.val=1
+                // Check values
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSM"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Number nProg
+    Attributes
+        ID                 : 44
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Reset push state of last selected value
+                b[newValTargetId.val].bco=idle.bco
+                b[newValTargetId.val].pco=idle.pco
+                // Mark this field as pushed
+                newValTargetId.val=nProg.id
+                b[newValTargetId.val].bco=idle.pco
+                b[newValTargetId.val].pco=idle.bco
+                // A new value has been selected
+                newSelect.val=1
+                // Check values
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSX"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Number nMaxSteps2
+    Attributes
+        ID                 : 47
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 99
+    
+    Events
+        Touch Press Event
+            // Reset push state of last selected value
+            b[newValTargetId.val].bco=idle.bco
+            b[newValTargetId.val].pco=idle.pco
+            // Mark this field as pushed
+            newValTargetId.val=nStep.id
+            b[newValTargetId.val].bco=idle.pco
+            b[newValTargetId.val].pco=idle.bco
+            // A new value has been selected
+            newSelect.val=1
+            // Check if values are legal
+            click fCheck,0
+        
+XFloat nNTau
+    Attributes
+        ID                 : 25
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 30
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Reset push state of last selected value
+                b[newValTargetId.val].bco=idle.bco
+                b[newValTargetId.val].pco=idle.pco
+                // Mark this field as pushed
+                newValTargetId.val=nNTau.id
+                b[newValTargetId.val].bco=idle.pco
+                b[newValTargetId.val].pco=idle.bco
+                // A new value has been selected
+                newSelect.val=1
+                // Check values
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSS"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+XFloat nAmp
+    Attributes
+        ID                 : 28
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 10
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Reset push state of last selected value
+                b[newValTargetId.val].bco=idle.bco
+                b[newValTargetId.val].pco=idle.pco
+                // Mark this field as pushed
+                newValTargetId.val=nAmp.id
+                b[newValTargetId.val].bco=idle.pco
+                b[newValTargetId.val].pco=idle.bco
+                // A new value has been selected
+                newSelect.val=1
+                // Check values
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+XFloat idle
+    Attributes
+        ID                 : 34
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 0
+    
+Text tTitle
+    Attributes
+        ID                 : 1
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Envelope Settings
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tUser
+    Attributes
+        ID                 : 2
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  Guest
+        Max. Text Size     : 32
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMSI
+    Attributes
+        ID                 : 3
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Simple
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMML
+    Attributes
+        ID                 : 4
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : MIDI Live
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMLS
+    Attributes
+        ID                 : 5
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Lightsaber
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHideBack2
+    Attributes
+        ID                 : 6
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text tStep
+    Attributes
+        ID                 : 19
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Step
+        Max. Text Size     : 15
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tAmp
+    Attributes
+        ID                 : 20
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Amplitude
+        Max. Text Size     : 15
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tDur
+    Attributes
+        ID                 : 21
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Duration
+        Max. Text Size     : 15
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tNTau
+    Attributes
+        ID                 : 22
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : n-tau
+        Max. Text Size     : 15
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tms
+    Attributes
+        ID                 : 24
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : ms
+        Max. Text Size     : 2
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text fCheck
+    Attributes
+        ID                 : 35
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 10
+    
+    Events
+        Touch Release Event
+            // Settings must stay in certain ranges. this function checks and fixes them.
+            // Okay on this page this event does some more voodoo.
+            if(b[newValTargetId.val].type==59)
+            {
+                // If selected component has a decimal point.
+                bL.txt="«"
+                bR.txt="»"
+            }else
+            {
+                bL.txt="-1"
+                bR.txt="+1"
+            }
+            // ifs can only compare variables, they cannot do calulations...
+            sys0=63+1
+            if(nProg.val==0)
+            {
+                nProg.val=63
+            }else if(nProg.val==sys0)
+            {
+                nProg.val=1
+            }else if(nProg.val>sys0)
+            {
+                nProg.val=63
+            }else if(nProg.val<1)
+            {
+                nProg.val=1
+            }
+            // ifs can only compare variables, they cannot do calulations...
+            sys0=maxSteps.val+1
+            if(nStep.val==0)
+            {
+                nStep.val=maxSteps.val
+            }else if(nStep.val==sys0)
+            {
+                nStep.val=1
+            }else if(nStep.val>sys0)
+            {
+                nStep.val=maxSteps.val
+            }else if(nStep.val<1)
+            {
+                nStep.val=1
+            }
+            // ifs can only compare variables, they cannot do calulations...
+            sys0=maxSteps.val+1
+            if(nNext.val==0)
+            {
+                nNext.val=maxSteps.val
+            }else if(nNext.val==sys0)
+            {
+                nNext.val=1
+            }else if(nNext.val>sys0)
+            {
+                nNext.val=maxSteps.val
+            }else if(nNext.val<1)
+            {
+                nNext.val=1
+            }
+            if(nStep.val==maxSteps.val)
+            {
+                nNext.val=maxSteps.val
+                nAmp.val=0
+                vis tRelease1,1
+            }else
+            {
+                vis tRelease1,0
+            }
+            if(nNext.val==maxSteps.val)
+            {
+                vis tRelease2,1
+            }else
+            {
+                vis tRelease2,0
+            }
+            if(nAmp.val<0)
+            {
+                nAmp.val=0
+            }
+            if(nDur.val<0)
+            {
+                nDur.val=0
+            }
+            if(newSelect.val==0)
+            {
+                //
+                // Mark field as modified
+                sys0=0
+                if(newValTargetId.val==nProg.id)
+                {
+                    sys0=0x1f
+                }
+                if(newValTargetId.val==nStep.id)
+                {
+                    sys0=1
+                }else if(newValTargetId.val==nNext.id)
+                {
+                    sys0=1<<1
+                }else if(newValTargetId.val==nAmp.id)
+                {
+                    sys0=1<<2
+                }else if(newValTargetId.val==nDur.id)
+                {
+                    sys0=1<<3
+                }else if(newValTargetId.val==nNTau.id)
+                {
+                    sys0=1<<4
+                }
+                changedValues.val|=sys0
+            }
+        
+Text tRelease1
+    Attributes
+        ID                 : 37
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : (Release)
+        Max. Text Size     : 15
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tSlash1
+    Attributes
+        ID                 : 39
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : /
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tNextStep
+    Attributes
+        ID                 : 40
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Next Step
+        Max. Text Size     : 15
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tProg
+    Attributes
+        ID                 : 43
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Program
+        Max. Text Size     : 15
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tSlash2
+    Attributes
+        ID                 : 48
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : /
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tRelease2
+    Attributes
+        ID                 : 49
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : (Release)
+        Max. Text Size     : 15
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+QR Code qrHelp
+    Attributes
+        ID               : 53
+        Scope            : local
+        Send Component ID: disabled
+        Text             : git.io/JkvOK
+        Max. Text Size   : 16
+    
+    Events
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                showHelp.val=1
+                tempStr.txt=tTitle.txt
+                tTitle.txt="Get Help/Link for..."
+                // keep QR code on top
+                ref qrHelp
+                // Show modified title before stopping screen refreshs.
+                doevents
+                ref_stop
+            }else
+            {
+                showHelp.val=0
+                tTitle.txt=tempStr.txt
+                // keep QR code on top
+                ref qrHelp
+                ref_star
+            }
+        
+Button b0
+    Attributes
+        ID               : 7
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 0
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg7"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b1
+    Attributes
+        ID               : 8
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 1
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg7"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                if(b[newValTargetId.val].val<0)
+                {
+                    b[newValTargetId.val].val-=1
+                }else
+                {
+                    b[newValTargetId.val].val+=1
+                }
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b2
+    Attributes
+        ID               : 9
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 2
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg7"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                if(b[newValTargetId.val].val<0)
+                {
+                    b[newValTargetId.val].val-=2
+                }else
+                {
+                    b[newValTargetId.val].val+=2
+                }
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b3
+    Attributes
+        ID               : 10
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 3
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg7"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                if(b[newValTargetId.val].val<0)
+                {
+                    b[newValTargetId.val].val-=3
+                }else
+                {
+                    b[newValTargetId.val].val+=3
+                }
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b4
+    Attributes
+        ID               : 11
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 4
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg7"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                if(b[newValTargetId.val].val<0)
+                {
+                    b[newValTargetId.val].val-=4
+                }else
+                {
+                    b[newValTargetId.val].val+=4
+                }
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b5
+    Attributes
+        ID               : 12
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 5
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg7"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                if(b[newValTargetId.val].val<0)
+                {
+                    b[newValTargetId.val].val-=5
+                }else
+                {
+                    b[newValTargetId.val].val+=5
+                }
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b6
+    Attributes
+        ID               : 13
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 6
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg7"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                if(b[newValTargetId.val].val<0)
+                {
+                    b[newValTargetId.val].val-=6
+                }else
+                {
+                    b[newValTargetId.val].val+=6
+                }
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b7
+    Attributes
+        ID               : 14
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 7
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg7"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                if(b[newValTargetId.val].val<0)
+                {
+                    b[newValTargetId.val].val-=7
+                }else
+                {
+                    b[newValTargetId.val].val+=7
+                }
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b8
+    Attributes
+        ID               : 15
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 8
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg7"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                if(b[newValTargetId.val].val<0)
+                {
+                    b[newValTargetId.val].val-=8
+                }else
+                {
+                    b[newValTargetId.val].val+=8
+                }
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b9
+    Attributes
+        ID               : 16
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 9
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg7"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                if(b[newValTargetId.val].val<0)
+                {
+                    b[newValTargetId.val].val-=9
+                }else
+                {
+                    b[newValTargetId.val].val+=9
+                }
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bClear
+    Attributes
+        ID               : 17
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : X
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg7"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                //if(newValTargetId.val==nProg.id||newValTargetId.val==nStep.id)
+                //{
+                //  b[newValTargetId.val].val=1
+                //}else
+                //{
+                b[newValTargetId.val].val=0
+                //}
+                //click fCheck,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bSet
+    Attributes
+        ID               : 18
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Set Values
+        Max. Text Size   : 20
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxS9"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                click bOK,0
+                //
+                // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
+                // Data byte 1:
+                //    Bit 6-7: 3 = ADSR settings.
+                //    Bit 0-5: 0: Update EEPROM. 1-63: ADSR Program which will be modified.
+                // Data byte 2: Parameter that is set.
+                //    0: Set current step (byte 3 ignored, should be 0) (Like NRP number)
+                //    1: Set next step (byte 3 ignored, should be 0)
+                //    2: Set amplitude
+                //    3: Set duration in milliseconds
+                //    4: Set n-tau.
+                // Data Byte 3:
+                //   Bit 0-6: Power of 10 by which the value (bytes 4-5) is divided.
+                //   Bit 7: 0: Value is positive. 1: Value is negative.
+                // Data Byte 4: Value, LSB
+                // Data Byte 5: Value, MSB
+                //
+                // Send all changes
+                changedValues.val=0x1f
+                sys1=0
+                while(sys1>=0)
+                {
+                    // sys1 contains Data Byte 2
+                    // See fCheck to see how changedValues is set.
+                    sys1=1
+                    sys1=sys1&changedValues.val
+                    if(sys1>0)
+                    {
+                        changedValues.val-=sys1
+                        sys1=0
+                    }else
+                    {
+                        sys1=1<<1
+                        sys1=sys1&changedValues.val
+                        if(sys1>0)
+                        {
+                            changedValues.val-=sys1
+                            sys1=1
+                        }else
+                        {
+                            sys1=1<<2
+                            sys1=sys1&changedValues.val
+                            if(sys1>0)
+                            {
+                                changedValues.val-=sys1
+                                sys1=2
+                            }else
+                            {
+                                sys1=1<<3
+                                sys1=sys1&changedValues.val
+                                if(sys1>0)
+                                {
+                                    changedValues.val-=sys1
+                                    sys1=3
+                                }else
+                                {
+                                    sys1=1<<4
+                                    sys1=sys1&changedValues.val
+                                    if(sys1>0)
+                                    {
+                                        changedValues.val-=sys1
+                                        sys1=4
+                                    }else
+                                    {
+                                        sys1=1<<5
+                                        sys1=sys1&changedValues.val
+                                        if(sys1>0)
+                                        {
+                                            changedValues.val-=sys1
+                                            sys1=5
+                                        }else
+                                        {
+                                            sys1=-1
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if(sys1>=0)
+                    {
+                        // sys2 contains Data Byte 3-5
+                        sys2=0
+                        if(sys1==0)
+                        {
+                            sys2=nStep.val-1
+                            sys0=nStep.id
+                        }else if(sys1==1)
+                        {
+                            sys2=nNext.val-1
+                            sys0=nNext.id
+                        }else if(sys1==2)
+                        {
+                            sys2=nAmp.val
+                            sys0=nAmp.id
+                        }else if(sys1==3)
+                        {
+                            sys2=nDur.val
+                            sys0=nDur.id
+                        }else if(sys1==4)
+                        {
+                            sys2=nNTau.val
+                            sys0=nNTau.id
+                        }
+                        if(sys2<0)
+                        {
+                            // We want the absolute value (same bits for positive and negative value)...
+                            sys2=0-sys2
+                            // ... and indicate the sign with a sign bit only.
+                            sys2=sys2<<1
+                            sys2+=1
+                        }else
+                        {
+                            // Only do the bitshifting (sign bit remains 0)
+                            sys2=sys2<<1
+                        }
+                        sys2=sys2<<7
+                        if(b[sys0].type==59)
+                        {
+                            sys2+=b[sys0].vvs1
+                        }
+                        //
+                        // sys0 contains Data Byte 1
+                        sys0=3<<6
+                        sys0+=nProg.val
+                        prints "d",1
+                        prints sys0,1
+                        prints sys1,1
+                        prints sys2,3
+                    }
+                }
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bReturn
+    Attributes
+        ID               : 26
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Return
+        Max. Text Size   : 10
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                click bSaveEEPROM,0
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSH"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                page Settings
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b10
+    Attributes
+        ID               : 29
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : ±
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg7"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                b[newValTargetId.val].val*=-1
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bL
+    Attributes
+        ID               : 30
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : «
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg7"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                newSelect.val=0
+                if(b[newValTargetId.val].type==59)
+                {
+                    // If selected component has a decimal point, move it.
+                    b[newValTargetId.val].vvs1+=1
+                }else
+                {
+                    // If selected component is a normal number, decrement it.
+                    b[newValTargetId.val].val-=1
+                }
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bR
+    Attributes
+        ID               : 31
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : »
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg7"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                newSelect.val=0
+                if(b[newValTargetId.val].type==59)
+                {
+                    // If selected component has a decimal point.
+                    if(b[newValTargetId.val].vvs1>0)
+                    {
+                        b[newValTargetId.val].vvs1-=1
+                    }
+                }else
+                {
+                    // If selected component is a normal number, increment it.
+                    b[newValTargetId.val].val+=1
+                }
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bSaveEEPROM
+    Attributes
+        ID               : 42
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Write EEPROM
+        Max. Text Size   : 30
+    
+    Events
+        Touch Release Event
+            click fCheck,0
+            //
+            // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
+            // Data byte 1:
+            //    Bit 6-7: 3 = ADSR settings.
+            //    Bit 0-5: 0: Update EEPROM. 1-63: ADSR Program which will be modified.
+            // Data byte 2: Parameter that is set.
+            //    0: Set current step (byte 3 ignored, should be 0) (Like NRP number)
+            //    1: Set next step (byte 3 ignored, should be 0)
+            //    2: Set amplitude
+            //    3: Set duration in milliseconds
+            //    4: Set n-tau.
+            // Data Byte 3:
+            //   Bit 0-6: Power of 10 by which the value (bytes 4-5) is divided.
+            //   Bit 7: 0: Value is positive. 1: Value is negative.
+            // Data Byte 4: Value, LSB
+            // Data Byte 5: Value, MSB
+            //
+            // sys0 contains Data Byte 1
+            sys0=3<<6
+            prints "d",1
+            prints sys0,1
+            prints 0,4
+            b[newValTargetId.val].bco=idle.bco
+            b[newValTargetId.val].pco=idle.pco
+            newValTargetId.val=idle.id
+        
+Button bOK
+    Attributes
+        ID               : 45
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : ok
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg7"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                click fCheck,0
+                b[newValTargetId.val].bco=idle.bco
+                b[newValTargetId.val].pco=idle.pco
+                newValTargetId.val=idle.id
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Hotspot fLoadModes
+    Attributes
+        ID               : 52
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Load active modes
+            sys0=Settings.activeModes.val&4
+            if(sys0!=0)
+            {
+                // Lightsaber Mode is active
+                tMLS.bco=Settings.backSelectCol2.val
+            }
+            //
+            // Display all active modes
+            sys0=Settings.activeModes.val&1
+            if(sys0!=0)
+            {
+                // Simple Mode is active
+                tMSI.bco=Settings.backSelectCol2.val
+            }
+            sys0=Settings.activeModes.val&2
+            if(sys0!=0)
+            {
+                // MIDI Live Mode is active
+                tMML.bco=Settings.backSelectCol2.val
+            }
+        
+Hotspot fLoadColors
+    Attributes
+        ID               : 54
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Changes all page components according to the current color set.
+            // Note: This component has to be the last component of the page.
+            //
+            // sys0: component id
+            // sys1: component type
+            // sys2: picture id offset for current color mode
+            sys2=Settings.colorMode.val*Settings.picCount.val
+            for(sys0=0;sys0<fLoadColors.id;sys0++)
+            {
+                // More convenient for typing
+                sys1=b[sys0].type
+                if(sys1==121)
+                {
+                    // Types that have bco
+                    // page
+                    if(b[sys0].bco==Settings.backCol2Deflt.val)
+                    {
+                        b[sys0].bco=Settings.backCol2.val
+                    }else
+                    {
+                        b[sys0].bco=Settings.backCol.val
+                    }
+                }else if(sys1==54||sys1==59||sys1==116||sys1==55)
+                {
+                    // Types that have bco, pco, and sta:
+                    // number, float, text, scroll text
+                    if(b[sys0].sta==1)
+                    {
+                        if(b[sys0].bco==Settings.backCol2Deflt.val)
+                        {
+                            b[sys0].bco=Settings.backCol2.val
+                            b[sys0].pco=Settings.frontCol2.val
+                        }else
+                        {
+                            b[sys0].bco=Settings.backCol.val
+                            b[sys0].pco=Settings.frontCol.val
+                        }
+                    }
+                }else if(sys1==98||sys1==53)
+                {
+                    // Types that have pco, pic, pco2, pic2, sta:
+                    // button, dual-state button
+                    if(b[sys0].sta==2)
+                    {
+                        b[sys0].pco=Settings.frontCol.val
+                        b[sys0].pco2=Settings.backCol.val
+                        b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                        b[sys0].pic+=sys2
+                        b[sys0].pic2=b[sys0].pic+1
+                    }
+                }else if(sys1==58)
+                {
+                    // Types that have bco, pco
+                    // QR Code
+                    b[sys0].bco=Settings.backCol.val
+                    b[sys0].pco=Settings.qrFrontCol.val
+                }else if(sys1==1)
+                {
+                    // Types that have pic, pic2:
+                    // slider
+                    b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                    b[sys0].pic+=sys2
+                    b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
+                    b[sys0].pic2+=sys2
+                }
+            }
+        

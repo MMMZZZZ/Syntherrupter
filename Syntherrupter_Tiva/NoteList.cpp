@@ -42,6 +42,7 @@ void NoteList::removeNote(Note* note)
         activeNotes--;
 
         note->number = 128;
+        note->nextChnNote = 0;
         for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
         {
             if (note->assignedTones[coil])

@@ -1,12 +1,33 @@
-Normal Blue:
+Light Mode Blue:
 	Red:    31
 	Green:  95
 	Blue:  160
-Dark Blue:
+Light Mode Dark Blue:
 	Red:    20
 	Green:  63
 	Blue:  106
-Gray:
+Light Mode Gray:
 	Red:   127
 	Green: 127
 	Blue:  127
+Light Mode Background:
+	Red:   255
+	Green: 255
+	Blue:  255
+	
+Dark Mode Blue:
+	Red:   156
+	Green: 195
+	Blue:  229
+Dark Mode Dark Blue:
+	Red:    20
+	Green:  63
+	Blue:  106
+Dark Mode Gray:
+	Red:   127
+	Green: 127
+	Blue:  127
+Dark Mode Background:
+	Red:    38
+	Green:  38
+	Blue:   38

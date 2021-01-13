@@ -1,35 +1,25 @@
 Page Error
-    Events
-        Preinitialize Event
-            
-        Postinitialize Event
-            
-        Touch Press Event
-            
-        Touch Release Event
-            
-        Page Exit Event
-            
-    Components
-        Text tTitle
-            Properties
-                Scope       : Local
-                Initial Text: "Fehler!"
-                Max. length : 25
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    
-        Text tError
-            Properties
-                Scope       : Local
-                Initial Text: "Unbekannter Fehler"
-                Max. length : 25
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    
+    Attributes
+        ID               : 0
+        Scope            : local
+        Send Component ID: disabled
+        Locked           : no
+    
+Text tTitle
+    Attributes
+        ID                 : 1
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Unspecified Error
+        Max. Text Size     : 25
+    
+Text tError
+    Attributes
+        ID                 : 2
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : No details available.
+        Max. Text Size     : 25
+    

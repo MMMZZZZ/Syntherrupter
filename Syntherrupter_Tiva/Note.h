@@ -22,7 +22,7 @@ public:
     virtual ~Note();
     bool isDead()
     {
-        return ((ADSRStep && ADSRVolume < 1e-6f) || number > 127);
+        return (number > 127);
     };
     uint32_t ADSRStep      = 0;
     uint8_t channel        = 0;
@@ -34,6 +34,7 @@ public:
     float rawVolume         = 0.0f;
     float ADSRVolume        = 0.0f;
     float finishedVolume    = 0.0f;
+    float pitch             = 0.0f;
     float frequency         = 0.0f;
     float periodUS          = 0.0f;
     float pan               = 0.5f;
@@ -44,6 +45,8 @@ public:
     Tone* assignedTones[COIL_COUNT];
     Note* prevNote = 0;
     Note* nextNote = 0;
+    Note* prevChnNote = 0;
+    Note* nextChnNote = 0;
 
     // For debugging purposes only.
     uint32_t id = 0;

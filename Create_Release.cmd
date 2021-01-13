@@ -1,7 +1,11 @@
+del /q Syntherrupter_Firmwares
+md Syntherrupter_Firmwares
 rem Start Nextion Build VM.
 "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" controlvm "Windows 7 Nextion VBox" poweroff
 "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" snapshot "Windows 7 Nextion VBox" restore "Starting in 3 seconds..." 
 "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" startvm "Windows 7 Nextion VBox" --type headless
+rem copy ESP8266 binary to release folder. Usually no need for (re)compiling. 
+robocopy Syntherrupter_Lightsaber Syntherrupter_Firmwares Syntherrupter_Lightsaber.ino.generic.bin
 rem Compile Tiva Firmware for all possible output numbers.
 for %%i in (1,2,3,4,5,6) do ( 
  C:\TI\ccsv8\eclipse\eclipsec -noSplash -data "C:\Users\Max\workspace_v8" -application com.ti.ccstudio.apps.projectBuild -ccs.projects Syntherrupter_Tiva -ccs.configuration Release_%%i
@@ -20,5 +24,3 @@ if exist "*.HMI" goto loop
 "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" snapshot "Windows 7 Nextion VBox" restore "Starting in 3 seconds..."
 "C:\Program Files\WinRAR\winrar" a -afzip -m5 ..\Syntherrupter_Firmwares.zip
 cd ..
-del /q Syntherrupter_Firmwares
-md Syntherrupter_Firmwares

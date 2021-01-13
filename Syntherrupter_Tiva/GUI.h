@@ -9,12 +9,12 @@
 #define GUI_H_
 
 
-#include "InterrupterConfig.h"
-#include "EEPROMSettings.h"
 #include "stdint.h"
 #include "stdbool.h"
-#include "driverlib/uart.h"
+#include "driverlib/gpio.h"
 #include "System.h"
+#include "InterrupterConfig.h"
+#include "EEPROMSettings.h"
 #include "Nextion.h"
 #include "Coil.h"
 
@@ -32,10 +32,14 @@ enum class Mode {
     midiLiveEnter,
     midiLive,
     midiLiveExit,
+    lightsaberEnter,
+    lightsaber,
+    lightsaberExit,
     userSelect,
     settings,
     settingsExit,
     nxtFWUpdate,
+    espFWUpdate,
 };
 
 
@@ -80,26 +84,31 @@ private:
         EEE = false;
     };
 
+    static void lightsaberEnter()
+    {
+        LightSaber::start();
+    }
+    static void lightsaber();
+    static void lightsaberExit()
+    {
+        LightSaber::stop();
+    }
+
     static void userSelect();
     static void settings();
     static void settingsExit()
     {
         // Update EEPROM
-        cfg.update();
+        EEPROMSettings::update();
     };
 
-    static void nxtFWUpdate();
+    static void serialPassthrough(uint32_t uartNum);
+
     static bool checkValue(uint32_t val);
 
     static Nextion nxt;
-    static EEPROMSettings cfg;
-
-    static Tone* simpleTone;
 
     static uint32_t state;
-    static uint32_t userMaxOntimeUS;
-    static uint32_t userMaxBPS;
-    static uint32_t userMaxDutyPerm;
     static uint32_t command;
     static uint32_t commandData[33]; // sized to max length of all commands.
     static Mode mode;

@@ -10,14 +10,8 @@
 
 
 Nextion GUI::nxt;
-EEPROMSettings GUI::cfg;
-
-Tone* GUI::simpleTone;
 
 uint32_t GUI::state           = 0;
-uint32_t GUI::userMaxOntimeUS = 0;
-uint32_t GUI::userMaxBPS      = 0;
-uint32_t GUI::userMaxDutyPerm = 0;
 uint32_t GUI::command         = 0;
 uint32_t GUI::commandData[33] = {0, 0, 0, 0, 0, 0, 0, 0,
                                  0, 0, 0, 0, 0, 0, 0, 0,
@@ -48,7 +42,7 @@ GUI::~GUI()
 
 void GUI::init()
 {
-    bool cfgInEEPROM = cfg.init();
+    bool cfgInEEPROM = EEPROMSettings::init();
     nxt.init(3, 115200, nxtTimeoutUS);
 
     /* Try to modify and read a Nextion value. If this works we know the
@@ -97,10 +91,10 @@ void GUI::init()
             for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
                 // Load settings
-                uint32_t maxOntimeUS = cfg.getCoilsMaxOntimeUS(coil);
-                uint32_t minOffUS    = cfg.getCoilsMinOffUS(coil);
-                uint32_t maxVoices   = cfg.getCoilsMaxVoices(coil);
-                uint32_t maxDutyPerm = cfg.getCoilsMaxDutyPerm(coil);
+                uint32_t maxOntimeUS = EEPROMSettings::getCoilsMaxOntimeUS(coil);
+                uint32_t minOffUS    = EEPROMSettings::getCoilsMinOffUS(coil);
+                uint32_t maxVoices   = EEPROMSettings::getCoilsMaxVoices(coil);
+                uint32_t maxDutyPerm = EEPROMSettings::getCoilsMaxDutyPerm(coil);
 
                 if (maxOntimeUS > allCoilsMaxOntimeUS)
                 {
@@ -119,11 +113,11 @@ void GUI::init()
 
                 // Send to Nextion
                 nxt.printf("%s.coil%iOn.val=%i\xff\xff\xff",
-                              AllCoilSettings, coil + 1, maxOntimeUS);
+                           AllCoilSettings, coil + 1, maxOntimeUS);
                 nxt.printf("%s.coil%iOffVoices.val=%i\xff\xff\xff",
-                              AllCoilSettings, coil + 1, (maxVoices << 16) + minOffUS);
+                           AllCoilSettings, coil + 1, (maxVoices << 16) + minOffUS);
                 nxt.printf("%s.coil%iDuty.val=%i\xff\xff\xff",
-                              AllCoilSettings, coil + 1, maxDutyPerm);
+                           AllCoilSettings, coil + 1, maxDutyPerm);
                 // Give time to the UART to send the data
                 System::delayUS(20000);
             }
@@ -132,9 +126,9 @@ void GUI::init()
             const char *AllUsersPage = "User_Settings";
             for (uint32_t user = 0; user < 3; user++)
             {
-                uint32_t maxOntimeUS = cfg.getUsersMaxOntimeUS(user);
-                uint32_t maxBPS      = cfg.getUsersMaxBPS(user);
-                uint32_t maxDutyPerm = cfg.getUsersMaxDutyPerm(user);
+                uint32_t maxOntimeUS = EEPROMSettings::getUsersMaxOntimeUS(user);
+                uint32_t maxBPS      = EEPROMSettings::getUsersMaxBPS(user);
+                uint32_t maxDutyPerm = EEPROMSettings::getUsersMaxDutyPerm(user);
 
                 if (user == 2)
                 {
@@ -143,44 +137,54 @@ void GUI::init()
                 }
 
                 nxt.printf("%s.u%iName.txt=\"%s\"\xff\xff\xff",
-                              AllUsersPage, user, cfg.userNames[user]);
+                           AllUsersPage, user, EEPROMSettings::userNames[user]);
                 nxt.printf("%s.u%iCode.txt=\"%s\"\xff\xff\xff",
-                              AllUsersPage, user, cfg.userPwds[user]);
+                           AllUsersPage, user, EEPROMSettings::userPwds[user]);
                 nxt.printf("%s.u%iOntime.val=%i\xff\xff\xff",
-                              AllUsersPage, user, maxOntimeUS);
+                           AllUsersPage, user, maxOntimeUS);
                 nxt.printf("%s.u%iBPS.val=%i\xff\xff\xff",
-                              AllUsersPage, user, maxBPS);
+                           AllUsersPage, user, maxBPS);
                 nxt.printf("%s.u%iDuty.val=%i\xff\xff\xff",
-                              AllUsersPage, user, maxDutyPerm);
+                           AllUsersPage, user, maxDutyPerm);
                 // Give time to the UART to send the data
                 System::delayUS(20000);
             }
 
+            // ADSR
+            EEPROMSettings::getMIDIPrograms();
+
             // Other Settings
-            uint32_t buttonHoldTime =  cfg.otherSettings[0] & 0x0000ffff;
-            uint32_t sleepDelay     = (cfg.otherSettings[0] & 0xffff0000) >> 16;
-            uint32_t dispBrightness =  cfg.otherSettings[1] & 0xff;
+            uint32_t buttonHoldTime =  EEPROMSettings::otherSettings[0]        & 0xffff;
+            uint32_t sleepDelay     = (EEPROMSettings::otherSettings[0] >> 16) & 0xffff;
+            uint32_t dispBrightness =  EEPROMSettings::otherSettings[1]        & 0xff;
+            uint32_t backOff        = (EEPROMSettings::otherSettings[1] >>  8) & 0b1;
+            uint32_t colorMode      = (EEPROMSettings::otherSettings[1] >>  9) & 0b1;
             nxt.printf("Other_Settings.nHoldTime.val=%i\xff\xff\xff",
                           buttonHoldTime);
             nxt.printf("thsp=%i\xff\xff\xff", sleepDelay);
             nxt.printf("dim=%i\xff\xff\xff", dispBrightness);
+            //nxt.printf("Other_Settings.nBackOff.val=%i\xff\xff\xff", backOff);
+            nxt.printf("Settings.colorMode.val=%i\xff\xff\xff", colorMode);
+
+            // Give time to the UART to send the data
+            System::delayUS(20000);
+        }
+        else
+        {
+            // Show warning if no valid config is present in EEPROM.
+            nxt.sendCmd("tStartup.txt=sNoConfig.txt");
+            nxt.sendCmd("tStartup.font=0");
+
+            EEPROMSettings::setMIDIPrograms();
         }
         nxt.setVal("TC_Settings.maxCoilCount", COIL_COUNT);
-
-        // Give time to the UART to send the data
-        System::delayUS(20000);
+        nxt.setVal("ADSR_Settings.maxSteps", MIDIProgram::DATA_POINTS);
 
         // Display Tiva firmware versions
         nxt.setTxt("tTivaFWVersion", TIVA_FW_VERSION);
 
         // Initialization completed.
-        nxt.sendCmd("vis 255,1");
-
-        // Show warning if no valid config is present in EEPROM. Warning is one layer below normal startup picture.
-        if (!cfgInEEPROM)
-        {
-            nxt.sendCmd("vis pStartup,0");
-        }
+        nxt.sendCmd("click comOk,1");
     }
 }
 
@@ -276,6 +280,10 @@ uint32_t GUI::update()
                 {
                     mode = Mode::midiLiveEnter;
                 }
+                else if (modeByte0 == 'l' && modeByte1 == 's')
+                {
+                    mode = Mode::lightsaberEnter;
+                }
                 else if (modeByte0 == 'u' && modeByte1 == 's')
                 {
                     mode = Mode::userSelect;
@@ -283,6 +291,10 @@ uint32_t GUI::update()
                 else if (modeByte0 == 'n' && modeByte1 == 'u')
                 {
                     mode = Mode::nxtFWUpdate;
+                }
+                else if (modeByte0 == 'e' && modeByte1 == 'u')
+                {
+                    mode = Mode::espFWUpdate;
                 }
                 else if (modeByte0 == 's' && modeByte1 == 'e')
                 {
@@ -294,6 +306,7 @@ uint32_t GUI::update()
                     {
                         coils[coil].midi.setVolSettings(0.0f, 0.0f);
                         coils[coil].simple.setOntimeUS(0.0f, true);
+                        coils[coil].lightsaber.setOntimeUS(0.0f);
                     }
                 }
                 else
@@ -411,6 +424,18 @@ uint32_t GUI::update()
         mode = Mode::idle;
         break;
 
+    case Mode::lightsaberEnter:
+        lightsaberEnter();
+        mode = Mode::lightsaber;
+        break;
+    case Mode::lightsaber:
+        lightsaber();
+        break;
+    case Mode::lightsaberExit:
+        lightsaberExit();
+        mode = Mode::idle;
+        break;
+
     case Mode::settings:
         settings();
         break;
@@ -420,7 +445,10 @@ uint32_t GUI::update()
         break;
 
     case Mode::nxtFWUpdate:
-        nxtFWUpdate();
+        serialPassthrough(3);
+        break;
+    case Mode::espFWUpdate:
+        serialPassthrough(2);
         break;
 
     case Mode::idle:
@@ -437,18 +465,7 @@ uint32_t GUI::update()
 
 void GUI::userSelect()
 {
-    if (command == 'd')
-    {
-        uint32_t user = commandData[0];
-        if (user < 2)
-        {
-            userMaxOntimeUS = cfg.getUsersMaxOntimeUS(user);
-            userMaxBPS      = cfg.getUsersMaxBPS(user);
-            userMaxDutyPerm = cfg.getUsersMaxDutyPerm(user);
-        }
-        // Data applied; clear command byte.
-        command = 0;
-    }
+    // obsolete; left for backward compatibility.
     mode = Mode::idle;
 }
 
@@ -580,40 +597,116 @@ void GUI::midiLive()
     }
 }
 
-void GUI::settings()
+void GUI::lightsaber()
 {
     if (command == 'd')
     {
-        // Coil, user or other settings changed.
-        // Data format documented in separate file.
+        uint32_t targetCoils =  commandData[0];
+        uint32_t type        =  commandData[1];
+        uint32_t data1       =  commandData[2];
+        uint32_t data2       = (commandData[4] << 8) + commandData[3];
+
+        if (type == 0)
+        {
+            // Set which lightsabers play on this coil.
+            for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+            {
+                if (targetCoils & (1 << coil))
+                {
+                    coils[coil].lightsaber.setActiveLightsabers(data1);
+                    coils[coil].lightsaber.setOntimeUS(data2);
+                }
+            }
+        }
+        else if (type == 1)
+        {
+            LightSaber::ESPSetID(data1);
+        }
+        // Data applied; clear command byte.
+        command = 0;
+    }
+}
+
+void GUI::settings()
+{
+    // Data format documented in separate file.
+    if (command == 'd')
+    {
         uint32_t settings = (commandData[0] & 0b11000000) >> 6;
         uint32_t number =    commandData[0] & 0b00111111;
-        uint32_t data   =   (commandData[4] << 24)
-                          + (commandData[3] << 16)
-                          + (commandData[2] << 8)
-                          +  commandData[1];
-        if (settings == 1 && (number - 1) < COIL_COUNT)
+        if (settings < 3)
         {
-            // Coil limits. Number ranges from 1-6 instead of 0-5.
-            number--;
-            cfg.coilSettings[number] = data;
-            coils[number].setMaxVoices(cfg.getCoilsMaxVoices(number));
-            coils[number].setMinOfftimeUS(cfg.getCoilsMinOffUS(number));
-            coils[number].setMaxDutyPerm(cfg.getCoilsMaxDutyPerm(number));
-            coils[number].setMaxOntimeUS(cfg.getCoilsMaxOntimeUS(number));
+            // Coil, user or other settings changed.
+            uint32_t data   =   (commandData[4] << 24)
+                              + (commandData[3] << 16)
+                              + (commandData[2] << 8)
+                              +  commandData[1];
+            if (settings == 1 && (number - 1) < COIL_COUNT)
+            {
+                // Coil limits. Number ranges from 1-6 instead of 0-5.
+                number--;
+                EEPROMSettings::coilSettings[number] = data;
+                coils[number].setMaxVoices(EEPROMSettings::getCoilsMaxVoices(number));
+                coils[number].setMinOfftimeUS(EEPROMSettings::getCoilsMinOffUS(number));
+                coils[number].setMaxDutyPerm(EEPROMSettings::getCoilsMaxDutyPerm(number));
+                coils[number].setMaxOntimeUS(EEPROMSettings::getCoilsMaxOntimeUS(number));
+            }
+            else if (settings == 0 && number < 3)
+            {
+                // User limits.
+                EEPROMSettings::userSettings[number] = data;
+            }
+            else if (settings == 2 && number < 10)
+            {
+                // Other (general) settings
+                EEPROMSettings::otherSettings[number] = data;
+            }
         }
-        else if (settings == 0 && number < 3)
+        else
         {
-            // User limits.
-            cfg.userSettings[number] = data;
-            userMaxOntimeUS = cfg.getUsersMaxOntimeUS(number);
-            userMaxBPS      = cfg.getUsersMaxBPS(number);
-            userMaxDutyPerm = cfg.getUsersMaxDutyPerm(number);
-        }
-        else if (settings == 2 && number < 10)
-        {
-            // Other (general) settings
-            cfg.otherSettings[number] = data;
+            // ADSR settings
+            if (!number)
+            {
+                // Command to store current ADSR settings to EEPROM
+                EEPROMSettings::setMIDIPrograms();
+            }
+            else if (number < MIDI::MAX_PROGRAMS)
+            {
+                static uint32_t index{0}, nextStep{1};
+                static float amplitude{1.0f}, durationUS{1000.0f}, ntau{0.0f};
+
+                float sign = 1.0f;
+                if (commandData[2] & 0b10000000)
+                {
+                    sign = -1.0f;
+                }
+
+                float factor = powf(10.0f, - float(commandData[2] & 0x7f));
+                float val      = (commandData[4] << 8) + commandData[3];
+
+                val *= sign * factor;
+
+                switch (commandData[1])
+                {
+                    case 0: // current step
+                        index      = commandData[3];
+                        break;
+                    case 1: // next step
+                        nextStep   = commandData[3];
+                        break;
+                    case 2: // amplitude
+                        amplitude  = val;
+                        break;
+                    case 3: // duration (ms)
+                        durationUS = 1000.0f * val;
+                        break;
+                    case 4: // ntau
+                        ntau       = val;
+                        break;
+                }
+
+                MIDI::programs[number].setDataPoint(index, amplitude, durationUS, ntau, nextStep);
+            }
         }
         // Data applied; clear command byte.
         command = 0;
@@ -628,99 +721,83 @@ void GUI::settings()
             // Data contains user password
             for (uint32_t i = 0; i < length; i++)
             {
-                cfg.userPwds[user][i] = commandData[i + 1];
+                EEPROMSettings::userPwds[user][i] = commandData[i + 1];
             }
-            cfg.userPwds[user][length] = '\0';
+            EEPROMSettings::userPwds[user][length] = '\0';
         }
         else
         {
             // Data contains user name
             for (uint32_t i = 0; i < length; i++)
             {
-                cfg.userNames[user][i] = commandData[i + 1];
+                EEPROMSettings::userNames[user][i] = commandData[i + 1];
             }
-            cfg.userNames[user][length] = '\0';
+            EEPROMSettings::userNames[user][length] = '\0';
         }
         // Data applied; clear command byte.
         command = 0;
     }
 }
 
-void GUI::nxtFWUpdate()
+void GUI::serialPassthrough(uint32_t uartNum)
 {
-    // Stop normal operation and pass data between Nextion UART and USB UART
-    // After upload is done (1 sec timeout) the uC performs a reset.
+    /*
+     * Disable Interrupts and UARTs and pass data between the USB serial port
+     * and the selected serial port.
+     *
+     * This is done via polling to operate independantly of the baud rate
+     * Since Syntherrupter does nothing else during this time, this doesn't
+     * cause timing issues.
+     *
+     * Note: To leave this mode you have to power cycle Syntherrupter.
+     */
 
-    // Stop Nextion UARTstdio operation
-    nxt.disableStdio();
+    IntMasterDisable();
 
-    // UARTs are supposed to be initialized.
-    uint32_t nxtUARTBase   = nxt.getUARTBase();
-    uint32_t nxtUARTPeriph = nxt.getUARTPeriph();
-    uint32_t usbUARTBase   = UART0_BASE;
-    uint32_t baudRate      = nxt.getBaudRate();
+    // USB UART is UART 0
+    uint32_t USBPort     = UART::UART_MAPPING[0][UART::UART_PORT_BASE];
+    uint32_t USBRXPin    = UART::UART_MAPPING[0][UART::UART_RX_PIN];
+    uint32_t USBTXPin    = UART::UART_MAPPING[0][UART::UART_TX_PIN];
+    uint32_t targetPort  = UART::UART_MAPPING[uartNum][UART::UART_PORT_BASE];
+    uint32_t targetRXPin = UART::UART_MAPPING[uartNum][UART::UART_RX_PIN];
+    uint32_t targetTXPin = UART::UART_MAPPING[uartNum][UART::UART_TX_PIN];
 
-    // Re-init to make sure settings are correct
-    if (SysCtlPeripheralReady(SYSCTL_PERIPH_UART0))
-    {
-        SysCtlPeripheralReset(SYSCTL_PERIPH_UART0);
-    }
-    else
-    {
-        SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
-        SysCtlDelay(3);
-    }
-    if (SysCtlPeripheralReady(nxtUARTPeriph))
-    {
-        SysCtlPeripheralReset(nxtUARTPeriph);
-    }
-    else
-    {
-        SysCtlPeripheralEnable(nxtUARTPeriph);
-        SysCtlDelay(3);
-    }
-    UARTConfigSetExpClk(nxtUARTBase, System::getClockFreq(), baudRate,
-                        (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
-    UARTConfigSetExpClk(usbUARTBase, System::getClockFreq(), baudRate,
-                        (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
-    UARTFIFOEnable(nxtUARTBase);
-    UARTFIFOEnable(usbUARTBase);
+    SysCtlPeripheralDisable(UART::UART_MAPPING[0][UART::UART_SYSCTL_PERIPH]);
+    SysCtlPeripheralDisable(UART::UART_MAPPING[uartNum][UART::UART_SYSCTL_PERIPH]);
 
-    bool uploadStarted               = false;
-    uint32_t timeUS                  = System::getSystemTimeUS();
-    uint32_t uploadBeginUS           = timeUS;
-    constexpr uint32_t minDurationUS = 15000000;
-    constexpr uint32_t timeoutUS     = 1000000; // must be smaller than minUploadDurationUS
+    GPIOPinTypeGPIOOutput(USBPort,    USBTXPin);
+    GPIOPinTypeGPIOOutput(targetPort, targetTXPin);
+    GPIOPinTypeGPIOInput(USBPort,    USBRXPin);
+    GPIOPinTypeGPIOInput(targetPort, targetRXPin);
+    GPIOPadConfigSet(USBPort, USBRXPin, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+    GPIOPadConfigSet(USBPort, USBRXPin, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+
+
     while (42)
     {
-        if (UARTCharsAvail(nxtUARTBase))
+        uint8_t USBRXState    = 0;
+        uint8_t targetRXState = 0;
+
+        // Read Pins
+        if (GPIOPinRead(USBPort, USBRXPin) & 0xff)
         {
-            unsigned char c = UARTCharGet(nxtUARTBase);
-            UARTCharPutNonBlocking(usbUARTBase, c);
+            USBRXState    = 0xff;
         }
-        if (UARTCharsAvail(usbUARTBase))
+        else
         {
-            timeUS = System::getSystemTimeUS();
-            if (!uploadStarted)
-            {
-                uploadStarted = true;
-                uploadBeginUS = timeUS;
-            }
-            unsigned char c = UARTCharGet(usbUARTBase);
-            UARTCharPutNonBlocking(nxtUARTBase, c);
+            USBRXState = 0;
         }
-        if (uploadStarted && (System::getSystemTimeUS() - timeUS) > timeoutUS)
+        if (GPIOPinRead(targetPort, targetRXPin) & 0xff)
         {
-            if (timeUS - uploadBeginUS > minDurationUS)
-            {
-                // Upload has happened.
-                SysCtlReset();
-            }
-            else
-            {
-                // Maybe just a port check.
-                uploadStarted = false;
-            }
+            targetRXState = 0xff;
         }
+        else
+        {
+            targetRXState = 0;
+        }
+
+        // Pass to other port
+        GPIOPinWrite(USBPort,    USBTXPin,    targetRXState);
+        GPIOPinWrite(targetPort, targetTXPin, USBRXState);
     }
 }

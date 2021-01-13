@@ -1,6 +1,19 @@
 Page Settings
+    Attributes
+        ID               : 0
+        Scope            : local
+        Send Component ID: disabled
+        Locked           : no
+    
     Events
         Preinitialize Event
+            // Prevent page refreshs until postinit
+            ref_stop
+            //
+            // Load colors
+            click fLoadColors,1
+            click fLoadModes,1
+            //
             // Display username
             if(User_Settings.userNum.val==0)
             {
@@ -13,177 +26,566 @@ Page Settings
                 tUser.txt=" "+User_Settings.u2Name.txt
             }
             //
+            vis fLoadModes,0
+            vis fLoadColors,0
+            // Not all users have the same rights
+            if(User_Settings.userNum.val!=2)
+            {
+                vis bCoilSettings,0
+                vis bNXTUpdate,0
+                vis bESPUpdate,0
+            }
+            // Tell the microcontroller: Mode: SEttings
+            prints "mse",0
+            //
+            // Load Help Mode
+            if(Help_Info.helpMode.val==0)
+            {
+                vis qrHelp,0
+                fill qrHelp.x,qrHelp.y,qrHelp.w,qrHelp.h,b[0].bco
+            }else
+            {
+                tempStr.txt=tTitle.txt
+                showHelp.val=1
+                click 0,1
+            }
+            //
+            // Enable page refreshs again
+            ref_star
+        
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(Other_Settings.nBackOff.val!=0)
+                {
+                    // Default "stop" action.
+                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                    prints "mes",3
+                    // Set all ontime and duty settings of all pages to 0.
+                    // First come the global variables then the local variables.
+                    Simple.ontime.val=0
+                    Simple.duty.val=0
+                    Simple.set1.val=Simple.set1.val&0x0000ffff
+                    Simple.set2.val=Simple.set2.val&0x0000ffff
+                    Simple.set3.val=Simple.set3.val&0x0000ffff
+                    Simple.set4.val=Simple.set4.val&0x0000ffff
+                    Simple.set5.val=Simple.set5.val&0x0000ffff
+                    Simple.set6.val=Simple.set6.val&0x0000ffff
+                    MIDI_Live.ontime.val=0
+                    MIDI_Live.duty.val=0
+                    MIDI_Live.set1.val=0
+                    MIDI_Live.set2.val=0
+                    MIDI_Live.set3.val=0
+                    MIDI_Live.set4.val=0
+                    MIDI_Live.set5.val=0
+                    MIDI_Live.set6.val=0
+                    Lightsaber.ontime.val=0
+                    Lightsaber.ontimes12.val=0
+                    Lightsaber.ontimes34.val=0
+                    Lightsaber.ontimes56.val=0
+                }
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2Q"
+                click qrHelp,0
+            }
+        
+Variable (int32) activeModes
+    Attributes
+        ID   : 1
+        Scope: global
+        Value: 0
+    
+Variable (int32) backCol
+    Attributes
+        ID   : 2
+        Scope: global
+        Value: 65535
+    
+Variable (int32) backCol2
+    Attributes
+        ID   : 3
+        Scope: global
+        Value: 4589
+    
+Variable (int32) frontCol
+    Attributes
+        ID   : 16
+        Scope: global
+        Value: 6900
+    
+Variable (int32) frontCol2
+    Attributes
+        ID   : 17
+        Scope: global
+        Value: 65535
+    
+Variable (int32) picCount
+    Attributes
+        ID   : 18
+        Scope: global
+        Value: 31
+    
+Variable (int32) colorMode
+    Attributes
+        ID   : 19
+        Scope: global
+        Value: 0
+    
+Variable (int32) qrFrontCol
+    Attributes
+        ID   : 20
+        Scope: global
+        Value: 6900
+    
+Variable (string) tempStr
+    Attributes
+        ID            : 21
+        Scope         : local
+        Text          : 
+        Max. Text Size: 32
+    
+Variable (int32) showHelp
+    Attributes
+        ID   : 22
+        Scope: local
+        Value: 0
+    
+Variable (int32) applyingMode
+    Attributes
+        ID   : 23
+        Scope: global
+        Value: 1
+    
+Variable (int32) backCol2Deflt
+    Attributes
+        ID   : 24
+        Scope: global
+        Value: 4589
+    
+Variable (int32) backSelectCol2
+    Attributes
+        ID   : 25
+        Scope: global
+        Value: 6900
+    
+Text tTitle
+    Attributes
+        ID                 : 5
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Settings
+        Max. Text Size     : 22
+    
+Text tUser
+    Attributes
+        ID                 : 10
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  Guest
+        Max. Text Size     : 32
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMSI
+    Attributes
+        ID                 : 11
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Simple
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMML
+    Attributes
+        ID                 : 12
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : MIDI Live
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMLS
+    Attributes
+        ID                 : 13
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Lightsaber
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+QR Code qrHelp
+    Attributes
+        ID               : 27
+        Scope            : local
+        Send Component ID: disabled
+        Text             : git.io/JkvOK
+        Max. Text Size   : 16
+    
+    Events
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                showHelp.val=1
+                tempStr.txt=tTitle.txt
+                tTitle.txt="Get Help/Link for..."
+                // keep QR code on top
+                ref qrHelp
+                // Show modified title before stopping screen refreshs.
+                doevents
+                ref_stop
+            }else
+            {
+                showHelp.val=0
+                tTitle.txt=tempStr.txt
+                // keep QR code on top
+                ref qrHelp
+                ref_star
+            }
+        
+Button bCoilSettings
+    Attributes
+        ID               : 4
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Coil Limits
+        Max. Text Size   : 20
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2x"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                page TC_Settings
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bReturn
+    Attributes
+        ID               : 6
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Save
+        Max. Text Size   : 10
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf78"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Mode: EXit.
+                prints "mex",0
+                page Menu
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bNXTUpdate
+    Attributes
+        ID               : 7
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Nextion<->USB
+        Max. Text Size   : 20
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2p"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                page USB_NXT_Pass
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bGeneral
+    Attributes
+        ID               : 8
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : General
+        Max. Text Size   : 20
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2b"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                page Other_Settings
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bUsers
+    Attributes
+        ID               : 9
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Users
+        Max. Text Size   : 20
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2N"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                page User_Settings
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bEnvelope
+    Attributes
+        ID               : 14
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Envelopes
+        Max. Text Size   : 20
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2A"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                page Env_Settings
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bESPUpdate
+    Attributes
+        ID               : 15
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : ESP<->USB
+        Max. Text Size   : 20
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2h"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                page USB_ESP_Pass
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Hotspot fLoadModes
+    Attributes
+        ID               : 26
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Load active modes
+            sys0=Settings.activeModes.val&4
+            if(sys0!=0)
+            {
+                // Lightsaber Mode is active
+                tMLS.bco=Settings.backSelectCol2.val
+            }
+            //
             // Display all active modes
             sys0=Settings.activeModes.val&1
             if(sys0!=0)
             {
                 // Simple Mode is active
-                tMSI.bco=6900
+                tMSI.bco=Settings.backSelectCol2.val
             }
             sys0=Settings.activeModes.val&2
             if(sys0!=0)
             {
                 // MIDI Live Mode is active
-                tMML.bco=6900
-            }
-            //
-            // Tell the microcontroller: Mode: SEttings
-            prints "mse",0
-            // Not all users have the same rights
-            if(User_Settings.userNum.val!=2)
-            {
-                vis bCoilSettings,0
-                vis bUSBFWUpdate,0
+                tMML.bco=Settings.backSelectCol2.val
             }
         
-        Postinitialize Event
-            
+Hotspot fLoadColors
+    Attributes
+        ID               : 28
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
         Touch Press Event
-            if(Other_Settings.nBackOff.val!=0)
+            // Changes all page components according to the current color set.
+            // Note: This component has to be the last component of the page.
+            //
+            // sys0: component id
+            // sys1: component type
+            // sys2: picture id offset for current color mode
+            sys2=Settings.colorMode.val*Settings.picCount.val
+            for(sys0=0;sys0<fLoadColors.id;sys0++)
             {
-                // Default "stop" action.
-                // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                prints "mes",3
-                // Set all ontime and duty settings of all pages to 0.
-                // First come the global variables then the local variables.
-                Simple.ontime.val=0
-                Simple.duty.val=0
-                Simple.set1.val=Simple.set1.val&0x0000ffff
-                Simple.set2.val=Simple.set2.val&0x0000ffff
-                Simple.set3.val=Simple.set3.val&0x0000ffff
-                Simple.set4.val=Simple.set4.val&0x0000ffff
-                Simple.set5.val=Simple.set5.val&0x0000ffff
-                Simple.set6.val=Simple.set6.val&0x0000ffff
-                MIDI_Live.ontime.val=0
-                MIDI_Live.duty.val=0
-                MIDI_Live.set1.val=0
-                MIDI_Live.set2.val=0
-                MIDI_Live.set3.val=0
-                MIDI_Live.set4.val=0
-                MIDI_Live.set5.val=0
-                MIDI_Live.set6.val=0
+                // More convenient for typing
+                sys1=b[sys0].type
+                if(sys1==121)
+                {
+                    // Types that have bco
+                    // page
+                    if(b[sys0].bco==Settings.backCol2Deflt.val)
+                    {
+                        b[sys0].bco=Settings.backCol2.val
+                    }else
+                    {
+                        b[sys0].bco=Settings.backCol.val
+                    }
+                }else if(sys1==54||sys1==59||sys1==116||sys1==55)
+                {
+                    // Types that have bco, pco, and sta:
+                    // number, float, text, scroll text
+                    if(b[sys0].sta==1)
+                    {
+                        if(b[sys0].bco==Settings.backCol2Deflt.val)
+                        {
+                            b[sys0].bco=Settings.backCol2.val
+                            b[sys0].pco=Settings.frontCol2.val
+                        }else
+                        {
+                            b[sys0].bco=Settings.backCol.val
+                            b[sys0].pco=Settings.frontCol.val
+                        }
+                    }
+                }else if(sys1==98||sys1==53)
+                {
+                    // Types that have pco, pic, pco2, pic2, sta:
+                    // button, dual-state button
+                    if(b[sys0].sta==2)
+                    {
+                        b[sys0].pco=Settings.frontCol.val
+                        b[sys0].pco2=Settings.backCol.val
+                        b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                        b[sys0].pic+=sys2
+                        b[sys0].pic2=b[sys0].pic+1
+                    }
+                }else if(sys1==58)
+                {
+                    // Types that have bco, pco
+                    // QR Code
+                    b[sys0].bco=Settings.backCol.val
+                    b[sys0].pco=Settings.qrFrontCol.val
+                }else if(sys1==1)
+                {
+                    // Types that have pic, pic2:
+                    // slider
+                    b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                    b[sys0].pic+=sys2
+                    b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
+                    b[sys0].pic2+=sys2
+                }
             }
         
-        Touch Release Event
-            
-        Page Exit Event
-            
-    Components
-        Button bCoilSettings
-            Properties
-                Scope      : Local
-                Caption    : "Tesla Coil Limits"
-                Max. length: 20
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    page TC_Settings
-                
-        Text tTitle
-            Properties
-                Scope       : Local
-                Initial Text: "Settings"
-                Max. length : 22
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    
-        Button bReturn
-            Properties
-                Scope      : Local
-                Caption    : "Save"
-                Max. length: 10
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    // Mode: EXit.
-                    prints "mex",0
-                    page Menu
-                
-        Text tUser
-            Properties
-                Scope       : Local
-                Initial Text: " Guest"
-                Max. length : 32
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Button bUSBFWUpdate
-            Properties
-                Scope      : Local
-                Caption    : "USB FW Update"
-                Max. length: 20
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    page USB_FW_Update
-                
-        Button bGeneral
-            Properties
-                Scope      : Local
-                Caption    : "Other Settings"
-                Max. length: 20
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    page Other_Settings
-                
-        Button bUsers
-            Properties
-                Scope      : Local
-                Caption    : "User Settings"
-                Max. length: 20
-            
-            Events
-                Touch Press Event
-                    
-                Touch Release Event
-                    page User_Settings
-                
-        Variable activeModes
-            Properties
-                Scope         : Global
-                Type          : int32
-                Initial Value : 0
-            
-        Text tMSI
-            Properties
-                Scope       : Local
-                Initial Text: "Simple"
-                Max. length : 16
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    
-        Text tMML
-            Properties
-                Scope       : Local
-                Initial Text: "MIDI Live"
-                Max. length : 16
-            
-            Events
-                Touch Press Event
-                    // Make this object "transparent" for clicks and click background.
-                    click dp,1
-                
-                Touch Release Event
-                    

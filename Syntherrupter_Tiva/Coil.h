@@ -16,6 +16,7 @@
 #include "ToneList.h"
 #include "MIDI.h"
 #include "Simple.h"
+#include "LightSaber.h"
 
 
 class Coil
@@ -38,7 +39,7 @@ public:
         uint32_t timeUS = System::getSystemTimeUS();
         if (timeUS > nextAllowedFireUS)
         {
-            nextOntimeUS = toneList.getOntimeUS(timeUS);
+            uint32_t nextOntimeUS = toneList.getOntimeUS(timeUS);
             if (nextOntimeUS)
             {
                 one.shot(nextOntimeUS);
@@ -46,12 +47,8 @@ public:
             }
         }
         /*
-         * Overflow detection. No ontime or min offtime is larger than 10 seconds.
-         * Note: In theory you'd need a similar detection for the tone.nextFireUS
-         * variables. In practice this means that the tones playing during the
-         * overflow will stop playing but the next tones will be fine. Therefore
-         * it is not worth the additional CPU time to check each time for an
-         * overflow. Remember, it only happens less than once an hour.
+         * Overflow detection. No ontime or min offtime is larger than
+         * 10 seconds.
          */
         else if (nextAllowedFireUS - timeUS > 10000000)
         {
@@ -63,6 +60,7 @@ public:
     ToneList toneList;
     MIDI     midi;
     Simple   simple;
+    LightSaber lightsaber;
 
 
 private:
@@ -71,8 +69,6 @@ private:
     uint32_t maxOntimeUS       = 10;
     uint32_t maxDutyPerm       = 10;
     uint32_t nextAllowedFireUS =  0;
-    uint32_t nextOntimeUS      =  0;
-    uint32_t nextFireUS        = -1;
 };
 
 #endif /* COIL_H_ */

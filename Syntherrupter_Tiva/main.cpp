@@ -31,19 +31,26 @@ void uartMidiISR()
     MIDI::midiUart.ISR();
 }
 
+void uartLightSaberISR()
+{
+    LightSaber::uart.ISR();
+}
+
 
 int main(void)
 {
     System::init(sysTickISR);
     System::setSystemTimeResUS(16);
-    GUI::init();
 
-    // Initialize Coil objects
+    MIDI::init(115200, uartUsbISR, GPIO_PORTC_BASE, GPIO_PIN_4, GPIO_PIN_5, uartMidiISR);
+    LightSaber::init(GPIO_PORTA_BASE, GPIO_PIN_6, GPIO_PIN_7, 115200, uartLightSaberISR);
+
     for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
     {
         coils[coil].init(coil);
     }
-    MIDI::init(115200, uartUsbISR, GPIO_PORTC_BASE, GPIO_PIN_4, GPIO_PIN_5, uartMidiISR);
+
+    GUI::init();
 
     while (42)
     {
@@ -52,6 +59,7 @@ int main(void)
         if (state)
         {
             MIDI::process();
+            LightSaber::process();
 
             switch (COIL_COUNT)
             {

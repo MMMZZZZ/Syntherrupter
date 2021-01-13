@@ -7,6 +7,10 @@
 
 #include <UART.h>
 
+
+constexpr uint32_t UART::UART_MAPPING[8][9];
+
+
 UART::UART()
 {
     // TODO Auto-generated constructor stub
