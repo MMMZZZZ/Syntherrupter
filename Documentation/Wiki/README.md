@@ -24,3 +24,8 @@ The High Voltage Forum topic contains quite a subjects that haven't made their w
 * [In-depth explanation of note duty vs note ontime](https://highvoltageforum.net/index.php?topic=1020.msg8564#msg8564)
 * [AstRiis Syntherrupter build with 4 outputs](https://highvoltageforum.net/index.php?topic=1267.msg9292#msg9292)
 * If you happen to have a Nextion Intelligent Screen (Indicated by a P in the model number), or a TJC X series screen, you need to make changes to the Nextion source file. You need to modify [the sliders](https://highvoltageforum.net/index.php?topic=1020.msg9670#msg9670) and [the code for dark mode](https://highvoltageforum.net/index.php?topic=1020.msg9682#msg9682)
+
+In addition, Mads Barnkob from [Kaizer Power Electronics](https://kaizerpowerelectronics.dk/) has a video series about his impressive Syntherrupter based show controller:
+
+* [Tesla Coil Show Controller Project (Part 1 of 6)](https://www.youtube.com/watch?v=Ad2129sZv6w)
+* *(Other parts will be added as soon as they're released)*
