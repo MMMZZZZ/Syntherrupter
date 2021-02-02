@@ -52,13 +52,13 @@ Here's a demo of Syntherrupters stereo features with Thunderstruck. The only mod
 
 Check the [Wiki](/Documentation/Wiki#readme). It's far from being complete, but the most important stuff - like a Getting Started Guide - is there.
 
-### ADSR Sounds
+### Envelope Sounds
 
 The sound can be selected by the MIDI command "Program Change". In your MIDI software you can select it by changing the instrument of the channel. 
 
-The programs 1-63 can be modified by the user using the ADSR Editor. The programs 20-39 are stored in EEPROM. Unless modified by the user, they are simply constant ontime. All other programs have the following characteristics at startup:
+The programs 1-63 can be modified by the user using the [Envelope Editor](/Documentation/Wiki/UI/Envelope.md#readme). The programs 20-39 are stored in EEPROM. Unless modified by the user, they are simply constant ontime. All other programs have the following characteristics at startup:
 
-* Program 0 and all unlisted: No ADSR. Constant ontime (except for other effects like modulation).
+* Program 0 and all unlisted: No envelope. Constant ontime (except for other effects like modulation).
 * Program 1: Roughly like a piano. Attack peaks to 1 (= not exceeding the given ontime)
 * Program 2: Sloooow rise, slow fall. Good for soft background, but too slow for shorter notes. Attack peaks to 1 (= not exceeding the given ontime)
 * Program 3: Like program 1, but with a small step, to make shorter notes more audible. Attack peaks to 1 (= not exceeding the given ontime)
@@ -70,7 +70,7 @@ The programs 1-63 can be modified by the user using the ADSR Editor. The program
 * Program 9: Forced Staccato with slight sustain. Attack peaks to 3 (= tripling the given ontime for a few miliseconds)
 * Program 11-19: Same as programs 1-9 but with exponential instead of linear curves between the points. No other changes made, so not that special yet. 
 
-If you wonder why you would want to exceed the given ontime, it is an "efficient" way to get louder notes even with high voice count without tripping your circuit breaker. Since the ontime drops pretty fast after the attack you can consider the ontime on the display more like an average ontime. Note that all these ADSR settings do not allow to exceed your coil limits (->Settings->Coil Setttings). 
+If you wonder why you would want to exceed the given ontime, it is an "efficient" way to get louder notes even with high voice count without tripping your circuit breaker. Since the ontime drops pretty fast after the attack you can consider the ontime on the display more like an average ontime. Note that all these envelope settings do not allow to exceed your [coil limits](/Documentation/Wiki/UI/Coil%20Limits.md#readme). 
 
 ### Other documentation
 
