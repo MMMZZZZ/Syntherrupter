@@ -28,4 +28,6 @@ The High Voltage Forum topic contains quite a subjects that haven't made their w
 In addition, Mads Barnkob from [Kaizer Power Electronics](https://kaizerpowerelectronics.dk/) has a video series about his impressive Syntherrupter based show controller:
 
 * [Tesla Coil Show Controller Project (Part 1 of 6)](https://www.youtube.com/watch?v=Ad2129sZv6w)
+* [Tesla Coil Show Controller - Programming Syntherrupter (Part 2 of 6)](https://www.youtube.com/watch?v=jQZj8DPNvJg)
+* [Tesla Coil Show Controller - 6 Optical Output Control Panel (Part 3 of 6)](https://www.youtube.com/watch?v=DCFt82_SrNI)
 * *(Other parts will be added as soon as they're released)*
