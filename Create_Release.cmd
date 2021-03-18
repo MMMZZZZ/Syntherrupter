@@ -15,7 +15,9 @@ for %%i in (1,2,3,4,5,6) do (
 ren Syntherrupter_Firmwares\Syntherrupter_Tiva_1_Coils.bin Syntherrupter_Tiva_1_Coil.bin
 rem Build VM takes at least 20s to start, and at least 20s to compile one file. We assume that compiling the 6 Tiva firmwares take at least 20s. So... if no HMI file is there, the VM didn't start yet, or has already finished. 
 cd Syntherrupter_Firmwares
-if not exist "*.HMI" timeout /t 20
+:waitforvm
+timeout /t 5
+if not exist "*.HMI" goto waitforvm
 rem Build VM is configured to delete temporary HMI files after creation. wait until no HMI files are left.
 :loop
 timeout /t 5

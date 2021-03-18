@@ -16,6 +16,9 @@ This page covers how to flash a (new) firmware on your Syntherrupter.
 Beta versions usually include new features that do not touch the core of Syntherrupter. This means it's *highly unlikely* that the update breaks the cores safety features, namely the specified maximum ontime, minimum offtime and maximum duty. However, you should not expect any part of the GUI or any of Syntherrupters modes to be free of bugs. 
 
 ## Flashing Order and Recovery
+
+*This only concerns firmware updates and assumes you already have a working setup.* 
+
 Firmware updates always consist of a new Nextion and a new Tiva firmware. Unless the release notes say something different, you should update the Nextion firmware first. The reason is that you can always flash the Tiva microcontroller but in order to flash Nextion you need a working Syntherrupter that allows you to enter [Nextion<->USB Passthrough Mode](UI/Nextion-USB.md#readme).
 
 Usually if a Nextion firmware update goes wrong, the Tiva microcontroller will automatically enter [Nextion<->USB Passthrough Mode](UI/Nextion-USB.md#readme), allowing you to reflash the firmware. However, if you flashed f.ex. the wrong version it can happen that this check is successful but Syntherrupter is still unuasble. In this case you can either [update Nextion using a microSD card](#nextion-flashing-with-a-microsd-card), or disconnect the Nextion screen when powering up Syntherrupter. Wait 5 seconds, and reconnect. This makes sure that the Tiva firmware entered Nextion<->USB passthrough mode and you can [flash the Nextion firmware over USB](#nextion-flashing-over-usbserial) again. 
@@ -31,7 +34,7 @@ Usually if a Nextion firmware update goes wrong, the Tiva microcontroller will a
 ### Steps for Driver Installation
 * Extract the *stellaris_icdi_drivers* folder from the drivers zip file.
 * Connect Tiva LaunchPad to the PC via its DEBUG USB port. 
-* Open the Device Manager. One or more unknown "ICDI" devices will be listed. 
+* Open the Device Manager. One or more unknown "ICDI" devices will be listed. If not, the drivers are already installed and you can skip the remaining steps.
 * Right click on one of them
 	* Choose update the drivers,
 	* Search on the PC, 
