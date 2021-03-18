@@ -440,7 +440,7 @@ bool MIDI::processBuffer(uint32_t b)
         {
             if (*dataBytes == 1)
             {
-                if (*c1 <= MAX_PROGRAMS)
+                if (*c1 < MAX_PROGRAMS)
                 {
                     channels[*channel].program = *c1;
                 }
