@@ -11,6 +11,7 @@
 
 #include "InterrupterConfig.h"
 #include "Note.h"
+#include "Channel.h"
 
 
 class NoteList

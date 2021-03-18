@@ -30,6 +30,7 @@ public:
     Note* lastNote  = 0;
     uint32_t noteCount = 0;
 
+    uint32_t number              = 0;
     uint8_t channelAfterTouch    = 0;
     uint8_t program              = 0;
     uint8_t coils                = 0xff; // Startup default: play every channel on every coil.

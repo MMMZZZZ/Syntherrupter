@@ -39,10 +39,11 @@ void NoteList::removeNote(Note* note)
 {
     if (note)
     {
+        note->channel->removeNote(note);
+
         activeNotes--;
 
         note->number = 128;
-        note->nextChnNote = 0;
         for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
         {
             if (note->assignedTones[coil])
@@ -108,7 +109,7 @@ Note* NoteList::getNote(uint32_t channel, uint32_t noteNum)
         {
             return 0;
         }
-        if (noteNum == note->number && channel == note->channel)
+        if (noteNum == note->number && channel == note->channel->number)
         {
             return note;
         }
