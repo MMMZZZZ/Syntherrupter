@@ -75,6 +75,12 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPor
     {
         freqTable[note] = exp2f((note - 69.0f) / 12.0f) * 440.0f;
     }
+
+    // Store channel number in each channel object
+    for (uint32_t chn = 0; chn < 16; chn++)
+    {
+        channels[chn].number = chn;
+    }
 }
 
 bool MIDI::processBuffer(uint32_t b)
@@ -161,18 +167,17 @@ bool MIDI::processBuffer(uint32_t b)
                     if (!(*note))
                     {
                         (*note) = notelist.addNote();
-                        (*note)->afterTouch  = 0;
-                        (*note)->rawVolume   = 0.0f;
-                        (*note)->EnvelopeVolume  = 0.0f;
+                        (*note)->afterTouch     = 0;
+                        (*note)->rawVolume      = 0.0f;
+                        (*note)->EnvelopeVolume = 0.0f;
                         channels[*channel].addNote(*note);
                     }
 
-                    (*note)->number     = *number;
-                    (*note)->velocity   = *c1;
+                    (*note)->number         = *number;
+                    (*note)->velocity       = *c1;
                     (*note)->EnvelopeStep   = 0;
                     (*note)->EnvelopeTimeUS = 0.0f;
-                    (*note)->channel    = *channel;
-                    (*note)->changed    = true;
+                    (*note)->changed        = true;
                     channels[*channel].notesChanged = true;
                 }
                 else if (*note) // Note has no velocity = note off. Code copy pasted from note off command.
@@ -386,7 +391,6 @@ bool MIDI::processBuffer(uint32_t b)
                         while (note != 0)
                         {
                             Note* nextNote = note->nextChnNote;
-                            channels[*channel].removeNote(note);
                             notelist.removeNote(note);
                             note = nextNote;
                         }
@@ -436,7 +440,7 @@ bool MIDI::processBuffer(uint32_t b)
         {
             if (*dataBytes == 1)
             {
-                if (*c1 <= MAX_PROGRAMS)
+                if (*c1 < MAX_PROGRAMS)
                 {
                     channels[*channel].program = *c1;
                 }
@@ -716,7 +720,7 @@ void MIDI::updateEffects(Note* note)
         if (timeDiffUS > effectResolutionUS)
         {
             note->EnvelopeTimeUS = currentTime;
-            MIDIProgram* program = &(programs[channels[note->channel].program]);
+            MIDIProgram* program = &(programs[note->channel->program]);
             if (!program->setEnvelopeAmp(&(note->EnvelopeStep), &(note->EnvelopeVolume)))
             {
                 // Note ended.
@@ -761,10 +765,9 @@ void MIDI::updateToneList()
 
             if (note->isDead())
             {
-                channels[note->channel].removeNote(note);
                 notelist.removeNote(note); // Removes tone from tonelists, too.
             }
-            else if (channels[note->channel].coils & coilBit)
+            else if (note->channel->coils & coilBit)
             {
                 setPanVol(note);
                 if (lastTone && voicesLeft)

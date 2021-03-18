@@ -9,7 +9,7 @@
 #define INTERRUPTER_CONFIG_H_
 
 
-#define TIVA_FW_VERSION "v4.1.1"
+#define TIVA_FW_VERSION "v4.1.2"
 
 #ifdef COIL_COUNT_1
 #define COIL_COUNT 1
@@ -30,7 +30,7 @@
 #define COIL_COUNT 6
 #endif
 #ifdef TEABUG
-#define COIL_COUNT 1
+#define COIL_COUNT 6
 #endif
 
 #define MAX_VOICES 32

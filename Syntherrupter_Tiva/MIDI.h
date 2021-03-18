@@ -77,15 +77,15 @@ private:
                 note->panVol[coilNum] = 1.0f;
             }
 
-            if (coilPan < 0.0f || channels[note->channel].notePanMode == Channel::NOTE_PAN_OMNI)
+            if (coilPan < 0.0f || note->channel->notePanMode == Channel::NOTE_PAN_OMNI)
             {
                 note->panVol[coilNum] = 1.0f;
             }
         }
     };
-    static float getLFOVal(uint32_t channel)
+    static float getLFOVal(Channel* channel)
     {
-        if (channels[channel].modulation)
+        if (channel->modulation)
         {
             /*
              *               /            t   \
@@ -99,7 +99,7 @@ private:
              * sine wave between 0 and 1 mapped to the desired modulation depth (50% max).
              */
             return (sinf(6.283185307179586f * float(System::getSystemTimeUS()) / LFO_PERIOD_US) + 1) / 4.0f
-                    * channels[channel].modulation;
+                    * channel->modulation;
         }
         else
         {

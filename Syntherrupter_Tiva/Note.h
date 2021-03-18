@@ -14,6 +14,8 @@
 #include "InterrupterConfig.h"
 #include "Tone.h"
 
+// Forward declaration of Channel class
+class Channel;
 
 class Note
 {
@@ -24,8 +26,8 @@ public:
     {
         return (number > 127);
     };
+    Channel* channel = 0;
     uint32_t EnvelopeStep    = 0;
-    uint8_t channel          = 0;
     uint8_t number           = 0;
     uint8_t velocity         = 0;
     uint8_t afterTouch       = 0;
@@ -45,7 +47,6 @@ public:
     Tone* assignedTones[COIL_COUNT];
     Note* prevNote = 0;
     Note* nextNote = 0;
-    Note* prevChnNote = 0;
     Note* nextChnNote = 0;
 
     // For debugging purposes only.

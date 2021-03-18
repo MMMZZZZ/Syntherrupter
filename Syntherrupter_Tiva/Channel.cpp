@@ -69,6 +69,7 @@ Note* Channel::getNote(uint8_t noteNum)
 void Channel::addNote(Note* note)
 {
     note->nextChnNote = firstNote;
+    note->channel = this;
     firstNote = note;
     noteCount++;
 }
@@ -78,6 +79,8 @@ void Channel::removeNote(Note* note)
     if (note == firstNote)
     {
         firstNote = firstNote->nextChnNote;
+        note->nextChnNote = 0;
+        noteCount--;
     }
     else
     {
@@ -88,15 +91,14 @@ void Channel::removeNote(Note* note)
             if (currentNote == note)
             {
                 prevNote->nextChnNote = currentNote->nextChnNote;
+                note->nextChnNote = 0;
+                noteCount--;
                 break;
             }
             prevNote    = currentNote;
             currentNote = currentNote->nextChnNote;
         }
     }
-
-    note->nextChnNote = 0;
-    noteCount--;
 }
 
 void Channel::notePanDataUpdate()
