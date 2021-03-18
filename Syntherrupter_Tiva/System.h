@@ -65,8 +65,8 @@ private:
     static volatile uint32_t SYS_TICK_RES_US;
 
     // Peripherals that should be turned off in case of an error
-    static constexpr uint32_t peripheralsCount = 43;
-    static constexpr uint32_t peripherals[peripheralsCount] = { SYSCTL_PERIPH_EMAC0,
+    static constexpr uint32_t PERIPH_COUNT = 43;
+    static constexpr uint32_t ALL_PERIPHS[PERIPH_COUNT] = { SYSCTL_PERIPH_EMAC0,
                                                      SYSCTL_PERIPH_EPHY0,
                                                      SYSCTL_PERIPH_EPI0,
                                                      SYSCTL_PERIPH_GPIOB,

@@ -11,8 +11,8 @@
 volatile uint32_t System::timeUS = 0;
 volatile uint32_t System::SYS_TICK_RES_US = 50;
 //uint32_t System::sysTickHalfRes = sysTickResUS / 2;
-constexpr uint32_t System::peripheralsCount;
-constexpr uint32_t System::peripherals[peripheralsCount];
+constexpr uint32_t System::PERIPH_COUNT;
+constexpr uint32_t System::ALL_PERIPHS[PERIPH_COUNT];
 
 
 
@@ -58,10 +58,10 @@ void System::error()
     // IntMasterDisable();
 
     // Stop all peripherals
-    for (uint_fast8_t i = 0; i < peripheralsCount; i++)
+    for (uint_fast8_t i = 0; i < PERIPH_COUNT; i++)
     {
-        SysCtlPeripheralReset(peripherals[i]);
-        SysCtlPeripheralDisable(peripherals[i]);
+        SysCtlPeripheralReset(ALL_PERIPHS[i]);
+        SysCtlPeripheralDisable(ALL_PERIPHS[i]);
     }
 
     while (42);
