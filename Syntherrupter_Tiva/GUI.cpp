@@ -150,7 +150,7 @@ void GUI::init()
                 System::delayUS(20000);
             }
 
-            // ADSR
+            // Load envelopes
             EEPROMSettings::getMIDIPrograms();
 
             // Other Settings
@@ -178,7 +178,7 @@ void GUI::init()
             EEPROMSettings::setMIDIPrograms();
         }
         nxt.setVal("TC_Settings.maxCoilCount", COIL_COUNT);
-        nxt.setVal("ADSR_Settings.maxSteps", MIDIProgram::DATA_POINTS);
+        nxt.setVal("Env_Settings.maxSteps", MIDIProgram::DATA_POINTS);
 
         // Display Tiva firmware versions
         nxt.setTxt("tTivaFWVersion", TIVA_FW_VERSION);
@@ -664,10 +664,10 @@ void GUI::settings()
         }
         else
         {
-            // ADSR settings
+            // Envelope settings
             if (!number)
             {
-                // Command to store current ADSR settings to EEPROM
+                // Command to store current envelope settings to EEPROM
                 EEPROMSettings::setMIDIPrograms();
             }
             else if (number < MIDI::MAX_PROGRAMS)

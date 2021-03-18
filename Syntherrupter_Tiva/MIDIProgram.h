@@ -29,7 +29,7 @@ public:
     float ntau[DATA_POINTS];
     uint32_t nextStep[DATA_POINTS];
     Mode mode = Mode::exp;
-    bool setADSRAmp(uint32_t* step, float* amp)
+    bool setEnvelopeAmp(uint32_t* step, float* amp)
     {
         // Return if note is still active or not.
 

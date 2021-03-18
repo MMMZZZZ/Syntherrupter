@@ -163,14 +163,14 @@ bool MIDI::processBuffer(uint32_t b)
                         (*note) = notelist.addNote();
                         (*note)->afterTouch  = 0;
                         (*note)->rawVolume   = 0.0f;
-                        (*note)->ADSRVolume  = 0.0f;
+                        (*note)->EnvelopeVolume  = 0.0f;
                         channels[*channel].addNote(*note);
                     }
 
                     (*note)->number     = *number;
                     (*note)->velocity   = *c1;
-                    (*note)->ADSRStep   = 0;
-                    (*note)->ADSRTimeUS = 0.0f;
+                    (*note)->EnvelopeStep   = 0;
+                    (*note)->EnvelopeTimeUS = 0.0f;
                     (*note)->channel    = *channel;
                     (*note)->changed    = true;
                     channels[*channel].notesChanged = true;
@@ -400,7 +400,7 @@ bool MIDI::processBuffer(uint32_t b)
                         Note* note = channels[*channel].firstNote;
                         while (note != 0)
                         {
-                            note->ADSRStep = MIDIProgram::DATA_POINTS - 1;
+                            note->EnvelopeStep = MIDIProgram::DATA_POINTS - 1;
                             note = note->nextChnNote;
                         }
                         break;
@@ -631,7 +631,7 @@ void MIDI::process()
                             }
                             else if (!channel->sustainPedal)
                             {
-                                note->ADSRStep = MIDIProgram::DATA_POINTS - 1;
+                                note->EnvelopeStep = MIDIProgram::DATA_POINTS - 1;
                             }
                         }
                         note = note->nextChnNote;
@@ -704,20 +704,20 @@ void MIDI::process()
 
 void MIDI::updateEffects(Note* note)
 {
-    // Needed for ADSR
+    // Needed for envelopes
     float currentTime = System::getSystemTimeUS();
-    if (note->ADSRTimeUS == 0.0f)
+    if (note->EnvelopeTimeUS == 0.0f)
     {
-        note->ADSRTimeUS = currentTime;
+        note->EnvelopeTimeUS = currentTime;
     }
     else
     {
-        float timeDiffUS = currentTime - note->ADSRTimeUS;
+        float timeDiffUS = currentTime - note->EnvelopeTimeUS;
         if (timeDiffUS > effectResolutionUS)
         {
-            note->ADSRTimeUS = currentTime;
+            note->EnvelopeTimeUS = currentTime;
             MIDIProgram* program = &(programs[channels[note->channel].program]);
-            if (!program->setADSRAmp(&(note->ADSRStep), &(note->ADSRVolume)))
+            if (!program->setEnvelopeAmp(&(note->EnvelopeStep), &(note->EnvelopeVolume)))
             {
                 // Note ended.
                 note->number = 128;
@@ -726,9 +726,9 @@ void MIDI::updateEffects(Note* note)
             else
             {
 
-                // After calculation of ADSR envelope, add other effects like modulation
+                // After calculation of envelope, add other effects like modulation
                 float finishedVolume =   note->rawVolume
-                                       * note->ADSRVolume
+                                       * note->EnvelopeVolume
                                        * (1.0f - getLFOVal(note->channel));
                 if (finishedVolume != note->finishedVolume)
                 {
@@ -740,7 +740,7 @@ void MIDI::updateEffects(Note* note)
         if (timeDiffUS < 0.0f)
         {
             // Time overflowed
-            note->ADSRTimeUS = currentTime;
+            note->EnvelopeTimeUS = currentTime;
         }
     }
 }
