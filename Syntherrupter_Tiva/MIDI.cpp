@@ -41,8 +41,8 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPor
 
     MIDIProgram::setResolutionUS(effectResolutionUS);
 
-    // Copy legacy ADSR table to new MIDIProgram class. That's the way it works until there's a useful editor for ADSR.
-    for (uint32_t prog = 0; prog < ADSR_PROGRAM_COUNT + 1; prog++)
+    // Copy legacy ADSR table to new MIDIProgram class.
+    for (uint32_t prog = 1; prog < ADSR_PROGRAM_COUNT + 1; prog++)
     {
         programs[prog].setMode(MIDIProgram::Mode::lin);
         programs[prog+10].setMode(MIDIProgram::Mode::exp);
@@ -63,6 +63,13 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPor
             programs[prog+10].setDataPoint(dataPnt, ADSR_LEGACY_PROGRAMS[prog][i*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][i*2+1], 3.0f, nextPnt);
         }
     }
+
+    // The "new" piano envelope
+    programs[10].setDataPoint(0,                            2.0f,   15e3f, 2.0f, 1);
+    programs[10].setDataPoint(1,                            1.0f,  100e3f, 2.0f, 2);
+    programs[10].setDataPoint(2,                            0.0f, 8000e3f, 7.0f, 2);
+    programs[10].setDataPoint(MIDIProgram::DATA_POINTS - 1, 0.0f,  200e3f, 4.0f, MIDIProgram::DATA_POINTS - 1);
+
 
     for (uint32_t note = 0; note < 128; note++)
     {
