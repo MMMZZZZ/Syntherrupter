@@ -30,7 +30,7 @@
 #define COIL_COUNT 6
 #endif
 #ifdef TEABUG
-#define COIL_COUNT 1
+#define COIL_COUNT 6
 #endif
 
 #define MAX_VOICES 32
