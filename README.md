@@ -47,6 +47,7 @@ The following two videos demonstrate Syntherrupters capabilities but there are n
 
 * [Queen - I Want It All](http://www.youtube.com/watch?v=H2ykCsD_b5g). A MIDI with ~6 voices, pitch bending, sometimes very fast notes, and other effects.
 * [ACDC - Thunderstruck](http://www.youtube.com/watch?v=Tyts9u0le6A). This is a 6 channel demo of Syntherrupters stereo features with Thunderstruck. The only modification made to the MIDI file, were the commands that set up Syntherrupters stereo mode (documented [here](/Documentation/Wiki/Custom%20MIDI%20Commands.md)). The mapping of the notes to the coils (represented by LEDs) in done automatically.
+
     *"I must say that the Omni-mode is what I have dreamt about for years, I am really looking forward to use that feature (and not so much that I now have to build 6 identical coils)"* ([from Mads Barnkob](https://highvoltageforum.net/index.php?topic=1020.msg8430#msg8430))
 
 Then there are a few videos from other people that build their own Syntherrupter:
