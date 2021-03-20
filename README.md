@@ -46,9 +46,12 @@ My own version. Left to right: On/Off switch, charge port, serial port, optical 
 The following two videos demonstrate Syntherrupters capabilities but there are no arcs because I haven't had any opportunity to run my tesla coil. 
 
 * [Queen - I Want It All](http://www.youtube.com/watch?v=H2ykCsD_b5g). A MIDI with ~6 voices, pitch bending, sometimes very fast notes, and other effects.
+
 * [ACDC - Thunderstruck](http://www.youtube.com/watch?v=Tyts9u0le6A). This is a 6 channel demo of Syntherrupters stereo features with Thunderstruck. The only modification made to the MIDI file, were the commands that set up Syntherrupters stereo mode (documented [here](/Documentation/Wiki/Custom%20MIDI%20Commands.md)). The mapping of the notes to the coils (represented by LEDs) in done automatically.
 
     *"I must say that the Omni-mode is what I have dreamt about for years, I am really looking forward to use that feature (and not so much that I now have to build 6 identical coils)"* ([from Mads Barnkob](https://highvoltageforum.net/index.php?topic=1020.msg8430#msg8430))
+
+* [ABBA - Gimme! Gimme! Gimme!](https://www.youtube.com/watch?v=6n-RvNdsbxE). Perfect demo of the [staccato envelope](/Documentation/Wiki/Envelopes.md#readme). Note how the low notes are not "on, off" but more like a quick fade in and fade out with slight reverb. That's the envelope. Compare it with the videos below, which do not use this feature
 
 Then there are a few videos from other people that build their own Syntherrupter:
 * [Video (performed by Georgios)](https://www.youtube.com/watch?v=1vgiw4VHPKQ). Fast MIDI with 2 tesla coils and up to 4 notes per coil
