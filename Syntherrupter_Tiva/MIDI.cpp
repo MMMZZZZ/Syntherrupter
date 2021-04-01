@@ -147,6 +147,11 @@ bool MIDI::processBuffer(uint32_t b)
                     channels[channel].notesChanged = true;
                 }
             }
+            else if (dataBytes == 2)
+            {
+                // End of command, reset dataBytes counter
+                dataBytes = 0;
+            }
             break;
         }
         case 0x90: // Note on
@@ -162,6 +167,9 @@ bool MIDI::processBuffer(uint32_t b)
             }
             else if (dataBytes == 2)
             {
+                // End of command, reset dataBytes counter
+                dataBytes = 0;
+
                 if (c1) // Note has a velocity
                 {
                     if (!note)
@@ -199,6 +207,9 @@ bool MIDI::processBuffer(uint32_t b)
             }
             else if (dataBytes == 2 && note)
             {
+                // End of command, reset dataBytes counter
+                dataBytes = 0;
+
                 note->afterTouch = c1;
                 note->changed = true;
                 channels[channel].notesChanged = true;
@@ -215,6 +226,9 @@ bool MIDI::processBuffer(uint32_t b)
             }
             else if (dataBytes == 2)
             {
+                // End of command, reset dataBytes counter
+                dataBytes = 0;
+
                 switch (controller)
                 {
                     default:
@@ -422,6 +436,9 @@ bool MIDI::processBuffer(uint32_t b)
             }
             else if (dataBytes == 2)
             {
+                // End of command, reset dataBytes counter
+                dataBytes = 0;
+
                 channels[channel].pitchBend = c1 * 128.0f + pb;
                 channels[channel].controllersChanged = true;
             }
@@ -431,6 +448,9 @@ bool MIDI::processBuffer(uint32_t b)
         {
             if (dataBytes == 1)
             {
+                // End of command, reset dataBytes counter
+                dataBytes = 0;
+
                 channels[channel].channelAfterTouch = c1;
                 channels[channel].controllersChanged = true;
 
@@ -441,6 +461,9 @@ bool MIDI::processBuffer(uint32_t b)
         {
             if (dataBytes == 1)
             {
+                // End of command, reset dataBytes counter
+                dataBytes = 0;
+
                 if (c1 < MAX_PROGRAMS)
                 {
                     channels[channel].program = c1;
