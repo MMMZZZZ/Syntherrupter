@@ -15,6 +15,8 @@ constexpr ByteBuffer* MIDI::BUFFER_LIST[];
 Channel               MIDI::channels[];
 NoteList              MIDI::notelist;
 uint32_t              MIDI::notesCount = 0;
+uint32_t              MIDI::sysexNum = 0;
+uint32_t              MIDI::sysexVal = 0;
 bool                  MIDI::playing = false;
 float                 MIDI::freqTable[128];
 MIDIProgram           MIDI::programs[MAX_PROGRAMS];
@@ -452,6 +454,132 @@ bool MIDI::processBuffer(uint32_t b)
             }
             break;
         }
+        case 0xF0: // F0: SysEx start, F7: SysEx end, F[other]: idgaf
+        {
+            /*
+             * System messages are not channel specific. As written in the
+             * comment above the lower bits encode the type of system message.
+             * Hence the channel variable has a different meaning in this
+             * case.
+             */
+            uint32_t& type = channel;
+
+            static constexpr uint32_t SYSEX_START = 0;
+            static constexpr uint32_t SYSEX_END = 7;
+
+            static uint8_t  sysexDataAll[BUFFER_COUNT][SYSEX_MAX_SIZE]{0};
+            static uint32_t sysexDataIndexAll[BUFFER_COUNT]{0};
+            static bool sysexUsableAll[BUFFER_COUNT]{false};
+
+            uint8_t (&sysexData)[SYSEX_MAX_SIZE] = sysexDataAll[b];
+            uint32_t &sysexDataIndex = sysexDataIndexAll[b];
+            bool &sysexUsable = sysexUsableAll[b];
+
+            if (dataBytes == 1)
+            {
+                // new sysex command, reset usable state.
+                sysexUsable = true;
+            }
+
+            if (sysexUsable)
+            {
+                if (type == SYSEX_START)
+                {
+                    switch (dataBytes)
+                    {
+                        case 1: // Vendor ID. Only 2 byte IDs are accepted by syntherrupter
+                            if (c1 != 0)
+                            {
+                                // 1-byte ID, nothing we can support.
+                                sysexUsable = false;
+                            }
+                            break;
+                        case 2: // [Assuming a 2 byte ID] MSB of the DMID
+                            /*
+                             * Only Syntherrupter messages are supported, meaning the DMID must equal 0x2605
+                             */
+                            if (c1 != 0x26)
+                            {
+                                sysexUsable = false;
+                            }
+                            break;
+                        case 3: // LSB of the DMID
+                            if (c1 != 0x05)
+                            {
+                                sysexUsable = false;
+                            }
+                            break;
+                        case 4: // Message Protocol Version
+                            if (c1 != SYSEX_PROTOCOL_VERSION)
+                            {
+                                sysexUsable = false;
+                            }
+                        default: // in all other cases it are data bytes
+                            if (sysexDataIndex < SYSEX_MAX_SIZE)
+                            {
+                                sysexData[sysexDataIndex++] = c1;
+                            }
+                            break;
+                    }
+                }
+                else if (type == SYSEX_END)
+                {
+
+                    /*
+                     * Sysex message completed, process data bytes.
+                     * Basic format: n address bytes, m data bytes.
+                     * n, m determined based on message length l:
+                     *  l | n |   m
+                     * ---+---+-----
+                     *   2| 1 |   1
+                     *   3| 1 |   2
+                     *   4| 2 |   2
+                     *   5| 1 |   4
+                     *   6| 2 |   4
+                     *   7| 2 |   5
+                     *   8| 4 |   4
+                     *   9| 4 |   5
+                     *  10| 5 |   5
+                     *   x| 5 | x-5
+                     *
+                     * Data is transmitted LSB first.
+                     *
+                     * Currently no support for strings or message lengths outside
+                     * [2,10].
+                     */
+                    static constexpr uint32_t BYTE_COUNT[12][2] = {
+                        {0, 0}, // garbage
+                        {0, 0}, // garbage
+                        {1, 1},
+                        {1, 2},
+                        {2, 2},
+                        {1, 4},
+                        {2, 4},
+                        {2, 5},
+                        {4, 4},
+                        {4, 5},
+                        {5, 5},
+                        {5, 0},
+                    };
+
+                    if (sysexDataIndex >= 2 && sysexDataIndex <= 10)
+                    {
+                        sysexNum = 0;
+                        sysexVal = 0;
+
+                        for (uint32_t i = 0; i < BYTE_COUNT[sysexDataIndex][0]; i++)
+                        {
+                            sysexNum += sysexData[i] << (7 * i);
+                        }
+
+                        for (uint32_t i = 0; i < BYTE_COUNT[sysexDataIndex][1]; i++)
+                        {
+                            sysexVal += sysexData[BYTE_COUNT[sysexDataIndex][0] + i] << (7 * i);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     return true;
@@ -827,4 +955,170 @@ void MIDI::setCoilNum(uint32_t num)
 {
     coilNum = num;
     coilBit = 1 << num;
+}
+
+void MIDI::processSysex()
+{
+    /*
+     * sysexNum: 1-4 groups of 7 bits
+     *    0-6: parameter number LSB
+     *   7-13: parameter number MSB [optional]
+     *  14-20: parameter target LSB [optional, but requires parameter number MSB]
+     *  21-27: parameter target MSB [optional, but requires target LSB and number MSB]
+     *
+     * if no target is required for a parameter it should be 0.
+     */
+
+    uint32_t number    =  sysexNum        & 0x3fff;
+    uint32_t targetLSB = (sysexNum >>  7) & 0x007f;
+    uint32_t targetMSB = (sysexNum >> 14) & 0x007f;
+
+    switch (number)
+    {
+        /*
+         * Structure:  0x01- 0x1f: System commands / reserved
+         *                  0x01: request value of X
+         *                  0x02: request support for X
+         *                  0x10: reply to request
+         *
+         *             0x20- 0x2f: "common" mode parameters (ontime, duty, ...)
+         *                         may not be supported by all modes but are
+         *                         likely to be required by a new mode.
+         *             0x30- 0x3f: simple mode parameters
+         *             0x40- 0x4f: midi live mode parameters
+         *             0x50- 0x5f: lightsaber mode parameters
+         *             0x60- 0x7f: reserved
+         *            0x100-0x1ff: settings
+         * If applicable, any PN + 0x2000 is the float32 version of that
+         * parameter (default: int32).
+         * Unless noted otherwise...
+         *   * the float version is not fractional. f.ex. if int32 version is
+         *     in 1/1000, the f32 version isn't.
+         *   * the float version of an abstract range is from 0.0f-1.0f. If
+         *     f.ex. a parameter covers a range from 0-127, the float version
+         *     would equal to that value divided by 127.
+         */
+
+        // parameter number: [target, can be c=coil or m=supported mode=[ml(midi live), s(simple), ls(lightsabers)]], ui=unsigned int, f32=float(32bit), bfx = x bit bitfield, description
+        case 0x20: // [msb=coil][lsb=s,ml,ls] i32 ontime in us
+
+            break;
+        case 0x21: // [msb=s,ml,ls][lsb=coil], i32 duty in 1/1000
+
+            break;
+        case 0x22: // [msb=s,ml,ls][lsb=coil], i32 BPS in Hz
+
+            break;
+        case 0x23: // [msb=s,ml,ls][lsb=coil], i32 period in us
+
+            break;
+        case 0x26: // [msb=s,ml,ls][lsb=0], ui apply mode. 0=manual, 1=on release, 2=immediate, other=reserved.
+
+            break;
+        case 0x27: // [msb=s,ml,ls][lsb=0], enable/disable mode. 0=disable, 1=enable, other=reserved
+
+            break;
+
+        case 0x30: // (msb=s)[lsb=all coils], i32 ontime filter factor /1000
+
+            break;
+        case 0x31: // (msb=s)[lsb=all coils], i32 ontime filter constant /1000
+
+            break;
+        case 0x32: // (msb=s)[lsb=all coils], i32 BPS filter factor /1000
+
+            break;
+        case 0x33: // (msb=s)[lsb=all coils], i32 BPS filter constant /1000
+
+            break;
+
+        case 0x40: // (msb=ml)[lsb=coil], bf16 assigned MIDI channels
+
+            break;
+        case 0x41: // (msb=ml)[lsb=coil], bf7 pan config. [0-1]: reach mode, 0=const, 1=lin, 2-3=reserved; [2-5]:reserved; [6]: stereo enabled/disabled.
+
+            break;
+        case 0x42: // (msb=ml)[lsb=coil], i32 pan position (0-127)
+
+            break;
+        case 0x43: // (msb=ml)[lsb=coil], i32 pan reach (0-127)
+
+            break;
+        case 0x44: // (msb=ml)[lsb=coil], reserved for additional pan reach parameter.
+
+            break;
+        case 0x45: // (msb=ml)(lsb=0), i32 reset. 1 = reset NRPs, other = reserved.
+
+            break;
+
+        case 0x50: // (msb=ls)[lsb=coil], bf4 assigned lightsabers
+
+            break;
+        case 0x51: // (msb=ls)(lsb=0), i32 assign given ID to specified lightsaber. id can be 0-3. other values are reserved.
+
+            break;
+
+        case 0x100: // ()(), i32 EEPROM update mode, 0=manual, 1=force update, 2=auto (after each settings command), other=reserved.
+
+            break;
+        case 0x110: // ()(), i32 display brightness, 0-100, other=reserved
+
+            break;
+        case 0x111: // ()(), i32 seconds til standby, 1-3600, 0=disabled, other=reserved
+
+            break;
+        case 0x112: // ()(), i32 button hold time (ms), 50-9999, other=reserved
+
+            break;
+        case 0x113: // ()(), bf1 safety options, [0]: background shutdown, 0=disabled, 1=enabled.
+
+            break;
+        case 0x114: // ()(), i32 color mode, 0=light, 1=dark, other=reserved
+
+            break;
+        case 0x120: // [msb=charGroup][lsb=user], char[4] username
+
+            break;
+        case 0x121: // [msb=charGroup][lsb=user], char[4] password
+
+            break;
+        case 0x122: // ()[lsb=user], i32 user max ontime in us
+
+            break;
+        case 0x123: // ()[lsb=user], i32 user max duty in 1/1000
+
+            break;
+        case 0x124: // ()[lsb=user], i32 user max BPS in Hz
+
+            break;
+        case 0x130: // ()[lsb=coil], i32 coil max ontime in us
+
+            break;
+        case 0x131: // ()[lsb=coil], i32 coil max duty in 1/1000
+
+            break;
+        case 0x132: // reserved for: ()[lsb=coil], i32 coil min ontime in us
+
+            break;
+        case 0x133: // ()[lsb=coil], i32 coil min offtime in us
+
+            break;
+        case 0x134: // ()[lsb=coil], i32 coil max MIDI voices, 1-16, ohter=reserved
+
+            break;
+        case 0x140: // (msb=program)(lsb=step), i32 envelope next step, 0-7
+
+            break;
+        case 0x141: // (msb=program)(lsb=step), i32 envelope step amplitude in 1/1000
+
+            break;
+        case 0x142: // (msb=program)(lsb=step), i32 envelope step duration in us
+
+            break;
+        case 0x143: // (msb=program)(lsb=step), i32 envelope step n-tau in 1/1000
+
+            break;
+        default:
+            break;
+    }
 }
