@@ -539,13 +539,13 @@ void GUI::midiLive()
                 uint8_t channel = commandData[0] & 0xf;
                 MIDI::otherBuffer.add(0xB0 + channel);    // Control Change
                 MIDI::otherBuffer.add(0x63);              // NRPN Coarse
-                MIDI::otherBuffer.add(commandData[1]); // Value
+                MIDI::otherBuffer.add(commandData[1]);    // Value
                 MIDI::otherBuffer.add(0x62);              // NRPN Fine
-                MIDI::otherBuffer.add(commandData[2]); // Value
+                MIDI::otherBuffer.add(commandData[2]);    // Value
                 MIDI::otherBuffer.add(0x06);              // Data Entry Coarse
-                MIDI::otherBuffer.add(commandData[3]); // Value
+                MIDI::otherBuffer.add(commandData[3]);    // Value
                 MIDI::otherBuffer.add(0x26);              // Data Entry Fine
-                MIDI::otherBuffer.add(commandData[4]); // Value
+                MIDI::otherBuffer.add(commandData[4]);    // Value
             }
         }
         else
