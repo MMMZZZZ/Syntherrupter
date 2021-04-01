@@ -1,7 +1,6 @@
 # Syntherrupter
 
-Powerful polyphonic MIDI interrupter for tesla coils based on the TI Tiva TM4C1294XL microcontroller board and a Nextion resistive touch display.
-You can control up to 6 different coils simultaneously. On each coil you can play over 10 notes. Probably more than you'll ever need. 
+Powerful MIDI interrupter with touchscreen for up to 6 tesla coils and 16 voices per coil. 
 
 By Max Zuidberg. Credits [below](#credits).
 
