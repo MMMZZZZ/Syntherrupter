@@ -1,7 +1,11 @@
 # Custom MIDI Commands
+
+[Back to the wiki main page](README.md#readme)
+
 Syntherrupter's MIDI functions can be controlled via custom MIDI commands. Since vendor or even device specific MIDI commands are part of the MIDI standard, embedding them in your MIDI files does not break the compatibiliy of the file with other devices. 
 
 ## Index
+
 * [Custom MIDI Commands](#custom-midi-commands)
 * [Index](#index)
 	* [Non-registered Parameters (NRP)](#non-registered-parameters-nrp)
@@ -12,6 +16,7 @@ Syntherrupter's MIDI functions can be controlled via custom MIDI commands. Since
 		* [Syntherrupters SysEx Commands Version 1](#syntherrupters-sysex-commands-version-1)
 
 ## Non-registered Parameters (NRP)
+
 Non-registered parameters allow control over up to 16383 controllers, each one with 14 bit resolution. These commands are not "vendor encoded" like SysEx messages (see below) therefore Syntherrupter only uses controller numbers that are not known to be used by any manufacturer. 
 
 If you've never used NRPs or Syntherrupters advanced features, you might have a look at the following helpful links:
@@ -21,6 +26,7 @@ If you've never used NRPs or Syntherrupters advanced features, you might have a 
 NRPs are implemented via control change commands, which means that the controlled parameter does not affect the same parameter on another MIDI channel - just like other controllers like pedals, volume, pan, ...
 
 ### NRP Format
+
 There are 4 controller messages that are used to modify NRPs:
  * Controller 99 - NRP number coarse (NC): Sets the upper 7 bit of the NRP number
  * Controller 98 - NRP number fine (NF): Sets the lower 7 bit of the NRP number
@@ -32,6 +38,7 @@ All 4 commands are independant, meaning a NC command does not affect the lower 7
 After finishing the modification of NRPs, the NRP number should be reset to 0x7f7f.
 
 ### Syntherrupters NRPs
+
 Currently Syntherrupter has support for the following NRPs (all values are decimal, not hex):
 |Parameter|NC|NF|DC|DF|
 |-|-|-|-|-|
@@ -52,6 +59,7 @@ Syntherrupter allows you to map notes to stereo positions based on different par
 	* Mode 6: "Loudest". All notes of the channel get mapped based on the pitch of the note with the highest velocity. If multiple notes have the same velocity, the pitch of the most recent one is taken.
 
 ## System Exclusive Messages (SysEx)
+
 SysEx messages were originally intended to allow manufacturers to implement completely custom commands within the MIDI protocol. Part of each command is a device manufacturer ID (DMID) to make sure the commands of different manufacturers don't interfer with each other. Hence, with your own ID you can implement whatever you want. 
 
 However with GM2, kind of a revision and extension of the MIDI standard, "Universal SysEx Messages" were introduced. They have a ID just like any other SysEx message but as the "universal" indicates, they are well defined and intended to be implemented on any suitable device. It's basically a backward compatible extension of the existing MIDI standard. As of now, Syntherrupter has no support for Universal SysEx Messages (and tbh they're quite rare in MIDI files).
@@ -94,18 +102,17 @@ Structure:
 #### Overview
 
 The commands are grouped by purpose. Any command (range) that's not listed here should be considered as reserved.
-
-* `0x01-0x1f`: System commands. Commands like a read request or an answer to a read request
-* `0x20-0x3f`: Common mode parameters. Things like ontime, which are to some extend required by all modes. 
-* `0x40-0x5f`: Simple mode parameters. Control specific properties of Simple mode.
-* `0x60-0x7f`: MIDI Live mode parameters. Control specific properties of MIDI Live mode.
-* `0x100-0x10f`: Lightsaber mode parameters. Control specific properties of Lightsaber mode.
+* [`0x01-0x1f`: System commands](#0x01-0x1f-system-commands). Commands like a read request or an answer to a read request
+* [`0x20-0x3f`: Common mode parameters](#0x20-0x3f-common-mode-parameters). Things like ontime, which are to some extend required by all modes. 
+* [`0x40-0x5f`: Simple mode parameters](#0x40-0x5f-simple-mode-parameters). Control specific properties of Simple mode.
+* [`0x60-0x7f`: MIDI Live mode parameters](#0x60-0x7f-midi-live-mode-parameters). Control specific properties of MIDI Live mode.
+* [`0x100-0x10f`: Lightsaber mode parameters](#0x100-0x10f-lightsaber-mode-parameters). Control specific properties of Lightsaber mode.
 * `0x200-0x3ff`: Settings
-	* `0x200-0x21f`: EEPROM and other control commands
-	* `0x220-0x23f`: General settings
-	* `0x240-0x25f`: User settings
-	* `0x260-0x27f`: Coil settings (limits)
-	* `0x300-0x31f`: Envelope settings
+	* [`0x200-0x21f`: EEPROM and other control commands](#0x200-0x21f-eeprom-and-other-control-commands)
+	* [`0x220-0x23f`: General settings](#0x220-0x23f-general-settings)
+	* [`0x240-0x25f`: User settings](#0x240-0x25f-user-settings)
+	* [`0x260-0x27f`: Coil settings (limits)](#0x260-0x27f-coil-settings-limits)
+	* [`0x300-0x31f`: Envelope settings](#0x300-0x31f-envelope-settings)
 	
 #### Conventions
 
