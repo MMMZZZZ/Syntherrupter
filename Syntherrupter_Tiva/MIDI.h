@@ -162,7 +162,7 @@ private:
     static constexpr uint32_t effectResolutionUS = 2000;
 
     static constexpr uint32_t SYSEX_MAX_SIZE = 16;
-    static constexpr uint32_t SYSEX_PROTOCOL_VERSION = 0;
+    static constexpr uint32_t SYSEX_PROTOCOL_VERSION = 1;
     static constexpr uint32_t    BUFFER_COUNT = 3;
     static constexpr ByteBuffer* BUFFER_LIST[BUFFER_COUNT] = {&(usbUart.buffer), &(midiUart.buffer), &otherBuffer};;
     static constexpr uint32_t MAX_NOTES_COUNT = 64;

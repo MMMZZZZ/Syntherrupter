@@ -241,7 +241,7 @@ bool MIDI::processBuffer(uint32_t b)
                         channels[channel].expression = c1 / 128.0f;
                         channels[channel].controllersChanged = true;
                         break;
-                    case 0x40: // Sustain Pedal
+                    case 0x60: // Sustain Pedal
                         if (c1 >= 64)
                         {
                             channels[channel].sustainPedal = true;
@@ -252,7 +252,7 @@ bool MIDI::processBuffer(uint32_t b)
                         }
                         channels[channel].controllersChanged = true;
                         break;
-                    case 0x43: // Damper Pedal
+                    case 0x63: // Damper Pedal
                         if (c1 >= 64)
                         {
                             channels[channel].damperPedal = true;
@@ -1007,26 +1007,26 @@ void MIDI::processSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMSB,
         case 0x21:
         case 0x22:
         case 0x23:
-        case 0x40:
-        case 0x41:
-        case 0x42:
-        case 0x43:
-        case 0x44:
-        case 0x50:
-        case 0x130:
-        case 0x131:
-        case 0x132:
-        case 0x133:
-        case 0x134:
+        case 0x60:
+        case 0x61:
+        case 0x62:
+        case 0x63:
+        case 0x64:
+        case 0x100:
+        case 0x260:
+        case 0x261:
+        case 0x262:
+        case 0x263:
+        case 0x264:
             if (targetLSB >= 0 && targetLSB < COIL_COUNT)
             {
                 lsbOk = true;
             }
             break;
-        case 0x30:
-        case 0x31:
-        case 0x32:
-        case 0x33:
+        case 0x40:
+        case 0x41:
+        case 0x44:
+        case 0x45:
             if (targetLSB == 127)
             {
                 lsbOk = true;
@@ -1035,35 +1035,35 @@ void MIDI::processSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMSB,
 
         case 0x26:
         case 0x27:
-        case 0x45:
-        case 0x51:
-        case 0x100:
-        case 0x110:
-        case 0x111:
-        case 0x112:
-        case 0x113:
-        case 0x114:
+        case 0x65:
+        case 0x101:
+        case 0x200:
+        case 0x220:
+        case 0x221:
+        case 0x222:
+        case 0x223:
+        case 0x224:
             if (targetLSB == 0)
             {
                 lsbOk = true;
             }
             break;
 
-        case 0x120:
-        case 0x121:
-        case 0x122:
-        case 0x123:
-        case 0x124:
+        case 0x240:
+        case 0x241:
+        case 0x242:
+        case 0x243:
+        case 0x244:
             if (targetLSB >= 0 && targetLSB < 3)
             {
                 lsbOk = true;
             }
             break;
 
-        case 0x140:
-        case 0x141:
-        case 0x142:
-        case 0x143:
+        case 0x300:
+        case 0x301:
+        case 0x302:
+        case 0x303:
             if (targetLSB >= 0 && targetLSB < MIDIProgram::DATA_POINTS)
             {
                 lsbOk = true;
@@ -1092,68 +1092,68 @@ void MIDI::processSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMSB,
             }
             break;
 
-        case 0x30:
-        case 0x31:
-        case 0x32:
-        case 0x33:
+        case 0x40:
+        case 0x41:
+        case 0x44:
+        case 0x45:
             if (targetMSB == 0 || targetMSB == MODE_SIMPLE)
             {
                 msbOk = true;
             }
             break;
 
-        case 0x40:
-        case 0x41:
-        case 0x42:
-        case 0x43:
-        case 0x44:
-        case 0x45:
+        case 0x60:
+        case 0x61:
+        case 0x62:
+        case 0x63:
+        case 0x64:
+        case 0x65:
             if (targetMSB == 0 || targetMSB == MODE_MIDI_LIVE)
             {
                 msbOk = true;
             }
             break;
 
-        case 0x50:
-        case 0x51:
+        case 0x100:
+        case 0x101:
             if (targetMSB == 0 || targetMSB == MODE_LIGHTSABER)
             {
                 msbOk = true;
             }
             break;
 
-        case 0x100:
-        case 0x110:
-        case 0x111:
-        case 0x112:
-        case 0x113:
-        case 0x114:
-        case 0x122:
-        case 0x123:
-        case 0x124:
-        case 0x130:
-        case 0x131:
-        case 0x132:
-        case 0x133:
-        case 0x134:
+        case 0x200:
+        case 0x220:
+        case 0x221:
+        case 0x222:
+        case 0x223:
+        case 0x224:
+        case 0x242:
+        case 0x243:
+        case 0x244:
+        case 0x260:
+        case 0x261:
+        case 0x262:
+        case 0x263:
+        case 0x264:
             if (targetMSB == 0)
             {
                 msbOk = true;
             }
             break;
 
-        case 0x120:
-        case 0x121:
+        case 0x240:
+        case 0x241:
             if (targetMSB >= 0 && targetMSB < (EEPROMSettings_STR_CHAR_COUNT / 4))
             {
                 msbOk = true;
             }
             break;
 
-        case 0x140:
-        case 0x141:
-        case 0x142:
-        case 0x143:
+        case 0x300:
+        case 0x301:
+        case 0x302:
+        case 0x303:
             if (targetMSB >= 0 && targetMSB < MAX_PROGRAMS)
             {
                 msbOk = true;
@@ -1168,19 +1168,18 @@ void MIDI::processSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMSB,
     switch (number)
     {
         /*
-         * Structure:  0x01- 0x1f: System commands / reserved
-         *                  0x01: request value of X
-         *                  0x02: request support for X
-         *                  0x10: reply to request
+         * Structure:  0x01-0x1f: System commands
+         *                 0x01: request value of X
+         *                 0x02: request support for X
+         *                 0x10: reply to request
          *
-         *             0x20- 0x2f: "common" mode parameters (ontime, duty, ...)
-         *                         may not be supported by all modes but are
-         *                         likely to be required by a new mode.
-         *             0x30- 0x3f: simple mode parameters
-         *             0x40- 0x4f: midi live mode parameters
-         *             0x50- 0x5f: lightsaber mode parameters
-         *             0x60- 0x7f: reserved
-         *            0x100-0x1ff: settings
+         *             0x20- 0x3f:  "common" mode parameters (ontime, duty, ...)
+         *                          may not be supported by all modes but are
+         *                          likely to be required by a new mode.
+         *              0x40- 0x5f: simple mode parameters
+         *              0x60- 0x7f: midi live mode parameters
+         *             0x100-0x12f: lightsaber mode parameters
+         *             0x200-0x3ff: settings
          * If applicable, any PN + 0x2000 is the float32 version of that
          * parameter (default: int32).
          * Unless noted otherwise...
@@ -1207,7 +1206,7 @@ void MIDI::processSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMSB,
 
             break;
         case 0x23: // [msb=s,ml,ls][lsb=coil], i32 period in us
-            coilInstances[targetLSB]->setVolSettings(1e6f / sysexVal, coilInstances[targetLSB]->singleNoteMaxDuty);
+
             break;
         case 0x26: // [msb=s,ml,ls][lsb=0], ui apply mode. 0=manual, 1=on release, 2=immediate, other=reserved.
 
@@ -1223,23 +1222,23 @@ void MIDI::processSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMSB,
             }
             break;
 
-        case 0x30: // (msb=s)[lsb=all coils], i32 ontime filter factor /1000
+        case 0x40: // (msb=s)[lsb=all coils], i32 ontime filter factor /1000
 
             break;
-        case 0x31: // (msb=s)[lsb=all coils], i32 ontime filter constant /1000
+        case 0x41: // (msb=s)[lsb=all coils], i32 ontime filter constant /1000
 
             break;
-        case 0x32: // (msb=s)[lsb=all coils], i32 BPS filter factor /1000
+        case 0x44: // (msb=s)[lsb=all coils], i32 BPS filter factor /1000
 
             break;
-        case 0x33: // (msb=s)[lsb=all coils], i32 BPS filter constant /1000
+        case 0x45: // (msb=s)[lsb=all coils], i32 BPS filter constant /1000
 
             break;
 
-        case 0x40: // (msb=ml)[lsb=coil], bf16 assigned MIDI channels
+        case 0x60: // (msb=ml)[lsb=coil], bf16 assigned MIDI channels
             coilInstances[targetLSB]->setChannels(sysexVal & 0xffff);
             break;
-        case 0x41: // (msb=ml)[lsb=coil], ui3 pan config. 0=const, 1=lin, 2-7=reserved.
+        case 0x61: // (msb=ml)[lsb=coil], ui3 pan config. 0=const, 1=lin, 2-7=reserved.
             if ((sysexVal & 0b111) == 0)
             {
                 coilInstances[targetLSB]->panConstVol = true;
@@ -1250,14 +1249,14 @@ void MIDI::processSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMSB,
             }
             coilInstances[targetLSB]->coilPanChanged = true;
             break;
-        case 0x42: // (msb=ml)[lsb=coil], i32 pan position (0-127), other = disabled.
+        case 0x62: // (msb=ml)[lsb=coil], i32 pan position (0-127), other = disabled.
             if (sysexVal < 0 || sysexVal > 127)
             {
                 sysexVal = 128;
             }
             coilInstances[targetLSB]->setPan(sysexVal);
             break;
-        case 0x43: // (msb=ml)[lsb=coil], i32 pan reach (0-127)
+        case 0x63: // (msb=ml)[lsb=coil], i32 pan reach (0-127)
             if (sysexVal >= 0 && sysexVal >= 127)
             {
                 if (coilInstances[targetLSB]->panConstVol)
@@ -1267,69 +1266,69 @@ void MIDI::processSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMSB,
                 coilInstances[targetLSB]->setPanReach(sysexVal);
             }
             break;
-        case 0x44: // (msb=ml)[lsb=coil], reserved for additional pan reach parameter.
+        case 0x64: // (msb=ml)[lsb=coil], reserved for additional pan reach parameter.
 
             break;
-        case 0x45: // (msb=ml)(lsb=0), bf16 reset NRPs of given channels.
+        case 0x65: // (msb=ml)(lsb=0), bf16 reset NRPs of given channels.
             resetNRPs(sysexVal & 0xffff);
             break;
 
-        case 0x50: // (msb=ls)[lsb=coil], bf4 assigned lightsabers
+        case 0x100: // (msb=ls)[lsb=coil], bf4 assigned lightsabers
 
             break;
-        case 0x51: // (msb=ls)(lsb=0), i32 assign given ID to specified lightsaber. id can be 0-3. other values are reserved.
+        case 0x101: // (msb=ls)(lsb=0), i32 assign given ID to specified lightsaber. id can be 0-3. other values are reserved.
 
             break;
 
-        case 0x100: // ()(), i32 EEPROM update mode, 0=manual, 1=force update, 2=auto (after each settings command), other=reserved.
+        case 0x200: // ()(), i32 EEPROM update mode, 0=manual, 1=force update, 2=auto (after each settings command), other=reserved.
 
             break;
-        case 0x110: // ()(), i32 display brightness, 0-100, other=reserved
+        case 0x220: // ()(), i32 display brightness, 0-100, other=reserved
 
             break;
-        case 0x111: // ()(), i32 seconds til standby, 1-3600, 0=disabled, other=reserved
+        case 0x221: // ()(), i32 seconds til standby, 1-3600, 0=disabled, other=reserved
 
             break;
-        case 0x112: // ()(), i32 button hold time (ms), 50-9999, other=reserved
+        case 0x222: // ()(), i32 button hold time (ms), 50-9999, other=reserved
 
             break;
-        case 0x113: // ()(), bf1 safety options, [0]: background shutdown, 0=disabled, 1=enabled.
+        case 0x223: // ()(), bf1 safety options, [0]: background shutdown, 0=disabled, 1=enabled.
 
             break;
-        case 0x114: // ()(), i32 color mode, 0=light, 1=dark, other=reserved
+        case 0x224: // ()(), i32 color mode, 0=light, 1=dark, other=reserved
 
             break;
-        case 0x120: // [msb=charGroup][lsb=user], char[4] username
+        case 0x240: // [msb=charGroup][lsb=user], char[4] username
 
             break;
-        case 0x121: // [msb=charGroup][lsb=user], char[4] password
+        case 0x241: // [msb=charGroup][lsb=user], char[4] password
 
             break;
-        case 0x122: // ()[lsb=user,nb], i32 user max ontime in us
+        case 0x242: // ()[lsb=user,nb], i32 user max ontime in us
 
             break;
-        case 0x123: // ()[lsb=user,nb], i32 user max duty in 1/1000
+        case 0x243: // ()[lsb=user,nb], i32 user max duty in 1/1000
 
             break;
-        case 0x124: // ()[lsb=user,nb], i32 user max BPS in Hz
+        case 0x244: // ()[lsb=user,nb], i32 user max BPS in Hz
 
             break;
-        case 0x130: // ()[lsb=coil], i32 coil max ontime in us
+        case 0x260: // ()[lsb=coil], i32 coil max ontime in us
 
             break;
-        case 0x131: // ()[lsb=coil], i32 coil max duty in 1/1000
+        case 0x261: // ()[lsb=coil], i32 coil max duty in 1/1000
 
             break;
-        case 0x132: // reserved for: ()[lsb=coil], i32 coil min ontime in us
+        case 0x262: // reserved for: ()[lsb=coil], i32 coil min ontime in us
 
             break;
-        case 0x133: // ()[lsb=coil], i32 coil min offtime in us
+        case 0x263: // ()[lsb=coil], i32 coil min offtime in us
 
             break;
-        case 0x134: // ()[lsb=coil], i32 coil max MIDI voices, 1-16, ohter=reserved
+        case 0x264: // ()[lsb=coil], i32 coil max MIDI voices, 1-16, ohter=reserved
 
             break;
-        case 0x140: // (msb=program)(lsb=step), i32 envelope next step, 0-7
+        case 0x300: // (msb=program)(lsb=step), i32 envelope next step, 0-7
             if (sysexVal >= 0 && sysexVal < MIDIProgram::DATA_POINTS)
             {
                 float& amp     = programs[targetMSB].amplitude[targetLSB];
@@ -1338,7 +1337,7 @@ void MIDI::processSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMSB,
                 programs[targetMSB].setDataPoint(targetLSB, amp, dur, ntau, sysexVal);
             }
             break;
-        case 0x141: // (msb=program)(lsb=step), i32 envelope step amplitude in 1/1000
+        case 0x301: // (msb=program)(lsb=step), i32 envelope step amplitude in 1/1000
             if (sysexVal >= 0)
             {
                 float& dur     = programs[targetMSB].durationUS[targetLSB];
@@ -1347,7 +1346,7 @@ void MIDI::processSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMSB,
                 programs[targetMSB].setDataPoint(targetLSB, sysexVal / 1e3f, dur, ntau, next);
             }
             break;
-        case 0x142: // (msb=program)(lsb=step), i32 envelope step duration in us
+        case 0x302: // (msb=program)(lsb=step), i32 envelope step duration in us
             if (sysexVal >= 0)
             {
                 float& amp     = programs[targetMSB].amplitude[targetLSB];
@@ -1356,7 +1355,7 @@ void MIDI::processSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMSB,
                 programs[targetMSB].setDataPoint(targetLSB, amp, sysexVal, ntau, next);
             }
             break;
-        case 0x143: // (msb=program)(lsb=step), i32 envelope step n-tau in 1/1000
+        case 0x303: // (msb=program)(lsb=step), i32 envelope step n-tau in 1/1000
             float& amp     = programs[targetMSB].amplitude[targetLSB];
             float& dur     = programs[targetMSB].durationUS[targetLSB];
             uint32_t& next = programs[targetMSB].nextStep[targetLSB];
