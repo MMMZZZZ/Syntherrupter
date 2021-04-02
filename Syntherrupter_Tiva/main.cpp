@@ -42,6 +42,9 @@ int main(void)
     System::init(sysTickISR);
     System::setSystemTimeResUS(16);
 
+    // Copy value manually because mutually including headers yadi yadi yada
+    MIDI::EEPROMSettings_STR_CHAR_COUNT = EEPROMSettings::STR_CHAR_COUNT;
+
     MIDI::init(115200, uartUsbISR, GPIO_PORTC_BASE, GPIO_PIN_4, GPIO_PIN_5, uartMidiISR);
     LightSaber::init(GPIO_PORTA_BASE, GPIO_PIN_6, GPIO_PIN_7, 115200, uartLightSaberISR);
 

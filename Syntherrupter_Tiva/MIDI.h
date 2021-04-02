@@ -39,6 +39,7 @@ public:
     static void start();
     static void stop();
     static void resetNRPs(uint32_t chns = 0xffff);
+    void setVolSettingsProm(float ontimeUSMax, float dutyMaxProm);
     void setVolSettings(float ontimeUSMax, float dutyMax);
     void setChannels(uint32_t chns);
     void setPan(uint32_t pan);
@@ -54,11 +55,13 @@ public:
     static ByteBuffer otherBuffer;
     static constexpr uint32_t MAX_PROGRAMS = 64;
     static MIDIProgram programs[MAX_PROGRAMS];
+    static MIDI* coilInstances[COIL_COUNT];
+    static uint32_t EEPROMSettings_STR_CHAR_COUNT; // TODO this really needs to disappear.
 
 private:
     static bool processBuffer(uint32_t b);
     static void updateEffects(Note* note);
-    static void processSysex();
+    static void processSysex(uint32_t sysexNum, uint32_t targetLSB, uint32_t targetMSB, int32_t sysexVal);
     void setPanVol(Note* note)
     {
         if (note->panChanged || coilPanChanged)
@@ -164,9 +167,8 @@ private:
     static constexpr ByteBuffer* BUFFER_LIST[BUFFER_COUNT] = {&(usbUart.buffer), &(midiUart.buffer), &otherBuffer};;
     static constexpr uint32_t MAX_NOTES_COUNT = 64;
     static NoteList notelist;
-    static uint32_t           notesCount;
-    static uint32_t sysexNum;
-    static uint32_t sysexVal;
+    static uint32_t notesCount;
+    static uint32_t sysexDeviceID;
     ToneList* tonelist;
     float absFreq               =  0.0f;
     float singleNoteMaxDuty     =  0.0f;
