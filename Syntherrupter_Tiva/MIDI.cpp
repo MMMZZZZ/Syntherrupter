@@ -241,7 +241,7 @@ bool MIDI::processBuffer(uint32_t b)
                         channels[channel].expression = c1 / 128.0f;
                         channels[channel].controllersChanged = true;
                         break;
-                    case 0x60: // Sustain Pedal
+                    case 0x40: // Sustain Pedal
                         if (c1 >= 64)
                         {
                             channels[channel].sustainPedal = true;
@@ -252,7 +252,7 @@ bool MIDI::processBuffer(uint32_t b)
                         }
                         channels[channel].controllersChanged = true;
                         break;
-                    case 0x63: // Damper Pedal
+                    case 0x43: // Damper Pedal
                         if (c1 >= 64)
                         {
                             channels[channel].damperPedal = true;
