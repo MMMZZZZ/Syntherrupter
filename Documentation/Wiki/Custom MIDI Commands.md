@@ -127,15 +127,15 @@ All conventions are to be read as "unless noted otherwise... ".
 	* int32
 	* float32
 	* char[4]
-	* bitfield, noted as bf3, where 3 would indicate that the field is 3 bits wide (starting at the least significant bit of the parameter value)
-* Any parameter value or part of it that is not specified by this document is reserved. A bitfield range within the bitfield is noted as [LSB-MSB], f.ex. [2-7]
+	* bitfield, noted as bf8, where 8 would indicate that the field is 8 bits wide (starting at the least significant bit of the parameter value). A bitfield range within the bitfield is noted as [LSB-MSB], f.ex. [2-7]
+* Any parameter value or part of it that is not specified by this document is reserved.
 * Target value 127 is reserved for broadcasting, meaning it will affect all targets (works for LSB/MSB independantly). Currently not implemented [NS].
 
 #### `0x01-0x1f`: System commands
 
-* `0x01`: Request parameter value
-* `0x02`: Request if parameter is supported
-* `0x10`: Response to request
+* `0x01`: [NS] Request parameter value
+* `0x02`: [NS] Request if parameter is supported
+* `0x10`: [NS] Response to request
 
 #### `0x20-0x3f`: Common mode parameters
 
@@ -155,15 +155,15 @@ All conventions are to be read as "unless noted otherwise... ".
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, duty cycle in 1/1000
-* `0x22`: BPS
+* `0x22`: [NS] BPS
 	* Target MSB: uint, target mode
-		* 1: [NS] Simple Mode
+		* 1: Simple Mode
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, BPS in Hz
-* `0x23`: Period
+* `0x23`: [NS] Period
 	* Target MSB: uint, target mode
-		* 1: [NS] Simple Mode
+		* 1: Simple Mode
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, period in us
