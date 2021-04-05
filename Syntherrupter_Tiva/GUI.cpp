@@ -114,7 +114,7 @@ void GUI::init()
                 // Send to Nextion
                 nxt.printf("%s.coil%iOn.val=%i\xff\xff\xff",
                            AllCoilSettings, coil + 1, maxOntimeUS);
-                nxt.printf("%s.coil%iOffVoices.val=%i\xff\xff\xff",
+                nxt.printf("%s.coil%iOffVoics.val=%i\xff\xff\xff",
                            AllCoilSettings, coil + 1, (maxVoices << 16) + minOffUS);
                 nxt.printf("%s.coil%iDuty.val=%i\xff\xff\xff",
                            AllCoilSettings, coil + 1, maxDutyPerm);

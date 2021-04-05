@@ -37,48 +37,48 @@ Page TC_Settings
             if(maxCoilCount.val>=1)
             {
                 nCoil1On.val=coil1On.val
-                nCoil1MinOff.val=coil1OffVoices.val&0x0000ffff
-                nCoil1Voices.val=coil1OffVoices.val>>16
+                nCoil1MinOff.val=coil1OffVoics.val&0x0000ffff
+                nCoil1Voices.val=coil1OffVoics.val>>16
                 nCoil1Voices.val=nCoil1Voices.val&0x0000ffff
                 nCoil1Duty.val=coil1Duty.val
             }
             if(maxCoilCount.val>=2)
             {
                 nCoil2On.val=coil2On.val
-                nCoil2MinOff.val=coil2OffVoices.val&0x0000ffff
-                nCoil2Voices.val=coil2OffVoices.val>>16
+                nCoil2MinOff.val=coil2OffVoics.val&0x0000ffff
+                nCoil2Voices.val=coil2OffVoics.val>>16
                 nCoil2Voices.val=nCoil2Voices.val&0x0000ffff
                 nCoil2Duty.val=coil2Duty.val
             }
             if(maxCoilCount.val>=3)
             {
                 nCoil3On.val=coil3On.val
-                nCoil3MinOff.val=coil3OffVoices.val&0x0000ffff
-                nCoil3Voices.val=coil3OffVoices.val>>16
+                nCoil3MinOff.val=coil3OffVoics.val&0x0000ffff
+                nCoil3Voices.val=coil3OffVoics.val>>16
                 nCoil3Voices.val=nCoil3Voices.val&0x0000ffff
                 nCoil3Duty.val=coil3Duty.val
             }
             if(maxCoilCount.val>=4)
             {
                 nCoil4On.val=coil4On.val
-                nCoil4MinOff.val=coil4OffVoices.val&0x0000ffff
-                nCoil4Voices.val=coil4OffVoices.val>>16
+                nCoil4MinOff.val=coil4OffVoics.val&0x0000ffff
+                nCoil4Voices.val=coil4OffVoics.val>>16
                 nCoil4Voices.val=nCoil4Voices.val&0x0000ffff
                 nCoil4Duty.val=coil4Duty.val
             }
             if(maxCoilCount.val>=5)
             {
                 nCoil5On.val=coil5On.val
-                nCoil5MinOff.val=coil5OffVoices.val&0x0000ffff
-                nCoil5Voices.val=coil5OffVoices.val>>16
+                nCoil5MinOff.val=coil5OffVoics.val&0x0000ffff
+                nCoil5Voices.val=coil5OffVoics.val>>16
                 nCoil5Voices.val=nCoil5Voices.val&0x0000ffff
                 nCoil5Duty.val=coil5Duty.val
             }
             if(maxCoilCount.val>=6)
             {
                 nCoil6On.val=coil6On.val
-                nCoil6MinOff.val=coil6OffVoices.val&0x0000ffff
-                nCoil6Voices.val=coil6OffVoices.val>>16
+                nCoil6MinOff.val=coil6OffVoics.val&0x0000ffff
+                nCoil6Voices.val=coil6OffVoics.val>>16
                 nCoil6Voices.val=nCoil6Voices.val&0x0000ffff
                 nCoil6Duty.val=coil6Duty.val
             }
@@ -298,7 +298,7 @@ Variable (int32) coil1On
         Scope: global
         Value: 0
     
-Variable (int32) coil1OffVoices
+Variable (int32) coil1OffVoics
     Attributes
         ID   : 46
         Scope: global
@@ -316,7 +316,7 @@ Variable (int32) coil2On
         Scope: global
         Value: 0
     
-Variable (int32) coil2OffVoices
+Variable (int32) coil2OffVoics
     Attributes
         ID   : 49
         Scope: global
@@ -334,7 +334,7 @@ Variable (int32) coil3On
         Scope: global
         Value: 0
     
-Variable (int32) coil3OffVoices
+Variable (int32) coil3OffVoics
     Attributes
         ID   : 52
         Scope: global
@@ -352,7 +352,7 @@ Variable (int32) coil4On
         Scope: global
         Value: 0
     
-Variable (int32) coil4OffVoices
+Variable (int32) coil4OffVoics
     Attributes
         ID   : 55
         Scope: global
@@ -370,7 +370,7 @@ Variable (int32) coil5On
         Scope: global
         Value: 0
     
-Variable (int32) coil5OffVoices
+Variable (int32) coil5OffVoics
     Attributes
         ID   : 58
         Scope: global
@@ -388,7 +388,7 @@ Variable (int32) coil6On
         Scope: global
         Value: 0
     
-Variable (int32) coil6OffVoices
+Variable (int32) coil6OffVoics
     Attributes
         ID   : 61
         Scope: global
@@ -1904,8 +1904,8 @@ Button bReturn
                 if(maxCoilCount.val>=1)
                 {
                     coil1On.val=nCoil1On.val
-                    coil1OffVoices.val=nCoil1Voices.val<<16
-                    coil1OffVoices.val+=nCoil1MinOff.val
+                    coil1OffVoics.val=nCoil1Voices.val<<16
+                    coil1OffVoics.val+=nCoil1MinOff.val
                     coil1Duty.val=nCoil1Duty.val
                     if(coil1On.val>sys0)
                     {
@@ -1919,8 +1919,8 @@ Button bReturn
                 if(maxCoilCount.val>=2)
                 {
                     coil2On.val=nCoil2On.val
-                    coil2OffVoices.val=nCoil2Voices.val<<16
-                    coil2OffVoices.val+=nCoil2MinOff.val
+                    coil2OffVoics.val=nCoil2Voices.val<<16
+                    coil2OffVoics.val+=nCoil2MinOff.val
                     coil2Duty.val=nCoil2Duty.val
                     if(coil2On.val>sys0)
                     {
@@ -1934,8 +1934,8 @@ Button bReturn
                 if(maxCoilCount.val>=3)
                 {
                     coil3On.val=nCoil3On.val
-                    coil3OffVoices.val=nCoil3Voices.val<<16
-                    coil3OffVoices.val+=nCoil3MinOff.val
+                    coil3OffVoics.val=nCoil3Voices.val<<16
+                    coil3OffVoics.val+=nCoil3MinOff.val
                     coil3Duty.val=nCoil3Duty.val
                     if(coil3On.val>sys0)
                     {
@@ -1949,8 +1949,8 @@ Button bReturn
                 if(maxCoilCount.val>=4)
                 {
                     coil4On.val=nCoil4On.val
-                    coil4OffVoices.val=nCoil4Voices.val<<16
-                    coil4OffVoices.val+=nCoil4MinOff.val
+                    coil4OffVoics.val=nCoil4Voices.val<<16
+                    coil4OffVoics.val+=nCoil4MinOff.val
                     coil4Duty.val=nCoil4Duty.val
                     if(coil4On.val>sys0)
                     {
@@ -1964,8 +1964,8 @@ Button bReturn
                 if(maxCoilCount.val>=5)
                 {
                     coil5On.val=nCoil5On.val
-                    coil5OffVoices.val=nCoil5Voices.val<<16
-                    coil5OffVoices.val+=nCoil5MinOff.val
+                    coil5OffVoics.val=nCoil5Voices.val<<16
+                    coil5OffVoics.val+=nCoil5MinOff.val
                     coil5Duty.val=nCoil5Duty.val
                     if(coil5On.val>sys0)
                     {
@@ -1979,8 +1979,8 @@ Button bReturn
                 if(maxCoilCount.val>=6)
                 {
                     coil6On.val=nCoil6On.val
-                    coil6OffVoices.val=nCoil6Voices.val<<16
-                    coil6OffVoices.val+=nCoil6MinOff.val
+                    coil6OffVoics.val=nCoil6Voices.val<<16
+                    coil6OffVoics.val+=nCoil6MinOff.val
                     coil6Duty.val=nCoil6Duty.val
                     if(coil6On.val>sys0)
                     {
@@ -2009,12 +2009,12 @@ Button bReturn
                 if(maxCoilCount.val>=1)
                 {
                     sys0=coil1On.val/10
-                    sys1=coil1OffVoices.val>>16
+                    sys1=coil1OffVoics.val>>16
                     sys1=sys1&0x0000ffff
                     sys1-=1
                     sys1=sys1<<12
                     sys0+=sys1
-                    sys1=coil1OffVoices.val&0x0000ffff
+                    sys1=coil1OffVoics.val&0x0000ffff
                     sys1/=10
                     sys1=sys1<<16
                     sys0+=sys1
@@ -2029,12 +2029,12 @@ Button bReturn
                 if(maxCoilCount.val>=2)
                 {
                     sys0=coil2On.val/10
-                    sys1=coil2OffVoices.val>>16
+                    sys1=coil2OffVoics.val>>16
                     sys1=sys1&0x0000ffff
                     sys1-=1
                     sys1=sys1<<12
                     sys0+=sys1
-                    sys1=coil2OffVoices.val&0x0000ffff
+                    sys1=coil2OffVoics.val&0x0000ffff
                     sys1/=10
                     sys1=sys1<<16
                     sys0+=sys1
@@ -2049,12 +2049,12 @@ Button bReturn
                 if(maxCoilCount.val>=3)
                 {
                     sys0=coil3On.val/10
-                    sys1=coil3OffVoices.val>>16
+                    sys1=coil3OffVoics.val>>16
                     sys1=sys1&0x0000ffff
                     sys1-=1
                     sys1=sys1<<12
                     sys0+=sys1
-                    sys1=coil3OffVoices.val&0x0000ffff
+                    sys1=coil3OffVoics.val&0x0000ffff
                     sys1/=10
                     sys1=sys1<<16
                     sys0+=sys1
@@ -2069,12 +2069,12 @@ Button bReturn
                 if(maxCoilCount.val>=4)
                 {
                     sys0=coil4On.val/10
-                    sys1=coil4OffVoices.val>>16
+                    sys1=coil4OffVoics.val>>16
                     sys1=sys1&0x0000ffff
                     sys1-=1
                     sys1=sys1<<12
                     sys0+=sys1
-                    sys1=coil4OffVoices.val&0x0000ffff
+                    sys1=coil4OffVoics.val&0x0000ffff
                     sys1/=10
                     sys1=sys1<<16
                     sys0+=sys1
@@ -2089,12 +2089,12 @@ Button bReturn
                 if(maxCoilCount.val>=5)
                 {
                     sys0=coil5On.val/10
-                    sys1=coil5OffVoices.val>>16
+                    sys1=coil5OffVoics.val>>16
                     sys1=sys1&0x0000ffff
                     sys1-=1
                     sys1=sys1<<12
                     sys0+=sys1
-                    sys1=coil5OffVoices.val&0x0000ffff
+                    sys1=coil5OffVoics.val&0x0000ffff
                     sys1/=10
                     sys1=sys1<<16
                     sys0+=sys1
@@ -2109,12 +2109,12 @@ Button bReturn
                 if(maxCoilCount.val>=6)
                 {
                     sys0=coil6On.val/10
-                    sys1=coil6OffVoices.val>>16
+                    sys1=coil6OffVoics.val>>16
                     sys1=sys1&0x0000ffff
                     sys1-=1
                     sys1=sys1<<12
                     sys0+=sys1
-                    sys1=coil6OffVoices.val&0x0000ffff
+                    sys1=coil6OffVoics.val&0x0000ffff
                     sys1/=10
                     sys1=sys1<<16
                     sys0+=sys1
