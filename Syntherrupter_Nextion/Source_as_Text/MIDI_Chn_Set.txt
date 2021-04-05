@@ -40,20 +40,20 @@ Page MIDI_Chn_Set
             //
             // Load values
             sys0=NRPData.val
-            nDataFine.val=sys0&0xff
-            sys0=sys0>>8
-            nDataCoarse.val=sys0&0xff
+            nNumCoarse.val=sys0&0xff
             sys0=sys0>>8
             nNumFine.val=sys0&0xff
             sys0=sys0>>8
-            nNumCoarse.val=sys0&0xff
+            nDataCoarse.val=sys0&0xff
+            sys0=sys0>>8
+            nDataFine.val=sys0&0xff
             //
             sys0=MIDIData.val
             nStatus.val=sys0&0xff
             sys0=sys0>>8
             nData1.val=sys0&0xff
             sys0=sys0>>8
-            nData2.val=sys0&0xf0
+            nData2.val=sys0&0xff
             if(nStatus.val>0)
             {
                 if(nStatus.val<0xf0)
@@ -242,7 +242,7 @@ Variable (int32) NRPData
     Attributes
         ID   : 63
         Scope: global
-        Value: 704643072
+        Value: 42
     
 Variable (int32) MIDIData
     Attributes
@@ -301,13 +301,13 @@ Number fStore
                 sys0+=chnNum.val
                 //
                 sys1=0
-                sys1+=nNumCoarse.val
-                sys1=sys1<<8
-                sys1+=nNumFine.val
+                sys1+=nDataFine.val
                 sys1=sys1<<8
                 sys1+=nDataCoarse.val
                 sys1=sys1<<8
-                sys1+=nDataFine.val
+                sys1+=nNumFine.val
+                sys1=sys1<<8
+                sys1+=nNumCoarse.val
                 // Send data only if it was modified or if the channel changed.
                 if(NRPData.val!=sys1)
                 {
@@ -333,7 +333,11 @@ Number fStore
                 sys1+=nData1.val
                 sys1=sys1<<8
                 sys1+=nStatus.val
-                sys2=sys1&0xfff0ffff
+                sys2=sys1
+                if(nStatus.val<0xf0)
+                {
+                    sys2&=0xfffffff0
+                }
                 // Send data only if it was modified.
                 if(MIDIData.val!=sys2)
                 {
@@ -749,7 +753,7 @@ Text fCheck
                 nStatus.val=0
             }else if(nStatus.val>255)
             {
-                nStatus.val=255
+                nStatus.val=0
             }else if(nStatus.val<0xf0)
             {
                 nStatus.val=nStatus.val&0xf0
@@ -1598,8 +1602,8 @@ Button bOK
                 newValTargetId.val=idle.id
                 //
                 // Make sure the values will be transmitted.
-                NRPData.val+=1
-                MIDIData.val+=1
+                NRPData.val=0xffffffff
+                MIDIData.val=0xffffffff
                 click fStore,1
             }else
             {

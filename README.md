@@ -1,7 +1,6 @@
 # Syntherrupter
 
-Powerful polyphonic MIDI interrupter for tesla coils based on the TI Tiva TM4C1294XL microcontroller board and a Nextion resistive touch display.
-You can control up to 6 different coils simultaneously. On each coil you can play over 10 notes. Probably more than you'll ever need. 
+Powerful MIDI interrupter with touchscreen for up to 6 tesla coils and 16 voices per coil. 
 
 By Max Zuidberg. Credits [below](#credits).
 
@@ -11,6 +10,7 @@ By Max Zuidberg. Credits [below](#credits).
 * [Documentation and Getting Started](#documentation-and-getting-started)
 * [Pictures](#pictures)
 * [Demo Videos](#demo-videos)
+* [PC MIDI Setup](#pc-midi-setup)
 * [Credits](#credits)
 
 ## Features
@@ -42,15 +42,29 @@ My own version. Left to right: On/Off switch, charge port, serial port, optical 
 
 ## Demo Videos
 
-Syntherrupter playing "I Want It All" - a MIDI with ~6 voices, pitch bending, sometimes very fast notes, and other effects.
+The following two videos demonstrate Syntherrupters capabilities but there are no arcs because I haven't had any opportunity to run my tesla coil. 
 
-[![Syntherrupter Demo - I Want It All](http://img.youtube.com/vi/H2ykCsD_b5g/0.jpg)](http://www.youtube.com/watch?v=H2ykCsD_b5g)
+* [Queen - I Want It All](http://www.youtube.com/watch?v=H2ykCsD_b5g). A MIDI with ~6 voices, pitch bending, sometimes very fast notes, and other effects.
 
-Here's a 6 channel demo of Syntherrupters stereo features with Thunderstruck. The only modification made to the MIDI file, were the commands that set up Syntherrupters stereo mode (documented [here](/Documentation/Wiki/Custom%20MIDI%20Commands.md)). The mapping of the notes to the coils (represented by LEDs) in done automatically.
+* [ACDC - Thunderstruck](http://www.youtube.com/watch?v=Tyts9u0le6A). This is a 6 channel demo of Syntherrupters stereo features with Thunderstruck. The only modification made to the MIDI file, were the commands that set up Syntherrupters stereo mode (documented [here](/Documentation/Wiki/Custom%20MIDI%20Commands.md)). The mapping of the notes to the coils (represented by LEDs) in done automatically.
 
-*"I must say that the Omni-mode is what I have dreamt about for years, I am really looking forward to use that feature (and not so much that I now have to build 6 identical coils)"* ([from Mads Barnkob](https://highvoltageforum.net/index.php?topic=1020.msg8430#msg8430))
+    *"I must say that the Omni-mode is what I have dreamt about for years, I am really looking forward to use that feature (and not so much that I now have to build 6 identical coils)"* ([from Mads Barnkob](https://highvoltageforum.net/index.php?topic=1020.msg8430#msg8430))
 
-[![Syntherrupter Demo - I Want It All](http://img.youtube.com/vi/Tyts9u0le6A/0.jpg)](http://www.youtube.com/watch?v=Tyts9u0le6A)
+* [ABBA - Gimme! Gimme! Gimme!](https://www.youtube.com/watch?v=6n-RvNdsbxE). Perfect demo of the [staccato envelope](/Documentation/Wiki/Envelopes.md#readme). Note how the low notes are not "on, off" but more like a quick fade in and fade out with slight reverb. That's the envelope. Compare it with the videos below, which do not use this feature
+
+Then there are a few videos from other people that build their own Syntherrupter:
+* [Video (performed by Georgios)](https://www.youtube.com/watch?v=1vgiw4VHPKQ). Fast MIDI with 2 tesla coils and up to 4 notes per coil
+* [O-Zone - Dragostea Din Tei (performed by futurist)](https://www.youtube.com/watch?v=86U6sI6FZ6c). 1 Coil, two notes, nonetheless a good MIDI.
+* [Fonsi - Despacito and much more (performed by futurist)](https://www.youtube.com/playlist?list=PLlkH_ZpBGiexB1ahBjtajvHqJAfMIxrB1). Playlist with a lot of popular songs. Usually only 2 notes at most, played by 2 coils. 
+
+## PC MIDI Setup
+
+To open and play MIDI files I use the free software [SynthFont 1](http://www.synthfont.com/). You can select a different output for each track which we can use to send some tracks to the interrupter. You might want to change the instrument of these tracks to use Syntherrupters [envelopes](/Documentation/Wiki/Envelopes.md#readme). For good sound quality download the [SGMv2.01-Sal-Guitar-Bass-v1.3](https://sites.google.com/site/soundfonts4u) soundfont).
+
+SynthFont allows you to send MIDI data directly to a serial port and thus to Syntherrupter. Its USB baud rate is 115200baud/s.
+
+If you want to use another Software you'll need two little tools that are very easy to use: [Hairless MIDI<->Serial](https://projectgus.github.io/hairless-midiserial/). and [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html). When you start loopMIDI it creates a virtual MIDI device that you can select in any MIDI software as output (or input btw). And hairless MIDI<->Serial makes the bridge between this virtual MIDI device and the serial COM port.
+This sounds complicated but since the last both programs remember the settings, you only have to start them - no other click needed. The setup has proven its reliability and usability many times and for many hours. 
 
 ## Credits
 
