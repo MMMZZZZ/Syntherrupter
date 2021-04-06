@@ -19,6 +19,6 @@ The sound can be selected by the MIDI command "Program Change". In your MIDI sof
 * Program 10: My best approximation of an actual piano. Attack peaks to 2 (= doubling the given ontime for a few milliseconds)
 * Program 11-19: Same as programs 1-9 but with exponential instead of linear curves between the points. No other changes made, so nothing special *yet*.
 
-If you wonder why you would want to exceed the given ontime, it is an "efficient" way to get louder notes even with high voice count without tripping your circuit breaker. Since the ontime drops pretty fast after the attack you can consider the ontime on the display more like an average ontime. Note that all these envelope settings do not allow to exceed your coil limits [coil limits](/Documentation/Wiki/UI/Coil%20Limits.md#readme). 
+If you wonder why you would want to exceed the given ontime, it is an "efficient" way to get louder notes even with high voice count without tripping your circuit breaker. Since the ontime drops pretty fast after the attack you can consider the ontime on the display more like an average ontime. Note that all these envelope settings do not allow to exceed your [coil limits](/Documentation/Wiki/UI/Coil%20Limits.md#readme). 
 
 The programs 1-63 can be modified by the user using the [Envelope Editor](/Documentation/Wiki/UI/Envelope.md#readme). The programs 20-39 are stored in EEPROM. Unless modified by the user, they are like program 0, no envelope (constant ontime). All other programs will be reset on startup.
