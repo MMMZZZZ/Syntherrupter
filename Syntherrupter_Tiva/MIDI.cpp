@@ -40,6 +40,8 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPor
     usbUart.init(0, usbBaudRate, usbISR, 0b00100000);
     midiUart.init(midiUartPort, midiUartRx, midiUartTx, 31250, midiISR, 0b01100000);
     otherBuffer.init(128);
+    usbUart.enable();
+    midiUart.enable();
 
     MIDIProgram::setResolutionUS(effectResolutionUS);
 
@@ -632,8 +634,6 @@ void MIDI::start()
     if (!playing)
     {
         playing = true;
-        usbUart.enable();
-        midiUart.enable();
         for (uint32_t channel = 0; channel < 16; channel++)
         {
             channels[channel].resetControllers();
@@ -644,8 +644,6 @@ void MIDI::start()
 void MIDI::stop()
 {
     playing = false;
-    usbUart.disable();
-    midiUart.disable();
     notelist.removeAllNotes();
 }
 
@@ -750,20 +748,19 @@ void MIDI::resetNRPs(uint32_t chns)
 
 void MIDI::process()
 {
+    // Process all data that's in the buffer.
+    bool newData = false;
+    for (uint32_t bufferNum = 0; bufferNum < BUFFER_COUNT; bufferNum++)
+    {
+        while (BUFFER_LIST[bufferNum]->level())
+        {
+            newData = true;
+            processBuffer(bufferNum);
+        }
+    }
+
     if (playing)
     {
-        // Process all data that's in the buffer.
-
-        bool newData = false;
-        for (uint32_t bufferNum = 0; bufferNum < BUFFER_COUNT; bufferNum++)
-        {
-            while (BUFFER_LIST[bufferNum]->level())
-            {
-                newData = true;
-                processBuffer(bufferNum);
-            }
-        }
-
         if (newData)
         {
             for (uint32_t channelNum = 0; channelNum < 16; channelNum++)
