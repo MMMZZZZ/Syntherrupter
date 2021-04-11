@@ -10,10 +10,9 @@
 #include <stdbool.h>
 #include "InterrupterConfig.h"
 #include "System.h"
+#include "Settings.h"
+#include "Coil.h"
 #include "GUI.h"
-
-
-Coil coils[COIL_COUNT];
 
 
 void sysTickISR()
@@ -42,15 +41,12 @@ int main(void)
     System::init(sysTickISR);
     System::setSystemTimeResUS(16);
 
-    // Copy value manually because mutually including headers yadi yadi yada
-    MIDI::EEPROMSettings_STR_CHAR_COUNT = EEPROMSettings::STR_CHAR_COUNT;
-
     MIDI::init(115200, uartUsbISR, GPIO_PORTC_BASE, GPIO_PIN_4, GPIO_PIN_5, uartMidiISR);
     LightSaber::init(GPIO_PORTA_BASE, GPIO_PIN_6, GPIO_PIN_7, 115200, uartLightSaberISR);
 
     for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
     {
-        coils[coil].init(coil);
+        Coil::allCoils[coil].init(coil);
     }
 
     GUI::init();
@@ -62,34 +58,35 @@ int main(void)
         if (state)
         {
             MIDI::process();
+            Settings::processSysex();
             LightSaber::process();
 
             switch (COIL_COUNT)
             {
                 case 6:
-                    coils[5].updateData();
-                    coils[5].updateOutput();
+                    Coil::allCoils[5].updateData();
+                    Coil::allCoils[5].updateOutput();
                 case 5:
-                    coils[4].updateData();
-                    coils[4].updateOutput();
+                    Coil::allCoils[4].updateData();
+                    Coil::allCoils[4].updateOutput();
                 case 4:
-                    coils[3].updateData();
-                    coils[3].updateOutput();
+                    Coil::allCoils[3].updateData();
+                    Coil::allCoils[3].updateOutput();
                 case 3:
-                    coils[2].updateData();
-                    coils[2].updateOutput();
+                    Coil::allCoils[2].updateData();
+                    Coil::allCoils[2].updateOutput();
                 case 2:
-                    coils[1].updateData();
-                    coils[1].updateOutput();
+                    Coil::allCoils[1].updateData();
+                    Coil::allCoils[1].updateOutput();
                 case 1:
-                    coils[0].updateData();
-                    coils[0].updateOutput();
+                    Coil::allCoils[0].updateData();
+                    Coil::allCoils[0].updateOutput();
                     break;
             }
             /*for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
                 // Run non-static coil object methods
-                coils[coil].update();
+                Coil::allCoils[coil].update();
             }*/
         }
         else
@@ -98,7 +95,7 @@ int main(void)
             // and delete all tones
             for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
-                ToneList* tl = &(coils[coil].toneList);
+                ToneList* tl = &(Coil::allCoils[coil].toneList);
                 for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
                 {
                     tl->deleteTone(tl->firstTone);

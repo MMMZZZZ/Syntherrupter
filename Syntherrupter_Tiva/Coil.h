@@ -56,6 +56,7 @@ public:
         }
     };
 
+    static Coil allCoils[COIL_COUNT];
     Oneshot  one;
     ToneList toneList;
     MIDI     midi;

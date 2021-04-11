@@ -27,7 +27,6 @@ void Coil::init(uint32_t coilNum)
     one.init(num);
     midi.setCoilNum(num);
     midi.setCoilsToneList(&toneList);
-    MIDI::coilInstances[num] = &midi;
     lightsaber.setCoilNum(num);
     lightsaber.setTonelist(&toneList);
 }

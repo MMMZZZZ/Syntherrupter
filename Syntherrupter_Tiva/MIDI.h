@@ -11,7 +11,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <math.h>
 #include "InterrupterConfig.h"
 #include "System.h"
 #include "Channel.h"
@@ -25,38 +24,59 @@
 class MIDI
 {
 public:
+    struct SysexMsg {
+        uint32_t number;
+        uint32_t targetLSB;
+        uint32_t targetMSB;
+        int32_t value;
+    };
     MIDI();
     virtual ~MIDI();
-    static void init(uint32_t usbBaudRate, void (*usbISR)(void),
-                     uint32_t midiUartPort, uint32_t midiUartRx,
-                     uint32_t midiUartTx, void (*midiISR)(void));
     void updateToneList();
     void setCoilsToneList(ToneList* tonelist)
     {
         this->tonelist = tonelist;
     };
     void setCoilNum(uint32_t num);
-    static void start();
-    static void stop();
-    static void resetNRPs(uint32_t chns = 0xffff);
     void setVolSettingsProm(float ontimeUSMax, float dutyMaxProm);
     void setVolSettings(float ontimeUSMax, float dutyMax);
+    void setOntimeUS(float ontimeUSMax)
+    {
+        setVolSettings(ontimeUSMax, singleNoteMaxDuty);
+    };
+    void setDuty(float dutyMax)
+    {
+        setVolSettings(singleNoteMaxOntimeUS, dutyMax);
+    };
     void setChannels(uint32_t chns);
     void setPan(uint32_t pan);
     void setPanReach(uint32_t reach);
+    void setPanConstVol(bool cnst)
+    {
+        panConstVol    = cnst;
+        coilPanChanged = true;
+    };
     void setMaxVoices(uint32_t maxVoices);
+    static void init(uint32_t usbBaudRate, void (*usbISR)(void),
+                     uint32_t midiUartPort, uint32_t midiUartRx,
+                     uint32_t midiUartTx, void (*midiISR)(void));
+    static void start();
+    static void stop();
     static bool isPlaying()
     {
         return playing;
     };
+    static void resetNRPs(uint32_t chns = 0xffff);
     static void process();
+    static SysexMsg getSysex()
+    {
+        return sysexMsg;
+    }
     static Channel channels[16];
     static UART usbUart, midiUart;
     static ByteBuffer otherBuffer;
     static constexpr uint32_t MAX_PROGRAMS = 64;
     static MIDIProgram programs[MAX_PROGRAMS];
-    static MIDI* coilInstances[COIL_COUNT];
-    static uint32_t EEPROMSettings_STR_CHAR_COUNT; // TODO this really needs to disappear.
 
 private:
     static bool processBuffer(uint32_t b);
@@ -169,6 +189,7 @@ private:
     static NoteList notelist;
     static uint32_t notesCount;
     static uint32_t sysexDeviceID;
+    static SysexMsg sysexMsg;
     ToneList* tonelist;
     float absFreq               =  0.0f;
     float singleNoteMaxDuty     =  0.0f;

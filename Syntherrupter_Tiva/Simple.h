@@ -35,8 +35,14 @@ public:
     {
         filteredOntimeUS.setTarget(ontimeUS, force);
     };
+    void setDuty(float duty, bool force = false)
+    {
+        float ontimeUS = duty * 1e6f / frequency;
+        filteredOntimeUS.setTarget(ontimeUS, force);
+    };
     void setFrequency(float freq, bool force = false)
     {
+        frequency = freq;
         filteredFrequency.setTarget(freq, force);
     };
 private:
@@ -44,6 +50,7 @@ private:
     ToneList* tonelist;
     Tone* tone;
     uint32_t updatePeriodUS = 10000, lastUpdateUS = 0;
+    float frequency = 0.0f;
     static bool started;
 };
 

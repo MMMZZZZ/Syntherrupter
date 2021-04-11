@@ -19,30 +19,6 @@
 #include "Coil.h"
 
 
-extern Coil coils[];
-
-
-// Modes
-enum class Mode {
-    emergency,
-    idle,
-    simpleEnter,
-    simple,
-    simpleExit,
-    midiLiveEnter,
-    midiLive,
-    midiLiveExit,
-    lightsaberEnter,
-    lightsaber,
-    lightsaberExit,
-    userSelect,
-    settings,
-    settingsExit,
-    nxtFWUpdate,
-    espFWUpdate,
-};
-
-
 class GUI
 {
 public:
@@ -55,6 +31,24 @@ public:
     static void showError();
 
 private:
+    enum class Mode {
+        emergency,
+        idle,
+        simpleEnter,
+        simple,
+        simpleExit,
+        midiLiveEnter,
+        midiLive,
+        midiLiveExit,
+        lightsaberEnter,
+        lightsaber,
+        lightsaberExit,
+        userSelect,
+        settings,
+        settingsExit,
+        nxtFWUpdate,
+        espFWUpdate,
+    };
     static void idle()
     {
         state = 0;

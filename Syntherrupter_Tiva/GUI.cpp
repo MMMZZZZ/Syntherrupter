@@ -18,7 +18,7 @@ uint32_t GUI::commandData[33] = {0, 0, 0, 0, 0, 0, 0, 0,
                                  0, 0, 0, 0, 0, 0, 0, 0,
                                  0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-Mode GUI::mode = Mode::idle;
+GUI::Mode GUI::mode = GUI::Mode::idle;
 
 constexpr uint32_t GUI::errorLen;
 char GUI::errorTxt[errorLen];
@@ -106,10 +106,10 @@ void GUI::init()
                 }
 
                 // Apply to coil objects
-                coils[coil].setMaxVoices(maxVoices);
-                coils[coil].setMaxDutyPerm(maxDutyPerm);
-                coils[coil].setMaxOntimeUS(maxOntimeUS);
-                coils[coil].setMinOfftimeUS(minOffUS);
+                Coil::allCoils[coil].setMaxVoices(maxVoices);
+                Coil::allCoils[coil].setMaxDutyPerm(maxDutyPerm);
+                Coil::allCoils[coil].setMaxOntimeUS(maxOntimeUS);
+                Coil::allCoils[coil].setMinOfftimeUS(minOffUS);
 
                 // Send to Nextion
                 nxt.printf("%s.coil%iOn.val=%i\xff\xff\xff",
@@ -304,9 +304,9 @@ uint32_t GUI::update()
                 {
                     for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
                     {
-                        coils[coil].midi.setVolSettings(0.0f, 0.0f);
-                        coils[coil].simple.setOntimeUS(0.0f, true);
-                        coils[coil].lightsaber.setOntimeUS(0.0f);
+                        Coil::allCoils[coil].midi.setVolSettings(0.0f, 0.0f);
+                        Coil::allCoils[coil].simple.setOntimeUS(0.0f, true);
+                        Coil::allCoils[coil].lightsaber.setOntimeUS(0.0f);
                     }
                 }
                 else
@@ -482,8 +482,8 @@ void GUI::simple()
             {
                 uint32_t ontimeUS  = (commandData[2] << 8) + commandData[1];
                 uint32_t frequency = (commandData[4] << 8) + commandData[3];
-                coils[i].simple.setOntimeUS(ontimeUS);
-                coils[i].simple.setFrequency(frequency);
+                Coil::allCoils[i].simple.setOntimeUS(ontimeUS);
+                Coil::allCoils[i].simple.setFrequency(frequency);
             }
         }
         // Data applied; clear command byte.
@@ -502,7 +502,7 @@ void GUI::midiLive()
         {
             // Legacy
             uint32_t channels = (commandData[2] << 8) + commandData[1];
-            coils[coil].midi.setChannels(channels);
+            Coil::allCoils[coil].midi.setChannels(channels);
         }
         else
         {
@@ -515,7 +515,7 @@ void GUI::midiLive()
                 EEI = 0;
                 for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
                 {
-                    coils[coil].midi.setChannels(0xffff);
+                    Coil::allCoils[coil].midi.setChannels(0xffff);
                 }
             }
         }
@@ -559,9 +559,18 @@ void GUI::midiLive()
                     if (mode == 0)
                     {
                         uint32_t channels = (commandData[2] << 8) + commandData[1];
-                        coils[coil].midi.setChannels(channels);
-                        coils[coil].midi.setPanReach(commandData[3]);
-                        coils[coil].midi.setPan(commandData[4]);
+                        Coil::allCoils[coil].midi.setChannels(channels);
+                        if (commandData[3] & 0b10000000)
+                        {
+                            Coil::allCoils[coil].midi.setPanConstVol(true);
+                            commandData[3] &= 0b01111111;
+                        }
+                        else
+                        {
+                            Coil::allCoils[coil].midi.setPanConstVol(false);
+                        }
+                        Coil::allCoils[coil].midi.setPanReach(commandData[3]);
+                        Coil::allCoils[coil].midi.setPan(commandData[4]);
                     }
                     else if (mode == 1)
                     {
@@ -572,7 +581,7 @@ void GUI::midiLive()
                     {
                         uint32_t ontimeUS = (commandData[2] << 8) + commandData[1];
                         uint32_t dutyPerm = (commandData[4] << 8) + commandData[3];
-                        coils[coil].midi.setVolSettingsProm(ontimeUS, dutyPerm);
+                        Coil::allCoils[coil].midi.setVolSettingsProm(ontimeUS, dutyPerm);
                     }
                 }
             }
@@ -613,8 +622,8 @@ void GUI::lightsaber()
             {
                 if (targetCoils & (1 << coil))
                 {
-                    coils[coil].lightsaber.setActiveLightsabers(data1);
-                    coils[coil].lightsaber.setOntimeUS(data2);
+                    Coil::allCoils[coil].lightsaber.setActiveLightsabers(data1);
+                    Coil::allCoils[coil].lightsaber.setOntimeUS(data2);
                 }
             }
         }
@@ -646,10 +655,10 @@ void GUI::settings()
                 // Coil limits. Number ranges from 1-6 instead of 0-5.
                 number--;
                 EEPROMSettings::coilSettings[number] = data;
-                coils[number].setMaxVoices(EEPROMSettings::getCoilsMaxVoices(number));
-                coils[number].setMinOfftimeUS(EEPROMSettings::getCoilsMinOffUS(number));
-                coils[number].setMaxDutyPerm(EEPROMSettings::getCoilsMaxDutyPerm(number));
-                coils[number].setMaxOntimeUS(EEPROMSettings::getCoilsMaxOntimeUS(number));
+                Coil::allCoils[number].setMaxVoices(EEPROMSettings::getCoilsMaxVoices(number));
+                Coil::allCoils[number].setMinOfftimeUS(EEPROMSettings::getCoilsMinOffUS(number));
+                Coil::allCoils[number].setMaxDutyPerm(EEPROMSettings::getCoilsMaxDutyPerm(number));
+                Coil::allCoils[number].setMaxOntimeUS(EEPROMSettings::getCoilsMaxOntimeUS(number));
             }
             else if (settings == 0 && number < 3)
             {
