@@ -8,6 +8,9 @@
 #include <Coil.h>
 
 
+Coil Coil::allCoils[COIL_COUNT];
+
+
 Coil::Coil()
 {
     // TODO Auto-generated constructor stub
