@@ -4,7 +4,7 @@
 
 The connection between interrupter and tesla coil driver is usually made with fibre optics. This page explains how to add optic transmitters to Syntherrupter. 
 
-Syntherrupter can generate up to 6 independant interrupter signals (for up to 6 independant tesla coils). You're completely free in the choice of how many outputs you want to have on your Syntherrupter; 1, 2, 3, 4, 5 or 6 are possible. In any case you'll need one transmitter per output. 
+Syntherrupter can generate up to 6 independant interrupter signals (for up to 6 independent tesla coils). You're completely free in the choice of how many outputs you want to have on your Syntherrupter; 1, 2, 3, 4, 5 or 6 are possible. In any case you'll need one transmitter per output. 
 
 ## Output Pins and Limits
 

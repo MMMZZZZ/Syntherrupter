@@ -44,7 +44,7 @@ void Channel::resetControllers()
 void Channel::resetNRPs()
 {
     notePanSourceRangeLow  = 0.0f;
-    notePanSourceRangeHigh = 1.0f;
+    notePanSourceRangeHigh = 127.0f;
     notePanTargetRangeLow  = 0.0f;
     notePanTargetRangeHigh = 1.0f;
     notePanMode            = NOTE_PAN_OFF;

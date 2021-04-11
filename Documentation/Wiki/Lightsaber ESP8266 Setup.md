@@ -55,10 +55,10 @@ For the Syntherrupter and for you it is important to distinguish each lightsaber
 
 To set the ID, connect the ESP you want to use in the lightsaber to the Syntherrupter. Enter lightsaber mode and hold the ID you want to assign to this ESP. It will be stored immediately in the ESPs flash, meaning you can immediately disconnect the ESP from the Syntherrupter after holding the button. And you only need to do this once for each lightsaber. 
 
-While you can set an ID for the receiving ESP that will stay connected to the Syntherrutper, it is not important. The ID is only used by those ESPs which act as transmitter (see below).
+While you can set an ID for the receiving ESP that will stay connected to the Syntherrupter, it is not important. The ID is only used by those ESPs which act as transmitter (see below).
 
 ## Transmitters, Receivers, Pairing
-You might wonder how to configure an ESP for being a transmitter sitting in a lightsaber or the receiver connected to the Syntherrutper. Simple answer: you don't. Since only the ESPs in the lightsabers are actually connected to a MPU-6050 sensor they can recognize themselves what their role is. If a MPU-6050 is detected, the ESP will wait for the receiving ESP to power up and connect to it. 
+You might wonder how to configure an ESP for being a transmitter sitting in a lightsaber or the receiver connected to the Syntherrupter. Simple answer: you don't. Since only the ESPs in the lightsabers are actually connected to a MPU-6050 sensor they can recognize themselves what their role is. If a MPU-6050 is detected, the ESP will wait for the receiving ESP to power up and connect to it. 
 
 Usually the pairing happens within seconds after power up. A successfull connection is visible by the blue LED on the ESPs lighting up. Sometimes the MPU-6050 fails to initialize and thus the ESP thinks he is a receiver, not a transmitter. In this case a power cycle usually solves the problem. 
 
