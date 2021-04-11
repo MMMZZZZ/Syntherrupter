@@ -38,7 +38,7 @@ void Simple::updateToneList()
         {
             float o = filteredOntimeUS.getFiltered();
             float f = filteredFrequency.getFiltered();
-            if (o > 1.0f && f > 1.0f)
+            if (o > 1.0f && f > 0.1f)
             {
                 f = 1e6f / f;
                 tone = tonelist->updateTone(o, f, this, this, tone);
