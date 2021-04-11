@@ -253,7 +253,7 @@ void Settings::processSysex()
         case 0x20: // [msb=s,ml,ls][lsb=coil] i32 ontime in us
             if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == MODE_ALL)
             {
-                Coil::allCoils[msg.targetLSB].simple.setOntimeUS(msg.targetLSB);
+                Coil::allCoils[msg.targetLSB].simple.setOntimeUS(msg.value);
             }
             if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == MODE_ALL)
             {
@@ -261,13 +261,13 @@ void Settings::processSysex()
             }
             if (msg.targetMSB == MODE_LIGHTSABER || msg.targetMSB == MODE_ALL)
             {
-                Coil::allCoils[msg.targetLSB].lightsaber.setOntimeUS(msg.targetLSB);
+                Coil::allCoils[msg.targetLSB].lightsaber.setOntimeUS(msg.value);
             }
             break;
         case 0x21: // [msb=s,ml,ls][lsb=coil], i32 duty in 1/1000
             if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == MODE_ALL)
             {
-                Coil::allCoils[msg.targetLSB].simple.setDuty(msg.targetLSB / 1e3f);
+                Coil::allCoils[msg.targetLSB].simple.setDuty(msg.value / 1e3f);
             }
             if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == MODE_ALL)
             {
@@ -281,13 +281,13 @@ void Settings::processSysex()
         case 0x22: // [msb=s,ml,ls][lsb=coil], i32 BPS in Hz
             if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == MODE_ALL)
             {
-                Coil::allCoils[msg.targetLSB].simple.setFrequency(msg.targetLSB);
+                Coil::allCoils[msg.targetLSB].simple.setFrequency(msg.value);
             }
             break;
         case 0x23: // [msb=s,ml,ls][lsb=coil], i32 period in us
             if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == MODE_ALL)
             {
-                Coil::allCoils[msg.targetLSB].simple.setFrequency(1e6f / msg.targetLSB);
+                Coil::allCoils[msg.targetLSB].simple.setFrequency(1e6f / msg.value);
             }
             break;
         case 0x26: // [msb=s,ml,ls][lsb=0], ui apply mode. 0=manual, 1=on release, 2=immediate, other=reserved.
