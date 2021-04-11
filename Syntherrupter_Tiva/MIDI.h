@@ -29,6 +29,7 @@ public:
         uint32_t targetLSB;
         uint32_t targetMSB;
         int32_t value;
+        uint8_t newMsg;
     };
     MIDI();
     virtual ~MIDI();
@@ -70,6 +71,10 @@ public:
     static void process();
     static SysexMsg getSysex()
     {
+        if (sysexMsg.newMsg)
+        {
+            sysexMsg.newMsg--;
+        }
         return sysexMsg;
     }
     static Channel channels[16];

@@ -210,6 +210,10 @@ void Settings::processSysex()
 {
     MIDI::SysexMsg msg = MIDI::getSysex();
 
+    if (!msg.newMsg)
+    {
+        return;
+    }
     if (!checkSysex(msg.number, msg.targetLSB, msg.targetMSB, msg.value))
     {
         return;

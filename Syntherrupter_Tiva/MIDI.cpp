@@ -502,8 +502,9 @@ bool MIDI::processBuffer(uint32_t b)
 
             if (dataBytes == 1)
             {
-                // new sysex command, reset usable state.
+                // new sysex command, reset usable state and data index.
                 sysexUsable = true;
+                sysexDataIndex = 0;
             }
             else if (sysexUsable)
             {
@@ -620,6 +621,7 @@ bool MIDI::processBuffer(uint32_t b)
                         sysexMsg.targetLSB = targetLSB;
                         sysexMsg.targetMSB = targetMSB;
                         sysexMsg.value     = sysexVal;
+                        sysexMsg.newMsg    = 2;
                     }
                 }
             }
