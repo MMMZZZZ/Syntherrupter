@@ -184,7 +184,6 @@ Page Lightsaber
             if(Help_Info.helpMode.val==0)
             {
                 vis qrHelp,0
-                fill qrHelp.x,qrHelp.y,qrHelp.w,qrHelp.h,b[0].bco
             }else
             {
                 tempStr.txt=tTitle.txt
@@ -1093,20 +1092,15 @@ Button bMode
             if(showHelp.val==0)
             {
                 // Normal operation
-                // WORKAROUND. Hiding a component when the page background color changed doesnt work properly.
-                // ref 0 takes to long, ref component doesnt work. hence: manually draw a rectangle of the right color in this area
-                // and disable the components touch events.
                 Settings.applyingMode.val++
                 if(Settings.applyingMode.val==2)
                 {
                     bMode.txt="Immediately"
                     vis bApply,0
-                    fill bApply.x,bApply.y,bApply.w,bApply.h,b[0].bco
                 }else if(Settings.applyingMode.val==1)
                 {
                     bMode.txt="On Release"
                     vis bApply,0
-                    fill bApply.x,bApply.y,bApply.w,bApply.h,b[0].bco
                 }else // higher than allowed, jump back to 0
                 {
                     Settings.applyingMode.val=0
@@ -1712,10 +1706,11 @@ Hotspot fLoadColors
                     b[sys0].pco=Settings.qrFrontCol.val
                 }else if(sys1==1)
                 {
-                    // Types that have pic, pic2:
+                    // Types that have pic, pic1, pic2:
                     // slider
                     b[sys0].pic=b[sys0].pic%Settings.picCount.val
                     b[sys0].pic+=sys2
+                    b[sys0].pic1=b[sys0].pic
                     b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
                     b[sys0].pic2+=sys2
                 }

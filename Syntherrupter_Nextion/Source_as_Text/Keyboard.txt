@@ -87,7 +87,6 @@ Page Keyboard
             if(Help_Info.helpMode.val==0)
             {
                 vis qrHelp,0
-                fill qrHelp.x,qrHelp.y,qrHelp.w,qrHelp.h,b[0].bco
             }else
             {
                 tempStr.txt=tTitle.txt
@@ -1473,10 +1472,11 @@ Hotspot fLoadColors
                     b[sys0].pco=Settings.qrFrontCol.val
                 }else if(sys1==1)
                 {
-                    // Types that have pic, pic2:
+                    // Types that have pic, pic1, pic2:
                     // slider
                     b[sys0].pic=b[sys0].pic%Settings.picCount.val
                     b[sys0].pic+=sys2
+                    b[sys0].pic1=b[sys0].pic
                     b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
                     b[sys0].pic2+=sys2
                 }

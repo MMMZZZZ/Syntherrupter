@@ -83,15 +83,6 @@ Page MIDI_TC_Set
             {
                 btPanDis.val=0
             }
-            //
-            // Hide Pan objects in case its disabled (prevents flickering)
-            vis tL,0
-            vis sPan,0
-            vis tR,0
-            vis tPanReach,0
-            vis sReach,0
-            vis tReachInfo,0
-            vis bLinConst,0
             // Show button state
             click fConvBtnState,0
             click btPanDis,0
@@ -100,7 +91,6 @@ Page MIDI_TC_Set
             if(Help_Info.helpMode.val==0)
             {
                 vis qrHelp,0
-                fill qrHelp.x,qrHelp.y,qrHelp.w,qrHelp.h,b[0].bco
             }else
             {
                 tempStr.txt=tTitle.txt
@@ -975,8 +965,6 @@ Button bPrevious
                 {
                     coilNum.val=TC_Settings.maxCoilCount.val
                 }
-                // Reload page for previous coil
-                page MIDI_TC_Set
             }else
             {
                 // Show Help
@@ -987,6 +975,8 @@ Button bPrevious
             if(showHelp.val==0)
             {
                 // Normal Operation
+                // Reload page for next coil
+                page MIDI_TC_Set
             }else
             {
                 // Show Help
@@ -1017,8 +1007,6 @@ Button bNext
                 {
                     coilNum.val=1
                 }
-                // Reload page for previous coil
-                page MIDI_TC_Set
             }else
             {
                 // Show Help
@@ -1029,6 +1017,8 @@ Button bNext
             if(showHelp.val==0)
             {
                 // Normal Operation
+                // Reload page for next coil
+                page MIDI_TC_Set
             }else
             {
                 // Show Help
@@ -1625,7 +1615,6 @@ Dual-state Button btPanDis
                 if(btPanDis.val==0)
                 {
                     btPanDis.txt=sPanDis.txt
-                    ref_stop
                     vis tL,0
                     vis sPan,0
                     vis tR,0
@@ -1633,8 +1622,6 @@ Dual-state Button btPanDis
                     vis sReach,0
                     vis tReachInfo,0
                     vis bLinConst,0
-                    ref 0
-                    ref_star
                 }else
                 {
                     btPanDis.txt=sPanEn.txt
@@ -1748,10 +1735,11 @@ Hotspot fLoadColors
                     b[sys0].pco=Settings.qrFrontCol.val
                 }else if(sys1==1)
                 {
-                    // Types that have pic, pic2:
+                    // Types that have pic, pic1, pic2:
                     // slider
                     b[sys0].pic=b[sys0].pic%Settings.picCount.val
                     b[sys0].pic+=sys2
+                    b[sys0].pic1=b[sys0].pic
                     b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
                     b[sys0].pic2+=sys2
                 }
