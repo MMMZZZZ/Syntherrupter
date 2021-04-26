@@ -22,20 +22,16 @@ public:
     void add(volatile uint8_t data)
     {
         buffer[writeIndex++] = data;
+        if (writeIndex >= size)
+        {
+            writeIndex -= size;
+        }
         if (writeIndex == readIndex)
         {
-            readIndex = writeIndex + 1;
-        }
-        if (writeIndex >= size - 1)
-        {
-            if (writeIndex >= size)
+            readIndex++;
+            if (readIndex >= size)
             {
-                writeIndex = 0;
-                readIndex  = 1;
-            }
-            else
-            {
-                readIndex  = 0;
+                readIndex -= size;
             }
         }
     };
