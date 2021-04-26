@@ -42,7 +42,7 @@ Syntherrupter allows you to map notes to stereo positions based on different par
 	* Mode 6: "Loudest". All notes of the channel get mapped based on the pitch of the note with the highest velocity. If multiple notes have the same velocity, the pitch of the most recent one is taken.
 
 ## System Exclusive Messages (SysEx)
-SysEx messages were originally intended to allow manufacturers to implement completely custom commands within the MIDI protocol. Part of each command is a device manufacturer ID (DMID) to make sure the commands of different manufacturers don't interfer with each other. Hence, with your own ID you can implement whatever you want. 
+SysEx messages were originally intended to allow manufacturers to implement completely custom commands within the MIDI protocol. Part of each command is a device manufacturer ID (DMID) to make sure the commands of different manufacturers don't interfere with each other. Hence, with your own ID you can implement whatever you want. 
 
 However with GM2, kind of a "revision and extension" of the MIDI standard, "Universal SysEx Messages" were introduced. They have a ID just like any other SysEx message but as the "universal" indicates, they are well defined and intended to be implemented on any suitable device. It's basically a backward compatible extension of the existing MIDI standard. As of now, Syntherrupter has no support for Universal SysEx Messages (and tbh they're quite rare in MIDI files).
 

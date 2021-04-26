@@ -32,12 +32,10 @@ Pretty much everything can be found in the [Wiki](/Documentation/Wiki#readme). F
 
 ## Pictures
 
-![UI Preview](/Documentation/Pictures/UI/MIDI%20Live%20Dark.png)
+SimonNwardUKs version for 4 coils:
+![Syntherrupter Max Back](/Documentation/Pictures/Syntherrupter_SimonNwardUK_Top_Both.jpg)
 
-My own version. Left to right: On/Off switch, charge port, serial port, optical out (only one for now):
-![Syntherrupter Max Back](/Documentation/Pictures/Syntherrupter_Max_Back.jpeg)
-
-(Can be even simpler than this!)
+Internals of my single output version (with excessive optical receiver):
 ![Syntherrupter Max Inside](/Documentation/Pictures/Syntherrupter_Max_Internal.jpeg)
 
 ## Demo Videos
@@ -70,6 +68,6 @@ This sounds complicated but since the last both programs remember the settings, 
 
 [Netzpfuscher and his awesome UD3](https://highvoltageforum.net/index.php?topic=188.0). Thank you for the initial help with polyphony and the awesome lightsaber idea.
 
-[TMaxElectronics](https://tmax-electronics.de/easteregg/). Many great discussions about MIDI, Interrupters, C/C++ worst practices, and much more. And for developping a competing interrupter - keeps the development going. 
+[TMaxElectronics](https://tmax-electronics.de/easteregg/). Many great discussions about MIDI, Interrupters, C/C++ worst practices, and much more. And for developing a competing interrupter - keeps the development going. 
 
 [highvoltageforum](https://highvoltageforum.net). Without those people sharing their ideas and knowledge, Syntherrupter would never be where it is now. 
