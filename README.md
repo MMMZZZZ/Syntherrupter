@@ -32,12 +32,10 @@ Pretty much everything can be found in the [Wiki](/Documentation/Wiki#readme). F
 
 ## Pictures
 
-![UI Preview](/Documentation/Pictures/UI/MIDI%20Live%20Dark.png)
+SimonNwardUKs version for 4 coils:
+![Syntherrupter Max Back](/Documentation/Pictures/Syntherrupter_SimonNwardUK_Top_Both.jpg)
 
-My own version. Left to right: On/Off switch, charge port, serial port, optical out (only one for now):
-![Syntherrupter Max Back](/Documentation/Pictures/Syntherrupter_Max_Back.jpeg)
-
-(Can be even simpler than this!)
+Internals of my single output version (with excessive optical receiver):
 ![Syntherrupter Max Inside](/Documentation/Pictures/Syntherrupter_Max_Internal.jpeg)
 
 ## Demo Videos
