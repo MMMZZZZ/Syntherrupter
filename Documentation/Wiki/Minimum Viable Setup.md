@@ -78,7 +78,9 @@ To keep things simple I won't write "Nextion or TJC display" every time but simp
 
 The user interface can be run on a Windows PC. This requires an additional Serial to USB converter that connects to the same Pins as the Nextion display would ([see below](#wiring)).
 
-* Download, install and open the Nextion Editor. For firmwares up to  v4.1.0 you need Nextion Editor v1.61.1 (Download as [ZIP (portable)](https://nextion.tech/download/nextion-setup-v1-61-1.zip) or [Installer](https://nextion.tech/download/nextion-setup-v1-61-1.exe)). Unfortunately each of their updates breaks compatibility... I'll keep this section updated.
+* Download, install and open the Nextion Editor. 
+  * For firmwares up to v4.1.3 you need Nextion Editor v1.61.1 (Download as [ZIP (portable)](https://nextion.tech/download/nextion-setup-v1-61-1.zip) or [Installer](https://nextion.tech/download/nextion-setup-v1-61-1.exe)). 
+  * For firmware versions 4.1.4 and later you need Nextion Editor v1.62.1 (Download as [ZIP (portable)](https://nextion.tech/download/nextion-setup-v1-62-1.zip) or [Installer](https://nextion.tech/download/nextion-setup-v1-62-1.exe)). 
 * Click "Debug" on the top right. A file dialog opens. Select the *Syntherrupter_Nextion_NX8048T050.tft* file from the release zip file. 
 * A new window opens. At the bottom left select "User MCU Input" and then the COM port of the Serial to USB converter. Baud rate is 115200baud/s.
 * You may need to reset the Tiva. 
