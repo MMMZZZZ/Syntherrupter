@@ -42,27 +42,33 @@ Btw. since they are resistive touch screens, they aren't affected by EMI like th
 You don't need a standalone interrupter? Well, you can run the user interface on the PC, too. In that case you don't need a display at all ([see below](#without-a-display)).
 
 ### Suitable Models
-Nextions ease of use comes at a cost. Litterally. These displays are rather expensive, starting at 65$ for the 5" version. Starting? Yes, there are actually 4 displays that are suitable for Syntherrupter:
+Nextions ease of use comes at a cost. Litterally. These displays are rather expensive, starting at 64$ for the 5" version. Starting? Yes, there are actually 6 displays that are suitable for Syntherrupter:
 
 * `NX8048T050_011R`: Nextion 5" Basic series ([Official shop: 65$](https://www.itead.cc/nextion-nx8048t050.html))
 * `NX8048T070_011R`: Nextion 7" Basic series ([Official shop: 75$](https://www.itead.cc/nextion-nx8048t070.html))
 * `NX8048K050_011R`: Nextion 5" Enhanced series ([Official shop: 72$](https://www.itead.cc/nextion-nx8048k050.html))
 * `NX8048K070_011R`: Nextion 7" Enhanced series ([Official shop: 83$](https://www.itead.cc/nextion-nx8048k070.html))
+* `NX8048P050_011R`: Nextion 5" Intelligent series ([Official shop: 64$](https://www.itead.cc/5-0-nextion-intelligent-series-hmi-resistive-capacitive-touch-display-without-enclosure.html))
+* `NX8048P070_011R`: Nextion 7" Intelligent series ([Official shop: 73$](https://www.itead.cc/nextion-nx8048p070-011r-011c.html))
 
-I recommend buying them from the official shop. 
+I recommend buying them from the official shop, but some of them are available from Mouser, Digikey, etc. 
 
 The R at the end is important! It indicates that its the version with *resistive* touch. There are also versions with *capacitive* touch, marked by a `C` and versions with *no touch*, marked with an `N`. 
 
-Among other things that are useless for Syntherrupter the enhanced series offers more than twice the processing power. This allows for a more responsive UI. In addition not every store has all of those displays. Mouser offers only the most expensive one from the list. 
+The three different series differ by quite some features but the only important difference for Syntherrupter is the processor speed. The Basic series runs at 48MHz, the Enhanced one at 108MHz and the Intelligent one at 200MHz. The latter one used to be more expensive than the other two (which somewhat makes sense) but right now it's not. So by all means, go for it. Makes the UI run much smoother than a basic series screen. 
 
-Plot twist: Nextion is actually just a rebranding. The displays originally come from the chinese manufacturer TJC. Buying directly from those is 30-50% cheaper but they only sell within China so you have to use an import service like Superbuy. Still cheaper than buying a Nextion but also slower. 
+Plot twist: Nextion is actually not much more than a rebranding. The displays originally come from the chinese manufacturer TJC. Buying directly from those is 30-50% cheaper but they only sell within China so you have to use an import service like Superbuy. Still cheaper than buying a Nextion but also slower. 
 
-The TJC displays have the same model numbers except that they start with `TJC` instead of `NX`:
+The TJC displays have almost the same model numbers and start with `TJC` instead of `NX`:
 
-* `TJC8048T050_011R`: TJC 5" Basic series
-* `TJC8048T070_011R`: TJC 7" Basic series
-* `TJC8048K050_011R`: TJC 5" Enhanced series
-* `TJC8048K070_011R`: TJC 7" Enhanced series
+* `TJC8048T050_011R`: TJC 5" T0 (Basic) series
+* `TJC8048T070_011R`: TJC 7" T0 (Basic) series
+* `TJC8048K050_011R`: TJC 5" K0 (Enhanced) series
+* `TJC8048K070_011R`: TJC 7" K0 (Enhanced) series
+* `TJC8048X350_011R`: TJC 5" X3 (Intelligent) series (slower flash)
+* `TJC8048X370_011R`: TJC 7" X3 (Intelligent) series (slower flash)
+* `TJC8048X550_011R`: TJC 5" X5 (Intelligent) series
+* `TJC8048X570_011R`: TJC 7" X5 (Intelligent) series
 
 To keep things simple I won't write "Nextion or TJC display" every time but simply call it "Nextion". 
 
@@ -72,7 +78,9 @@ To keep things simple I won't write "Nextion or TJC display" every time but simp
 
 The user interface can be run on a Windows PC. This requires an additional Serial to USB converter that connects to the same Pins as the Nextion display would ([see below](#wiring)).
 
-* Download, install and open the Nextion Editor. For firmwares up to  v4.1.0 you need Nextion Editor v1.61.1 (Download as [ZIP (portable)](https://nextion.tech/download/nextion-setup-v1-61-1.zip) or [Installer](https://nextion.tech/download/nextion-setup-v1-61-1.exe)). Unfortunately each of their updates breaks compatibility... I'll keep this section updated.
+* Download, install and open the Nextion Editor. 
+  * For firmwares up to v4.1.3 you need Nextion Editor v1.61.1 (Download as [ZIP (portable)](https://nextion.tech/download/nextion-setup-v1-61-1.zip) or [Installer](https://nextion.tech/download/nextion-setup-v1-61-1.exe)). 
+  * For firmware versions 4.1.4 and later you need Nextion Editor v1.62.1 (Download as [ZIP (portable)](https://nextion.tech/download/nextion-setup-v1-62-1.zip) or [Installer](https://nextion.tech/download/nextion-setup-v1-62-1.exe)). 
 * Click "Debug" on the top right. A file dialog opens. Select the *Syntherrupter_Nextion_NX8048T050.tft* file from the release zip file. 
 * A new window opens. At the bottom left select "User MCU Input" and then the COM port of the Serial to USB converter. Baud rate is 115200baud/s.
 * You may need to reset the Tiva. 
@@ -86,4 +94,4 @@ Tiva pins:
 
 Both Tiva pins are 3.3V logic pins, capable of 2mA current. They are 5V tolerant.
 
-The Nextion display requires regulated 5V at 500mA. If possible you should not power the display through the Tiva LaunchPad. The PWM modulated backlight causes a rather strong ripple that may cause issues (even though I never had any).
+The Nextion display requires regulated 5V at 1A. If possible you should not power the display through the Tiva LaunchPad. The PWM modulated backlight causes a rather strong ripple that may cause issues. If you're facing weird behavior you can try adding a low ESR capacitor in the ballpark of 220uF across the DC input jack on the Nextion screen itself. This greatly reduces the PWM ripple. 
