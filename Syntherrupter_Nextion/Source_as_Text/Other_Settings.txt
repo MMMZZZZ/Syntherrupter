@@ -589,7 +589,6 @@ Slider sBrightness
         Position         : 100
         Upper range limit: 100
         Lower range limit: 10
-        Channel count    : 25
     
     Events
         Touch Press Event

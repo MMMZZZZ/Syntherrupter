@@ -654,7 +654,6 @@ Slider sPan
         Position         : 64
         Upper range limit: 127
         Lower range limit: 0
-        Channel count    : 25
     
     Events
         Touch Press Event
@@ -719,7 +718,6 @@ Slider sReach
         Position         : 64
         Upper range limit: 127
         Lower range limit: 0
-        Channel count    : 25
     
     Events
         Touch Press Event
