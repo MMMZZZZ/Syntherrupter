@@ -45,6 +45,18 @@ public:
         frequency = freq;
         filteredFrequency.setTarget(freq, force);
     };
+    float getDuty()
+    {
+        return filteredOntimeUS.getTarget() * filteredFrequency.getTarget() / 1e6f;
+    };
+    float getOntimeUS()
+    {
+        return filteredOntimeUS.getTarget();
+    };
+    float getFrequency()
+    {
+        return filteredFrequency.getTarget();
+    };
 private:
     Filter filteredOntimeUS, filteredFrequency;
     ToneList* tonelist;

@@ -9,7 +9,7 @@
 #include <GUI.h>
 
 
-Nextion GUI::nxt;
+Nextion* GUI::nxt;
 
 uint32_t GUI::state           = 0;
 uint32_t GUI::command         = 0;
@@ -22,6 +22,8 @@ GUI::Mode GUI::mode = GUI::Mode::idle;
 
 constexpr uint32_t GUI::errorLen;
 char GUI::errorTxt[errorLen];
+
+bool GUI::acceptsData = true;
 
 bool GUI::EEE = false;
 uint32_t GUI::EET = 0;
@@ -40,10 +42,10 @@ GUI::~GUI()
 
 }
 
-void GUI::init()
+void GUI::init(Nextion* nextion, bool nxtOk)
 {
     bool cfgInEEPROM = EEPROMSettings::init();
-    nxt.init(3, 115200, nxtTimeoutUS);
+    nxt = nextion;
 
     /* Try to modify and read a Nextion value. If this works we know the
      * Nextion is ready. If this doesn't work, something is wrong with
@@ -53,20 +55,8 @@ void GUI::init()
      * that mode).
      */
     uint32_t startTime = System::getSystemTimeUS();
-    bool nxtOK = false;
-    while ((System::getSystemTimeUS() - startTime) < nxtStartTimeoutUS && !nxtOK)
-    {
-        nxt.sendCmd("rest");
-        System::delayUS(700000);
-        nxt.setVal("comOk", 1);
-        System::delayUS(20000);
-        if (nxt.getVal("comOk") == 1)
-        {
-            nxtOK = true;
-        }
-    }
 
-    if (!nxtOK)
+    if (!nxtOk)
     {
         mode = Mode::nxtFWUpdate;
     }
@@ -112,11 +102,11 @@ void GUI::init()
                 Coil::allCoils[coil].setMinOfftimeUS(minOffUS);
 
                 // Send to Nextion
-                nxt.printf("%s.coil%iOn.val=%i\xff\xff\xff",
+                nxt->printf("%s.coil%iOn.val=%i\xff\xff\xff",
                            AllCoilSettings, coil + 1, maxOntimeUS);
-                nxt.printf("%s.coil%iOffVoics.val=%i\xff\xff\xff",
+                nxt->printf("%s.coil%iOffVoics.val=%i\xff\xff\xff",
                            AllCoilSettings, coil + 1, (maxVoices << 16) + minOffUS);
-                nxt.printf("%s.coil%iDuty.val=%i\xff\xff\xff",
+                nxt->printf("%s.coil%iDuty.val=%i\xff\xff\xff",
                            AllCoilSettings, coil + 1, maxDutyPerm);
                 // Give time to the UART to send the data
                 System::delayUS(20000);
@@ -136,15 +126,15 @@ void GUI::init()
                     maxDutyPerm = allCoilsMaxDutyPerm;
                 }
 
-                nxt.printf("%s.u%iName.txt=\"%s\"\xff\xff\xff",
+                nxt->printf("%s.u%iName.txt=\"%s\"\xff\xff\xff",
                            AllUsersPage, user, EEPROMSettings::userNames[user]);
-                nxt.printf("%s.u%iCode.txt=\"%s\"\xff\xff\xff",
+                nxt->printf("%s.u%iCode.txt=\"%s\"\xff\xff\xff",
                            AllUsersPage, user, EEPROMSettings::userPwds[user]);
-                nxt.printf("%s.u%iOntime.val=%i\xff\xff\xff",
+                nxt->printf("%s.u%iOntime.val=%i\xff\xff\xff",
                            AllUsersPage, user, maxOntimeUS);
-                nxt.printf("%s.u%iBPS.val=%i\xff\xff\xff",
+                nxt->printf("%s.u%iBPS.val=%i\xff\xff\xff",
                            AllUsersPage, user, maxBPS);
-                nxt.printf("%s.u%iDuty.val=%i\xff\xff\xff",
+                nxt->printf("%s.u%iDuty.val=%i\xff\xff\xff",
                            AllUsersPage, user, maxDutyPerm);
                 // Give time to the UART to send the data
                 System::delayUS(20000);
@@ -159,12 +149,12 @@ void GUI::init()
             uint32_t dispBrightness =  EEPROMSettings::otherSettings[1]        & 0xff;
             uint32_t backOff        = (EEPROMSettings::otherSettings[1] >>  8) & 0b1;
             uint32_t colorMode      = (EEPROMSettings::otherSettings[1] >>  9) & 0b1;
-            nxt.printf("Other_Settings.nHoldTime.val=%i\xff\xff\xff",
+            nxt->printf("Other_Settings.nHoldTime.val=%i\xff\xff\xff",
                           buttonHoldTime);
-            nxt.printf("thsp=%i\xff\xff\xff", sleepDelay);
-            nxt.printf("dim=%i\xff\xff\xff", dispBrightness);
-            //nxt.printf("Other_Settings.nBackOff.val=%i\xff\xff\xff", backOff);
-            nxt.printf("Settings.colorMode.val=%i\xff\xff\xff", colorMode);
+            nxt->printf("thsp=%i\xff\xff\xff", sleepDelay);
+            nxt->printf("dim=%i\xff\xff\xff", dispBrightness);
+            //nxt->printf("Other_Settings.nBackOff.val=%i\xff\xff\xff", backOff);
+            nxt->printf("Settings.colorMode.val=%i\xff\xff\xff", colorMode);
 
             // Give time to the UART to send the data
             System::delayUS(20000);
@@ -172,19 +162,19 @@ void GUI::init()
         else
         {
             // Show warning if no valid config is present in EEPROM.
-            nxt.sendCmd("tStartup.txt=sNoConfig.txt");
-            nxt.sendCmd("tStartup.font=0");
+            nxt->sendCmd("tStartup.txt=sNoConfig.txt");
+            nxt->sendCmd("tStartup.font=0");
 
             EEPROMSettings::setMIDIPrograms();
         }
-        nxt.setVal("TC_Settings.maxCoilCount", COIL_COUNT);
-        nxt.setVal("Env_Settings.maxSteps", MIDIProgram::DATA_POINTS);
+        nxt->setVal("TC_Settings.maxCoilCount", COIL_COUNT);
+        nxt->setVal("Env_Settings.maxSteps", MIDIProgram::DATA_POINTS);
 
         // Display Tiva firmware versions
-        nxt.setTxt("tTivaFWVersion", TIVA_FW_VERSION);
+        nxt->setTxt("tTivaFWVersion", TIVA_FW_VERSION);
 
         // Initialization completed.
-        nxt.sendCmd("click comOk,1");
+        nxt->sendCmd("click comOk,1");
     }
 }
 
@@ -207,18 +197,18 @@ void GUI::setError(const char* err)
 
 void GUI::showError()
 {
-    nxt.setPage("Error");
-    nxt.setTxt("tInfo", errorTxt);
+    nxt->setPage("Error");
+    nxt->setTxt("tInfo", errorTxt);
 }
 
 bool GUI::checkValue(uint32_t val)
 {
-    if (val == nxt.receiveErrorVal)
+    if (val == nxt->receiveErrorVal)
     {
         setError("Wert unplausibel");
         return false;
     }
-    if (val == nxt.receiveTimeoutVal)
+    if (val == nxt->receiveTimeoutVal)
     {
         setError("Zeitüberschreitung");
         return false;
@@ -238,25 +228,25 @@ uint32_t GUI::update()
     uint32_t time = 0;
 
     // receive and store command
-    if (nxt.charsAvail())
+    if (nxt->charsAvail())
     {
-        command = nxt.getChar();
+        command = nxt->getChar();
         time = System::getSystemTimeUS();
         switch (command)
         {
             case 'm':
             {
-                while (nxt.charsAvail() < 2)
+                while (nxt->charsAvail() < 2)
                 {
-                    if (System::getSystemTimeUS() - time > nxtTimeoutUS)
+                    if (System::getSystemTimeUS() - time > Nextion::timeoutUS)
                     {
                         setError("Data timeout");
                         showError();
                         System::error();
                     }
                 }
-                char modeByte0 = nxt.getChar();
-                char modeByte1 = nxt.getChar();
+                char modeByte0 = nxt->getChar();
+                char modeByte1 = nxt->getChar();
                 if (modeByte0 == 'e' && modeByte1 == 'x')
                 {
                     if (mode == Mode::simple)
@@ -309,6 +299,14 @@ uint32_t GUI::update()
                         Coil::allCoils[coil].lightsaber.setOntimeUS(0.0f);
                     }
                 }
+                else if (modeByte0 == 'a' && modeByte1 == 'd')
+                {
+                    acceptsData = true;
+                }
+                else if (modeByte0 == 'd' && modeByte1 == 'd')
+                {
+                    acceptsData = false;
+                }
                 else
                 {
                     mode = Mode::idle;
@@ -320,12 +318,12 @@ uint32_t GUI::update()
                 uint32_t i = 0;
                 while (i < 5)
                 {
-                    if (nxt.charsAvail())
+                    if (nxt->charsAvail())
                     {
-                        commandData[i++] = nxt.getChar();
+                        commandData[i++] = nxt->getChar();
                         time = System::getSystemTimeUS();
                     }
-                    if (System::getSystemTimeUS() - time > nxtTimeoutUS)
+                    if (System::getSystemTimeUS() - time > Nextion::timeoutUS)
                     {
                         setError("Data timeout");
                         showError();
@@ -339,12 +337,12 @@ uint32_t GUI::update()
                 uint32_t i = 0;
                 while (i < 3)
                 {
-                    if (nxt.charsAvail())
+                    if (nxt->charsAvail())
                     {
-                        commandData[i++] = nxt.getChar();
+                        commandData[i++] = nxt->getChar();
                         time = System::getSystemTimeUS();
                     }
-                    if (System::getSystemTimeUS() - time > nxtTimeoutUS)
+                    if (System::getSystemTimeUS() - time > Nextion::timeoutUS)
                     {
                         setError("Data timeout");
                         showError();
@@ -356,28 +354,28 @@ uint32_t GUI::update()
             case 'u':
             {
                 // We need at least 1 additional byte.
-                while (!nxt.charsAvail())
+                while (!nxt->charsAvail())
                 {
-                    if (System::getSystemTimeUS() - time > nxtTimeoutUS)
+                    if (System::getSystemTimeUS() - time > Nextion::timeoutUS)
                     {
                         setError("Data timeout");
                         showError();
                         System::error();
                     }
                 }
-                commandData[0] = nxt.getChar();
+                commandData[0] = nxt->getChar();
 
                 // Now we can determine the amount of data that follows and wait for it.
                 uint32_t cmdLength = (commandData[0] & 0b00011111) + 1;
                 uint32_t i = 1;
                 while (i <= cmdLength)
                 {
-                    if (nxt.charsAvail())
+                    if (nxt->charsAvail())
                     {
-                        commandData[i++] = nxt.getChar();
+                        commandData[i++] = nxt->getChar();
                         time = System::getSystemTimeUS();
                     }
-                    if (System::getSystemTimeUS() - time > nxtTimeoutUS)
+                    if (System::getSystemTimeUS() - time > Nextion::timeoutUS)
                     {
                         setError("Data timeout");
                         showError();

@@ -57,6 +57,10 @@ public:
         this->coilNum = num;
         this->coilBit = 1 << num;
     }
+    float getOntimeUS()
+    {
+        return ontimeUS;
+    }
     static UART uart;
 
 private:

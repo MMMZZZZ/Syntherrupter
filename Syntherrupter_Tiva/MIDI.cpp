@@ -16,7 +16,7 @@ Channel               MIDI::channels[];
 NoteList              MIDI::notelist;
 uint32_t              MIDI::notesCount = 0;
 uint32_t              MIDI::sysexDeviceID = 0;
-MIDI::SysexMsg        MIDI::sysexMsg;
+SysexMsg              MIDI::sysexMsg;
 bool                  MIDI::playing = false;
 float                 MIDI::freqTable[128];
 MIDIProgram           MIDI::programs[MAX_PROGRAMS];
@@ -91,7 +91,10 @@ bool MIDI::processBuffer(uint32_t b)
 {
     /*
      * Minimum MIDI data processing.
-     * Returns if valid data has been found.
+     *
+     * Returns if the parsed data requires immediate processing or not.
+     * If so, the serial buffers shouldn't be processed any further until
+     * all of the data parsed so far has indeed been used.
      */
 
     /*
@@ -620,15 +623,20 @@ bool MIDI::processBuffer(uint32_t b)
                         sysexMsg.number    = number;
                         sysexMsg.targetLSB = targetLSB;
                         sysexMsg.targetMSB = targetMSB;
-                        sysexMsg.value     = sysexVal;
+                        sysexMsg.value.i32 = sysexVal;
                         sysexMsg.newMsg    = 2;
+
+                        // Make sure the SysEx Message will be processed before
+                        // it'll be overwritten by a new one.
+                        return true;
                     }
                 }
             }
         }
     }
 
-    return true;
+    // Default response is: No urgent data that'd need immediate processing.
+    return false;
 }
 
 void MIDI::start()
@@ -689,7 +697,7 @@ void MIDI::setChannels(uint32_t chns)
     coilChange = true;
 }
 
-void MIDI::setPan(uint32_t pan)
+void MIDI::setPan(float pan)
 {
     if (pan < 128)
     {
@@ -702,7 +710,7 @@ void MIDI::setPan(uint32_t pan)
     coilPanChanged = true;
 }
 
-void MIDI::setPanReach(uint32_t reach)
+void MIDI::setPanReach(float reach)
 {
     if (reach)
     {
@@ -752,12 +760,17 @@ void MIDI::process()
 {
     // Process all data that's in the buffer.
     bool newData = false;
+    bool forceUpdate = false;
     for (uint32_t bufferNum = 0; bufferNum < BUFFER_COUNT; bufferNum++)
     {
-        while (BUFFER_LIST[bufferNum]->level())
+        while (BUFFER_LIST[bufferNum]->level() && !forceUpdate)
         {
             newData = true;
-            processBuffer(bufferNum);
+            forceUpdate = processBuffer(bufferNum);
+        }
+        if (forceUpdate)
+        {
+            break;
         }
     }
 

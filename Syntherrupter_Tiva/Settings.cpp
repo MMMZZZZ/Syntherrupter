@@ -9,18 +9,21 @@
 #include <Settings.h>
 
 
+Nextion* Settings::nxt;
+
+
 Settings::Settings()
 {
     // TODO Auto-generated constructor stub
 
 }
 
-void Settings::init()
+void Settings::init(Nextion* nextion)
 {
-
+    nxt = nextion;
 }
 
-bool Settings::checkSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMSB, int32_t value)
+bool Settings::checkSysex(SysexMsg& msg)
 {
     /*
      * sysexNum: 1-4 groups of 7 bits
@@ -32,7 +35,7 @@ bool Settings::checkSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMS
      * if no target is required for a parameter it should be 0.
      */
 
-    if (!number)
+    if (!msg.number)
     {
         return false;
     }
@@ -43,7 +46,7 @@ bool Settings::checkSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMS
     bool lsbOk = false;
 
     // targetLSB check
-    switch(number)
+    switch(msg.number)
     {
         case 0x20:
         case 0x21:
@@ -60,7 +63,7 @@ bool Settings::checkSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMS
         case 0x262:
         case 0x263:
         case 0x264:
-            if (targetLSB >= 0 && targetLSB < COIL_COUNT)
+            if (msg.targetLSB >= 0 && msg.targetLSB < COIL_COUNT)
             {
                 lsbOk = true;
             }
@@ -69,7 +72,7 @@ bool Settings::checkSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMS
         case 0x41:
         case 0x44:
         case 0x45:
-            if (targetLSB == 127)
+            if (msg.targetLSB == 127)
             {
                 lsbOk = true;
             }
@@ -85,7 +88,7 @@ bool Settings::checkSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMS
         case 0x222:
         case 0x223:
         case 0x224:
-            if (targetLSB == 0)
+            if (msg.targetLSB == 0)
             {
                 lsbOk = true;
             }
@@ -96,7 +99,7 @@ bool Settings::checkSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMS
         case 0x242:
         case 0x243:
         case 0x244:
-            if (targetLSB >= 0 && targetLSB < 3)
+            if (msg.targetLSB >= 0 && msg.targetLSB < 3)
             {
                 lsbOk = true;
             }
@@ -106,7 +109,7 @@ bool Settings::checkSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMS
         case 0x301:
         case 0x302:
         case 0x303:
-            if (targetLSB >= 0 && targetLSB < MIDIProgram::DATA_POINTS)
+            if (msg.targetLSB >= 0 && msg.targetLSB < MIDIProgram::DATA_POINTS)
             {
                 lsbOk = true;
             }
@@ -120,7 +123,7 @@ bool Settings::checkSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMS
     bool msbOk = false;
 
     // targetMSB check
-    switch (number)
+    switch (msg.number)
     {
         case 0x20:
         case 0x21:
@@ -128,7 +131,7 @@ bool Settings::checkSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMS
         case 0x23:
         case 0x26:
         case 0x27:
-            if (targetMSB == MODE_SIMPLE || targetMSB == MODE_MIDI_LIVE || targetMSB == MODE_LIGHTSABER )
+            if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == MODE_LIGHTSABER )
             {
                 msbOk = true;
             }
@@ -138,7 +141,7 @@ bool Settings::checkSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMS
         case 0x41:
         case 0x44:
         case 0x45:
-            if (targetMSB == 0 || targetMSB == MODE_SIMPLE)
+            if (msg.targetMSB == 0 || msg.targetMSB == MODE_SIMPLE)
             {
                 msbOk = true;
             }
@@ -150,7 +153,7 @@ bool Settings::checkSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMS
         case 0x63:
         case 0x64:
         case 0x65:
-            if (targetMSB == 0 || targetMSB == MODE_MIDI_LIVE)
+            if (msg.targetMSB == 0 || msg.targetMSB == MODE_MIDI_LIVE)
             {
                 msbOk = true;
             }
@@ -158,7 +161,7 @@ bool Settings::checkSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMS
 
         case 0x100:
         case 0x101:
-            if (targetMSB == 0 || targetMSB == MODE_LIGHTSABER)
+            if (msg.targetMSB == 0 || msg.targetMSB == MODE_LIGHTSABER)
             {
                 msbOk = true;
             }
@@ -178,7 +181,7 @@ bool Settings::checkSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMS
         case 0x262:
         case 0x263:
         case 0x264:
-            if (targetMSB == 0)
+            if (msg.targetMSB == 0)
             {
                 msbOk = true;
             }
@@ -186,7 +189,7 @@ bool Settings::checkSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMS
 
         case 0x240:
         case 0x241:
-            if (targetMSB >= 0 && targetMSB < (EEPROMSettings::STR_CHAR_COUNT / 4))
+            if (msg.targetMSB >= 0 && msg.targetMSB < (EEPROMSettings::STR_CHAR_COUNT / 4))
             {
                 msbOk = true;
             }
@@ -196,7 +199,7 @@ bool Settings::checkSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMS
         case 0x301:
         case 0x302:
         case 0x303:
-            if (targetMSB >= 0 && targetMSB < MIDI::MAX_PROGRAMS)
+            if (msg.targetMSB >= 0 && msg.targetMSB < MIDI::MAX_PROGRAMS)
             {
                 msbOk = true;
             }
@@ -208,13 +211,13 @@ bool Settings::checkSysex(uint32_t number, uint32_t targetLSB, uint32_t targetMS
 
 void Settings::processSysex()
 {
-    MIDI::SysexMsg msg = MIDI::getSysex();
+    SysexMsg msg = MIDI::getSysex();
 
     if (!msg.newMsg)
     {
         return;
     }
-    if (!checkSysex(msg.number, msg.targetLSB, msg.targetMSB, msg.value))
+    if (!checkSysex(msg))
     {
         return;
     }
@@ -249,220 +252,481 @@ void Settings::processSysex()
          * supported, it is noted by an "nb".
          */
 
-        // parameter number: (not required target byte, if target is transmitted, value must be 0 or the value specified here.)[required target], ui=unsigned int, f32=float(32bit), bfx = x bit bitfield, description
-        case 0x20: // [msb=s,ml,ls][lsb=coil] i32 ontime in us
-            if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == MODE_ALL)
+        // parameter number: (not required target byte, if target is transmitted, value must be 0 or the value specified here.)
+        // [required target], ui=unsigned int, f32=float(32bit), bfx = x bit bitfield, description
+        case 0x0020: // [msb=s,ml,ls][lsb=coil] i32 ontime in us
+            msg.value.f32 = msg.value.i32;
+        case 0x2020:
+            if (msg.value.f32 >= 0.0f)
             {
-                Coil::allCoils[msg.targetLSB].simple.setOntimeUS(msg.value);
-            }
-            if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == MODE_ALL)
-            {
-                Coil::allCoils[msg.targetLSB].midi.setOntimeUS(msg.value);
-            }
-            if (msg.targetMSB == MODE_LIGHTSABER || msg.targetMSB == MODE_ALL)
-            {
-                Coil::allCoils[msg.targetLSB].lightsaber.setOntimeUS(msg.value);
+                if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == WILDCARD)
+                {
+                    Coil::allCoils[msg.targetLSB].simple.setOntimeUS(msg.value.f32);
+                    if (GUI::getAcceptsData())
+                    {
+                        nxt->sendCmd("Simple.set%i.val&=0xff00", msg.targetLSB + 1);
+                        nxt->sendCmd("Simple.set%i.val+=%i", msg.targetLSB + 1, msg.value.f32);
+                    }
+                }
+                if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == WILDCARD)
+                {
+                    Coil::allCoils[msg.targetLSB].midi.setOntimeUS(msg.value.f32);
+                    if (GUI::getAcceptsData())
+                    {
+                        nxt->sendCmd("MIDI_Live.set%i.val&=0xff00", msg.targetLSB + 1);
+                        nxt->sendCmd("MIDI_Live.set%i.val+=%i", msg.targetLSB + 1, msg.value.f32);
+                    }
+                }
+                if (msg.targetMSB == MODE_LIGHTSABER || msg.targetMSB == WILDCARD)
+                {
+                    Coil::allCoils[msg.targetLSB].lightsaber.setOntimeUS(msg.value.f32);
+                    if (GUI::getAcceptsData())
+                    {
+                        msg.value.i32 = msg.value.f32;
+                        switch (msg.targetLSB)
+                        {
+                            case 0:
+                                nxt->sendCmd("MIDI_Live.ontime12.val&=0x00ff");
+                                nxt->sendCmd("MIDI_Live.ontime12.val+=%i", msg.value.i32 << 16);
+                                break;
+                            case 1:
+                                nxt->sendCmd("MIDI_Live.ontime12.val&=0xff00");
+                                nxt->sendCmd("MIDI_Live.ontime12.val+=%i", msg.value.i32);
+                                break;
+                            case 2:
+                                nxt->sendCmd("MIDI_Live.ontime34.val&=0x00ff");
+                                nxt->sendCmd("MIDI_Live.ontime34.val+=%i", msg.value.i32 << 16);
+                                break;
+                            case 3:
+                                nxt->sendCmd("MIDI_Live.ontime34.val&=0xff00");
+                                nxt->sendCmd("MIDI_Live.ontime34.val+=%i", msg.value.i32);
+                                break;
+                            case 4:
+                                nxt->sendCmd("MIDI_Live.ontime56.val&=0x00ff");
+                                nxt->sendCmd("MIDI_Live.ontime56.val+=%i", msg.value.i32 << 16);
+                                break;
+                            case 5:
+                                nxt->sendCmd("MIDI_Live.ontime56.val&=0xff00");
+                                nxt->sendCmd("MIDI_Live.ontime56.val+=%i", msg.value.i32);
+                                break;
+                        }
+                    }
+                }
             }
             break;
-        case 0x21: // [msb=s,ml,ls][lsb=coil], i32 duty in 1/1000
-            if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == MODE_ALL)
+        case 0x0021: // [msb=s,ml,ls][lsb=coil], i32 duty in 1/1000
+            msg.value.f32 = msg.value.i32 / 1e3f;
+        case 0x2021:
+            if (msg.value.f32 >= 0.0f)
             {
-                Coil::allCoils[msg.targetLSB].simple.setDuty(msg.value / 1e3f);
-            }
-            if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == MODE_ALL)
-            {
-                Coil::allCoils[msg.targetLSB].midi.setDuty(msg.value);
-            }
-            if (msg.targetMSB == MODE_LIGHTSABER || msg.targetMSB == MODE_ALL)
-            {
+                if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == WILDCARD)
+                {
+                    Coil::allCoils[msg.targetLSB].simple.setDuty(msg.value.f32);
+                    if (GUI::getAcceptsData())
+                    {
+                        nxt->sendCmd("Simple.set%i&=0xff00", msg.targetLSB);
+                        uint32_t ontime = Coil::allCoils[msg.targetLSB].simple.getOntimeUS();
+                        nxt->sendCmd("Simple.set%i+=%i", msg.targetLSB, ontime);
+                    }
+                }
+                if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == WILDCARD)
+                {
+                    Coil::allCoils[msg.targetLSB].midi.setDuty(msg.value.f32);
+                    if (GUI::getAcceptsData())
+                    {
+                        nxt->sendCmd("MIDI_Live.set%i&=0x00ff", msg.targetLSB);
+                        msg.value.ui32 = ((uint32_t) msg.value.f32) << 16;
+                        nxt->sendCmd("MIDI_Live.set%i+=%i", msg.targetLSB, msg.value.ui32);
+                    }
+                }
+                if (msg.targetMSB == MODE_LIGHTSABER || msg.targetMSB == WILDCARD)
+                {
 
+                }
             }
             break;
-        case 0x22: // [msb=s,ml,ls][lsb=coil], i32 BPS in Hz
-            if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == MODE_ALL)
+        case 0x0022: // [msb=s,ml,ls][lsb=coil], i32 BPS in Hz
+            msg.value.f32 = msg.value.i32;
+        case 0x2022:
+            if (msg.value.f32 >= 0.0f)
             {
-                Coil::allCoils[msg.targetLSB].simple.setFrequency(msg.value);
+                if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == WILDCARD)
+                {
+                    Coil::allCoils[msg.targetLSB].simple.setFrequency(msg.value.f32);
+                    if (GUI::getAcceptsData())
+                    {
+                        msg.value.ui32 = msg.value.f32;
+                        nxt->sendCmd("Simple.set%i&=0x00ff", msg.targetLSB);
+                        nxt->sendCmd("Simple.set%i+=%i", msg.targetLSB, msg.value.ui32 << 16);
+                    }
+                }
             }
             break;
-        case 0x23: // [msb=s,ml,ls][lsb=coil], i32 period in us
-            if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == MODE_ALL)
+        case 0x0023: // [msb=s,ml,ls][lsb=coil], i32 period in us
+            msg.value.f32 = msg.value.i32;
+        case 0x2023:
+            if (msg.value.f32 >= 0.0f)
             {
-                Coil::allCoils[msg.targetLSB].simple.setFrequency(1e6f / msg.value);
+                if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == WILDCARD)
+                {
+                    msg.value.f32 = 1e6f / msg.value.f32;
+                    Coil::allCoils[msg.targetLSB].simple.setFrequency(msg.value.f32);
+                    if (GUI::getAcceptsData())
+                    {
+                        msg.value.ui32 = msg.value.f32;
+                        nxt->sendCmd("Simple.set%i&=0x00ff", msg.targetLSB);
+                        nxt->sendCmd("Simple.set%i+=%i", msg.targetLSB, msg.value.ui32 << 16);
+                    }
+                }
             }
             break;
-        case 0x26: // [msb=s,ml,ls][lsb=0], ui apply mode. 0=manual, 1=on release, 2=immediate, other=reserved.
-            if (msg.targetMSB == MODE_ALL)
+        case 0x0026: // [msb=s,ml,ls][lsb=0], ui apply mode. 0=manual, 1=on release, 2=immediate, other=reserved.
+            if (msg.value.ui32 < 3)
             {
-
+                if (msg.targetMSB == WILDCARD)
+                {
+                    nxt->setVal("Settings.applyingMode", msg.value.ui32);
+                }
             }
             break;
-        case 0x27: // [msb=s,ml,ls][lsb=0], enable/disable mode. 0=disable, 1=enable, other=reserved
-            if (msg.value == 0)
+        case 0x0027: // [msb=s,ml,ls][lsb=0], enable/disable mode. 0=disable, 1=enable, other=reserved
+            if (msg.value.i32 == 0)
             {
-                if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == MODE_ALL)
+                if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == WILDCARD)
                 {
                     Simple::stop();
                 }
-                if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == MODE_ALL)
+                if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == WILDCARD)
                 {
                     MIDI::stop();
                 }
-                if (msg.targetMSB == MODE_LIGHTSABER || msg.targetMSB == MODE_ALL)
+                if (msg.targetMSB == MODE_LIGHTSABER || msg.targetMSB == WILDCARD)
                 {
                     LightSaber::stop();
                 }
+                if (GUI::getAcceptsData())
+                {
+                    if (msg.targetMSB == WILDCARD)
+                    {
+                        nxt->sendCmd("Settings.activeModes=0");
+                    }
+                    else
+                    {
+                        nxt->sendCmd("Settings.activeModes&=%i", ~(1 << msg.targetMSB));
+                    }
+                }
             }
-            else if (msg.value == 1)
+            else if (msg.value.i32 == 1)
             {
-                if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == MODE_ALL)
+                if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == WILDCARD)
                 {
                     Simple::start();
                 }
-                if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == MODE_ALL)
+                if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == WILDCARD)
                 {
                     MIDI::start();
                 }
-                if (msg.targetMSB == MODE_LIGHTSABER || msg.targetMSB == MODE_ALL)
+                if (msg.targetMSB == MODE_LIGHTSABER || msg.targetMSB == WILDCARD)
                 {
                     LightSaber::start();
+                }
+                if (GUI::getAcceptsData())
+                {
+                    if (msg.targetMSB == WILDCARD)
+                    {
+                        nxt->sendCmd("Settings.activeModes=0xff");
+                    }
+                    else
+                    {
+                        nxt->sendCmd("Settings.activeModes|=%i", (1 << msg.targetMSB));
+                    }
                 }
             }
             break;
 
-        case 0x40: // (msb=s)[lsb=all coils], i32 ontime filter factor /1000
+        case 0x0040: // (msb=s)[lsb=all coils], i32 ontime filter factor /1000
+            msg.value.f32 = msg.value.i32 / 1e3f;
+        case 0x2040:
 
             break;
-        case 0x41: // (msb=s)[lsb=all coils], i32 ontime filter constant /1000
+        case 0x0041: // (msb=s)[lsb=all coils], i32 ontime filter constant /1000
+            msg.value.f32 = msg.value.i32 / 1e3f;
+        case 0x2041:
 
             break;
-        case 0x44: // (msb=s)[lsb=all coils], i32 BPS filter factor /1000
+        case 0x0044: // (msb=s)[lsb=all coils], i32 BPS filter factor /1000
+            msg.value.f32 = msg.value.i32 / 1e3f;
+        case 0x2044:
 
             break;
-        case 0x45: // (msb=s)[lsb=all coils], i32 BPS filter constant /1000
+        case 0x0045: // (msb=s)[lsb=all coils], i32 BPS filter constant /1000
+            msg.value.f32 = msg.value.i32 / 1e3f;
+        case 0x2045:
 
             break;
 
-        case 0x60: // (msb=ml)[lsb=coil], bf16 assigned MIDI channels
-            Coil::allCoils[msg.targetLSB].midi.setChannels(msg.value & 0xffff);
-            break;
-        case 0x61: // (msb=ml)[lsb=coil], ui3 pan config. 0=const, 1=lin, 2-7=reserved.
-            if ((msg.value & 0b111) == 0)
+        case 0x0060: // (msb=ml)[lsb=coil], bf16 assigned MIDI channels
+        {
+            uint32_t start = msg.targetLSB;
+            uint32_t end = msg.targetLSB + 1;
+            if (msg.targetLSB == WILDCARD)
             {
-                Coil::allCoils[msg.targetLSB].midi.setPanConstVol(true);
+                start = 0;
+                end = COIL_COUNT;
             }
-            else if ((msg.value & 0b111) == 1)
+            for (uint32_t i = start; i < end; i++)
             {
-                Coil::allCoils[msg.targetLSB].midi.setPanConstVol(false);
+                msg.value.ui32 &= 0xffff;
+                Coil::allCoils[i].midi.setChannels(msg.value.ui32);
+                if (GUI::getAcceptsData())
+                {
+                    nxt->sendCmd("TC_Settings.coil%iChn.val&=0x0000ffff", i);
+                    nxt->sendCmd("TC_Settings.coil%iChn.val+=%i", i, msg.value.ui32);
+                }
             }
             break;
-        case 0x62: // (msb=ml)[lsb=coil], i32 pan position (0-127), other = disabled.
-            if (msg.value < 0 || msg.value > 127)
+        }
+        case 0x0061: // (msb=ml)[lsb=coil], ui3 pan config. 0=const, 1=lin, 2-7=reserved.
+        {
+            uint32_t start = msg.targetLSB;
+            uint32_t end = msg.targetLSB + 1;
+            if (msg.targetLSB == WILDCARD)
             {
-                msg.value = 128;
+                start = 0;
+                end = COIL_COUNT;
             }
-            Coil::allCoils[msg.targetLSB].midi.setPan(msg.value);
-            break;
-        case 0x63: // (msb=ml)[lsb=coil], i32 pan reach (0-127)
-            if (msg.value >= 0 && msg.value >= 127)
+            for (uint32_t i = start; i < end; i++)
             {
-                Coil::allCoils[msg.targetLSB].midi.setPanReach(msg.value);
+                if ((msg.value.ui32 & 0b111) == 0)
+                {
+                    Coil::allCoils[i].midi.setPanConstVol(true);
+                    if (GUI::getAcceptsData())
+                    {
+                        nxt->sendCmd("TC_Settings.coil%iChn.val|=%i", i, (1 << 7) << 16);
+                    }
+                }
+                else if ((msg.value.ui32 & 0b111) == 1)
+                {
+                    Coil::allCoils[i].midi.setPanConstVol(false);
+                    if (GUI::getAcceptsData())
+                    {
+                        nxt->sendCmd("TC_Settings.coil%iChn.val&=%i", i, ~((1 << 7) << 16));
+                    }
+                }
             }
             break;
-        case 0x64: // (msb=ml)[lsb=coil], reserved for additional pan reach parameter.
+        }
+        case 0x0062: // (msb=ml)[lsb=coil], i32 pan position (0-127), other = disabled.
+            msg.value.f32 = msg.value.i32;
+        case 0x2062:
+        {
+            if (msg.value.f32 < 0.0f || msg.value.f32 > 127.0f)
+            {
+                msg.value.f32 = 128.0f;
+            }
+            uint32_t start = msg.targetLSB;
+            uint32_t end = msg.targetLSB + 1;
+            if (msg.targetLSB == WILDCARD)
+            {
+                start = 0;
+                end = COIL_COUNT;
+            }
+            for (uint32_t i = start; i < end; i++)
+            {
+                Coil::allCoils[i].midi.setPan(msg.value.f32);
+                if (GUI::getAcceptsData())
+                {
+                    msg.value.ui32 = msg.value.f32;
+                    nxt->sendCmd("TC_Settings.coil%iChn.val&=%i", i, 127 << 24);
+                    nxt->sendCmd("TC_Settings.coil%iChn.val+=%i", i, msg.value.ui32 << 24);
+                }
+            }
+            break;
+        }
+        case 0x0063: // (msb=ml)[lsb=coil], i32 pan reach (0-127)
+            msg.value.f32 = msg.value.i32;
+        case 0x2063:
+        {
+            if (msg.value.f32 >= 0.0f && msg.value.f32 <= 127.0f)
+            {
+                uint32_t start = msg.targetLSB;
+                uint32_t end = msg.targetLSB + 1;
+                if (msg.targetLSB == WILDCARD)
+                {
+                    start = 0;
+                    end = COIL_COUNT;
+                }
+                for (uint32_t i = start; i < end; i++)
+                {
+                    Coil::allCoils[i].midi.setPanReach(msg.value.f32);
+                    if (GUI::getAcceptsData())
+                    {
+                        msg.value.ui32 = msg.value.f32;
+                        nxt->sendCmd("TC_Settings.coil%iChn.val&=%i", i, 127 << 16);
+                        nxt->sendCmd("TC_Settings.coil%iChn.val+=%i", i, msg.value.ui32 << 16);
+                    }
+                }
+            }
+            break;
+        }
+        case 0x0064: // (msb=ml)[lsb=coil], reserved for additional pan reach parameter.
 
             break;
-        case 0x65: // (msb=ml)(lsb=0), bf16 reset NRPs of given channels.
-            MIDI::resetNRPs(msg.value & 0xffff);
+        case 0x0065: // (msb=ml)(lsb=0), bf16 reset NRPs of given channels.
+            MIDI::resetNRPs(msg.value.ui32 & 0xffff);
             break;
 
-        case 0x100: // (msb=ls)[lsb=coil], bf4 assigned lightsabers
-            Coil::allCoils[msg.targetLSB].lightsaber.setActiveLightsabers(msg.value & 0b1111);
+        case 0x0100: // (msb=ls)[lsb=coil], bf4 assigned lightsabers
+        {
+            msg.value.ui32 &= 0b1111;
+            char* sLS = "____";
+            if (GUI::getAcceptsData())
+            {
+                for (uint32_t i = 0; i < 4; i++)
+                {
+                    if (msg.value.ui32 & (1 << i))
+                    {
+                        sLS[i] = '1' + i;
+                    }
+                }
+            }
+            uint32_t start = msg.targetLSB;
+            uint32_t end = msg.targetLSB + 1;
+            if (msg.targetLSB == WILDCARD)
+            {
+                start = 0;
+                end = COIL_COUNT;
+            }
+            for (uint32_t i = start; i < end; i++)
+            {
+                Coil::allCoils[i].lightsaber.setActiveLightsabers(msg.value.ui32);
+                if (GUI::getAcceptsData())
+                {
+                    nxt->setVal("Lightsabers.sLS%i.txt=%s", i, sLS);
+                }
+            }
             break;
-        case 0x101: // (msb=ls)(lsb=0), i32 assign given ID to specified lightsaber. id can be 0-3. other values are reserved.
-            Coil::allCoils[msg.targetLSB].lightsaber.ESPSetID(msg.value);
+        }
+        case 0x0101: // (msb=ls)(lsb=0), i32 assign given ID to specified lightsaber. id can be 0-3. other values are reserved.
+            Coil::allCoils[msg.targetLSB].lightsaber.ESPSetID(msg.value.i32);
             break;
 
-        case 0x200: // ()(), i32 EEPROM update mode, 0=manual, 1=force update, 2=auto (after each settings command), other=reserved.
+        case 0x0200: // ()(), i32 EEPROM update mode, 0=manual, 1=force update, 2=auto (after each settings command), other=reserved.
 
             break;
 
-        case 0x220: // ()(), i32 display brightness, 0-100, other=reserved
+        case 0x2220:
+            msg.value.ui32 = msg.value.f32;
+        case 0x0220: // ()(), i32 display brightness, 0-100, other=reserved
+            if (msg.value.ui32 <= 100)
+            {
+                nxt->setVal("dim", msg.value.ui32);
+            }
+            break;
+        case 0x2221:
+            msg.value.ui32 = msg.value.f32;
+        case 0x0221: // ()(), i32 seconds til standby, 1-3600, 0=disabled, other=reserved
+            if (msg.value.ui32 <= 3600)
+            {
+                nxt->setVal("thsp", msg.value.ui32, Nextion::NO_EXT);
+            }
+            break;
+        case 0x2222:
+            msg.value.ui32 = msg.value.f32;
+        case 0x0222: // ()(), i32 button hold time (ms), 50-9999, other=reserved
+            if (msg.value.ui32 >= 50 && msg.value.ui32 <= 9999)
+            {
+                nxt->setVal("Other_Settings.nHoldTime", msg.value.ui32);
+            }
+            break;
+        case 0x0223: // ()(), bf1 safety options, [0]: background shutdown, 0=disabled, 1=enabled.
+            nxt->setVal("Other_Settings.nBackOff", msg.value.ui32 & 0b1);
+            break;
+        case 0x0224: // ()(), i32 color mode, 0=light, 1=dark, other=reserved
+            if (msg.value.ui32 < 2)
+            {
+                nxt->setVal("Settings.colorMode", msg.value.ui32);
+                nxt->sendCmd("click fLoadColors,0");
+            }
+            break;
+        case 0x0240: // [msb=charGroup][lsb=user], char[4] username
+            if (msg.targetLSB == 0)
+            {
+                // Clear entire string before filling it up with new data.
+                memset(EEPROMSettings::userNames[msg.targetLSB], 0, EEPROMSettings::STR_CHAR_COUNT);
+            }
+            memcpy(msg.value.chr, &(EEPROMSettings::userNames[msg.targetLSB][msg.targetMSB * 4]), 4);
+            break;
+        case 0x0241: // [msb=charGroup][lsb=user], char[4] password
+            if (msg.targetLSB == 0)
+            {
+                // Clear entire string before filling it up with new data.
+                memset(EEPROMSettings::userNames[msg.targetLSB], 0, EEPROMSettings::STR_CHAR_COUNT);
+            }
+            memcpy(msg.value.chr, &(EEPROMSettings::userPwds[msg.targetLSB][msg.targetMSB * 4]), 4);
+            break;
+        case 0x0242: // ()[lsb=user,nb], i32 user max ontime in us
 
             break;
-        case 0x221: // ()(), i32 seconds til standby, 1-3600, 0=disabled, other=reserved
+        case 0x0243: // ()[lsb=user,nb], i32 user max duty in 1/1000
 
             break;
-        case 0x222: // ()(), i32 button hold time (ms), 50-9999, other=reserved
+        case 0x0244: // ()[lsb=user,nb], i32 user max BPS in Hz
 
             break;
-        case 0x223: // ()(), bf1 safety options, [0]: background shutdown, 0=disabled, 1=enabled.
+        case 0x0260: // ()[lsb=coil], i32 coil max ontime in us
 
             break;
-        case 0x224: // ()(), i32 color mode, 0=light, 1=dark, other=reserved
+        case 0x0261: // ()[lsb=coil], i32 coil max duty in 1/1000
 
             break;
-        case 0x240: // [msb=charGroup][lsb=user], char[4] username
+        case 0x0262: // reserved for: ()[lsb=coil], i32 coil min ontime in us
 
             break;
-        case 0x241: // [msb=charGroup][lsb=user], char[4] password
+        case 0x0263: // ()[lsb=coil], i32 coil min offtime in us
 
             break;
-        case 0x242: // ()[lsb=user,nb], i32 user max ontime in us
+        case 0x0264: // ()[lsb=coil], i32 coil max MIDI voices, 1-16, ohter=reserved
 
             break;
-        case 0x243: // ()[lsb=user,nb], i32 user max duty in 1/1000
-
-            break;
-        case 0x244: // ()[lsb=user,nb], i32 user max BPS in Hz
-
-            break;
-        case 0x260: // ()[lsb=coil], i32 coil max ontime in us
-
-            break;
-        case 0x261: // ()[lsb=coil], i32 coil max duty in 1/1000
-
-            break;
-        case 0x262: // reserved for: ()[lsb=coil], i32 coil min ontime in us
-
-            break;
-        case 0x263: // ()[lsb=coil], i32 coil min offtime in us
-
-            break;
-        case 0x264: // ()[lsb=coil], i32 coil max MIDI voices, 1-16, ohter=reserved
-
-            break;
-        case 0x300: // (msb=program)(lsb=step), i32 envelope next step, 0-7
-            if (msg.value >= 0 && msg.value < MIDIProgram::DATA_POINTS)
+        case 0x0300: // (msb=program)(lsb=step), i32 envelope next step, 0-7
+            if (msg.value.i32 >= 0 && msg.value.i32 < MIDIProgram::DATA_POINTS)
             {
                 float& amp     = MIDI::programs[msg.targetMSB].amplitude[msg.targetLSB];
                 float& dur     = MIDI::programs[msg.targetMSB].durationUS[msg.targetLSB];
                 float& ntau    = MIDI::programs[msg.targetMSB].ntau[msg.targetLSB];
-                MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, dur, ntau, msg.value);
+                MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, dur, ntau, msg.value.i32);
             }
             break;
-        case 0x301: // (msb=program)(lsb=step), i32 envelope step amplitude in 1/1000
-            if (msg.value >= 0)
+        case 0x0301: // (msb=program)(lsb=step), i32 envelope step amplitude in 1/1000
+            msg.value.f32 = msg.value.i32 / 1e3f;
+        case 0x2301:
+            if (msg.value.f32 >= 0)
             {
                 float& dur     = MIDI::programs[msg.targetMSB].durationUS[msg.targetLSB];
                 float& ntau    = MIDI::programs[msg.targetMSB].ntau[msg.targetLSB];
                 uint32_t& next = MIDI::programs[msg.targetMSB].nextStep[msg.targetLSB];
-                MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, msg.value / 1e3f, dur, ntau, next);
+                MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, msg.value.f32, dur, ntau, next);
             }
             break;
-        case 0x302: // (msb=program)(lsb=step), i32 envelope step duration in us
-            if (msg.value >= 0)
+        case 0x0302: // (msb=program)(lsb=step), i32 envelope step duration in us
+            msg.value.f32 = msg.value.i32;
+        case 0x2302:
+            if (msg.value.f32 >= 0)
             {
                 float& amp     = MIDI::programs[msg.targetMSB].amplitude[msg.targetLSB];
                 float& ntau    = MIDI::programs[msg.targetMSB].ntau[msg.targetLSB];
                 uint32_t& next = MIDI::programs[msg.targetMSB].nextStep[msg.targetLSB];
-                MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, msg.value, ntau, next);
+                MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, msg.value.f32, ntau, next);
             }
             break;
-        case 0x303: // (msb=program)(lsb=step), i32 envelope step n-tau in 1/1000
+        case 0x0303: // (msb=program)(lsb=step), i32 envelope step n-tau in 1/1000
+            msg.value.f32 = msg.value.i32 / 1e3f;
+        case 0x2303:
             float& amp     = MIDI::programs[msg.targetMSB].amplitude[msg.targetLSB];
             float& dur     = MIDI::programs[msg.targetMSB].durationUS[msg.targetLSB];
             uint32_t& next = MIDI::programs[msg.targetMSB].nextStep[msg.targetLSB];
-            MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, dur, msg.value / 1e3f, next);
+            MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, dur, msg.value.f32, next);
             break;
         default:
             break;

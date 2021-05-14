@@ -7,6 +7,10 @@
 
 #include <Nextion.h>
 
+
+constexpr uint32_t Nextion::timeoutUS;
+
+
 Nextion::Nextion()
 {
     // TODO Auto-generated constructor stub
@@ -18,10 +22,9 @@ Nextion::~Nextion()
     // TODO Auto-generated destructor stub
 }
 
-void Nextion::init(uint32_t uartNumber, uint32_t baudRate, uint32_t timeoutUS)
+bool Nextion::init(uint32_t uartNumber, uint32_t baudRate)
 {
     this->baudRate = baudRate;
-    this->timeoutUS = timeoutUS;
 
     // Nextion UART stdio setup
     this->UARTNum = uartNumber;
@@ -41,41 +44,98 @@ void Nextion::init(uint32_t uartNumber, uint32_t baudRate, uint32_t timeoutUS)
     IntPrioritySet(UART_MAPPING[UARTNum][UART_INT], 0b01000000);
     UARTStdioConfig(UARTNum, baudRate, System::getClockFreq());
     UARTEchoSet(false);
-}
 
-void Nextion::setTimeoutUS(uint32_t us)
-{
-    timeoutUS = us;
+    // Try establishing a connection.
+    uint32_t startTime = System::getSystemTimeUS();
+    while ((System::getSystemTimeUS() - startTime) < startTimeoutUS)
+    {
+        sendCmd("rest");
+        System::delayUS(700000);
+        setVal("comOk", 1);
+        System::delayUS(20000);
+        if (getVal("comOk") == 1)
+        {
+            return true;
+        }
+    }
+
+    // Connection failed.
+    return false;
 }
 
 void Nextion::sendCmd(const char* cmd)
 {
     UARTFlushRx();
-    UARTprintf("%s%s", cmd, endStr);
+    UARTprintf(cmd);
+    UARTwrite(endStr, 3);
+}
+
+void Nextion::sendCmd(const char* cmd, const char* str)
+{
+    UARTFlushRx();
+    UARTprintf(cmd, str);
+    UARTwrite(endStr, 3);
+}
+
+void Nextion::sendCmd(const char* cmd, int32_t val)
+{
+    UARTFlushRx();
+    UARTprintf(cmd, val);
+    UARTwrite(endStr, 3);
+}
+
+void Nextion::sendCmd(const char* cmd, int32_t val1, int32_t val2)
+{
+    UARTFlushRx();
+    UARTprintf(cmd, val1, val2);
+    UARTwrite(endStr, 3);
+}
+
+void Nextion::sendCmd(const char* cmd, const char* str, int32_t val)
+{
+    UARTFlushRx();
+    UARTprintf(cmd, str, val);
+    UARTwrite(endStr, 3);
+}
+
+void Nextion::sendCmd(const char* cmd, int32_t val, const char* str)
+{
+    UARTFlushRx();
+    UARTprintf(cmd, val, str);
+    UARTwrite(endStr, 3);
 }
 
 void Nextion::setTxt(const char* comp, const char* txt)
 {
     UARTFlushRx();
-    UARTprintf("%s.txt=\"%s\"%s", comp, txt, endStr);
+    UARTprintf("%s.txt=\"%s\"", comp, txt);
+    UARTwrite(endStr, 3);
 }
 
-void Nextion::setVal(const char* comp, uint32_t val)
+void Nextion::setVal(const char* comp, uint32_t val, bool noExt)
 {
     UARTFlushRx();
-    UARTprintf("%s.val=%i%s", comp, val, endStr);
+    if (noExt)
+    {
+        UARTprintf("%s=%i", comp, val);
+    }
+    else
+    {
+        UARTprintf("%s.val=%i", comp, val);
+    }
+    UARTwrite(endStr, 3);
 }
 
 void Nextion::setPage(const char* page)
 {
     UARTFlushRx();
-    UARTprintf("page %s%s", page, endStr);
+    sendCmd("page %s", page);
 }
 
 void Nextion::setPage(uint32_t page)
 {
     UARTFlushRx();
-    UARTprintf("page %i%s", page, endStr);
+    sendCmd("page %i", page);
 }
 
 void Nextion::flushRx()

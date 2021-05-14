@@ -11,6 +11,7 @@
 #include "InterrupterConfig.h"
 #include "System.h"
 #include "Settings.h"
+#include "Nextion.h"
 #include "Coil.h"
 #include "GUI.h"
 
@@ -41,6 +42,9 @@ int main(void)
     System::init(sysTickISR);
     System::setSystemTimeResUS(16);
 
+    Nextion nextion;
+    bool nxtOk = nextion.init(3, 115200);
+
     MIDI::init(115200, uartUsbISR, GPIO_PORTC_BASE, GPIO_PIN_4, GPIO_PIN_5, uartMidiISR);
     LightSaber::init(GPIO_PORTA_BASE, GPIO_PIN_6, GPIO_PIN_7, 115200, uartLightSaberISR);
 
@@ -49,7 +53,8 @@ int main(void)
         Coil::allCoils[coil].init(coil);
     }
 
-    GUI::init();
+    GUI::init(&nextion, nxtOk);
+    Settings::init(&nextion);
 
     while (42)
     {

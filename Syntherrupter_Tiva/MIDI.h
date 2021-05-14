@@ -19,18 +19,12 @@
 #include "ToneList.h"
 #include "NoteList.h"
 #include "MIDIProgram.h"
+#include "Sysex.h"
 
 
 class MIDI
 {
 public:
-    struct SysexMsg {
-        uint32_t number;
-        uint32_t targetLSB;
-        uint32_t targetMSB;
-        int32_t value;
-        uint8_t newMsg;
-    };
     MIDI();
     virtual ~MIDI();
     void updateToneList();
@@ -50,14 +44,22 @@ public:
         setVolSettings(singleNoteMaxOntimeUS, dutyMax);
     };
     void setChannels(uint32_t chns);
-    void setPan(uint32_t pan);
-    void setPanReach(uint32_t reach);
+    void setPan(float pan);
+    void setPanReach(float reach);
     void setPanConstVol(bool cnst)
     {
         panConstVol    = cnst;
         coilPanChanged = true;
     };
     void setMaxVoices(uint32_t maxVoices);
+    float getOntimeUS()
+    {
+        return singleNoteMaxOntimeUS;
+    };
+    float getDuty()
+    {
+        return singleNoteMaxDuty;
+    };
     static void init(uint32_t usbBaudRate, void (*usbISR)(void),
                      uint32_t midiUartPort, uint32_t midiUartRx,
                      uint32_t midiUartTx, void (*midiISR)(void));

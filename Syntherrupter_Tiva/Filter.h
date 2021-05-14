@@ -23,6 +23,10 @@ public:
     void init(float factor = 2.0f, float constant = 1.0f);
     void setTarget(float target, bool force = false);
     float getFiltered();
+    float getTarget()
+    {
+        return target;
+    }
 private:
     bool     targetReached = false;
     float    minTimestepUS   = 0.0f;
