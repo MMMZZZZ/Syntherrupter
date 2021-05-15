@@ -180,7 +180,7 @@ Text tMLS
         
 Text tSysexInfo
     Attributes
-        ID                 : 17
+        ID                 : 15
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -194,7 +194,7 @@ Text tSysexInfo
         
 QR Code qrHelp
     Attributes
-        ID               : 15
+        ID               : 14
         Scope            : local
         Send Component ID: disabled
         Text             : git.io/JkvOK
@@ -410,7 +410,7 @@ Button bHelp
         
 Hotspot fLoadModes
     Attributes
-        ID               : 14
+        ID               : 16
         Scope            : local
         Send Component ID: disabled
     
@@ -440,7 +440,7 @@ Hotspot fLoadModes
         
 Hotspot fLoadColors
     Attributes
-        ID               : 16
+        ID               : 17
         Scope            : local
         Send Component ID: disabled
     
