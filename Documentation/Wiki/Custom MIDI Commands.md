@@ -13,7 +13,7 @@ Syntherrupter's MIDI functions can be controlled via custom MIDI commands. Since
 		* [Syntherrupters NRPs](#syntherrupters-nrps)
 	* [System Exclusive Messages (SysEx)](#system-exclusive-messages-sysex)
 		* [SysEx format](#sysex-format)
-		* [Syntherrupters SysEx Commands Version 1](#syntherrupters-sysex-commands-version-1)
+		* [Syntherrupters SysEx Commands Version 1 (Draft!)](#syntherrupters-sysex-commands-version-1-draft)
 
 ## Non-registered Parameters (NRP)
 
@@ -97,7 +97,33 @@ Structure:
 
 *Note: Since not every parameter requires the full 9 bytes, it will be possible to send shorter messages which omit some of those bytes. However, they aren't standarized yet.*
 
-### Syntherrupters SysEx Commands Version 1
+### Syntherrupters SysEx Commands Version 1 (Draft!)
+
+#### This is still a draft!
+
+Currently these commands are only implemented in beta firmware versions. Since the version number is a single integer from 1-127 I can't name this version `0.1` or `1.0-beta.1`. Hence this note. This protocol shall be considered as draft and can change at any time until a stable firmware is released. At that point this note will disappear. 
+
+Also, keep in mind that there is a ton of parameters that has to be documented here, checked and implemented in the firmware and implemented in [Syfoh](https://github.com/MMMZZZZ/Syfoh#readme). That's a looot of sources for errors and oversights... Let me know if you find any oopsies!
+
+#### Conventions
+
+All conventions are to be read as "unless noted otherwise... ".
+
+* Reserved target bytes are expected to be 0.
+* Parameters and parameter options that are currently not supported by Syntherrupter are marked by an [NS].
+* Parameters and parameter options that are supported but won't show up on screen are marked as [NV] (not visible). 
+* Every integer parameter has a float version at offset `0x2000`. 
+	* If the integer parameter is expressed as fractional value, the float parameter is not.
+	* If the integer parameter covers a certain range, the float parameter is expected to cover that range with a value between 0.0f and 1.0f.
+	* Commands without float version are marked with [NF]. Examples are the Envelope steps. Since these need to be discrete values, a float version doesn't make sense. 
+* The parameter value can be one of the following types:
+	* int32
+	* float32
+	* char[4]
+	* bitfield, noted as bf8, where 8 would indicate that the field is 8 bits wide (starting at the least significant bit of the parameter value). A bitfield range within the bitfield is noted as [LSB-MSB], f.ex. [2-7]
+* Any parameter value or part of it that is not specified by this document is reserved.
+* Target value 127 is reserved for broadcasting, meaning it will affect all targets (works for LSB/MSB independantly).
+* Any parameter that is not compliant with these specs shall be ignored.
 
 #### Overview
 
@@ -114,23 +140,6 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* [`0x260-0x27f`: Coil settings (limits)](#0x260-0x27f-coil-settings-limits)
 	* [`0x300-0x31f`: Envelope settings](#0x300-0x31f-envelope-settings)
 	
-#### Conventions
-
-All conventions are to be read as "unless noted otherwise... ".
-
-* Reserved target bytes are expected to be 0.
-* Parameters and parameter options that are currently not supported by Syntherrupter are marked by an [NS].
-* Every integer parameter has a float version at offset `0x2000`. Currently not implemented [NS].
-	* If the integer parameter is expressed as fractional value, the float parameter is not.
-	* If the integer parameter covers a certain range, the float parameter is expected to cover that range with a value between 0.0f and 1.0f.
-* The parameter value can be one of the following types:
-	* int32
-	* float32
-	* char[4]
-	* bitfield, noted as bf8, where 8 would indicate that the field is 8 bits wide (starting at the least significant bit of the parameter value). A bitfield range within the bitfield is noted as [LSB-MSB], f.ex. [2-7]
-* Any parameter value or part of it that is not specified by this document is reserved.
-* Target value 127 is reserved for broadcasting, meaning it will affect all targets (works for LSB/MSB independantly). Currently not implemented [NS].
-
 #### `0x01-0x1f`: System commands
 
 * `0x01`: [NS] Request parameter value
@@ -139,116 +148,102 @@ All conventions are to be read as "unless noted otherwise... ".
 
 #### `0x20-0x3f`: Common mode parameters
 
-* `0x20`: Ontime
+* `0x20`: Mode Enable
 	* Target MSB: uint, target mode
-		* 1: [NS] Simple Mode
+		* 1: Simple Mode
 		* 2: MIDI Live Mode
-		* 3: [NS] Lightsaber mode
+		* 3: Lightsaber mode
+	* Target LSB: Reserved.
+	* Value: int32
+		* 0: Disable mode
+		* 1: Enable mode
+* `0x21`: Ontime
+	* Target MSB: uint, target mode
+		* 1: Simple Mode
+		* 2: MIDI Live Mode
+		* 3: Lightsaber mode
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, ontime in us
-* `0x21`: Duty cycle
+* `0x22`: Duty cycle
 	* Target MSB: uint, target mode
-		* 1: [NS] Simple Mode
+		* 1: Simple Mode
 		* 2: MIDI Live Mode
 		* 3: [NS] Lightsaber mode
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, duty cycle in 1/1000
-* `0x22`: [NS] BPS
+* `0x23`: BPS
 	* Target MSB: uint, target mode
 		* 1: Simple Mode
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, BPS in Hz
-* `0x23`: [NS] Period
+* `0x24`: Period
 	* Target MSB: uint, target mode
 		* 1: Simple Mode
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, period in us
-* `0x26`: [NS] UI Apply Mode
-	* Target MSB: uint, target mode
-		* 1: Simple Mode
-		* 2: MIDI Live Mode
-		* 3: Lightsaber mode
-	* Target LSB: reserved.
-	* Value: int32
-		* 0: Manually
-		* 1: On Release
-		* 2: Immediately
-* `0x27`: Mode Enable
-	* Target MSB: uint, target mode
-		* 1: [NS] Simple Mode
-		* 2: MIDI Live Mode
-		* 3: [NS] Lightsaber mode
-	* Target LSB: reserved.
-	* Value: int32
-		* 0: Disable mode
-		* 1: Enable mode
 
 #### `0x40-0x5f`: Simple mode parameters
 
 * `0x40`: [NS] Ontime Filter Factor
-	* Target MSB: uint, target mode. Reserved, expected to be:
-		* 1: Simple Mode
+	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, factor value in 1/1000
 * `0x41`: [NS] Ontime Filter Constant
-	* Target MSB: uint, target mode. Reserved, expected to be:
-		* 1: Simple Mode
+	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, factor value in 1/1000
 * `0x44`: [NS] BPS Filter Factor
-	* Target MSB: uint, target mode. Reserved, expected to be:
-		* 1: Simple Mode
+	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, factor value in 1/1000
 * `0x45`: [NS] BPS Filter Constant
-	* Target MSB: uint, target mode. Reserved, expected to be:
-		* 1: Simple Mode
+	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, factor value in 1/1000
 
 #### `0x60-0x7f`: MIDI Live mode parameters
 
-* `0x60`: Assigned MIDI Channels
-	* Target MSB: uint, target mode. Reserved, expected to be:
-		* 2: MIDI Live Mode
+* `0x60`: MIDI Channels assigned to Coil
+	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
-	* Value: bf16, marking every channel as assigned (1) or unassigned (0) for this coil.
-* `0x61`: Pan Configuration
-	* Target MSB: uint, target mode. Reserved, expected to be:
-		* 2: MIDI Live Mode
+	* Value: bf16, marking every channel as assigned (1) or unassigned (0) for this coil.	
+* `0x61`: [NS] Coils assigned to MIDI Channel
+	* Target MSB: Reserved.
+	* Target LSB: uint, target MIDI channel
+		* 0-15. 
+	* Value: bf6, marking every coil as assigned (1) or unassigned (0) for this MIDI channel. Bitfield size limited by your firmware if you flashed a binary for less outputs.
+* `0x62`: Pan Configuration
+	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: bf3
 		* [0-2]: uint, Reach mode.
 			* 0: Constant
 			* 1: Linear
-* `0x62`: Pan Position
-	* Target MSB: uint, target mode. Reserved, expected to be:
-		* 2: MIDI Live Mode
+* `0x63`: Pan Position
+	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32
 		* 0-127: Pan position, 0=left, 127=right
 		* All other values: Stereo features disabled. 
-* `0x63`: Pan Reach
-	* Target MSB: uint, target mode. Reserved, expected to be:
-		* 2: MIDI Live Mode
+* `0x64`: Pan Reach
+	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32
 		* 0-127: Pan reach
-* `0x65`: Reset Channel NRPs
-	* Target MSB: uint, target mode. Reserved, expected to be:
-		* 2: MIDI Live Mode
+* `0x66`: Reset Channel NRPs
+	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32
@@ -256,25 +251,22 @@ All conventions are to be read as "unless noted otherwise... ".
 
 #### `0x100-0x10f`: Lightsaber mode parameters
 
-* `0x100`: [NS] Assigned Lightsabers
-	* Target MSB: uint, target mode. Reserved, expected to be:
-		* 3: Lightsaber Mode
+* `0x100`: Assigned Lightsabers
+	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: bf4, marking each lightsaber as assigned (1) or not (0)
-* `0x101`: [NS] Set Lightsaber ID
-	* Target MSB: uint, target Mode. Reserved, expected to be:
-		* 3: Lightsaber Mode
-	* Target LSB: uint, target coil
-		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
+* `0x101`: Set Lightsaber ID
+	* Target MSB: Reserved.
+	* Target LSB: Reserved.
 	* Value: int32
 		* 0-4: New ID for the connected ESP8266
 
 #### `0x200-0x21f`: EEPROM and other control commands
 
 * `0x200`: [NS] EEPROM Update Mode
-	* Target MSB: Reserved
-	* Target LSB: Reserved
+	* Target MSB: Reserved.
+	* Target LSB: Reserved.
 	* Value: int32
 		* 0: Manual mode
 		* 1: Force update, does not affect current update mode.
@@ -282,93 +274,96 @@ All conventions are to be read as "unless noted otherwise... ".
 
 #### `0x220-0x23f`: General settings
 
-* `0x220`: [NS] Display brightness
-	* Target MSB: Reserved
-	* Target LSB: Reserved
+* `0x220`: Display brightness
+	* Target MSB: Reserved.
+	* Target LSB: Reserved.
 	* Value: int32
 		* 0-100: Brightness in percent
-* `0x221`: [NS] Standby
-	* Target MSB: Reserved
-	* Target LSB: Reserved
+* `0x221`: Standby
+	* Target MSB: Reserved.
+	* Target LSB: Reserved.
 	* Value: int32
 		* 0: Standby disabled
 		* 1-3600: Seconds until Syntherrupter goes into standby
-* `0x222`: [NS] UI Button Hold Time
-	* Target MSB: Reserved
-	* Target LSB: Reserved
+* `0x222`: UI Button Hold Time
+	* Target MSB: Reserved.
+	* Target LSB: Reserved.
 	* Value: int32
 		* 50-9999: Milliseconds to hold a button until alternate function is activated.
-* `0x223`: [NS] Safety Options
-	* Target MSB: Reserved
-	* Target LSB: Reserved
+* `0x223`: Safety Options
+	* Target MSB: Reserved.
+	* Target LSB: Reserved.
 	* Value: bf1
 		* [0]: Background shutdown enabled(1) or disabled(0)
-* `0x224`: [NS] UI Color Mode
-	* Target MSB: Reserved
-	* Target LSB: Reserved
+* `0x224`: UI Color Mode
+	* Target MSB: Reserved.
+	* Target LSB: Reserved.
 	* Value: int32, color mode
 		* 0: Light colors
 		* 1: Dark colors
+* `0x225`: UI Apply Mode
+	* Target MSB: uint, target mode.
+		* 127: wildcard, affects all modes. 
+	* Target LSB: Reserved.
+	* Value: int32
+		* 0: Manually
+		* 1: On Release
+		* 2: Immediately
 
 #### `0x240-0x25f`: User settings
 
-* `0x240`: [NS] User Name
-	* Target MSB: uint, char group position within target string
+* `0x240`: User Name
+	* Target MSB: uint, char group position within target string. When setting char group 0 the string will be deleted (set to `\x00`). Hence the null-termination does not need to be sent explicitly. 
+		* 0-7. 
+	* Target LSB: uint, user
+		* 0-2.
+	* Value: char[4]
+* `0x241`: User Password
+	* Target MSB: uint, char group position within target string. When setting char group 0 the string will be deleted (set to `\x00`). Hence the null-termination does not need to be sent explicitly. 
 		* 0-7
 	* Target LSB: uint, user
 		* 0-2.
 	* Value: char[4]
-* `0x241`: [NS] User Password
-	* Target MSB: uint, char group position within target string
-		* 0-7
-	* Target LSB: uint, user
-		* 0-2.
-	* Value: char[4]
-* `0x242`: [NS] User Max Ontime
-	* Target MSB: Reserved
+* `0x242`: User Max Ontime
+	* Target MSB: Reserved.
 	* Target LSB: uint, user
 		* 0-2.
 	* Value: int32, ontime in us
-* `0x243`: [NS] User Max Duty
-	* Target MSB: Reserved
+* `0x243`: User Max Duty
+	* Target MSB: Reserved.
 	* Target LSB: uint, user
 		* 0-2.
 	* Value: int32, duty in 1/1000
-* `0x244`: [NS] User Max BPS
-	* Target MSB: Reserved
+* `0x244`: User Max BPS
+	* Target MSB: Reserved.
 	* Target LSB: uint, user
 		* 0-2.
 	* Value: int32, BPS in Hz
 
 #### `0x260-0x27f`: Coil settings (limits)
 
-* `0x260`: [NS] Coil Max Ontime
-	* Target MSB: Reserved
-		* 3: Lightsaber Mode
+* `0x260`: [NV] Coil Max Ontime
+	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, ontime in us
-* `0x261`: [NS] Coil Max Duty
-	* Target MSB: Reserved
-		* 3: Lightsaber Mode
+* `0x261`: [NV] Coil Max Duty
+	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, duty in 1/1000
-* `0x262`: [NS] Coil Min Ontime
-	* Target MSB: Reserved
-		* 3: Lightsaber Mode
+* `0x262`: [NV] Coil Min Ontime
+	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, ontime in us
-* `0x263`: [NS] Coil Min Offtime
-	* Target MSB: Reserved
-		* 3: Lightsaber Mode
+* `0x263`: [NV] Coil Min Offtime
+	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, offtime in us
-* `0x264`: [NS] Coil Max MIDI Voices
-	* Target MSB: Reserved
-		* 3: Lightsaber Mode
+* `0x264`: [NV] Coil Max MIDI Voices
+	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, voice limit
