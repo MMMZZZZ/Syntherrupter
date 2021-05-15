@@ -33,17 +33,16 @@ public:
     Nextion();
     virtual ~Nextion();
     bool init(uint32_t portNumber, uint32_t baudRate);
-    void sendCmd(const char* cmd);
-    void sendCmd(const char* cmd, const char* data);
-    void sendCmd(const char* cmd, int32_t val);
-    void sendCmd(const char* cmd, int32_t val1, int32_t val2);
-    void sendCmd(const char* cmd, const char* str, int32_t val);
-    void sendCmd(const char* cmd, int32_t val, const char* str);
-    void setTxt(const char* comp, const char* txt);
-    void setVal(const char* comp, uint32_t val, bool noExt = false);
-    void setPage(const char* page);
-    void setPage(uint32_t page);
-    void setTimeoutUS(uint32_t us);
+    bool sendCmd(const char* cmd);
+    bool sendCmd(const char* cmd, const char* data);
+    bool sendCmd(const char* cmd, int32_t val);
+    bool sendCmd(const char* cmd, int32_t val1, int32_t val2);
+    bool sendCmd(const char* cmd, const char* str, int32_t val);
+    bool sendCmd(const char* cmd, int32_t val, const char* str);
+    bool setTxt(const char* comp, const char* txt);
+    bool setVal(const char* comp, uint32_t val, bool noExt = false);
+    bool setPage(const char* page);
+    bool setPage(uint32_t page);
     void flushRx();
     void printf(const char *pcString, ...);
     void disableStdio();
@@ -54,14 +53,16 @@ public:
     uint32_t charsAvail();
     uint32_t peek(const char c);
     char getChar();
-    uint32_t getVal(const char* comp);
+    int32_t getVal(const char* comp);
     char* getTxt(const char* comp);
-    static constexpr uint32_t receiveErrorVal   = 424242420;
-    static constexpr uint32_t receiveTimeoutVal = 424242421;
+    static constexpr int32_t receiveErrorVal   = -24242420;
+    static constexpr int32_t receiveTimeoutVal = -24242421;
     static constexpr uint32_t timeoutUS         =    300000;
     static constexpr uint32_t startTimeoutUS    =   3000000;
     static constexpr bool NO_EXT = true;
 private:
+    bool acknowledge();
+
     // UART mapping
     static constexpr uint32_t UART_SYSCTL_PERIPH      = 0;
     static constexpr uint32_t UART_BASE               = 1;
@@ -99,6 +100,7 @@ private:
     uint32_t baudRate = 0;
     static constexpr uint32_t readDataSize = 100;
     char readData[readDataSize];
+    bool acknowledgeEnabled = false;
 };
 
 #endif /* NEXTION_H_ */

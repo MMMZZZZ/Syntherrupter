@@ -101,7 +101,7 @@ private:
 
     static void serialPassthrough(uint32_t uartNum);
 
-    static bool checkValue(uint32_t val);
+    static bool checkValue(int32_t val);
 
     static Nextion* nxt;
 

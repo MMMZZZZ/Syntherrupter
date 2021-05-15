@@ -46,6 +46,7 @@ bool Nextion::init(uint32_t uartNumber, uint32_t baudRate)
     UARTEchoSet(false);
 
     // Try establishing a connection.
+    bool nxtOk = false;
     uint32_t startTime = System::getSystemTimeUS();
     while ((System::getSystemTimeUS() - startTime) < startTimeoutUS)
     {
@@ -55,64 +56,110 @@ bool Nextion::init(uint32_t uartNumber, uint32_t baudRate)
         System::delayUS(20000);
         if (getVal("comOk") == 1)
         {
-            return true;
+            nxtOk = true;
         }
     }
 
+    if (nxtOk)
+    {
+        acknowledgeEnabled = true;
+        setVal("bkcmd", 3, NO_EXT);
+        return false;
+    }
+
     // Connection failed.
-    return false;
+    return true;
 }
 
-void Nextion::sendCmd(const char* cmd)
+bool Nextion::acknowledge()
+{
+    if (!acknowledgeEnabled)
+    {
+        return true;
+    }
+    uint32_t time = System::getSystemTimeUS();
+    uint32_t termination = 0;
+    int32_t response = -1;
+    while (termination < 3)
+    {
+        if (System::getSystemTimeUS() - time > timeoutUS)
+        {
+            return false;
+        }
+        if (UARTRxBytesAvail())
+        {
+            int32_t temp = UARTgetc();
+            if (temp == 0xff)
+            {
+                termination++;
+            }
+            else
+            {
+                response = temp;
+            }
+        }
+    }
+
+    return (response == 0x01);
+}
+
+bool Nextion::sendCmd(const char* cmd)
 {
     UARTFlushRx();
     UARTprintf(cmd);
     UARTwrite(endStr, 3);
+    return acknowledge();
 }
 
-void Nextion::sendCmd(const char* cmd, const char* str)
+bool Nextion::sendCmd(const char* cmd, const char* str)
 {
     UARTFlushRx();
     UARTprintf(cmd, str);
     UARTwrite(endStr, 3);
+    return acknowledge();
 }
 
-void Nextion::sendCmd(const char* cmd, int32_t val)
+bool Nextion::sendCmd(const char* cmd, int32_t val)
 {
     UARTFlushRx();
     UARTprintf(cmd, val);
     UARTwrite(endStr, 3);
+    return acknowledge();
 }
 
-void Nextion::sendCmd(const char* cmd, int32_t val1, int32_t val2)
+bool Nextion::sendCmd(const char* cmd, int32_t val1, int32_t val2)
 {
     UARTFlushRx();
     UARTprintf(cmd, val1, val2);
     UARTwrite(endStr, 3);
+    return acknowledge();
 }
 
-void Nextion::sendCmd(const char* cmd, const char* str, int32_t val)
+bool Nextion::sendCmd(const char* cmd, const char* str, int32_t val)
 {
     UARTFlushRx();
     UARTprintf(cmd, str, val);
     UARTwrite(endStr, 3);
+    return acknowledge();
 }
 
-void Nextion::sendCmd(const char* cmd, int32_t val, const char* str)
+bool Nextion::sendCmd(const char* cmd, int32_t val, const char* str)
 {
     UARTFlushRx();
     UARTprintf(cmd, val, str);
     UARTwrite(endStr, 3);
+    return acknowledge();
 }
 
-void Nextion::setTxt(const char* comp, const char* txt)
+bool Nextion::setTxt(const char* comp, const char* txt)
 {
     UARTFlushRx();
     UARTprintf("%s.txt=\"%s\"", comp, txt);
     UARTwrite(endStr, 3);
+    return acknowledge();
 }
 
-void Nextion::setVal(const char* comp, uint32_t val, bool noExt)
+bool Nextion::setVal(const char* comp, uint32_t val, bool noExt)
 {
     UARTFlushRx();
     if (noExt)
@@ -124,18 +171,21 @@ void Nextion::setVal(const char* comp, uint32_t val, bool noExt)
         UARTprintf("%s.val=%i", comp, val);
     }
     UARTwrite(endStr, 3);
+    return acknowledge();
 }
 
-void Nextion::setPage(const char* page)
+bool Nextion::setPage(const char* page)
 {
     UARTFlushRx();
     sendCmd("page %s", page);
+    return acknowledge();
 }
 
-void Nextion::setPage(uint32_t page)
+bool Nextion::setPage(uint32_t page)
 {
     UARTFlushRx();
     sendCmd("page %i", page);
+    return acknowledge();
 }
 
 void Nextion::flushRx()
@@ -222,7 +272,7 @@ char* Nextion::getTxt(const char* comp)
     return 0;
 }
 
-uint32_t Nextion::getVal(const char* comp)
+int32_t Nextion::getVal(const char* comp)
 {
     UARTFlushRx();
     UARTprintf("get %s.val%s", comp, endStr);

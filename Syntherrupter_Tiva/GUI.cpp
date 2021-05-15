@@ -77,7 +77,6 @@ void GUI::init(Nextion* nextion, bool nxtOk)
             uint32_t allCoilsMaxDutyPerm = 0;
 
             // Settings of all coils
-            const char *AllCoilSettings = "TC_Settings";
             for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
             {
                 // Load settings
@@ -102,18 +101,17 @@ void GUI::init(Nextion* nextion, bool nxtOk)
                 Coil::allCoils[coil].setMinOfftimeUS(minOffUS);
 
                 // Send to Nextion
-                nxt->printf("%s.coil%iOn.val=%i\xff\xff\xff",
-                           AllCoilSettings, coil + 1, maxOntimeUS);
-                nxt->printf("%s.coil%iOffVoics.val=%i\xff\xff\xff",
-                           AllCoilSettings, coil + 1, (maxVoices << 16) + minOffUS);
-                nxt->printf("%s.coil%iDuty.val=%i\xff\xff\xff",
-                           AllCoilSettings, coil + 1, maxDutyPerm);
+                nxt->sendCmd("TC_Settings.coil%iOn.val=%i",
+                             coil + 1, maxOntimeUS);
+                nxt->sendCmd("TC_Settings.coil%iOffVoics.val=%i",
+                             coil + 1, (maxVoices << 16) + minOffUS);
+                nxt->sendCmd("TC_Settings.coil%iDuty.val=%i",
+                             coil + 1, maxDutyPerm);
                 // Give time to the UART to send the data
                 System::delayUS(20000);
             }
 
             // Settings of the 3 users
-            const char *AllUsersPage = "User_Settings";
             for (uint32_t user = 0; user < 3; user++)
             {
                 uint32_t maxOntimeUS = EEPROMSettings::getUsersMaxOntimeUS(user);
@@ -126,16 +124,16 @@ void GUI::init(Nextion* nextion, bool nxtOk)
                     maxDutyPerm = allCoilsMaxDutyPerm;
                 }
 
-                nxt->printf("%s.u%iName.txt=\"%s\"\xff\xff\xff",
-                           AllUsersPage, user, EEPROMSettings::userNames[user]);
-                nxt->printf("%s.u%iCode.txt=\"%s\"\xff\xff\xff",
-                           AllUsersPage, user, EEPROMSettings::userPwds[user]);
-                nxt->printf("%s.u%iOntime.val=%i\xff\xff\xff",
-                           AllUsersPage, user, maxOntimeUS);
-                nxt->printf("%s.u%iBPS.val=%i\xff\xff\xff",
-                           AllUsersPage, user, maxBPS);
-                nxt->printf("%s.u%iDuty.val=%i\xff\xff\xff",
-                           AllUsersPage, user, maxDutyPerm);
+                nxt->sendCmd("User_Settings.u%iName.txt=\"%s\"",
+                             user, EEPROMSettings::userNames[user]);
+                nxt->sendCmd("User_Settings.u%iCode.txt=\"%s\"",
+                             user, EEPROMSettings::userPwds[user]);
+                nxt->sendCmd("User_Settings.u%iOntime.val=%i",
+                             user, maxOntimeUS);
+                nxt->sendCmd("User_Settings.u%iBPS.val=%i",
+                             user, maxBPS);
+                nxt->sendCmd("User_Settings.u%iDuty.val=%i",
+                             user, maxDutyPerm);
                 // Give time to the UART to send the data
                 System::delayUS(20000);
             }
@@ -149,12 +147,11 @@ void GUI::init(Nextion* nextion, bool nxtOk)
             uint32_t dispBrightness =  EEPROMSettings::otherSettings[1]        & 0xff;
             uint32_t backOff        = (EEPROMSettings::otherSettings[1] >>  8) & 0b1;
             uint32_t colorMode      = (EEPROMSettings::otherSettings[1] >>  9) & 0b1;
-            nxt->printf("Other_Settings.nHoldTime.val=%i\xff\xff\xff",
-                          buttonHoldTime);
-            nxt->printf("thsp=%i\xff\xff\xff", sleepDelay);
-            nxt->printf("dim=%i\xff\xff\xff", dispBrightness);
+            nxt->setVal("Other_Settings.nHoldTime", buttonHoldTime);
+            nxt->setVal("thsp", sleepDelay, Nextion::NO_EXT);
+            nxt->setVal("dim", dispBrightness, Nextion::NO_EXT);
             //nxt->printf("Other_Settings.nBackOff.val=%i\xff\xff\xff", backOff);
-            nxt->printf("Settings.colorMode.val=%i\xff\xff\xff", colorMode);
+            nxt->setVal("Settings.colorMode", colorMode);
 
             // Give time to the UART to send the data
             System::delayUS(20000);
@@ -201,7 +198,7 @@ void GUI::showError()
     nxt->setTxt("tInfo", errorTxt);
 }
 
-bool GUI::checkValue(uint32_t val)
+bool GUI::checkValue(int32_t val)
 {
     if (val == nxt->receiveErrorVal)
     {
@@ -455,7 +452,6 @@ uint32_t GUI::update()
     default:
         mode = Mode::emergency;
         return false;
-        break;
     }
 
     return true;
