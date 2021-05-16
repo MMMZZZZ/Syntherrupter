@@ -719,20 +719,92 @@ void Settings::processSysex()
         case 0x0244: // ()[lsb=user,nb], i32 user max BPS in Hz
 
             break;
+        case 0x2260:
+            msg.value.i32 = msg.value.f32;
         case 0x0260: // ()[lsb=coil], i32 coil max ontime in us
+            uint32_t start = msg.targetLSB;
+            uint32_t end = msg.targetLSB + 1;
+            if (msg.targetLSB == WILDCARD)
+            {
+                start = 0;
+                end = COIL_COUNT;
+            }
+            for (uint32_t i = start; i < end; i++)
+            {
+                Coil::allCoils[i].setMaxOntimeUS(msg.value.ui32);
+                if (GUI::getAcceptsData())
+                {
+                    nxt->setVal("TC_Settings.coil%iOn.val=%i", i + 1, msg.value.i32);
+                }
+            }
+            break;
+        case 0x0261:
+            msg.value.f32 = msg.value.i32 / 1000.0f
+        case 0x2261: // ()[lsb=coil], i32 coil max duty in 1/1000
+            msg.value.f32 *= 1000.0f;
+            uint32_t start = msg.targetLSB;
+            uint32_t end = msg.targetLSB + 1;
+            if (msg.targetLSB == WILDCARD)
+            {
+                start = 0;
+                end = COIL_COUNT;
+            }
+            for (uint32_t i = start; i < end; i++)
+            {
+                Coil::allCoils[i].setMaxDutyPerm(msg.value.f32);
+                if (GUI::getAcceptsData())
+                {
+                    nxt->setVal("TC_Settings.coil%iDuty.val=%i", i + 1, msg.value.f32);
+                }
+            }
+            break;
+        case 0x0262:
+            msg.value.f32 = msg.value.i32;
+        case 0x2262: // reserved for: ()[lsb=coil], i32 coil min ontime in us
 
             break;
-        case 0x0261: // ()[lsb=coil], i32 coil max duty in 1/1000
-
-            break;
-        case 0x0262: // reserved for: ()[lsb=coil], i32 coil min ontime in us
-
-            break;
+        case 0x2263:
+            msg.value.i32 = msg.value.f32;
         case 0x0263: // ()[lsb=coil], i32 coil min offtime in us
-
+            uint32_t start = msg.targetLSB;
+            uint32_t end = msg.targetLSB + 1;
+            if (msg.targetLSB == WILDCARD)
+            {
+                start = 0;
+                end = COIL_COUNT;
+            }
+            for (uint32_t i = start; i < end; i++)
+            {
+                Coil::allCoils[i].setMinOfftimeUS(msg.value.i32);
+                if (GUI::getAcceptsData())
+                {
+                    uint32_t temp = EEPROMSettings::coilSettings[i] & 0x00ff;
+                    temp |= msg.value.ui32 << 16;
+                    nxt->setVal("TC_Settings.coil%iOffVoices.val=%i", i + 1, temp);
+                }
+            }
             break;
         case 0x0264: // ()[lsb=coil], i32 coil max MIDI voices, 1-16, ohter=reserved
-
+            if (msg.value.ui32 < 16)
+            {
+                uint32_t start = msg.targetLSB;
+                uint32_t end = msg.targetLSB + 1;
+                if (msg.targetLSB == WILDCARD)
+                {
+                    start = 0;
+                    end = COIL_COUNT;
+                }
+                for (uint32_t i = start; i < end; i++)
+                {
+                    Coil::allCoils[i].midi.setMaxVoices(msg.value.ui32);
+                    if (GUI::getAcceptsData())
+                    {
+                        uint32_t temp = EEPROMSettings::coilSettings[i] & 0xff00;
+                        temp |= msg.value.ui32;
+                        nxt->setVal("TC_Settings.coil%iOffVoices.val=%i", i + 1, temp);
+                    }
+                }
+            }
             break;
         case 0x0300: // (msb=program)(lsb=step), i32 envelope next step, 0-7
             if (msg.value.i32 >= 0 && msg.value.i32 < MIDIProgram::DATA_POINTS)

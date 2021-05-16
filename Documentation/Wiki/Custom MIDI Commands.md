@@ -342,12 +342,12 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 
 #### `0x260-0x27f`: Coil settings (limits)
 
-* `0x260`: [NS] Coil Max Ontime
+* `0x260`: Coil Max Ontime
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, ontime in us
-* `0x261`: [NS] Coil Max Duty
+* `0x261`: Coil Max Duty
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
@@ -357,12 +357,12 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, ontime in us
-* `0x263`: [NS] Coil Min Offtime
+* `0x263`: Coil Min Offtime
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, offtime in us
-* `0x264`: [NS] [NF] Coil Max MIDI Voices
+* `0x264`: [NF] Coil Max MIDI Voices
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
