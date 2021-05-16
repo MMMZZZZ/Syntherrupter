@@ -148,7 +148,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 
 #### `0x20-0x3f`: Common mode parameters
 
-* `0x20`: Mode Enable
+* `0x20`: [NF] Mode Enable
 	* Target MSB: uint, target mode
 		* 1: Simple Mode
 		* 2: MIDI Live Mode
@@ -256,7 +256,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: bf4, marking each lightsaber as assigned (1) or not (0)
-* `0x101`: Set Lightsaber ID
+* `0x101`: [NF] Set Lightsaber ID
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
@@ -290,18 +290,18 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: Reserved.
 	* Value: int32
 		* 50-9999: Milliseconds to hold a button until alternate function is activated.
-* `0x223`: Safety Options
+* `0x223`: [NF] Safety Options
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: bf1
 		* [0]: Background shutdown enabled(1) or disabled(0)
-* `0x224`: UI Color Mode
+* `0x224`: [NF] UI Color Mode
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32, color mode
 		* 0: Light colors
 		* 1: Dark colors
-* `0x225`: UI Apply Mode
+* `0x225`: [NF] UI Apply Mode
 	* Target MSB: uint, target mode.
 		* 127: wildcard, affects all modes. 
 	* Target LSB: Reserved.
@@ -312,29 +312,29 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 
 #### `0x240-0x25f`: User settings
 
-* `0x240`: User Name
+* `0x240`: [NV] User Name
 	* Target MSB: uint, char group position within target string. When setting char group 0 the string will be deleted (set to `\x00`). Hence the null-termination does not need to be sent explicitly. 
 		* 0-7. 
 	* Target LSB: uint, user
 		* 0-2.
 	* Value: char[4]
-* `0x241`: User Password
+* `0x241`: [NV] User Password
 	* Target MSB: uint, char group position within target string. When setting char group 0 the string will be deleted (set to `\x00`). Hence the null-termination does not need to be sent explicitly. 
 		* 0-7
 	* Target LSB: uint, user
 		* 0-2.
 	* Value: char[4]
-* `0x242`: User Max Ontime
+* `0x242`: [NS] User Max Ontime
 	* Target MSB: Reserved.
 	* Target LSB: uint, user
 		* 0-2.
 	* Value: int32, ontime in us
-* `0x243`: User Max Duty
+* `0x243`: [NS] User Max Duty
 	* Target MSB: Reserved.
 	* Target LSB: uint, user
 		* 0-2.
 	* Value: int32, duty in 1/1000
-* `0x244`: User Max BPS
+* `0x244`: [NS] User Max BPS
 	* Target MSB: Reserved.
 	* Target LSB: uint, user
 		* 0-2.
@@ -342,27 +342,27 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 
 #### `0x260-0x27f`: Coil settings (limits)
 
-* `0x260`: [NV] Coil Max Ontime
+* `0x260`: [NS] Coil Max Ontime
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, ontime in us
-* `0x261`: [NV] Coil Max Duty
+* `0x261`: [NS] Coil Max Duty
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, duty in 1/1000
-* `0x262`: [NV] Coil Min Ontime
+* `0x262`: [NS] Coil Min Ontime
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, ontime in us
-* `0x263`: [NV] Coil Min Offtime
+* `0x263`: [NS] Coil Min Offtime
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, offtime in us
-* `0x264`: [NV] Coil Max MIDI Voices
+* `0x264`: [NS] [NF] Coil Max MIDI Voices
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
