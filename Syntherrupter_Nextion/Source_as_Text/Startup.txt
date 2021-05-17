@@ -67,10 +67,6 @@ Text tStartup
         Max. Text Size     : 100
     
     Events
-        Touch Press Event
-            // This component should actually be named "tStartup" since its a text box.
-            // However it formerly was a picture and the name is kept for compatibility.
-        
         Touch Release Event
             // If one of the user passwords is blank, do auto login to this user.
             if(User_Settings.u0Code.txt==User_Settings.tAutoCode.txt)
