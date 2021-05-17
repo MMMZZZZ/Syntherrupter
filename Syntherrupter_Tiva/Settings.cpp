@@ -331,7 +331,7 @@ void Settings::processSysex()
                         Coil::allCoils[i].simple.setOntimeUS(msg.value.f32);
                         if (GUI::getAcceptsData())
                         {
-                            nxt->sendCmd("Simple.set%i.val&=0xff00", i + 1);
+                            nxt->sendCmd("Simple.set%i.val&=0xffff0000", i + 1);
                             nxt->sendCmd("Simple.set%i.val|=%i", i + 1, msg.value.f32);
                         }
                     }
@@ -340,7 +340,7 @@ void Settings::processSysex()
                         Coil::allCoils[i].midi.setOntimeUS(msg.value.f32);
                         if (GUI::getAcceptsData())
                         {
-                            nxt->sendCmd("MIDI_Live.set%i.val&=0xff00", i + 1);
+                            nxt->sendCmd("MIDI_Live.set%i.val&=0xffff0000", i + 1);
                             nxt->sendCmd("MIDI_Live.set%i.val|=%i", i + 1, msg.value.f32);
                         }
                     }
@@ -353,27 +353,27 @@ void Settings::processSysex()
                             switch (i)
                             {
                                 case 0:
-                                    nxt->sendCmd("Lightsaber.ontimes12.val&=0x00ff");
+                                    nxt->sendCmd("Lightsaber.ontimes12.val&=0x0000ffff");
                                     nxt->sendCmd("Lightsaber.ontimes12.val|=%i", msg.value.i32 << 16);
                                     break;
                                 case 1:
-                                    nxt->sendCmd("Lightsaber.ontimes12.val&=0xff00");
+                                    nxt->sendCmd("Lightsaber.ontimes12.val&=0xffff0000");
                                     nxt->sendCmd("Lightsaber.ontimes12.val|=%i", msg.value.i32);
                                     break;
                                 case 2:
-                                    nxt->sendCmd("Lightsaber.ontimes34.val&=0x00ff");
+                                    nxt->sendCmd("Lightsaber.ontimes34.val&=0x0000ffff");
                                     nxt->sendCmd("Lightsaber.ontimes34.val|=%i", msg.value.i32 << 16);
                                     break;
                                 case 3:
-                                    nxt->sendCmd("Lightsaber.ontimes34.val&=0xff00");
+                                    nxt->sendCmd("Lightsaber.ontimes34.val&=0xffff0000");
                                     nxt->sendCmd("Lightsaber.ontimes34.val|=%i", msg.value.i32);
                                     break;
                                 case 4:
-                                    nxt->sendCmd("Lightsaber.ontimes56.val&=0x00ff");
+                                    nxt->sendCmd("Lightsaber.ontimes56.val&=0x0000ffff");
                                     nxt->sendCmd("Lightsaber.ontimes56.val|=%i", msg.value.i32 << 16);
                                     break;
                                 case 5:
-                                    nxt->sendCmd("Lightsaber.ontimes56.val&=0xff00");
+                                    nxt->sendCmd("Lightsaber.ontimes56.val&=0xffff0000");
                                     nxt->sendCmd("Lightsaber.ontimes56.val|=%i", msg.value.i32);
                                     break;
                             }
@@ -387,6 +387,7 @@ void Settings::processSysex()
         case 0x2022:
             if (msg.value.f32 >= 0.0f)
             {
+                uint32_t temp = ((uint32_t) msg.value.f32) << 16;
                 uint32_t start = msg.targetLSB;
                 uint32_t end = msg.targetLSB + 1;
                 if (msg.targetLSB == WILDCARD)
@@ -401,7 +402,7 @@ void Settings::processSysex()
                         Coil::allCoils[i].simple.setDuty(msg.value.f32);
                         if (GUI::getAcceptsData())
                         {
-                            nxt->sendCmd("Simple.set%i.val&=0xff00", i + 1);
+                            nxt->sendCmd("Simple.set%i.val&=0xffff0000", i + 1);
                             uint32_t ontime = Coil::allCoils[i].simple.getOntimeUS();
                             nxt->sendCmd("Simple.set%i.val|=%i", i + 1, ontime);
                         }
@@ -411,9 +412,8 @@ void Settings::processSysex()
                         Coil::allCoils[i].midi.setDuty(msg.value.f32);
                         if (GUI::getAcceptsData())
                         {
-                            nxt->sendCmd("MIDI_Live.set%i.val&=0x00ff", i + 1);
-                            msg.value.ui32 = ((uint32_t) msg.value.f32) << 16;
-                            nxt->sendCmd("MIDI_Live.set%i.val|=%i", i + 1, msg.value.ui32);
+                            nxt->sendCmd("MIDI_Live.set%i.val&=0x0000ffff", i + 1);
+                            nxt->sendCmd("MIDI_Live.set%i.val|=%i", i + 1, temp);
                         }
                     }
                 }
@@ -424,6 +424,7 @@ void Settings::processSysex()
         case 0x2023:
             if (msg.value.f32 >= 0.0f)
             {
+                uint32_t temp = msg.value.f32;
                 if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == WILDCARD)
                 {
                     uint32_t start = msg.targetLSB;
@@ -438,9 +439,8 @@ void Settings::processSysex()
                         Coil::allCoils[i].simple.setFrequency(msg.value.f32);
                         if (GUI::getAcceptsData())
                         {
-                            msg.value.ui32 = msg.value.f32;
-                            nxt->sendCmd("Simple.set%i.val&=0x00ff", i + 1);
-                            nxt->sendCmd("Simple.set%i.val|=%i", i + 1, msg.value.ui32 << 16);
+                            nxt->sendCmd("Simple.set%i.val&=0x0000ffff", i + 1);
+                            nxt->sendCmd("Simple.set%i.val|=%i", i + 1, temp << 16);
                         }
                     }
                 }
@@ -451,6 +451,7 @@ void Settings::processSysex()
         case 0x2024:
             if (msg.value.f32 >= 0.0f)
             {
+                uint32_t temp = msg.value.f32;
                 if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == WILDCARD)
                 {
                     uint32_t start = msg.targetLSB;
@@ -466,9 +467,8 @@ void Settings::processSysex()
                         Coil::allCoils[i].simple.setFrequency(msg.value.f32);
                         if (GUI::getAcceptsData())
                         {
-                            msg.value.ui32 = msg.value.f32;
-                            nxt->sendCmd("Simple.set%i.val&=0x00ff", i + 1);
-                            nxt->sendCmd("Simple.set%i.val|=%i", i + 1, msg.value.ui32 << 16);
+                            nxt->sendCmd("Simple.set%i.val&=0x0000ffff", i + 1);
+                            nxt->sendCmd("Simple.set%i.val|=%i", i + 1, temp << 16);
                         }
                     }
                 }
@@ -734,7 +734,7 @@ void Settings::processSysex()
                 Coil::allCoils[i].setMaxOntimeUS(msg.value.ui32);
                 if (GUI::getAcceptsData())
                 {
-                    nxt->setVal("TC_Settings.coil%iOn.val=%i", i + 1, msg.value.i32);
+                    nxt->sendCmd("TC_Settings.coil%iOn.val=%i", i + 1, msg.value.i32);
                 }
             }
             break;
@@ -755,7 +755,7 @@ void Settings::processSysex()
                 Coil::allCoils[i].setMaxDutyPerm(msg.value.f32);
                 if (GUI::getAcceptsData())
                 {
-                    nxt->setVal("TC_Settings.coil%iDuty.val=%i", i + 1, msg.value.f32);
+                    nxt->sendCmd("TC_Settings.coil%iDuty.val=%i", i + 1, msg.value.f32);
                 }
             }
             break;
@@ -769,21 +769,23 @@ void Settings::processSysex()
             msg.value.i32 = msg.value.f32;
         case 0x0263: // ()[lsb=coil], i32 coil min offtime in us
         {
-            uint32_t start = msg.targetLSB;
-            uint32_t end = msg.targetLSB + 1;
-            if (msg.targetLSB == WILDCARD)
+            if (msg.value.ui32 <= 0xffff)
             {
-                start = 0;
-                end = COIL_COUNT;
-            }
-            for (uint32_t i = start; i < end; i++)
-            {
-                Coil::allCoils[i].setMinOfftimeUS(msg.value.i32);
-                if (GUI::getAcceptsData())
+                uint32_t start = msg.targetLSB;
+                uint32_t end = msg.targetLSB + 1;
+                if (msg.targetLSB == WILDCARD)
                 {
-                    uint32_t temp = EEPROMSettings::coilSettings[i] & 0x00ff;
-                    temp |= msg.value.ui32 << 16;
-                    nxt->setVal("TC_Settings.coil%iOffVoices.val=%i", i + 1, temp);
+                    start = 0;
+                    end = COIL_COUNT;
+                }
+                for (uint32_t i = start; i < end; i++)
+                {
+                    Coil::allCoils[i].setMinOfftimeUS(msg.value.i32);
+                    if (GUI::getAcceptsData())
+                    {
+                        nxt->sendCmd("TC_Settings.coil%iOffVoics.val&=0xffff0000", i + 1);
+                        nxt->sendCmd("TC_Settings.coil%iOffVoics.val|=%i", i + 1, msg.value.ui32);
+                    }
                 }
             }
             break;
@@ -803,9 +805,8 @@ void Settings::processSysex()
                     Coil::allCoils[i].midi.setMaxVoices(msg.value.ui32);
                     if (GUI::getAcceptsData())
                     {
-                        uint32_t temp = EEPROMSettings::coilSettings[i] & 0xff00;
-                        temp |= msg.value.ui32;
-                        nxt->setVal("TC_Settings.coil%iOffVoices.val=%i", i + 1, temp);
+                        nxt->sendCmd("TC_Settings.coil%iOffVoics.val&=0x0000ffff", i + 1);
+                        nxt->sendCmd("TC_Settings.coil%iOffVoics.val|=%i", i + 1, msg.value.ui32 << 16);
                     }
                 }
             }
