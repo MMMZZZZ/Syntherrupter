@@ -64,11 +64,11 @@ bool Nextion::init(uint32_t uartNumber, uint32_t baudRate)
     {
         acknowledgeEnabled = true;
         setVal("bkcmd", 3, NO_EXT);
-        return false;
+        return true;
     }
 
     // Connection failed.
-    return true;
+    return false;
 }
 
 bool Nextion::acknowledge()
