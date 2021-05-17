@@ -739,8 +739,9 @@ void Settings::processSysex()
             }
             break;
         case 0x0261:
-            msg.value.f32 = msg.value.i32 / 1000.0f
+            msg.value.f32 = msg.value.i32 / 1000.0f;
         case 0x2261: // ()[lsb=coil], i32 coil max duty in 1/1000
+        {
             msg.value.f32 *= 1000.0f;
             uint32_t start = msg.targetLSB;
             uint32_t end = msg.targetLSB + 1;
@@ -758,6 +759,7 @@ void Settings::processSysex()
                 }
             }
             break;
+        }
         case 0x0262:
             msg.value.f32 = msg.value.i32;
         case 0x2262: // reserved for: ()[lsb=coil], i32 coil min ontime in us
@@ -766,6 +768,7 @@ void Settings::processSysex()
         case 0x2263:
             msg.value.i32 = msg.value.f32;
         case 0x0263: // ()[lsb=coil], i32 coil min offtime in us
+        {
             uint32_t start = msg.targetLSB;
             uint32_t end = msg.targetLSB + 1;
             if (msg.targetLSB == WILDCARD)
@@ -784,6 +787,7 @@ void Settings::processSysex()
                 }
             }
             break;
+        }
         case 0x0264: // ()[lsb=coil], i32 coil max MIDI voices, 1-16, ohter=reserved
             if (msg.value.ui32 < 16)
             {
