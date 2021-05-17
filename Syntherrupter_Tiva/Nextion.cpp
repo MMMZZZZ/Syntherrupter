@@ -8,7 +8,7 @@
 #include <Nextion.h>
 
 
-constexpr uint32_t Nextion::timeoutUS;
+constexpr uint32_t Nextion::defaultTimeoutUS;
 
 
 Nextion::Nextion()
@@ -46,37 +46,37 @@ bool Nextion::init(uint32_t uartNumber, uint32_t baudRate)
     UARTEchoSet(false);
 
     // Try establishing a connection.
-    bool nxtOk = false;
-    uint32_t startTime = System::getSystemTimeUS();
-    while ((System::getSystemTimeUS() - startTime) < startTimeoutUS)
+    // Try 3 times
+    for (uint32_t i = 0; i < 3; i++)
     {
+        // In case Nextion is already running
+        acknowledgeEnabled = false;
+        setVal("bkcmd", 0, NO_EXT);
+
         sendCmd("rest");
-        System::delayUS(700000);
-        setVal("comOk", 1);
-        System::delayUS(20000);
-        if (getVal("comOk") == 1)
+
+        // Nextion startup code: 00 00 00 FF FF FF
+        if (!acknowledge(0x00, startTimeoutUS))
         {
-            nxtOk = true;
+            continue;
+        }
+        // Nextion ready code: 88 FF FF FF
+        if (!acknowledge(0x88))
+        {
+            continue;
+        }
+        acknowledgeEnabled = true;
+        if (setVal("bkcmd", 3, NO_EXT))
+        {
+            return true;
         }
     }
 
-    if (nxtOk)
-    {
-        acknowledgeEnabled = true;
-        setVal("bkcmd", 3, NO_EXT);
-        return true;
-    }
-
-    // Connection failed.
     return false;
 }
 
-bool Nextion::acknowledge()
+bool Nextion::acknowledge(char code, uint32_t timeoutUS)
 {
-    if (!acknowledgeEnabled)
-    {
-        return true;
-    }
     uint32_t time = System::getSystemTimeUS();
     uint32_t termination = 0;
     int32_t response = -1;
@@ -100,7 +100,7 @@ bool Nextion::acknowledge()
         }
     }
 
-    return (response == 0x01);
+    return (response == code);
 }
 
 bool Nextion::sendCmd(const char* cmd)
@@ -108,7 +108,11 @@ bool Nextion::sendCmd(const char* cmd)
     UARTFlushRx();
     UARTprintf(cmd);
     UARTwrite(endStr, 3);
-    return acknowledge();
+    if (acknowledgeEnabled)
+    {
+        return acknowledge();
+    }
+    return true;
 }
 
 bool Nextion::sendCmd(const char* cmd, const char* str)
@@ -116,7 +120,11 @@ bool Nextion::sendCmd(const char* cmd, const char* str)
     UARTFlushRx();
     UARTprintf(cmd, str);
     UARTwrite(endStr, 3);
-    return acknowledge();
+    if (acknowledgeEnabled)
+    {
+        return acknowledge();
+    }
+    return true;
 }
 
 bool Nextion::sendCmd(const char* cmd, int32_t val)
@@ -124,7 +132,11 @@ bool Nextion::sendCmd(const char* cmd, int32_t val)
     UARTFlushRx();
     UARTprintf(cmd, val);
     UARTwrite(endStr, 3);
-    return acknowledge();
+    if (acknowledgeEnabled)
+    {
+        return acknowledge();
+    }
+    return true;
 }
 
 bool Nextion::sendCmd(const char* cmd, int32_t val1, int32_t val2)
@@ -132,7 +144,11 @@ bool Nextion::sendCmd(const char* cmd, int32_t val1, int32_t val2)
     UARTFlushRx();
     UARTprintf(cmd, val1, val2);
     UARTwrite(endStr, 3);
-    return acknowledge();
+    if (acknowledgeEnabled)
+    {
+        return acknowledge();
+    }
+    return true;
 }
 
 bool Nextion::sendCmd(const char* cmd, const char* str, int32_t val)
@@ -140,7 +156,11 @@ bool Nextion::sendCmd(const char* cmd, const char* str, int32_t val)
     UARTFlushRx();
     UARTprintf(cmd, str, val);
     UARTwrite(endStr, 3);
-    return acknowledge();
+    if (acknowledgeEnabled)
+    {
+        return acknowledge();
+    }
+    return true;
 }
 
 bool Nextion::sendCmd(const char* cmd, int32_t val, const char* str)
@@ -148,7 +168,11 @@ bool Nextion::sendCmd(const char* cmd, int32_t val, const char* str)
     UARTFlushRx();
     UARTprintf(cmd, val, str);
     UARTwrite(endStr, 3);
-    return acknowledge();
+    if (acknowledgeEnabled)
+    {
+        return acknowledge();
+    }
+    return true;
 }
 
 bool Nextion::setTxt(const char* comp, const char* txt)
@@ -156,7 +180,11 @@ bool Nextion::setTxt(const char* comp, const char* txt)
     UARTFlushRx();
     UARTprintf("%s.txt=\"%s\"", comp, txt);
     UARTwrite(endStr, 3);
-    return acknowledge();
+    if (acknowledgeEnabled)
+    {
+        return acknowledge();
+    }
+    return true;
 }
 
 bool Nextion::setVal(const char* comp, uint32_t val, bool noExt)
@@ -171,27 +199,39 @@ bool Nextion::setVal(const char* comp, uint32_t val, bool noExt)
         UARTprintf("%s.val=%i", comp, val);
     }
     UARTwrite(endStr, 3);
-    return acknowledge();
+    if (acknowledgeEnabled)
+    {
+        return acknowledge();
+    }
+    return true;
 }
 
 bool Nextion::setPage(const char* page)
 {
     UARTFlushRx();
     sendCmd("page %s", page);
-    return acknowledge();
+    if (acknowledgeEnabled)
+    {
+        return acknowledge();
+    }
+    return true;
 }
 
 bool Nextion::setPage(uint32_t page)
 {
     UARTFlushRx();
     sendCmd("page %i", page);
-    return acknowledge();
+    if (acknowledgeEnabled)
+    {
+        return acknowledge();
+    }
+    return true;
 }
 
-void Nextion::flushRx()
+/*void Nextion::flushRx()
 {
     UARTFlushRx();
-}
+}*/
 
 void Nextion::disableStdio()
 {
@@ -233,7 +273,7 @@ uint32_t Nextion::peek(const char c)
     return UARTPeek(c);
 }
 
-void Nextion::printf(const char *pcString, ...)
+/*void Nextion::printf(const char *pcString, ...)
 {
     va_list vaArgP;
 
@@ -248,7 +288,7 @@ void Nextion::printf(const char *pcString, ...)
     // We're finished with the varargs now.
     //
     va_end(vaArgP);
-}
+}*/
 
 char* Nextion::getTxt(const char* comp)
 {
@@ -281,7 +321,7 @@ int32_t Nextion::getVal(const char* comp)
 
     while (UARTRxBytesAvail() < 8)
     {
-        if (System::getSystemTimeUS() - time > timeoutUS)
+        if (System::getSystemTimeUS() - time > defaultTimeoutUS)
         {
             return receiveTimeoutVal;
         }

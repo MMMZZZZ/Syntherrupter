@@ -107,8 +107,6 @@ void GUI::init(Nextion* nextion, bool nxtOk)
                              coil + 1, (maxVoices << 16) + minOffUS);
                 nxt->sendCmd("TC_Settings.coil%iDuty.val=%i",
                              coil + 1, maxDutyPerm);
-                // Give time to the UART to send the data
-                System::delayUS(20000);
             }
 
             // Settings of the 3 users
@@ -134,8 +132,6 @@ void GUI::init(Nextion* nextion, bool nxtOk)
                              user, maxBPS);
                 nxt->sendCmd("User_Settings.u%iDuty.val=%i",
                              user, maxDutyPerm);
-                // Give time to the UART to send the data
-                System::delayUS(20000);
             }
 
             // Load envelopes
@@ -152,9 +148,6 @@ void GUI::init(Nextion* nextion, bool nxtOk)
             nxt->setVal("dim", dispBrightness, Nextion::NO_EXT);
             //nxt->printf("Other_Settings.nBackOff.val=%i\xff\xff\xff", backOff);
             nxt->setVal("Settings.colorMode", colorMode);
-
-            // Give time to the UART to send the data
-            System::delayUS(20000);
         }
         else
         {
@@ -235,7 +228,7 @@ uint32_t GUI::update()
             {
                 while (nxt->charsAvail() < 2)
                 {
-                    if (System::getSystemTimeUS() - time > Nextion::timeoutUS)
+                    if (System::getSystemTimeUS() - time > Nextion::defaultTimeoutUS)
                     {
                         setError("Data timeout");
                         showError();
@@ -320,7 +313,7 @@ uint32_t GUI::update()
                         commandData[i++] = nxt->getChar();
                         time = System::getSystemTimeUS();
                     }
-                    if (System::getSystemTimeUS() - time > Nextion::timeoutUS)
+                    if (System::getSystemTimeUS() - time > Nextion::defaultTimeoutUS)
                     {
                         setError("Data timeout");
                         showError();
@@ -339,7 +332,7 @@ uint32_t GUI::update()
                         commandData[i++] = nxt->getChar();
                         time = System::getSystemTimeUS();
                     }
-                    if (System::getSystemTimeUS() - time > Nextion::timeoutUS)
+                    if (System::getSystemTimeUS() - time > Nextion::defaultTimeoutUS)
                     {
                         setError("Data timeout");
                         showError();
@@ -353,7 +346,7 @@ uint32_t GUI::update()
                 // We need at least 1 additional byte.
                 while (!nxt->charsAvail())
                 {
-                    if (System::getSystemTimeUS() - time > Nextion::timeoutUS)
+                    if (System::getSystemTimeUS() - time > Nextion::defaultTimeoutUS)
                     {
                         setError("Data timeout");
                         showError();
@@ -372,7 +365,7 @@ uint32_t GUI::update()
                         commandData[i++] = nxt->getChar();
                         time = System::getSystemTimeUS();
                     }
-                    if (System::getSystemTimeUS() - time > Nextion::timeoutUS)
+                    if (System::getSystemTimeUS() - time > Nextion::defaultTimeoutUS)
                     {
                         setError("Data timeout");
                         showError();

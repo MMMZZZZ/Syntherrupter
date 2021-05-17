@@ -43,8 +43,8 @@ public:
     bool setVal(const char* comp, uint32_t val, bool noExt = false);
     bool setPage(const char* page);
     bool setPage(uint32_t page);
-    void flushRx();
-    void printf(const char *pcString, ...);
+    //void flushRx();
+    //void printf(const char *pcString, ...);
     void disableStdio();
     void enableStdio();
     uint32_t getUARTBase();
@@ -57,11 +57,11 @@ public:
     char* getTxt(const char* comp);
     static constexpr int32_t receiveErrorVal   = -24242420;
     static constexpr int32_t receiveTimeoutVal = -24242421;
-    static constexpr uint32_t timeoutUS         =    300000;
-    static constexpr uint32_t startTimeoutUS    =   3000000;
+    static constexpr uint32_t defaultTimeoutUS =    300000;
+    static constexpr uint32_t startTimeoutUS   =    700000;
     static constexpr bool NO_EXT = true;
 private:
-    bool acknowledge();
+    bool acknowledge(char code = 0x01, uint32_t timeoutUS = defaultTimeoutUS);
 
     // UART mapping
     static constexpr uint32_t UART_SYSCTL_PERIPH      = 0;
