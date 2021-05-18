@@ -31,7 +31,7 @@ Any change automatically updates the duty value, too.
 
 Using the slider you can vary the BPS (Bans Per Second, frequency) within the [user's limits](Users.md#readme).
 
-Any change automatically updates the ontime or duty value, too. Your most recent change will be preserved. F.ex. if you set the ontime, then adjust the BPS, you ontime setting will be preserved and the duty value adjusted according to your changes. 
+Any change automatically updates the ontime or duty value, too. Your most recent change will be preserved. For example: if you set the ontime, then adjust the BPS, you ontime setting will be preserved and the duty value adjusted according to your changes. 
 
 ### Duty
 
