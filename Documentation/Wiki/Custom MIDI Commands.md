@@ -122,7 +122,7 @@ All conventions are to be read as "unless noted otherwise... ".
 	* char[4]
 	* bitfield, noted as bf8, where 8 would indicate that the field is 8 bits wide (starting at the least significant bit of the parameter value). A bitfield range within the bitfield is noted as [LSB-MSB], f.ex. [2-7]
 * Any parameter value or part of it that is not specified by this document is reserved.
-* Target value 127 is reserved for broadcasting, meaning it will affect all targets (works for LSB/MSB independantly).
+* Target value 127 is reserved for broadcasting, meaning it will affect all targets (works for LSB/MSB independently).
 * Any parameter that is not compliant with these specs shall be ignored.
 
 #### Overview
