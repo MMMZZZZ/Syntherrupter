@@ -42,7 +42,7 @@ Btw. since they are resistive touch screens, they aren't affected by EMI like th
 You don't need a standalone interrupter? Well, you can run the user interface on the PC, too. In that case you don't need a display at all ([see below](#without-a-display)).
 
 ### Suitable Models
-Nextions ease of use comes at a cost. Litterally. These displays are rather expensive, starting at 64$ for the 5" version. Starting? Yes, there are actually 6 displays that are suitable for Syntherrupter:
+Nextions ease of use comes at a cost. Literally. These displays are rather expensive, starting at 64$ for the 5" version. Starting? Yes, there are actually 6 displays that are suitable for Syntherrupter:
 
 * `NX8048T050_011R`: Nextion 5" Basic series ([Official shop: 65$](https://www.itead.cc/nextion-nx8048t050.html))
 * `NX8048T070_011R`: Nextion 7" Basic series ([Official shop: 75$](https://www.itead.cc/nextion-nx8048t070.html))
