@@ -62,7 +62,7 @@ If you set the password of a user to `0`, Syntherrupter will automatically log i
 
 ### Max. Ontime, Max. BPS, Max. Duty
 
-These value specify the *slider ranges* in the UI. They are independant of the [Coil Limits](Coil%20Limits.md#readme)! 
+These value specify the *slider ranges* in the UI. They are independent of the [Coil Limits](Coil%20Limits.md#readme)! 
 
 The only sort of exception are the ontime and duty settings for user 2. Since user two is supposed to have full rights, and since at the same time the coil limits are "hard limits", it makes sense for user 2 to be allowed to use the full range up to the coil limits - but no further. So they're set automatically to the highest of you coil limits. Since there's no coil limit for the BPS, that value can still be edited. 
 
