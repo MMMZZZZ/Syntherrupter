@@ -53,7 +53,12 @@ void Coil::setMaxOntimeUS(uint32_t ontimeUS)
 void Coil::setMinOfftimeUS(uint32_t offtimeUS)
 {
     // Integer ceiling.
-    minOffUS = offtimeUS + System::getSystemTimeResUS() - 1;
+    minOfftimeUS = offtimeUS + System::getSystemTimeResUS() - 1;
+}
+
+void Coil::setMinOntimeUS(uint32_t ontimeUS)
+{
+    this->minOntimeUS = ontimeUS;
 }
 
 void Coil::updateData()

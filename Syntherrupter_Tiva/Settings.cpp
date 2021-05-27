@@ -760,10 +760,20 @@ void Settings::processSysex()
             }
             break;
         }
-        case 0x0262:
-            msg.value.f32 = msg.value.i32;
-        case 0x2262: // reserved for: ()[lsb=coil], i32 coil min ontime in us
-
+        case 0x2262:
+            msg.value.i32 = msg.value.f32;
+        case 0x0262: // reserved for: ()[lsb=coil], i32 coil min ontime in us
+            uint32_t start = msg.targetLSB;
+            uint32_t end = msg.targetLSB + 1;
+            if (msg.targetLSB == WILDCARD)
+            {
+                start = 0;
+                end = COIL_COUNT;
+            }
+            for (uint32_t i = start; i < end; i++)
+            {
+                Coil::allCoils[i].setMinOntimeUS(msg.value.i32);
+            }
             break;
         case 0x2263:
             msg.value.i32 = msg.value.f32;
