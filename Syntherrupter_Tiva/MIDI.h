@@ -129,7 +129,7 @@ private:
              *
              * sine wave between 0 and 1 mapped to the desired modulation depth (50% max).
              */
-            return (sinf(6.283185307179586f * float(System::getSystemTimeUS()) / LFO_PERIOD_US) + 1) / 4.0f
+            return (sinf(6.283185307179586f * float(System::getSystemTimeUS()) / lfoPeriodUS) + 1) / 4.0f
                     * channel->modulation;
         }
         else
@@ -205,7 +205,8 @@ private:
     float inversPanReach        =  0.0f;
     uint8_t volMode             =  3;
     uint16_t activeChannels     =  0xffff;
-    uint32_t coilMaxVoices      =  0;
+    uint32_t *coilMaxVoicesPtr;
+    uint32_t &coilMaxVoices     =  *coilMaxVoicesPtr;
     uint32_t coilNum            =  0;
     uint8_t  coilBit            =  0;
     bool coilChange             = false;
@@ -213,7 +214,9 @@ private:
     bool panConstVol            = false;
 
     static bool playing;
-    static constexpr float LFO_PERIOD_US          = 200000.0f;
+    static float lfoPeriodUS = 200000.0f;
+
+    friend class EEPROMSettings;
 };
 
 #endif /* H_ */

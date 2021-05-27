@@ -18,19 +18,12 @@ uint32_t EEPROMSettings::otherSettings[10]        = {((0 << 16) | 250), 100, 0, 
 uint32_t EEPROMSettings::EnvelopeSettings[ENV_PROG_COUNT][MIDIProgram::DATA_POINTS][4];
 uint32_t EEPROMSettings::byteAddress = 0;
 uint32_t EEPROMSettings::bank = BANK_COUNT; // initialized to value higher than normally possible
-uint32_t EEPROMSettings::tempArray[(sizeof(EnvelopeSettings) > 30) ? MIDI::MAX_PROGRAMS : 30]; // must be at least as large as the largest array in use.
 bool     EEPROMSettings::EEPROMUpToDate = false;
+EEPROMSettings::EEPROMData EEPROMSettings::eeprom;
+EEPROMSettings::UserData (&EEPROMSettings::userData)[3] = EEPROMSettings::eeprom.parameters.userData;
+EEPROMSettings::CoilData (&EEPROMSettings::coilData)[6] = EEPROMSettings::eeprom.parameters.coilData;
+EEPROMSettings::UIData &(EEPROMSettings::uiData) = EEPROMSettings::eeprom.parameters.uiData;
 
-
-EEPROMSettings::EEPROMSettings()
-{
-
-}
-
-EEPROMSettings::~EEPROMSettings()
-{
-
-}
 
 bool EEPROMSettings::init()
 {
@@ -67,6 +60,24 @@ bool EEPROMSettings::init()
     else
     {
         read();
+    }
+
+    // Let all other classes point to the memory here
+    for (uint32_t program = 0; program < MIDI::MAX_PROGRAMS; program++)
+    {
+        MIDI::programs[program].stepsPointer = &(eeprom.parameters.envelopes[program]);
+    }
+    for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+    {
+        Coil::allCoils[coil].maxDutyPermPtr  = &(coilData[coil].maxDutyPerm);
+        Coil::allCoils[coil].maxOntimeUSPtr  = &(coilData[coil].maxOntimeUS);
+        Coil::allCoils[coil].minOntimeUSPtr  = &(coilData[coil].minOntimeUS);
+        Coil::allCoils[coil].minOfftimeUSPtr = &(coilData[coil].minOfftimeUS);
+        Coil::allCoils[coil].midi.coilMaxVoicesPtr = &(coilData[coil].maxMidiVoices);
+        Coil::allCoils[coil].simple.filteredFrequency.factorPtr   = &(coilData[coil].simpleBPSFF);
+        Coil::allCoils[coil].simple.filteredFrequency.constantPtr = &(coilData[coil].simpleBPSFC);
+        Coil::allCoils[coil].simple.filteredOntimeUS.factorPtr    = &(coilData[coil].simpleOntimeFF);
+        Coil::allCoils[coil].simple.filteredOntimeUS.constantPtr  = &(coilData[coil].simpleOntimeFC);
     }
 
     return foundValidConfig;
@@ -164,10 +175,10 @@ void EEPROMSettings::setMIDIPrograms()
     {
         for (uint32_t dataPoint = 0; dataPoint < MIDIProgram::DATA_POINTS; dataPoint++)
         {
-            EnvelopeSettings[program][dataPoint][ENV_AMP]  = ANY_TO_UINT32(MIDI::programs[ENV_DUR + program].amplitude[dataPoint]);
-            EnvelopeSettings[program][dataPoint][ENV_DUR]  = ANY_TO_UINT32(MIDI::programs[ENV_DUR + program].durationUS[dataPoint]);
-            EnvelopeSettings[program][dataPoint][ENV_NTAU] = ANY_TO_UINT32(MIDI::programs[ENV_DUR + program].ntau[dataPoint]);
-            EnvelopeSettings[program][dataPoint][ENV_NEXT] =               MIDI::programs[ENV_DUR + program].nextStep[dataPoint];
+            EnvelopeSettings[program][dataPoint][ENV_AMP]  = ANY_TO_UINT32(MIDI::programs[ENV_DUR + program].steps[dataPoint].amplitude);
+            EnvelopeSettings[program][dataPoint][ENV_DUR]  = ANY_TO_UINT32(MIDI::programs[ENV_DUR + program].steps[dataPoint].durationUS);
+            EnvelopeSettings[program][dataPoint][ENV_NTAU] = ANY_TO_UINT32(MIDI::programs[ENV_DUR + program].steps[dataPoint].ntau);
+            EnvelopeSettings[program][dataPoint][ENV_NEXT] =               MIDI::programs[ENV_DUR + program].steps[dataPoint].nextStep;
         }
     }
 }
@@ -242,6 +253,14 @@ void EEPROMSettings::update()
 
 void EEPROMSettings::rwuAll(uint32_t mode)
 {
+    for (uint32_t page = 0; page < PAGE_COUNT; page++)
+    {
+        rwuSingle(mode, eeprom.raw[page], PAGE_SIZE);
+    }
+}
+
+void EEPROMSettings::rwuAllLegacyV2(uint32_t mode)
+{
 
     if (bank >= BANK_COUNT)
     {
@@ -298,19 +317,17 @@ bool EEPROMSettings::rwuSingle(uint32_t mode, void *newData, uint32_t byteSize)
 
 void EEPROMSettings::readSequence(void *newData, uint32_t byteSize)
 {
-    // Make sure byteSize is a multiple of 4
-    byteSize = byteSize >> 2;
-    byteSize = byteSize << 2;
-    EEPROMRead((uint32_t *)newData, byteAddress, byteSize); // @suppress("Invalid arguments")
+    // Make sure byteSize is a multiple of 4 (= kill lowest two bits)
+    byteSize &= ~0b11;
+    EEPROMRead((uint32_t *)newData, byteAddress, byteSize);
     byteAddress += byteSize;
 }
 
 void EEPROMSettings::writeSequence(void *newData, uint32_t byteSize)
 {
-    // Make sure byteSize is a multiple of 4
-    byteSize = byteSize >> 2;
-    byteSize = byteSize << 2;
-    uint32_t error = EEPROMProgram((uint32_t *)newData, byteAddress, byteSize); // @suppress("Invalid arguments")
+    // Make sure byteSize is a multiple of 4 (= kill lowest two bits)
+    byteSize &= ~0b11;
+    uint32_t error = EEPROMProgram((uint32_t *)newData, byteAddress, byteSize);
     if (error)
     {
         System::error();
@@ -324,22 +341,23 @@ bool EEPROMSettings::writeChangedSequence(void *newData, uint32_t byteSize)
     // Takes a bit more time but EEPROM operations are slow anyway.
     // Returns if EEPROM has been modified.
 
-    // Make sure byteSize is a multiple of 4
-    byteSize = byteSize >> 2;
-    byteSize = byteSize << 2;
+    // Make sure byteSize is a multiple of 4 (= kill lowest two bits)
+    byteSize &= ~0b11;
 
     /*
-     *  Erases are done on a block base (1 block = 96 words, 1 word = 4 bytes).
+     *  Erases are done on a block base (1 block = 16 words, 1 word = 4 bytes).
      *  So if one word in a block needs to be changed, the whole block is
      *  erased (and rewritten). Since our data is likely smaller than 1 block
      *  we can abort the check on the first mismatch. In that case the whole
      *  block will be rewritten anyways.
      */
     bool dataChanged = false;
-    readSequence(tempArray, byteSize);
-    for (uint32_t i = 0; i < (byteSize / 4); i++)
+    uint32_t temp = 0;
+    uint32_t i;
+    for (i = 0; i < (byteSize / 4); i++)
     {
-        if (((uint32_t *)newData)[i] != tempArray[i])
+        readSequence(&temp, 4);
+        if (((uint32_t *)newData)[i] != temp)
         {
             dataChanged = true;
             break;
@@ -347,7 +365,7 @@ bool EEPROMSettings::writeChangedSequence(void *newData, uint32_t byteSize)
     }
     if (dataChanged)
     {
-        byteAddress -= byteSize;
+        byteAddress -= i * 4;
         writeSequence(newData, byteSize);
     }
     return dataChanged;

@@ -29,14 +29,17 @@ public:
     }
 private:
     bool     targetReached = false;
-    float    minTimestepUS   = 0.0f;
-    uint32_t lastTimeUS        = 0;
+    float    minTimestepUS = 0.0f;
+    uint32_t lastTimeUS    = 0;
     float    value         = 0.0f;
-    float    factor        = 0.0f;
-    float    constant      = 0.0f;
     float    dir           = 0.0f;
     float    target        = 0.0f;
+    float   *factorPtr;
+    float   *constantPtr;
+    float   &factor        = *factorPtr;
+    float   &constant      = *constantPtr;
 
+    friend class EEPROMSettings;
 };
 
 #endif /* FILTER_H_ */

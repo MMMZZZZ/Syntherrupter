@@ -17,6 +17,13 @@
 class MIDIProgram
 {
 public:
+    struct DataPoint
+    {
+        uint8_t nextStep;
+        float durationUS;
+        float amplitude;
+        float ntau;
+    };
     MIDIProgram();
     virtual ~MIDIProgram();
     enum class Mode {lin, exp, cnst};
@@ -24,10 +31,11 @@ public:
     void setMode(Mode mode);
     static void setResolutionUS(float res);
     static constexpr uint32_t DATA_POINTS = 8;
-    float durationUS[DATA_POINTS];
-    float amplitude[DATA_POINTS];
-    float ntau[DATA_POINTS];
-    uint32_t nextStep[DATA_POINTS];
+
+    // Actual memory location provided by EEPROMSettings
+    DataPoint (*stepsPointer)[DATA_POINTS];
+    DataPoint (&steps)[DATA_POINTS] = (*stepsPointer);
+
     Mode mode = Mode::exp;
     bool setEnvelopeAmp(uint32_t* step, float* amp)
     {
@@ -47,13 +55,13 @@ public:
         {
             *amp = amplitude[*step];
         }*/
-        if (  (*amp >= amplitude[*step] && amplitudeDiff[*step] >= 0)
-            ||(*amp <= amplitude[*step] && amplitudeDiff[*step] <= 0))
+        if (  (*amp >= steps[*step].amplitude && amplitudeDiff[*step] >= 0)
+            ||(*amp <= steps[*step].amplitude && amplitudeDiff[*step] <= 0))
         {
-            *amp  = amplitude[*step];
-            *step =  nextStep[*step];
+            *amp  = steps[*step].amplitude;
+            *step = steps[*step].nextStep;
 
-            if (*amp < 1e-6f && (*step == nextStep[*step]))
+            if (*amp < 1e-6f && (*step == steps[*step].nextStep))
             {
                 // No amplitude left and it will stay like this. A.k.a. note ended.
                 return false;

@@ -64,6 +64,8 @@ private:
     uint32_t updatePeriodUS = 10000, lastUpdateUS = 0;
     float frequency = 0.0f;
     static bool started;
+
+    friend class EEPROMSettings;
 };
 
 #endif /* SIMPLE_H_ */

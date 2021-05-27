@@ -698,17 +698,17 @@ void Settings::processSysex()
             if (msg.targetLSB == 0)
             {
                 // Clear entire string before filling it up with new data.
-                memset(EEPROMSettings::userNames[msg.targetLSB], 0, EEPROMSettings::STR_CHAR_COUNT);
+                memset(EEPROMSettings::userData[msg.targetLSB].name, 0, EEPROMSettings::STR_CHAR_COUNT);
             }
-            memcpy(msg.value.chr, &(EEPROMSettings::userNames[msg.targetLSB][msg.targetMSB * 4]), 4);
+            memcpy(msg.value.chr, &(EEPROMSettings::userData[msg.targetLSB].name[msg.targetMSB * 4]), 4);
             break;
         case 0x0241: // [msb=charGroup][lsb=user], char[4] password
             if (msg.targetLSB == 0)
             {
                 // Clear entire string before filling it up with new data.
-                memset(EEPROMSettings::userNames[msg.targetLSB], 0, EEPROMSettings::STR_CHAR_COUNT);
+                memset(EEPROMSettings::userData[msg.targetLSB].password, 0, EEPROMSettings::STR_CHAR_COUNT);
             }
-            memcpy(msg.value.chr, &(EEPROMSettings::userPwds[msg.targetLSB][msg.targetMSB * 4]), 4);
+            memcpy(msg.value.chr, &(EEPROMSettings::userData[msg.targetLSB].password[msg.targetMSB * 4]), 4);
             break;
         case 0x0242: // ()[lsb=user,nb], i32 user max ontime in us
 
@@ -722,6 +722,7 @@ void Settings::processSysex()
         case 0x2260:
             msg.value.i32 = msg.value.f32;
         case 0x0260: // ()[lsb=coil], i32 coil max ontime in us
+        {
             uint32_t start = msg.targetLSB;
             uint32_t end = msg.targetLSB + 1;
             if (msg.targetLSB == WILDCARD)
@@ -738,6 +739,7 @@ void Settings::processSysex()
                 }
             }
             break;
+        }
         case 0x0261:
             msg.value.f32 = msg.value.i32 / 1000.0f;
         case 0x2261: // ()[lsb=coil], i32 coil max duty in 1/1000
@@ -823,9 +825,9 @@ void Settings::processSysex()
         case 0x0300: // (msb=program)(lsb=step), i32 envelope next step, 0-7
             if (msg.value.i32 >= 0 && msg.value.i32 < MIDIProgram::DATA_POINTS)
             {
-                float& amp     = MIDI::programs[msg.targetMSB].amplitude[msg.targetLSB];
-                float& dur     = MIDI::programs[msg.targetMSB].durationUS[msg.targetLSB];
-                float& ntau    = MIDI::programs[msg.targetMSB].ntau[msg.targetLSB];
+                float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].amplitude;
+                float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].durationUS;
+                float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].ntau;
                 MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, dur, ntau, msg.value.i32);
             }
             break;
@@ -834,9 +836,9 @@ void Settings::processSysex()
         case 0x2301:
             if (msg.value.f32 >= 0)
             {
-                float& dur     = MIDI::programs[msg.targetMSB].durationUS[msg.targetLSB];
-                float& ntau    = MIDI::programs[msg.targetMSB].ntau[msg.targetLSB];
-                uint32_t& next = MIDI::programs[msg.targetMSB].nextStep[msg.targetLSB];
+                float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].durationUS;
+                float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].ntau;
+                uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].nextStep;
                 MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, msg.value.f32, dur, ntau, next);
             }
             break;
@@ -845,20 +847,22 @@ void Settings::processSysex()
         case 0x2302:
             if (msg.value.f32 >= 0)
             {
-                float& amp     = MIDI::programs[msg.targetMSB].amplitude[msg.targetLSB];
-                float& ntau    = MIDI::programs[msg.targetMSB].ntau[msg.targetLSB];
-                uint32_t& next = MIDI::programs[msg.targetMSB].nextStep[msg.targetLSB];
+                float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].amplitude;
+                float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].ntau;
+                uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].nextStep;
                 MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, msg.value.f32, ntau, next);
             }
             break;
         case 0x0303: // (msb=program)(lsb=step), i32 envelope step n-tau in 1/1000
             msg.value.f32 = msg.value.i32 / 1e3f;
         case 0x2303:
-            float& amp     = MIDI::programs[msg.targetMSB].amplitude[msg.targetLSB];
-            float& dur     = MIDI::programs[msg.targetMSB].durationUS[msg.targetLSB];
-            uint32_t& next = MIDI::programs[msg.targetMSB].nextStep[msg.targetLSB];
+        {
+            float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].amplitude;
+            float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].durationUS;
+            uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].nextStep;
             MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, dur, msg.value.f32, next);
             break;
+        }
         default:
             break;
     }

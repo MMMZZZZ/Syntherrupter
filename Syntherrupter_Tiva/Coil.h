@@ -68,11 +68,17 @@ public:
 
 private:
     uint32_t num               =  0;
-    uint32_t minOfftimeUS      = 50;
-    uint32_t minOntimeUS       =  0;
-    uint32_t maxOntimeUS       = 10;
-    uint32_t maxDutyPerm       = 10;
+    // Actual memory (location) provided by EEPROMSettings
+    uint32_t* minOntimeUSPtr;
+    uint32_t* minOfftimeUSPtr;
+    uint32_t* maxOntimeUSPtr;
+    uint32_t* maxDutyPermPtr;
+    uint32_t& minOntimeUS   = (*minOntimeUSPtr);
+    uint32_t& minOfftimeUS  = (*minOfftimeUSPtr);
+    uint32_t& maxOntimeUS   = (*maxOntimeUSPtr);
+    uint32_t& maxDutyPerm   = (*maxDutyPermPtr);
     uint32_t nextAllowedFireUS =  0;
+    friend class EEPROMSettings;
 };
 
 #endif /* COIL_H_ */

@@ -123,9 +123,9 @@ void GUI::init(Nextion* nextion, bool nxtOk)
                 }
 
                 nxt->sendCmd("User_Settings.u%iName.txt=\"%s\"",
-                             user, EEPROMSettings::userNames[user]);
+                             user, EEPROMSettings::userData[user].name);
                 nxt->sendCmd("User_Settings.u%iCode.txt=\"%s\"",
-                             user, EEPROMSettings::userPwds[user]);
+                             user, EEPROMSettings::userData[user].password);
                 nxt->sendCmd("User_Settings.u%iOntime.val=%i",
                              user, maxOntimeUS);
                 nxt->sendCmd("User_Settings.u%iBPS.val=%i",
@@ -138,16 +138,11 @@ void GUI::init(Nextion* nextion, bool nxtOk)
             EEPROMSettings::getMIDIPrograms();
 
             // Other Settings
-            uint32_t buttonHoldTime =  EEPROMSettings::otherSettings[0]        & 0xffff;
-            uint32_t sleepDelay     = (EEPROMSettings::otherSettings[0] >> 16) & 0xffff;
-            uint32_t dispBrightness =  EEPROMSettings::otherSettings[1]        & 0xff;
-            uint32_t backOff        = (EEPROMSettings::otherSettings[1] >>  8) & 0b1;
-            uint32_t colorMode      = (EEPROMSettings::otherSettings[1] >>  9) & 0b1;
-            nxt->setVal("Other_Settings.nHoldTime", buttonHoldTime);
-            nxt->setVal("thsp", sleepDelay, Nextion::NO_EXT);
-            nxt->setVal("dim", dispBrightness, Nextion::NO_EXT);
+            nxt->setVal("Other_Settings.nHoldTime", EEPROMSettings::uiData.buttonHoldTime);
+            nxt->setVal("thsp", EEPROMSettings::uiData.sleepDelay, Nextion::NO_EXT);
+            nxt->setVal("dim", EEPROMSettings::uiData.brightness, Nextion::NO_EXT);
             //nxt->printf("Other_Settings.nBackOff.val=%i\xff\xff\xff", backOff);
-            nxt->setVal("Settings.colorMode", colorMode);
+            nxt->setVal("Settings.colorMode", EEPROMSettings::uiData.colorMode);
         }
         else
         {
@@ -641,7 +636,6 @@ void GUI::settings()
             {
                 // Coil limits. Number ranges from 1-6 instead of 0-5.
                 number--;
-                EEPROMSettings::coilSettings[number] = data;
                 Coil::allCoils[number].setMaxVoices(EEPROMSettings::getCoilsMaxVoices(number));
                 Coil::allCoils[number].setMinOfftimeUS(EEPROMSettings::getCoilsMinOffUS(number));
                 Coil::allCoils[number].setMaxDutyPerm(EEPROMSettings::getCoilsMaxDutyPerm(number));
@@ -650,12 +644,24 @@ void GUI::settings()
             else if (settings == 0 && number < 3)
             {
                 // User limits.
-                EEPROMSettings::userSettings[number] = data;
+                EEPROMSettings::userData[number].maxDutyPerm = (data & 0xff800000) >> 23;
+                EEPROMSettings::userData[number].maxBPS      = ((data & 0x007ff000) >> 12) * 10;
+                EEPROMSettings::userData[number].maxOntimeUS = (data & 0x00000fff) * 10;
             }
             else if (settings == 2 && number < 10)
             {
                 // Other (general) settings
-                EEPROMSettings::otherSettings[number] = data;
+                if (number == 0)
+                {
+                    EEPROMSettings::uiData.buttonHoldTime =  data        & 0xffff;
+                    EEPROMSettings::uiData.sleepDelay     = (data >> 16) & 0xffff;
+                }
+                else if (number == 1)
+                {
+                    EEPROMSettings::uiData.brightness =  data        & 0xff;
+                    //EEPROMSettings::uiData.backOff  = (data >>  8) & 0b1;
+                    EEPROMSettings::uiData.colorMode  = (data >>  9) & 0b1;
+                }
             }
         }
         else
@@ -717,18 +723,18 @@ void GUI::settings()
             // Data contains user password
             for (uint32_t i = 0; i < length; i++)
             {
-                EEPROMSettings::userPwds[user][i] = commandData[i + 1];
+                EEPROMSettings::userData[user].password[i] = commandData[i + 1];
             }
-            EEPROMSettings::userPwds[user][length] = '\0';
+            EEPROMSettings::userData[user].password[length] = '\0';
         }
         else
         {
             // Data contains user name
             for (uint32_t i = 0; i < length; i++)
             {
-                EEPROMSettings::userNames[user][i] = commandData[i + 1];
+                EEPROMSettings::userData[user].name[i] = commandData[i + 1];
             }
-            EEPROMSettings::userNames[user][length] = '\0';
+            EEPROMSettings::userData[user].name[length] = '\0';
         }
         // Data applied; clear command byte.
         command = 0;

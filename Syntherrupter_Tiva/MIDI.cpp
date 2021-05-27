@@ -21,6 +21,7 @@ bool                  MIDI::playing = false;
 float                 MIDI::freqTable[128];
 MIDIProgram           MIDI::programs[MAX_PROGRAMS];
 constexpr float       MIDI::ADSR_LEGACY_PROGRAMS[MIDI::ADSR_PROGRAM_COUNT + 1][8];
+float                 MIDI::lfoPeriodUS = 200000.0f;
 
 
 MIDI::MIDI()
