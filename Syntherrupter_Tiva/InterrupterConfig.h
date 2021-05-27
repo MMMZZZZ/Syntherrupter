@@ -34,6 +34,7 @@
 #endif
 
 #define MAX_VOICES 32
+// #define INVERT
 
 
 #endif /* INTERRUPTER_CONFIG_H_ */
