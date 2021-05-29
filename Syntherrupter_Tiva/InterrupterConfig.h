@@ -35,6 +35,7 @@
 
 #define MAX_VOICES 32
 // #define INVERT
+// #define DFLT_PASSWORDS
 
 
 #endif /* INTERRUPTER_CONFIG_H_ */
