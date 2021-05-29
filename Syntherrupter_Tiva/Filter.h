@@ -34,10 +34,8 @@ private:
     float    value         = 0.0f;
     float    dir           = 0.0f;
     float    target        = 0.0f;
-    float   *factorPtr;
-    float   *constantPtr;
-    float   &factor        = *factorPtr;
-    float   &constant      = *constantPtr;
+    float   *factor;
+    float   *constant;
 
     friend class EEPROMSettings;
 };

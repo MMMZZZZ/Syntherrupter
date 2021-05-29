@@ -1,29 +1,29 @@
 /*
- * Settings.cpp
+ * Sysex.cpp
  *
  *  Created on: 10.04.2021
  *      Author: Max Zuidberg
  */
 
 
-#include <Settings.h>
+#include <Sysex.h>
 
 
-Nextion* Settings::nxt;
+Nextion* Sysex::nxt;
 
 
-Settings::Settings()
+Sysex::Sysex()
 {
     // TODO Auto-generated constructor stub
 
 }
 
-void Settings::init(Nextion* nextion)
+void Sysex::init(Nextion* nextion)
 {
     nxt = nextion;
 }
 
-bool Settings::checkSysex(SysexMsg& msg)
+bool Sysex::checkSysex(SysexMsg& msg)
 {
     /*
      * if no target is required for a parameter it should be 0.
@@ -210,7 +210,7 @@ bool Settings::checkSysex(SysexMsg& msg)
     return msbOk;
 }
 
-void Settings::processSysex()
+void Sysex::processSysex()
 {
     SysexMsg msg = MIDI::getSysex();
 
@@ -700,7 +700,7 @@ void Settings::processSysex()
                 // Clear entire string before filling it up with new data.
                 memset(EEPROMSettings::userData[msg.targetLSB].name, 0, EEPROMSettings::STR_CHAR_COUNT);
             }
-            memcpy(msg.value.chr, &(EEPROMSettings::userData[msg.targetLSB].name[msg.targetMSB * 4]), 4);
+            memcpy(&(EEPROMSettings::userData[msg.targetLSB].name[msg.targetMSB * 4]), msg.value.chr, 4);
             break;
         case 0x0241: // [msb=charGroup][lsb=user], char[4] password
             if (msg.targetLSB == 0)
@@ -708,7 +708,7 @@ void Settings::processSysex()
                 // Clear entire string before filling it up with new data.
                 memset(EEPROMSettings::userData[msg.targetLSB].password, 0, EEPROMSettings::STR_CHAR_COUNT);
             }
-            memcpy(msg.value.chr, &(EEPROMSettings::userData[msg.targetLSB].password[msg.targetMSB * 4]), 4);
+            memcpy(&(EEPROMSettings::userData[msg.targetLSB].password[msg.targetMSB * 4]), msg.value.chr, 4);
             break;
         case 0x0242: // ()[lsb=user,nb], i32 user max ontime in us
 
@@ -793,7 +793,7 @@ void Settings::processSysex()
                 Coil::allCoils[i].setMinOfftimeUS(msg.value.i32);
                 if (GUI::getAcceptsData())
                 {
-                    uint32_t temp = EEPROMSettings::coilSettings[i] & 0x00ff;
+                    uint32_t temp = EEPROMSettings::coilData[i].minOfftimeUS;
                     temp |= msg.value.ui32 << 16;
                     nxt->setVal("TC_Settings.coil%iOffVoices.val=%i", i + 1, temp);
                 }
@@ -815,7 +815,7 @@ void Settings::processSysex()
                     Coil::allCoils[i].midi.setMaxVoices(msg.value.ui32);
                     if (GUI::getAcceptsData())
                     {
-                        uint32_t temp = EEPROMSettings::coilSettings[i] & 0xff00;
+                        uint32_t temp = EEPROMSettings::coilData[i].maxMidiVoices;
                         temp |= msg.value.ui32;
                         nxt->setVal("TC_Settings.coil%iOffVoices.val=%i", i + 1, temp);
                     }
@@ -825,9 +825,9 @@ void Settings::processSysex()
         case 0x0300: // (msb=program)(lsb=step), i32 envelope next step, 0-7
             if (msg.value.i32 >= 0 && msg.value.i32 < MIDIProgram::DATA_POINTS)
             {
-                float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].amplitude;
-                float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].durationUS;
-                float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].ntau;
+                float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
+                float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
+                float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
                 MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, dur, ntau, msg.value.i32);
             }
             break;
@@ -836,9 +836,9 @@ void Settings::processSysex()
         case 0x2301:
             if (msg.value.f32 >= 0)
             {
-                float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].durationUS;
-                float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].ntau;
-                uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].nextStep;
+                float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
+                float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
+                uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
                 MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, msg.value.f32, dur, ntau, next);
             }
             break;
@@ -847,9 +847,9 @@ void Settings::processSysex()
         case 0x2302:
             if (msg.value.f32 >= 0)
             {
-                float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].amplitude;
-                float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].ntau;
-                uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].nextStep;
+                float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
+                float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
+                uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
                 MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, msg.value.f32, ntau, next);
             }
             break;
@@ -857,9 +857,9 @@ void Settings::processSysex()
             msg.value.f32 = msg.value.i32 / 1e3f;
         case 0x2303:
         {
-            float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].amplitude;
-            float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].durationUS;
-            uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB].nextStep;
+            float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
+            float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
+            uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
             MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, dur, msg.value.f32, next);
             break;
         }

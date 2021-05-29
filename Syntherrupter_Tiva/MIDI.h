@@ -15,11 +15,11 @@
 #include "System.h"
 #include "Channel.h"
 #include "UART.h"
-#include "ByteBuffer.h"
+#include "Buffer.h"
 #include "ToneList.h"
 #include "NoteList.h"
 #include "MIDIProgram.h"
-#include "Sysex.h"
+#include "SysexMsg.h"
 
 
 class MIDI
@@ -81,7 +81,7 @@ public:
     }
     static Channel channels[16];
     static UART usbUart, midiUart;
-    static ByteBuffer otherBuffer;
+    static Buffer<uint8_t> otherBuffer;
     static constexpr uint32_t MAX_PROGRAMS = 64;
     static MIDIProgram programs[MAX_PROGRAMS];
 
@@ -160,38 +160,12 @@ private:
 
     static float freqTable[128];
 
-    static constexpr uint32_t ADSR_PROGRAM_COUNT     = 9;
-    // TODO: The following list is missing the newer sounds.
-    // Note Durations cant be 0. To "skip" D/S/R set Duration to 1.0f (any very small value) and Amplitude to exactly the previous one.
-    // 0: No ADSR
-    // 1: Normal ("Piano")
-    // 2: Slow Pad (Slooow rise, sloow fall)
-    // 3: Slow Step Pad (As Slow Pad, but with a faster step at the beginning. good for faster notes
-    // 4: Pad
-    // 5: Staccato (no long notes possible. They're short. Always.
-    // 6: Legator (release = prolonged sustain)
-    static constexpr float ADSR_LEGACY_PROGRAMS[ADSR_PROGRAM_COUNT + 1][8]
-
-             // Attack Amp/Invers Dur.       Decay Amp/Invers Dur.        Sustain Amp/Invers Dur.       Release Amp/Invers Dur.
-           = {{1.0f,              1.0f,     1.0f,              1.0f,     1.0f,               1.0f,      0.0f,              1.0f},
-
-              {1.0f, 1.0f /   30000.0f,     0.5f, 1.0f /   10000.0f,     0.10f, 1.0f /  3500000.0f,     0.0f, 1.0f /   10000.0f},
-              {1.0f, 1.0f / 4000000.0f,     1.0f, 1.0f /       1.0f,     1.00f, 1.0f /        1.0f,     0.0f, 1.0f / 1000000.0f},
-              {0.3f, 1.0f /    8000.0f,     1.0f, 1.0f / 4000000.0f,     1.00f, 1.0f /        1.0f,     0.0f, 1.0f / 1000000.0f},
-              {1.0f, 1.0f / 1500000.0f,     1.0f, 1.0f /       1.0f,     1.00f, 1.0f /        1.0f,     0.0f, 1.0f /  500000.0f},
-              {1.0f, 1.0f /    3000.0f,     0.4f, 1.0f /   30000.0f,     0.00f, 1.0f /   400000.0f,     0.0f, 1.0f /       1.0f},
-              {1.0f, 1.0f /    7000.0f,     0.5f, 1.0f /   10000.0f,     0.25f, 1.0f /  3000000.0f,     0.0f, 1.0f / 3000000.0f},
-              {0.3f, 1.0f /    8000.0f,     1.0f, 1.0f / 4000000.0f,     1.00f, 1.0f /        1.0f,     0.0f, 1.0f /  400000.0f},
-              {2.0f, 1.0f /   30000.0f,     1.0f, 1.0f /    2500.0f,     0.10f, 1.0f /  3500000.0f,     0.0f, 1.0f /   10000.0f},
-              {3.0f, 1.0f /    3000.0f,     1.0f, 1.0f /   27000.0f,     0.00f, 1.0f /   400000.0f,     0.0f, 1.0f /       1.0f},
-    };
-
     static constexpr uint32_t effectResolutionUS = 2000;
 
     static constexpr uint32_t SYSEX_MAX_SIZE = 16;
     static constexpr uint32_t SYSEX_PROTOCOL_VERSION = 1;
     static constexpr uint32_t    BUFFER_COUNT = 3;
-    static constexpr ByteBuffer* BUFFER_LIST[BUFFER_COUNT] = {&(usbUart.buffer), &(midiUart.buffer), &otherBuffer};;
+    static constexpr Buffer<uint8_t>* BUFFER_LIST[BUFFER_COUNT] = {&(usbUart.buffer), &(midiUart.buffer), &otherBuffer};;
     static constexpr uint32_t MAX_NOTES_COUNT = 64;
     static NoteList notelist;
     static uint32_t notesCount;
@@ -205,8 +179,7 @@ private:
     float inversPanReach        =  0.0f;
     uint8_t volMode             =  3;
     uint16_t activeChannels     =  0xffff;
-    uint32_t *coilMaxVoicesPtr;
-    uint32_t &coilMaxVoices     =  *coilMaxVoicesPtr;
+    uint32_t *coilMaxVoices;
     uint32_t coilNum            =  0;
     uint8_t  coilBit            =  0;
     bool coilChange             = false;
@@ -214,7 +187,8 @@ private:
     bool panConstVol            = false;
 
     static bool playing;
-    static float lfoPeriodUS = 200000.0f;
+    static float* lfoPeriodUSPtr;
+    static float& lfoPeriodUS;
 
     friend class EEPROMSettings;
 };

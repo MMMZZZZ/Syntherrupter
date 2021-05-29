@@ -9,7 +9,6 @@
 #define UART_H_
 
 
-#include <ByteBuffer.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "inc/hw_memmap.h"              // Macros defining the memory map of the Tiva C Series device. This includes defines such as peripheral base address locations such as GPIO_PORTF_BASE.
@@ -23,6 +22,7 @@
 #include "driverlib/interrupt.h"        // Defines and macros for NVIC Controller (Interrupt) API of driverLib. This includes API functions such as IntEnable and IntPrioritySet.
 #include "driverlib/uart.h"             // Defines and macros for UART API of driverLib.
 #include "System.h"
+#include "Buffer.h"
 
 
 class UART
@@ -57,7 +57,7 @@ public:
             buffer.add(UARTCharGet(uartBase));
         }
     };
-    ByteBuffer buffer;
+    Buffer<uint8_t> buffer;
     static constexpr uint32_t DEFAULT_INT_PRIO = 42424242;
     static constexpr uint32_t UART_SYSCTL_PERIPH      = 0;
     static constexpr uint32_t UART_BASE               = 1;

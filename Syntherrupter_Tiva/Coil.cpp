@@ -26,7 +26,7 @@ void Coil::init(uint32_t coilNum)
     num = coilNum;
     // As of now all coils share the same filter settings. However this is
     // not mandatory.
-    simple.init(&toneList, 2.0f, 30.0f, 1.8f, 5.0f);
+    simple.init(&toneList);
     one.init(num);
     midi.setCoilNum(num);
     midi.setCoilsToneList(&toneList);
@@ -53,12 +53,12 @@ void Coil::setMaxOntimeUS(uint32_t ontimeUS)
 void Coil::setMinOfftimeUS(uint32_t offtimeUS)
 {
     // Integer ceiling.
-    minOfftimeUS = offtimeUS + System::getSystemTimeResUS() - 1;
+    *minOfftimeUS = offtimeUS + System::getSystemTimeResUS() - 1;
 }
 
 void Coil::setMinOntimeUS(uint32_t ontimeUS)
 {
-    this->minOntimeUS = ontimeUS;
+    *minOntimeUS = ontimeUS;
 }
 
 void Coil::updateData()

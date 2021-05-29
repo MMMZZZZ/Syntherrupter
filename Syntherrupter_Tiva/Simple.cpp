@@ -22,12 +22,10 @@ Simple::~Simple()
     // TODO Auto-generated destructor stub
 }
 
-void Simple::init(ToneList* tonelist, float ontimeFact, float ontimeConst, float freqFact, float freqConst, uint32_t updatePeriodUS)
+void Simple::init(ToneList* tonelist, uint32_t updatePeriodUS)
 {
     this->tonelist = tonelist;
     this->updatePeriodUS = updatePeriodUS;
-    filteredOntimeUS.init(ontimeFact, ontimeConst);
-    filteredFrequency.init(freqFact, freqConst);
 }
 
 void Simple::updateToneList()

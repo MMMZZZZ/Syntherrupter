@@ -8,34 +8,20 @@
 #include <EEPROMSettings.h>
 
 
-constexpr uint32_t EEPROMSettings::BANK_STARTS[BANK_COUNT];
-char     EEPROMSettings::userNames[3][STR_CHAR_COUNT] = {"Padawan", "Jedi Knight", "Master Yoda"};
-char     EEPROMSettings::userPwds[3][STR_CHAR_COUNT]  = {"1234",    "8079",        "0"};
-uint32_t EEPROMSettings::userSettings[3]          = {0, 0, 0};          // Bit format equal to communication format, documented in separate file.
-uint32_t EEPROMSettings::coilSettings[6]          = {0, 0, 0, 0, 0, 0}; // Bit format equal to communication format, documented in separate file.
-uint32_t EEPROMSettings::otherSettings[10]        = {((0 << 16) | 250), 100, 0, 0, 0,
-                                                     0, 0, 0, 0, 0};  // Bit format equal to communication format, documented in separate file.
-uint32_t EEPROMSettings::EnvelopeSettings[ENV_PROG_COUNT][MIDIProgram::DATA_POINTS][4];
+//char     EEPROMSettings::userNames[3][STR_CHAR_COUNT] = {"Padawan", "Jedi Knight", "Master Yoda"};
+//char     EEPROMSettings::userPwds[3][STR_CHAR_COUNT]  = {"1234",    "8079",        "0"};
 uint32_t EEPROMSettings::byteAddress = 0;
-uint32_t EEPROMSettings::bank = BANK_COUNT; // initialized to value higher than normally possible
-bool     EEPROMSettings::EEPROMUpToDate = false;
 EEPROMSettings::EEPROMData EEPROMSettings::eeprom;
-EEPROMSettings::UserData (&EEPROMSettings::userData)[3] = EEPROMSettings::eeprom.parameters.userData;
-EEPROMSettings::CoilData (&EEPROMSettings::coilData)[6] = EEPROMSettings::eeprom.parameters.coilData;
-EEPROMSettings::UIData &(EEPROMSettings::uiData) = EEPROMSettings::eeprom.parameters.uiData;
+uint8_t &EEPROMSettings::version = EEPROMSettings::eeprom.data.version;
+EEPROMSettings::UserData (&EEPROMSettings::userData)[3] = EEPROMSettings::eeprom.data.userData;
+EEPROMSettings::CoilData (&EEPROMSettings::coilData)[6] = EEPROMSettings::eeprom.data.coilData;
+EEPROMSettings::DeviceData &(EEPROMSettings::uiData) = EEPROMSettings::eeprom.data.deviceData;
+EEPROMSettings::CurrentLayout EEPROMSettings::defaultSettings;
+EEPROMSettings::VolatileData EEPROMSettings::volatileData;
 
 
-bool EEPROMSettings::init()
+uint32_t EEPROMSettings::init()
 {
-    /*
-     * Total Configuration cannot be larger than 2040 Bytes.
-     * Reason: This class divides the 6kB EEPROM in 3 banks. It switches
-     * automatically between them if a certain number of writes has been made.
-     * This extends the nominal life of 500k writes (should actually be 700k,
-     * based on how it internally works) to at least 1.5M writes. So you could
-     * change a value every minute for almost three years.
-     */
-
     // Make EEPROM available and initialize
     SysCtlPeripheralEnable(SYSCTL_PERIPH_EEPROM0);
     SysCtlDelay(2);
@@ -45,207 +31,205 @@ bool EEPROMSettings::init()
         System::error();
     }
 
-    // Search for a bank with valid data and return if such data could be found.
-    bool foundValidConfig = updateBank();
+    uint32_t result = NO_CFG;
 
-    if (!foundValidConfig)
+    // Read all data from EEPROM
+    readAll();
+
+    // Initialize default values
+    initDefault();
+
+    if (eeprom.data.present == PRESENT)
     {
-        uint32_t error = EEPROMMassErase();
-        if (error)
+        if (eeprom.data.version == VERSION)
+        {
+            result = CFG_OK;
+        }
+        else if (eeprom.data.version < VERSION)
+        {
+            result = legacyImport();
+        }
+        else
+        {
+            result = CFG_UNKNOWN;
+        }
+    }
+    else
+    {
+        //uint32_t error = EEPROMMassErase();
+        //if (error)
         {
             System::error();
         }
-        updateBank();
-    }
-    else
-    {
-        read();
     }
 
-    // Let all other classes point to the memory here
-    for (uint32_t program = 0; program < MIDI::MAX_PROGRAMS; program++)
+    // If no valid config could be found, initialize everything to
+    // default values.
+    if (result == NO_CFG)
     {
-        MIDI::programs[program].stepsPointer = &(eeprom.parameters.envelopes[program]);
+        eeprom.data = defaultSettings;
+        result = CFG_OK;
+    }
+
+    /*
+     * Let all other classes point to the memory here
+     */
+    uint32_t eepromProg = 0;
+    uint32_t volatileProg = 0;
+    for (uint32_t prog = 0; prog < MIDI::MAX_PROGRAMS; prog++)
+    {
+        if (volatileProg < ENV_PROG_OFFSET || eepromProg >= ENV_PROG_COUNT)
+        {
+            MIDI::programs[prog].steps = &(volatileData.envelopes[volatileProg++]);
+        }
+        else
+        {
+            MIDI::programs[prog].steps = &(eeprom.data.envelopes[eepromProg++]);
+        }
     }
     for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
     {
-        Coil::allCoils[coil].maxDutyPermPtr  = &(coilData[coil].maxDutyPerm);
-        Coil::allCoils[coil].maxOntimeUSPtr  = &(coilData[coil].maxOntimeUS);
-        Coil::allCoils[coil].minOntimeUSPtr  = &(coilData[coil].minOntimeUS);
-        Coil::allCoils[coil].minOfftimeUSPtr = &(coilData[coil].minOfftimeUS);
-        Coil::allCoils[coil].midi.coilMaxVoicesPtr = &(coilData[coil].maxMidiVoices);
-        Coil::allCoils[coil].simple.filteredFrequency.factorPtr   = &(coilData[coil].simpleBPSFF);
-        Coil::allCoils[coil].simple.filteredFrequency.constantPtr = &(coilData[coil].simpleBPSFC);
-        Coil::allCoils[coil].simple.filteredOntimeUS.factorPtr    = &(coilData[coil].simpleOntimeFF);
-        Coil::allCoils[coil].simple.filteredOntimeUS.constantPtr  = &(coilData[coil].simpleOntimeFC);
+        Coil::allCoils[coil].maxDutyPerm  = &(coilData[coil].maxDutyPerm);
+        Coil::allCoils[coil].maxOntimeUS  = &(coilData[coil].maxOntimeUS);
+        Coil::allCoils[coil].minOntimeUS  = &(coilData[coil].minOntimeUS);
+        Coil::allCoils[coil].minOfftimeUS = &(coilData[coil].minOfftimeUS);
+        Coil::allCoils[coil].midi.coilMaxVoices = &(coilData[coil].maxMidiVoices);
+        Coil::allCoils[coil].simple.filteredFrequency.factor   = &(coilData[coil].simpleBPSFF);
+        Coil::allCoils[coil].simple.filteredFrequency.constant = &(coilData[coil].simpleBPSFC);
+        Coil::allCoils[coil].simple.filteredOntimeUS.factor    = &(coilData[coil].simpleOntimeFF);
+        Coil::allCoils[coil].simple.filteredOntimeUS.constant  = &(coilData[coil].simpleOntimeFC);
     }
 
-    return foundValidConfig;
+    return result;
 }
 
-uint32_t EEPROMSettings::getUsersMaxDutyPerm(uint32_t user)
+uint32_t EEPROMSettings::legacyImport()
 {
-    uint32_t duty = 0;
-    if (user < 3)
+    // v2 used 2 banks for wear leveling.
+    uint8_t& present0 = eeprom.legacyV2.bank0.data.present;
+    uint8_t& present1 = eeprom.legacyV2.bank1.data.present;
+    uint8_t& version0 = eeprom.legacyV2.bank0.data.version;
+    uint8_t& version1 = eeprom.legacyV2.bank1.data.version;
+    uint16_t& wear0 = eeprom.legacyV2.bank0.data.wear;
+    uint16_t& wear1 = eeprom.legacyV2.bank1.data.wear;
+    if ((present0 == PRESENT && version0 == 0x02) || (present1 == PRESENT && version1 == 0x02))
     {
-        duty = (userSettings[user] & 0xff800000) >> 23;
-    }
-    return duty;
-}
+        // Found old v2 layout. Import to current layout.
 
-uint32_t EEPROMSettings::getUsersMaxBPS(uint32_t user)
-{
-    uint32_t bps = 0;
-    if (user < 3)
-    {
-        bps = ((userSettings[user] & 0x007ff000) >> 12) * 10;
-    }
-    return bps;
-}
+        // A temporary storage needs to be created since both the legacy
+        // and the current layout occupy the same memory area (thus direct
+        // assignments from one to the other would corrupt everything).
+        LegacyV2Bank oldLayout;
 
-uint32_t EEPROMSettings::getUsersMaxOntimeUS(uint32_t user)
-{
-    uint32_t ontimeUS = 0;
-    if (user < 3)
-    {
-        ontimeUS = (userSettings[user] & 0x00000fff) * 10;
-    }
-    return ontimeUS;
-}
-
-uint32_t EEPROMSettings::getCoilsMaxDutyPerm(uint32_t coil)
-{
-    uint32_t duty = 0;
-    if (coil < 6)
-    {
-        duty = (coilSettings[coil] & 0xff800000) >> 23;
-    }
-    return duty;
-}
-
-uint32_t EEPROMSettings::getCoilsMinOffUS(uint32_t coil)
-{
-    uint32_t minOffUS = 0;
-    if (coil < 6)
-    {
-        minOffUS = ((coilSettings[coil] & 0x007f0000) >> 16) * 10;
-    }
-    return minOffUS;
-}
-
-uint32_t EEPROMSettings::getCoilsMaxVoices(uint32_t coil)
-{
-    uint32_t maxVoices = 0;
-    if (coil < 6)
-    {
-        maxVoices = ((coilSettings[coil] & 0x0000f000) >> 12) + 1;
-    }
-    return maxVoices;
-}
-
-uint32_t EEPROMSettings::getCoilsMaxOntimeUS(uint32_t coil)
-{
-    uint32_t ontimeUS = 0;
-    if (coil < 6)
-    {
-        ontimeUS = (coilSettings[coil] & 0x00000fff) * 10;
-    }
-    return ontimeUS;
-}
-
-void EEPROMSettings::getMIDIPrograms()
-{
-    for (uint32_t program = 0; program < ENV_PROG_COUNT; program++)
-    {
-        for (uint32_t dataPoint = 0; dataPoint < MIDIProgram::DATA_POINTS; dataPoint++)
+        if (present0 != PRESENT)
         {
-            float amplitude  = ANY_TO_FLOAT(EnvelopeSettings[program][dataPoint][ENV_AMP]);
-            float durationUS = ANY_TO_FLOAT(EnvelopeSettings[program][dataPoint][ENV_DUR]);
-            float ntau       = ANY_TO_FLOAT(EnvelopeSettings[program][dataPoint][ENV_NTAU]);
-            float nextStep   =              EnvelopeSettings[program][dataPoint][ENV_NEXT];
-
-            MIDI::programs[ENV_PROG_OFFSET + program].setDataPoint(dataPoint, amplitude, durationUS, ntau, nextStep);
+            // No valid bank. Set wear to 0 such that it will be ignored
+            wear0 = 0;
         }
-    }
-}
-
-void EEPROMSettings::setMIDIPrograms()
-{
-    for (uint32_t program = 0; program < ENV_PROG_COUNT; program++)
-    {
-        for (uint32_t dataPoint = 0; dataPoint < MIDIProgram::DATA_POINTS; dataPoint++)
+        if (present1 != PRESENT)
         {
-            EnvelopeSettings[program][dataPoint][ENV_AMP]  = ANY_TO_UINT32(MIDI::programs[ENV_DUR + program].steps[dataPoint].amplitude);
-            EnvelopeSettings[program][dataPoint][ENV_DUR]  = ANY_TO_UINT32(MIDI::programs[ENV_DUR + program].steps[dataPoint].durationUS);
-            EnvelopeSettings[program][dataPoint][ENV_NTAU] = ANY_TO_UINT32(MIDI::programs[ENV_DUR + program].steps[dataPoint].ntau);
-            EnvelopeSettings[program][dataPoint][ENV_NEXT] =               MIDI::programs[ENV_DUR + program].steps[dataPoint].nextStep;
+            wear1 = 0;
         }
-    }
-}
-
-bool EEPROMSettings::updateBank()
-{
-    /*
-     * If no bank is selected, return value indicates if a valid configuration
-     * could be found.
-     * Else the return value indicates if we switched to a new bank.
-     */
-    if (bank >= BANK_COUNT)
-    {
-        // Currently no bank is selected. Search for valid bank.
-        for (uint32_t i = 0; i < BANK_COUNT; i++)
+        if (wear0 == 0 && wear1 == 0)
         {
-            uint32_t data = 0;
-            EEPROMRead(&data, BANK_STARTS[i], 4); // @suppress("Invalid arguments")
-            // Check if bank contains data and config version matches
-            if ((data & 0xffff0000) == (PRESENT & 0xffff0000))
+            // No config present.
+            return NO_CFG;
+        }
+        else if (wear0 > wear1)
+        {
+            oldLayout = eeprom.legacyV2.bank0;
+        }
+        else
+        {
+            oldLayout = eeprom.legacyV2.bank1;
+        }
+
+        // Import data to new layout
+
+        // User data
+        for (uint32_t user = 0; user < 3; user++)
+        {
+            UserData& userData = eeprom.data.userData[user];
+
+            constexpr uint32_t V2_STR_CHAR_COUNT = 32;
+            uint32_t copySize = std::min(V2_STR_CHAR_COUNT, STR_CHAR_COUNT);
+            memset(userData.name,     '\x00', sizeof(userData.name));
+            memset(userData.password, '\x00', sizeof(userData.password));
+
+            memcpy(userData.name,     oldLayout.data.userNames[user], copySize);
+            memcpy(userData.password, oldLayout.data.userPwds[user],  copySize);
+
+            userData.maxDutyPerm =  (oldLayout.data.userSettings[user] & 0xff800000) >> 23;
+            userData.maxBPS      = ((oldLayout.data.userSettings[user] & 0x007ff000) >> 12) * 10;
+            userData.maxOntimeUS =  (oldLayout.data.userSettings[user] & 0x00000fff) * 10;
+        }
+
+        // Coil data
+        for (uint32_t coil = 0; coil < 6; coil++)
+        {
+            CoilData& coilData = eeprom.data.coilData[coil];
+
+            coilData.maxDutyPerm    =  (oldLayout.data.coilSettings[coil] & 0xff800000) >> 23;
+            coilData.minOfftimeUS   = ((oldLayout.data.coilSettings[coil] & 0x007f0000) >> 16) * 10;
+            coilData.maxMidiVoices  = ((oldLayout.data.coilSettings[coil] & 0x0000f000) >> 12) +  1;
+            coilData.maxOntimeUS    =  (oldLayout.data.coilSettings[coil] & 0x00000fff)        * 10;
+
+            // The following values were not present in the old config; set them to default
+            coilData.outputInvert   = defaultSettings.coilData[coil].outputInvert;
+            coilData.minOntimeUS    = defaultSettings.coilData[coil].minOntimeUS;
+            coilData.simpleBPSFC    = defaultSettings.coilData[coil].simpleBPSFC;
+            coilData.simpleBPSFF    = defaultSettings.coilData[coil].simpleBPSFF;
+            coilData.simpleOntimeFC = defaultSettings.coilData[coil].simpleOntimeFC;
+            coilData.simpleOntimeFF = defaultSettings.coilData[coil].simpleOntimeFF;
+        }
+
+        // Envelopes
+        constexpr uint32_t ENV_AMP  = 0;
+        constexpr uint32_t ENV_DUR  = 1;
+        constexpr uint32_t ENV_NTAU = 2;
+        constexpr uint32_t ENV_NEXT = 3;
+        for (uint32_t prog = 0; prog < ENV_PROG_COUNT; prog++)
+        {
+            for (uint32_t step = 0; step < MIDIProgram::DATA_POINTS; step++)
             {
-                // Check if wear is non-zero, meaning the bank is in use.
-                if (data & 0x0000ffff)
-                {
-                    bank = i;
-                    return true;
-                }
+                MIDIProgram::DataPoint& dataPoint = eeprom.data.envelopes[prog][step];
+                dataPoint.amplitude  = oldLayout.data.envelopes[prog][step][ENV_AMP].f32;
+                dataPoint.durationUS = oldLayout.data.envelopes[prog][step][ENV_DUR].f32;
+                dataPoint.ntau       = oldLayout.data.envelopes[prog][step][ENV_NTAU].f32;
+                dataPoint.nextStep   = oldLayout.data.envelopes[prog][step][ENV_NEXT].ui32;
             }
         }
-        return false;
+
+        // Other settings
+        eeprom.data.deviceData.buttonHoldTime =  oldLayout.data.otherSettings[0]        & 0xffff;
+        eeprom.data.deviceData.sleepDelay     = (oldLayout.data.otherSettings[0] >> 16) & 0xffff;
+        eeprom.data.deviceData.brightness     =  oldLayout.data.otherSettings[1]        & 0xff;
+        eeprom.data.deviceData.colorMode      = (oldLayout.data.otherSettings[1] >>  9) & 0b1;
+
+        // The following values were not present in the old config:
+        eeprom.data.deviceData.backOff  = defaultSettings.deviceData.backOff;
+        eeprom.data.deviceData.deviceID = defaultSettings.deviceData.deviceID;
+
+        // Import done
+        eeprom.data.version = VERSION;
+        return CFG_UPGRADED;
     }
-    else
-    {
-        // Check bank wear level and switch to next one if necessary
-        uint32_t data = 0;
-        EEPROMRead(&data, BANK_STARTS[bank], 4);
-        data &= 0x0000ffff;
-        if (data == 0xffff)
-        {
-            // Time to switch bank
-            data = PRESENT;
-            // Mark bank as unused
-            EEPROMProgram(&data, BANK_STARTS[bank], 4);
-            // Select and initialize next bank
-            if (++bank >= BANK_COUNT)
-            {
-                bank = 0;
-            }
-            data = PRESENT + 1;
-            EEPROMProgram(&data, BANK_STARTS[bank], 4);
-            return true;
-        }
-    }
-    return false;
+
+    // Unknown config version; can't import.
+    return CFG_UNKNOWN;
 }
 
-void EEPROMSettings::read()
+void EEPROMSettings::readAll()
 {
     rwuAll(READ_EEPROM);
 }
 
-void EEPROMSettings::write()
+void EEPROMSettings::writeAll()
 {
     rwuAll(WRITE_EEPROM);
 }
 
-void EEPROMSettings::update()
+void EEPROMSettings::updateAll()
 {
     // Needs more testing! Edit 19.09.20: Apparently it works fine.
     rwuAll(UPDATE_EEPROM);
@@ -253,43 +237,10 @@ void EEPROMSettings::update()
 
 void EEPROMSettings::rwuAll(uint32_t mode)
 {
+    byteAddress = 0;
     for (uint32_t page = 0; page < PAGE_COUNT; page++)
     {
         rwuSingle(mode, eeprom.raw[page], PAGE_SIZE);
-    }
-}
-
-void EEPROMSettings::rwuAllLegacyV2(uint32_t mode)
-{
-
-    if (bank >= BANK_COUNT)
-    {
-        // No data in EEPROM yet. Select and initialize bank 0
-        bank = 0;
-        if (mode != READ_EEPROM)
-        {
-            uint32_t data = PRESENT + 1;
-            EEPROMProgram(&data, BANK_STARTS[0], 4); // @suppress("Invalid arguments")
-        }
-    }
-    byteAddress = BANK_STARTS[bank] + 4;
-
-    bool EEPROMModified = false;
-    EEPROMModified |= rwuSingle(mode, userNames, sizeof(userNames));
-    EEPROMModified |= rwuSingle(mode, userPwds,  sizeof(userPwds));
-    EEPROMModified |= rwuSingle(mode, userSettings, sizeof(userSettings));
-    EEPROMModified |= rwuSingle(mode, coilSettings, sizeof(coilSettings));
-    EEPROMModified |= rwuSingle(mode, otherSettings, sizeof(coilSettings));
-
-    for (uint32_t i = 0; i < ENV_PROG_COUNT; i+=2)
-    {
-        EEPROMModified |= rwuSingle(mode, EnvelopeSettings[i], 2 * sizeof(EnvelopeSettings[i]));
-    }
-
-    if (EEPROMModified)
-    {
-        // If data has been written to the EEPROM, check wear level.
-        updateBank();
     }
 }
 
@@ -326,12 +277,13 @@ void EEPROMSettings::readSequence(void *newData, uint32_t byteSize)
 void EEPROMSettings::writeSequence(void *newData, uint32_t byteSize)
 {
     // Make sure byteSize is a multiple of 4 (= kill lowest two bits)
+
     byteSize &= ~0b11;
-    uint32_t error = EEPROMProgram((uint32_t *)newData, byteAddress, byteSize);
+    /*uint32_t error = EEPROMProgram((uint32_t *)newData, byteAddress, byteSize);
     if (error)
     {
         System::error();
-    }
+    }*/
     byteAddress += byteSize;
 }
 
@@ -369,4 +321,161 @@ bool EEPROMSettings::writeChangedSequence(void *newData, uint32_t byteSize)
         writeSequence(newData, byteSize);
     }
     return dataChanged;
+}
+
+void EEPROMSettings::initDefault()
+{
+    /*
+     * Default "Header"
+     */
+    defaultSettings.present  = PRESENT;
+    defaultSettings.version  = VERSION;
+    defaultSettings.reserved = 1;
+
+    /*
+     * Default Coil Settings
+     */
+    for (uint32_t coil = 0; coil < 6; coil++)
+    {
+        defaultSettings.coilData[coil].maxDutyPerm    = 50;
+        defaultSettings.coilData[coil].maxMidiVoices  =  8;
+        defaultSettings.coilData[coil].maxOntimeUS    = 10;
+        defaultSettings.coilData[coil].minOntimeUS    =  0;
+        defaultSettings.coilData[coil].minOfftimeUS   = 10;
+        defaultSettings.coilData[coil].outputInvert   = false;
+        defaultSettings.coilData[coil].simpleBPSFC    = 5.0f;
+        defaultSettings.coilData[coil].simpleBPSFF    = 1.8f;
+        defaultSettings.coilData[coil].simpleOntimeFC = 30.0f;
+        defaultSettings.coilData[coil].simpleOntimeFF = 2.0f;
+    }
+
+    /*
+     * Default User Settings
+     */
+    defaultSettings.userData[0].maxBPS      = 100;
+    defaultSettings.userData[0].maxDutyPerm = 10;
+    defaultSettings.userData[0].maxOntimeUS = 10;
+    strcpy(defaultSettings.userData[0].name, "Padawan");
+    strcpy(defaultSettings.userData[0].password, "1234");
+    defaultSettings.userData[1].maxBPS      = 200;
+    defaultSettings.userData[1].maxDutyPerm = 20;
+    defaultSettings.userData[1].maxOntimeUS = 20;
+    strcpy(defaultSettings.userData[1].name, "Jedi Knight");
+    strcpy(defaultSettings.userData[1].password, "2345");
+    defaultSettings.userData[2].maxBPS      = 500;
+    defaultSettings.userData[2].maxDutyPerm = 50;
+    defaultSettings.userData[2].maxOntimeUS = 50;
+    strcpy(defaultSettings.userData[2].name, "Master Yoda");
+    strcpy(defaultSettings.userData[2].password, "0");
+
+    /*
+     * Default Device Settings
+     */
+    defaultSettings.deviceData.backOff        = true;
+    defaultSettings.deviceData.brightness     = 100;
+    defaultSettings.deviceData.buttonHoldTime = 250;
+    defaultSettings.deviceData.colorMode      = 1; // Dark mode
+    defaultSettings.deviceData.deviceID       = 0;
+    defaultSettings.deviceData.sleepDelay     = 0; // No sleep
+
+    /*
+     * Default Envelopes
+     */
+    constexpr uint32_t HOLD = MIDIProgram::DATA_POINTS - 2;
+    constexpr uint32_t LAST = MIDIProgram::DATA_POINTS - 1;
+
+    // Program 0 and all unspecified programs: No envelope (constant 100% volume while on, no rise/fall times)
+    volatileData.envelopes[0][0] = {.amplitude = 1.0f, .durationUS = 1.0f, .ntau = 0.1f, .nextStep = HOLD};
+    // Steps 1 to n-2 are "passive" but will be initialized nonetheless (such that the floats are legal values f.ex.)
+    for (uint32_t step = 1; step < LAST; step++)
+    {
+        volatileData.envelopes[0][step] = volatileData.envelopes[0][0];
+    }
+    volatileData.envelopes[0][LAST] = {.amplitude = 0.0f, .durationUS = 1.0f, .ntau = 0.1f, .nextStep = LAST};
+
+    // Initialize all EEPROM programs to the "empty" envelope
+    for (uint32_t env = 0; env < ENV_PROG_COUNT; env++)
+    {
+        memcpy(defaultSettings.envelopes[env], volatileData.envelopes[0], sizeof(defaultSettings.envelopes[0]));
+    }
+
+    // Initialize all RAM/Volatile programs to the empty envelope, too, then set individual datapoints.
+    for (uint32_t env = 1; env < (MIDI::MAX_PROGRAMS - ENV_PROG_COUNT); env++)
+    {
+        memcpy(volatileData.envelopes[env], volatileData.envelopes[0], sizeof(volatileData.envelopes[0]));
+    }
+
+    // Note: these programs date back to the early days of Syntherrupter where
+    //       envelopes were always fixed 4 steps. While not every envelope requires
+    //       4 explicitly defined steps, it was easier to keep it this way.
+
+    // Program 1: Linear Piano envelope, peaking to 1
+    volatileData.envelopes[1][0]    = {.amplitude =  1.0f, .durationUS =     30000.0f, .ntau = 0.1f, .nextStep = 1};
+    volatileData.envelopes[1][1]    = {.amplitude =  0.5f, .durationUS =     10000.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[1][2]    = {.amplitude =  0.1f, .durationUS =   3500000.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[1][LAST] = {.amplitude =  0.0f, .durationUS =     10000.0f, .ntau = 0.1f, .nextStep = LAST};
+
+    // Program 2: Slow Pad Sound (very slow rise and fall times)
+    volatileData.envelopes[2][0]    = {.amplitude =  1.0f, .durationUS =   4000000.0f, .ntau = 0.1f, .nextStep = 1};
+    volatileData.envelopes[2][1]    = {.amplitude =  1.0f, .durationUS =         1.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[2][2]    = {.amplitude =  1.0f, .durationUS =         1.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[2][LAST] = {.amplitude =  0.0f, .durationUS =   1000000.0f, .ntau = 0.1f, .nextStep = LAST};
+
+    // Program 3: Slow Step Pad (like program 2 but with a step at the beginning, such that it
+    volatileData.envelopes[3][0]    = {.amplitude =  0.3f, .durationUS =      8000.0f, .ntau = 0.1f, .nextStep = 1};
+    volatileData.envelopes[3][1]    = {.amplitude =  1.0f, .durationUS =   4000000.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[3][2]    = {.amplitude =  1.0f, .durationUS =         1.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[3][LAST] = {.amplitude =  0.0f, .durationUS =   1000000.0f, .ntau = 0.1f, .nextStep = LAST};
+
+    // Program 4: Pad (slow rise and fall times)
+    volatileData.envelopes[4][0]    = {.amplitude =  1.0f, .durationUS =   1500000.0f, .ntau = 0.1f, .nextStep = 1};
+    volatileData.envelopes[4][1]    = {.amplitude =  1.0f, .durationUS =         1.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[4][2]    = {.amplitude = 1.00f, .durationUS =         1.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[4][LAST] = {.amplitude =  0.0f, .durationUS =    500000.0f, .ntau = 0.1f, .nextStep = LAST};
+
+    // Program 5: Staccato, no reverb, peak amp = 1
+    volatileData.envelopes[5][0]    = {.amplitude =  1.0f, .durationUS =      3000.0f, .ntau = 0.1f, .nextStep = 1};
+    volatileData.envelopes[5][1]    = {.amplitude =  0.4f, .durationUS =     30000.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[5][2]    = {.amplitude = 0.00f, .durationUS =    400000.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[5][LAST] = {.amplitude =  0.0f, .durationUS =         1.0f, .ntau = 0.1f, .nextStep = LAST};
+
+    // Program 6: "Legato", like program 1 with very slow release
+    volatileData.envelopes[6][0]    = {.amplitude =  1.0f, .durationUS =      7000.0f, .ntau = 0.1f, .nextStep = 1};
+    volatileData.envelopes[6][1]    = {.amplitude =  0.5f, .durationUS =     10000.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[6][2]    = {.amplitude = 0.25f, .durationUS =   3000000.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[6][LAST] = {.amplitude =  0.0f, .durationUS =   3000000.0f, .ntau = 0.1f, .nextStep = LAST};
+
+    // Program 7: Slow Step Pad (like program 2) with faster release
+    volatileData.envelopes[7][0]    = {.amplitude =  0.3f, .durationUS =      8000.0f, .ntau = 0.1f, .nextStep = 1};
+    volatileData.envelopes[7][1]    = {.amplitude =  1.0f, .durationUS =   4000000.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[7][2]    = {.amplitude = 1.00f, .durationUS =         1.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[7][LAST] = {.amplitude =  0.0f, .durationUS =    400000.0f, .ntau = 0.1f, .nextStep = LAST};
+
+    // Program 8: Linear Piano with peak amp = 2.0f
+    volatileData.envelopes[8][0]    = {.amplitude =  2.0f, .durationUS =     30000.0f, .ntau = 0.1f, .nextStep = 1};
+    volatileData.envelopes[8][1]    = {.amplitude =  1.0f, .durationUS =      2500.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[8][2]    = {.amplitude = 0.10f, .durationUS =   3500000.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[8][LAST] = {.amplitude =  0.0f, .durationUS =     10000.0f, .ntau = 0.1f, .nextStep = LAST};
+
+    // Program 9: Staccato with reverb and peak amp = 3.0f
+    volatileData.envelopes[9][0]    = {.amplitude =  3.0f, .durationUS =      3000.0f, .ntau = 0.1f, .nextStep = 1};
+    volatileData.envelopes[9][1]    = {.amplitude =  1.0f, .durationUS =     27000.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[9][2]    = {.amplitude = 0.00f, .durationUS =    400000.0f, .ntau = 0.1f, .nextStep = 2};
+    volatileData.envelopes[9][LAST] = {.amplitude =  0.0f, .durationUS =         1.0f, .ntau = 0.1f, .nextStep = LAST};
+
+    // Program 10: "True" Piano Envelope (using exp curves)
+    volatileData.envelopes[10][0]    = {.amplitude = 2.0f, .durationUS =        15e3f, .ntau = 2.0f, .nextStep = 1};
+    volatileData.envelopes[10][1]    = {.amplitude = 1.0f, .durationUS =       100e3f, .ntau = 2.0f, .nextStep = 2};
+    volatileData.envelopes[10][2]    = {.amplitude = 0.0f, .durationUS =      8000e3f, .ntau = 7.0f, .nextStep = 2};
+    volatileData.envelopes[10][LAST] = {.amplitude = 0.0f, .durationUS =       200e3f, .ntau = 4.0f, .nextStep = LAST};
+
+    // Program 11-19: Same as 1-9 but with exp curves
+    for (uint32_t prog = 1; prog <= 9; prog++)
+    {
+        memcpy(volatileData.envelopes[prog + 10], volatileData.envelopes[prog], sizeof(volatileData.envelopes[0]));
+        for (uint32_t step = 0; step < MIDIProgram::DATA_POINTS; step++)
+        {
+            volatileData.envelopes[prog + 10][step].ntau = 3.0f;
+        }
+    }
 }

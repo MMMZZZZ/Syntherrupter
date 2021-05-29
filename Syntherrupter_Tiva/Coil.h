@@ -43,9 +43,9 @@ public:
             uint32_t nextOntimeUS = toneList.getOntimeUS(timeUS);
             if (nextOntimeUS)
             {
-                nextOntimeUS += minOntimeUS;
+                nextOntimeUS += *minOntimeUS;
                 one.shot(nextOntimeUS);
-                nextAllowedFireUS = timeUS + nextOntimeUS + minOfftimeUS;
+                nextAllowedFireUS = timeUS + nextOntimeUS + *minOfftimeUS;
             }
         }
         /*
@@ -67,16 +67,12 @@ public:
 
 
 private:
-    uint32_t num               =  0;
+    uint32_t num            =  0;
     // Actual memory (location) provided by EEPROMSettings
-    uint32_t* minOntimeUSPtr;
-    uint32_t* minOfftimeUSPtr;
-    uint32_t* maxOntimeUSPtr;
-    uint32_t* maxDutyPermPtr;
-    uint32_t& minOntimeUS   = (*minOntimeUSPtr);
-    uint32_t& minOfftimeUS  = (*minOfftimeUSPtr);
-    uint32_t& maxOntimeUS   = (*maxOntimeUSPtr);
-    uint32_t& maxDutyPerm   = (*maxDutyPermPtr);
+    uint32_t* minOntimeUS;
+    uint32_t* minOfftimeUS;
+    uint32_t* maxOntimeUS;
+    uint32_t* maxDutyPerm;
     uint32_t nextAllowedFireUS =  0;
     friend class EEPROMSettings;
 };

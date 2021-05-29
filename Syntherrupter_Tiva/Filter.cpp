@@ -11,20 +11,20 @@
 
 Filter::Filter()
 {
-    // TODO Auto-generated constructor stub
-
+    this->value = 0.0f;
+    this->minTimestepUS = 1000.0f;
 }
 
 Filter::~Filter()
 {
-    // TODO Auto-generated destructor stub
+
 }
 
 void Filter::init(float factor, float constant)
 {
     this->value = 0.0f;
-    this->factor = factor;
-    this->constant = constant;
+    *(this->factor) = factor;
+    *(this->constant) = constant;
     this->minTimestepUS = 1000.0f;
 }
 
@@ -66,7 +66,7 @@ float Filter::getFiltered()
             lastTimeUS = currentTimeUS;
             timestep /= 1000000.0f;
             timestep *= dir;
-            value = value * powf(factor, timestep) + constant * timestep;
+            value = value * powf(*factor, timestep) + *constant * timestep;
             if ((dir > 0 && value >= this->target) || (dir < 0 && value <= this->target))
             {
                 value = this->target;

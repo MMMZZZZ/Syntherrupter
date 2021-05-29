@@ -1,25 +1,40 @@
 /*
- * ByteBuffer.h
+ * Buffer.h
  *
  *  Created on: 20.08.2020
  *      Author: Max Zuidberg
  */
 
-#ifndef BYTEBUFFER_H_
-#define BYTEBUFFER_H_
+#ifndef BUFFER_H_
+#define BUFFER_H_
 
 
 #include <stdint.h>
 #include <stdbool.h>
 
 
-class ByteBuffer
+template <class T>
+class Buffer
 {
 public:
-    ByteBuffer();
-    virtual ~ByteBuffer();
-    void init(uint32_t size);
-    void add(volatile uint8_t data)
+    Buffer()
+    {
+        // Default Constructor
+    };
+    virtual ~Buffer()
+    {
+        // Default Destructor
+    };
+    void init(uint32_t size)
+    {
+        this->size = size;
+        buffer = new T[size];
+        for (uint32_t i = 0; i < size; i++)
+        {
+            buffer[i] = 0;
+        }
+    };
+    void add(T data)
     {
         buffer[writeIndex++] = data;
         if (writeIndex >= size)
@@ -63,19 +78,19 @@ public:
             return size - readIndex + writeIndex;
         }
     };
-    uint8_t peek()
+    T peek()
     {
         return buffer[readIndex];
     };
-    uint8_t read()
+    T read()
     {
-        uint8_t data = peek();
+        T data = peek();
         remove();
         return data;
     };
 private:
-    volatile uint8_t* buffer;
+    volatile T* buffer;
     volatile uint32_t size = 0, readIndex = 0, writeIndex = 0;
 };
 
-#endif /* BYTEBUFFER_H_ */
+#endif /* BUFFER_H_ */
