@@ -65,10 +65,13 @@ uint32_t EEPROMSettings::init()
 
     // If no valid config could be found, initialize everything to
     // default values.
-    if (result == NO_CFG)
+    if (result != CFG_OK && result != CFG_UPGRADED)
     {
         eeprom.data = defaultSettings;
-        result = CFG_OK;
+        if (result == NO_CFG)
+        {
+            result = CFG_OK;
+        }
     }
 
     /*
