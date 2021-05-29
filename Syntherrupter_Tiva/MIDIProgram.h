@@ -59,13 +59,13 @@ public:
         {
             *amp = amplitude[*step];
         }*/
-        if (  (*amp >= steps[*step]->amplitude && amplitudeDiff[*step] >= 0)
-            ||(*amp <= steps[*step]->amplitude && amplitudeDiff[*step] <= 0))
+        if (  (*amp >= (*steps)[*step].amplitude && amplitudeDiff[*step] >= 0)
+            ||(*amp <= (*steps)[*step].amplitude && amplitudeDiff[*step] <= 0))
         {
-            *amp  = steps[*step]->amplitude;
-            *step = steps[*step]->nextStep;
+            *amp  = (*steps)[*step].amplitude;
+            *step = (*steps)[*step].nextStep;
 
-            if (*amp < 1e-6f && (*step == steps[*step]->nextStep))
+            if (*amp < 1e-6f && (*step == (*steps)[*step].nextStep))
             {
                 // No amplitude left and it will stay like this. A.k.a. note ended.
                 return false;

@@ -27,12 +27,8 @@ class MIDI
 public:
     MIDI();
     virtual ~MIDI();
+    void init(uint32_t num, ToneList* tonelist);
     void updateToneList();
-    void setCoilsToneList(ToneList* tonelist)
-    {
-        this->tonelist = tonelist;
-    };
-    void setCoilNum(uint32_t num);
     void setVolSettingsProm(float ontimeUSMax, float dutyMaxProm);
     void setVolSettings(float ontimeUSMax, float dutyMax);
     void setOntimeUS(float ontimeUSMax)
@@ -129,7 +125,7 @@ private:
              *
              * sine wave between 0 and 1 mapped to the desired modulation depth (50% max).
              */
-            return (sinf(6.283185307179586f * float(System::getSystemTimeUS()) / lfoPeriodUS) + 1) / 4.0f
+            return (sinf(6.283185307179586f * float(System::getSystemTimeUS()) / *lfoPeriodUS) + 1) / 4.0f
                     * channel->modulation;
         }
         else
@@ -179,7 +175,7 @@ private:
     float inversPanReach        =  0.0f;
     uint8_t volMode             =  3;
     uint16_t activeChannels     =  0xffff;
-    uint32_t *coilMaxVoices;
+    uint32_t* coilMaxVoices;
     uint32_t coilNum            =  0;
     uint8_t  coilBit            =  0;
     bool coilChange             = false;
@@ -187,8 +183,7 @@ private:
     bool panConstVol            = false;
 
     static bool playing;
-    static float* lfoPeriodUSPtr;
-    static float& lfoPeriodUS;
+    static float* lfoPeriodUS;
 
     friend class EEPROMSettings;
 };

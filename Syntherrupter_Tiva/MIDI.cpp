@@ -20,8 +20,7 @@ SysexMsg                   MIDI::sysexMsg;
 bool                       MIDI::playing = false;
 float                      MIDI::freqTable[128];
 MIDIProgram                MIDI::programs[MAX_PROGRAMS];
-float*                     MIDI::lfoPeriodUSPtr;
-float&                     MIDI::lfoPeriodUS = *MIDI::lfoPeriodUSPtr;
+float*                     MIDI::lfoPeriodUS;
 
 
 MIDI::MIDI()
@@ -39,6 +38,8 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void),
                 uint32_t midiUartPort, uint32_t midiUartRx,
                 uint32_t midiUartTx, void(*midiISR)(void))
 {
+    // Static init. This stuff only needs to be done once (NOT for every instance).
+
     // Enable MIDI receiving over the USB UART (selectable baud rate) and a separate MIDI UART (31250 fixed baud rate).
     usbUart.init(0, usbBaudRate, usbISR, 0b00100000);
     midiUart.init(midiUartPort, midiUartRx, midiUartTx, 31250, midiISR, 0b01100000);
@@ -63,6 +64,19 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void),
         channels[chn].number = chn;
     }
 }
+
+void MIDI::init(uint32_t num, ToneList* tonelist)
+{
+    // Non-static init. This needs to be done for every instance of the class.
+
+    this->tonelist = tonelist;
+    this->coilNum  = num;
+    this->coilBit  = 1 << num;
+
+    // Correctly apply the settings already loaded by EEPROMSettings
+    setMaxVoices(*coilMaxVoices);
+}
+
 
 bool MIDI::processBuffer(uint32_t b)
 {
@@ -975,10 +989,4 @@ void MIDI::updateToneList()
     }
     coilChange     = false;
     coilPanChanged = false;
-}
-
-void MIDI::setCoilNum(uint32_t num)
-{
-    coilNum = num;
-    coilBit = 1 << num;
 }

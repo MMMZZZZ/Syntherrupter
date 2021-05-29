@@ -28,32 +28,33 @@ void Coil::init(uint32_t coilNum)
     // not mandatory.
     simple.init(&toneList);
     one.init(num);
-    midi.setCoilNum(num);
-    midi.setCoilsToneList(&toneList);
+    midi.init(num, &toneList);
     lightsaber.setCoilNum(num);
     lightsaber.setTonelist(&toneList);
+
+    // Correctly apply the settings already loaded by EEPROMSettings
+    setMaxDutyPerm(*maxDutyPerm);
+    setMaxOntimeUS(*maxOntimeUS);
+    setMinOfftimeUS(*minOfftimeUS);
+    setMinOntimeUS(*minOntimeUS);
 }
 
 void Coil::setMaxDutyPerm(uint32_t dutyPerm)
 {
     toneList.setMaxDuty(dutyPerm / 1000.0f);
-}
-
-void Coil::setMaxVoices(uint32_t maxVoices)
-{
-    midi.setMaxVoices(maxVoices);
+    *(this->maxDutyPerm) = dutyPerm;
 }
 
 void Coil::setMaxOntimeUS(uint32_t ontimeUS)
 {
     one.setMaxOntimeUS(ontimeUS);
     toneList.setMaxOntimeUS(ontimeUS);
+    *(this->maxOntimeUS) = ontimeUS;
 }
 
 void Coil::setMinOfftimeUS(uint32_t offtimeUS)
 {
-    // Integer ceiling.
-    *minOfftimeUS = offtimeUS + System::getSystemTimeResUS() - 1;
+    *minOfftimeUS = offtimeUS;
 }
 
 void Coil::setMinOntimeUS(uint32_t ontimeUS)

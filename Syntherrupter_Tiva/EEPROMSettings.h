@@ -43,20 +43,21 @@ public:
         uint32_t minOfftimeUS;
         uint32_t maxOntimeUS;
         uint32_t maxDutyPerm;
-        uint32_t maxMidiVoices;
         float simpleOntimeFF;
         float simpleOntimeFC;
         float simpleBPSFF;
         float simpleBPSFC;
+        uint32_t midiMaxVoices;
     };
     struct DeviceData
     {
-        uint8_t deviceID;
-        uint8_t brightness;
-        uint8_t colorMode;
-        uint16_t buttonHoldTime;
-        uint16_t sleepDelay;
-        bool backOff;
+        uint8_t  deviceID;
+        uint8_t  uiBrightness;
+        uint8_t  uiColorMode;
+        uint16_t uiButtonHoldTime;
+        uint16_t uiSleepDelay;
+        bool     uiBackOff;
+        float    midiLfoPeriodUS;
     };
 
     static constexpr uint32_t NO_CFG       = 0;

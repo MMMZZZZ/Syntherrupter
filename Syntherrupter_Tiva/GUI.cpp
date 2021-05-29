@@ -76,7 +76,7 @@ void GUI::init(Nextion* nextion, bool nxtOk, uint32_t cfgStatus)
         {
             uint32_t& maxOntimeUS   = EEPROMSettings::coilData[coil].maxOntimeUS;
             uint32_t& minOfftimeUS  = EEPROMSettings::coilData[coil].minOfftimeUS;
-            uint32_t& maxMidiVoices = EEPROMSettings::coilData[coil].maxMidiVoices;
+            uint32_t& maxMidiVoices = EEPROMSettings::coilData[coil].midiMaxVoices;
             uint32_t& maxDutyPerm   = EEPROMSettings::coilData[coil].maxDutyPerm;
 
             if (maxOntimeUS > allCoilsMaxOntimeUS)
@@ -123,11 +123,11 @@ void GUI::init(Nextion* nextion, bool nxtOk, uint32_t cfgStatus)
         }
 
         // Other Settings
-        nxt->setVal("Other_Settings.nHoldTime", EEPROMSettings::uiData.buttonHoldTime);
-        nxt->setVal("thsp", EEPROMSettings::uiData.sleepDelay, Nextion::NO_EXT);
-        nxt->setVal("dim", EEPROMSettings::uiData.brightness, Nextion::NO_EXT);
+        nxt->setVal("Other_Settings.nHoldTime", EEPROMSettings::uiData.uiButtonHoldTime);
+        nxt->setVal("thsp", EEPROMSettings::uiData.uiSleepDelay, Nextion::NO_EXT);
+        nxt->setVal("dim", EEPROMSettings::uiData.uiBrightness, Nextion::NO_EXT);
         //nxt->printf("Other_Settings.nBackOff.val=%i\xff\xff\xff", backOff);
-        nxt->setVal("Settings.colorMode", EEPROMSettings::uiData.colorMode);
+        nxt->setVal("Settings.colorMode", EEPROMSettings::uiData.uiColorMode);
 
         nxt->setVal("TC_Settings.maxCoilCount", COIL_COUNT);
         nxt->setVal("Env_Settings.maxSteps", MIDIProgram::DATA_POINTS);
@@ -642,7 +642,7 @@ void GUI::settings()
 
                 coilData.maxDutyPerm   =  (data & 0xff800000) >> 23;
                 coilData.minOfftimeUS  = ((data & 0x007f0000) >> 16) * 10;
-                coilData.maxMidiVoices = ((data & 0x0000f000) >> 12) +  1;
+                coilData.midiMaxVoices = ((data & 0x0000f000) >> 12) +  1;
                 coilData.maxOntimeUS   =  (data & 0x00000fff)        * 10;
             }
             else if (settings == 0 && number < 3)
@@ -657,14 +657,14 @@ void GUI::settings()
                 // Other (general) settings
                 if (number == 0)
                 {
-                    EEPROMSettings::uiData.buttonHoldTime =  data        & 0xffff;
-                    EEPROMSettings::uiData.sleepDelay     = (data >> 16) & 0xffff;
+                    EEPROMSettings::uiData.uiButtonHoldTime =  data        & 0xffff;
+                    EEPROMSettings::uiData.uiSleepDelay     = (data >> 16) & 0xffff;
                 }
                 else if (number == 1)
                 {
-                    EEPROMSettings::uiData.brightness =  data        & 0xff;
+                    EEPROMSettings::uiData.uiBrightness =  data        & 0xff;
                     //EEPROMSettings::uiData.backOff  = (data >>  8) & 0b1;
-                    EEPROMSettings::uiData.colorMode  = (data >>  9) & 0b1;
+                    EEPROMSettings::uiData.uiColorMode  = (data >>  9) & 0b1;
                 }
             }
         }

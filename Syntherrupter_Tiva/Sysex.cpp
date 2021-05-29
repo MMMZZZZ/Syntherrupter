@@ -793,7 +793,7 @@ void Sysex::processSysex()
                 Coil::allCoils[i].setMinOfftimeUS(msg.value.i32);
                 if (GUI::getAcceptsData())
                 {
-                    uint32_t temp = EEPROMSettings::coilData[i].minOfftimeUS;
+                    uint32_t temp = EEPROMSettings::coilData[i].midiMaxVoices;
                     temp |= msg.value.ui32 << 16;
                     nxt->setVal("TC_Settings.coil%iOffVoices.val=%i", i + 1, temp);
                 }
@@ -815,7 +815,7 @@ void Sysex::processSysex()
                     Coil::allCoils[i].midi.setMaxVoices(msg.value.ui32);
                     if (GUI::getAcceptsData())
                     {
-                        uint32_t temp = EEPROMSettings::coilData[i].maxMidiVoices;
+                        uint32_t temp = EEPROMSettings::coilData[i].minOfftimeUS;
                         temp |= msg.value.ui32;
                         nxt->setVal("TC_Settings.coil%iOffVoices.val=%i", i + 1, temp);
                     }

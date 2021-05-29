@@ -89,11 +89,11 @@ uint32_t EEPROMSettings::init()
     }
     for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
     {
-        Coil::allCoils[coil].maxDutyPerm  = &(coilData[coil].maxDutyPerm);
-        Coil::allCoils[coil].maxOntimeUS  = &(coilData[coil].maxOntimeUS);
-        Coil::allCoils[coil].minOntimeUS  = &(coilData[coil].minOntimeUS);
-        Coil::allCoils[coil].minOfftimeUS = &(coilData[coil].minOfftimeUS);
-        Coil::allCoils[coil].midi.coilMaxVoices = &(coilData[coil].maxMidiVoices);
+        Coil::allCoils[coil].maxDutyPerm   = &(coilData[coil].maxDutyPerm);
+        Coil::allCoils[coil].maxOntimeUS   = &(coilData[coil].maxOntimeUS);
+        Coil::allCoils[coil].minOntimeUS   = &(coilData[coil].minOntimeUS);
+        Coil::allCoils[coil].minOfftimeUS  = &(coilData[coil].minOfftimeUS);
+        Coil::allCoils[coil].midi.coilMaxVoices = &(coilData[coil].midiMaxVoices);
         Coil::allCoils[coil].simple.filteredFrequency.factor   = &(coilData[coil].simpleBPSFF);
         Coil::allCoils[coil].simple.filteredFrequency.constant = &(coilData[coil].simpleBPSFC);
         Coil::allCoils[coil].simple.filteredOntimeUS.factor    = &(coilData[coil].simpleOntimeFF);
@@ -106,12 +106,12 @@ uint32_t EEPROMSettings::init()
 uint32_t EEPROMSettings::legacyImport()
 {
     // v2 used 2 banks for wear leveling.
-    uint8_t& present0 = eeprom.legacyV2.bank0.data.present;
-    uint8_t& present1 = eeprom.legacyV2.bank1.data.present;
-    uint8_t& version0 = eeprom.legacyV2.bank0.data.version;
-    uint8_t& version1 = eeprom.legacyV2.bank1.data.version;
-    uint16_t& wear0 = eeprom.legacyV2.bank0.data.wear;
-    uint16_t& wear1 = eeprom.legacyV2.bank1.data.wear;
+    uint8_t&  present0 = eeprom.legacyV2.bank0.data.present;
+    uint8_t&  present1 = eeprom.legacyV2.bank1.data.present;
+    uint8_t&  version0 = eeprom.legacyV2.bank0.data.version;
+    uint8_t&  version1 = eeprom.legacyV2.bank1.data.version;
+    uint16_t& wear0    = eeprom.legacyV2.bank0.data.wear;
+    uint16_t& wear1    = eeprom.legacyV2.bank1.data.wear;
     if ((present0 == PRESENT && version0 == 0x02) || (present1 == PRESENT && version1 == 0x02))
     {
         // Found old v2 layout. Import to current layout.
@@ -171,7 +171,7 @@ uint32_t EEPROMSettings::legacyImport()
 
             coilData.maxDutyPerm    =  (oldLayout.data.coilSettings[coil] & 0xff800000) >> 23;
             coilData.minOfftimeUS   = ((oldLayout.data.coilSettings[coil] & 0x007f0000) >> 16) * 10;
-            coilData.maxMidiVoices  = ((oldLayout.data.coilSettings[coil] & 0x0000f000) >> 12) +  1;
+            coilData.midiMaxVoices  = ((oldLayout.data.coilSettings[coil] & 0x0000f000) >> 12) +  1;
             coilData.maxOntimeUS    =  (oldLayout.data.coilSettings[coil] & 0x00000fff)        * 10;
 
             // The following values were not present in the old config; set them to default
@@ -201,14 +201,15 @@ uint32_t EEPROMSettings::legacyImport()
         }
 
         // Other settings
-        eeprom.data.deviceData.buttonHoldTime =  oldLayout.data.otherSettings[0]        & 0xffff;
-        eeprom.data.deviceData.sleepDelay     = (oldLayout.data.otherSettings[0] >> 16) & 0xffff;
-        eeprom.data.deviceData.brightness     =  oldLayout.data.otherSettings[1]        & 0xff;
-        eeprom.data.deviceData.colorMode      = (oldLayout.data.otherSettings[1] >>  9) & 0b1;
+        eeprom.data.deviceData.uiButtonHoldTime =  oldLayout.data.otherSettings[0]        & 0xffff;
+        eeprom.data.deviceData.uiSleepDelay     = (oldLayout.data.otherSettings[0] >> 16) & 0xffff;
+        eeprom.data.deviceData.uiBrightness     =  oldLayout.data.otherSettings[1]        & 0xff;
+        eeprom.data.deviceData.uiColorMode      = (oldLayout.data.otherSettings[1] >>  9) & 0b1;
 
         // The following values were not present in the old config:
-        eeprom.data.deviceData.backOff  = defaultSettings.deviceData.backOff;
-        eeprom.data.deviceData.deviceID = defaultSettings.deviceData.deviceID;
+        eeprom.data.deviceData.uiBackOff       = defaultSettings.deviceData.uiBackOff;
+        eeprom.data.deviceData.deviceID        = defaultSettings.deviceData.deviceID;
+        eeprom.data.deviceData.midiLfoPeriodUS = defaultSettings.deviceData.midiLfoPeriodUS;
 
         // Import done
         eeprom.data.version = VERSION;
@@ -338,7 +339,7 @@ void EEPROMSettings::initDefault()
     for (uint32_t coil = 0; coil < 6; coil++)
     {
         defaultSettings.coilData[coil].maxDutyPerm    = 50;
-        defaultSettings.coilData[coil].maxMidiVoices  =  8;
+        defaultSettings.coilData[coil].midiMaxVoices  =  8;
         defaultSettings.coilData[coil].maxOntimeUS    = 10;
         defaultSettings.coilData[coil].minOntimeUS    =  0;
         defaultSettings.coilData[coil].minOfftimeUS   = 10;
@@ -361,7 +362,7 @@ void EEPROMSettings::initDefault()
     defaultSettings.userData[1].maxDutyPerm = 20;
     defaultSettings.userData[1].maxOntimeUS = 20;
     strcpy(defaultSettings.userData[1].name, "Jedi Knight");
-    strcpy(defaultSettings.userData[1].password, "2345");
+    strcpy(defaultSettings.userData[1].password, "8079");
     defaultSettings.userData[2].maxBPS      = 500;
     defaultSettings.userData[2].maxDutyPerm = 50;
     defaultSettings.userData[2].maxOntimeUS = 50;
@@ -371,12 +372,13 @@ void EEPROMSettings::initDefault()
     /*
      * Default Device Settings
      */
-    defaultSettings.deviceData.backOff        = true;
-    defaultSettings.deviceData.brightness     = 100;
-    defaultSettings.deviceData.buttonHoldTime = 250;
-    defaultSettings.deviceData.colorMode      = 1; // Dark mode
-    defaultSettings.deviceData.deviceID       = 0;
-    defaultSettings.deviceData.sleepDelay     = 0; // No sleep
+    defaultSettings.deviceData.uiBackOff        = true;
+    defaultSettings.deviceData.uiBrightness     = 100;
+    defaultSettings.deviceData.uiButtonHoldTime = 250;
+    defaultSettings.deviceData.uiColorMode      = 1; // Dark mode
+    defaultSettings.deviceData.deviceID         = 0;
+    defaultSettings.deviceData.uiSleepDelay     = 0; // No sleep
+    defaultSettings.deviceData.midiLfoPeriodUS  = 1.0f / 5.0f; // 5Hz
 
     /*
      * Default Envelopes

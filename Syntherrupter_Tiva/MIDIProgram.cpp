@@ -31,26 +31,26 @@ void MIDIProgram::setDataPoint(uint32_t index, float amplitude, float durationUS
     {
         // Amplitude of the release datapoint cannot be set to another value
         // than the default 0.0f.
-        steps[index]->amplitude = amplitude;
+        (*steps)[index].amplitude = amplitude;
     }
     else
     {
-        steps[index]->amplitude = 0.0f;
+        (*steps)[index].amplitude = 0.0f;
     }
 
-    steps[index]->durationUS = durationUS;
+    (*steps)[index].durationUS = durationUS;
 
     if (mode == Mode::cnst)
     {
-        steps[index]->ntau = 1e6f;
+        (*steps)[index].ntau = 1e6f;
     }
     else if (mode == Mode::lin)
     {
-        steps[index]->ntau = 0.0f;
+        (*steps)[index].ntau = 0.0f;
     }
     else if (mode == Mode::exp)
     {
-        steps[index]->ntau = ntau;
+        (*steps)[index].ntau = ntau;
     }
 
     if (nextStep >= DATA_POINTS)
@@ -65,11 +65,11 @@ void MIDIProgram::setDataPoint(uint32_t index, float amplitude, float durationUS
         }
     }
 
-    steps[index]->nextStep = nextStep;
+    (*steps)[index].nextStep = nextStep;
 
-    if (fabsf(steps[index]->ntau) < 0.1f)
+    if (fabsf((*steps)[index].ntau) < 0.1f)
     {
-        steps[index]->ntau = 0.1f;
+        (*steps)[index].ntau = 0.1f;
     }
 
     updateCoefficients();
@@ -85,15 +85,15 @@ void MIDIProgram::setMode(Mode mode)
         {
             if (mode == Mode::cnst)
             {
-                steps[i]->ntau = 1e6f;
+                (*steps)[i].ntau = 1e6f;
             }
             else if (mode == Mode::lin)
             {
-                steps[i]->ntau = 0.0f;
+                (*steps)[i].ntau = 0.0f;
             }
             else if (mode == Mode::exp)
             {
-                steps[i]->ntau = 3.0f;
+                (*steps)[i].ntau = 3.0f;
             }
         }
     }
@@ -168,25 +168,25 @@ void MIDIProgram::updateCoefficients()
     uint32_t beforeReleaseStep = DATA_POINTS - 2;
     for (uint32_t i = 0; i < 2 * DATA_POINTS; i++)
     {
-        amplitudeDiff[currentStep] = steps[currentStep]->amplitude - steps[lastDifferentStep]->amplitude;
+        amplitudeDiff[currentStep] = (*steps)[currentStep].amplitude - (*steps)[lastDifferentStep].amplitude;
 
-        coefficient[currentStep]   = expf(- steps[currentStep]->ntau / steps[currentStep]->durationUS * resolutionUS); // powf(expf(-ntau[currentStep]), 1.0f / * ticksPerStep[currentStep]);
-        expTargetAmp[currentStep]  = steps[lastDifferentStep]->amplitude - amplitudeDiff[currentStep] / expm1f(- steps[currentStep]->ntau);
+        coefficient[currentStep]   = expf(- (*steps)[currentStep].ntau / (*steps)[currentStep].durationUS * resolutionUS); // powf(expf(-ntau[currentStep]), 1.0f / * ticksPerStep[currentStep]);
+        expTargetAmp[currentStep]  = (*steps)[lastDifferentStep].amplitude - amplitudeDiff[currentStep] / expm1f(- (*steps)[currentStep].ntau);
 
         // Prevent +/- infinity
         coefficient[currentStep]   = fmaxf(-1e6f, fminf(1e6f, coefficient[currentStep]));
         expTargetAmp[currentStep]  = fmaxf(-1e6f, fminf(1e6f, expTargetAmp[currentStep]));
 
         stepDone[currentStep] = true;
-        if (steps[steps[currentStep]->nextStep]->amplitude != steps[currentStep]->amplitude)
+        if ((*steps)[(*steps)[currentStep].nextStep].amplitude != (*steps)[currentStep].amplitude)
         {
             lastDifferentStep = currentStep;
         }
-        if (steps[currentStep]->amplitude != steps[DATA_POINTS - 1]->amplitude)
+        if ((*steps)[currentStep].amplitude != (*steps)[DATA_POINTS - 1].amplitude)
         {
             beforeReleaseStep = currentStep;
         }
-        currentStep = steps[currentStep]->nextStep;
+        currentStep = (*steps)[currentStep].nextStep;
         if (stepDone[currentStep])
         {
             /*
