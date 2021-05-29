@@ -161,14 +161,14 @@ bool MIDI::processBuffer(uint32_t b)
                         note = notelist.addNote();
                         note->afterTouch     = 0;
                         note->rawVolume      = 0.0f;
-                        note->EnvelopeVolume = 0.0f;
+                        note->envelopeVolume = 0.0f;
                         channels[channel].addNote(note);
                     }
 
                     note->number         = number;
                     note->velocity       = c1;
-                    note->EnvelopeStep   = 0;
-                    note->EnvelopeTimeUS = 0.0f;
+                    note->envelopeStep   = 0;
+                    note->envelopeTimeUS = 0.0f;
                     note->changed        = true;
                     channels[channel].notesChanged = true;
                 }
@@ -402,7 +402,7 @@ bool MIDI::processBuffer(uint32_t b)
                         Note* note = channels[channel].firstNote;
                         while (note != 0)
                         {
-                            note->EnvelopeStep = MIDIProgram::DATA_POINTS - 1;
+                            note->envelopeStep = MIDIProgram::DATA_POINTS - 1;
                             note = note->nextChnNote;
                         }
                         break;
@@ -790,7 +790,7 @@ void MIDI::process()
                             }
                             else if (!channel->sustainPedal)
                             {
-                                note->EnvelopeStep = MIDIProgram::DATA_POINTS - 1;
+                                note->envelopeStep = MIDIProgram::DATA_POINTS - 1;
                             }
                         }
                         note = note->nextChnNote;
@@ -865,18 +865,18 @@ void MIDI::updateEffects(Note* note)
 {
     // Needed for envelopes
     float currentTime = System::getSystemTimeUS();
-    if (note->EnvelopeTimeUS == 0.0f)
+    if (note->envelopeTimeUS == 0.0f)
     {
-        note->EnvelopeTimeUS = currentTime;
+        note->envelopeTimeUS = currentTime;
     }
     else
     {
-        float timeDiffUS = currentTime - note->EnvelopeTimeUS;
+        float timeDiffUS = currentTime - note->envelopeTimeUS;
         if (timeDiffUS > effectResolutionUS)
         {
-            note->EnvelopeTimeUS = currentTime;
+            note->envelopeTimeUS = currentTime;
             MIDIProgram* program = &(programs[note->channel->program]);
-            if (!program->setEnvelopeAmp(&(note->EnvelopeStep), &(note->EnvelopeVolume)))
+            if (!program->setEnvelopeAmp(&(note->envelopeStep), &(note->envelopeVolume)))
             {
                 // Note ended.
                 note->number = 128;
@@ -887,7 +887,7 @@ void MIDI::updateEffects(Note* note)
 
                 // After calculation of envelope, add other effects like modulation
                 float finishedVolume =   note->rawVolume
-                                       * note->EnvelopeVolume
+                                       * note->envelopeVolume
                                        * (1.0f - getLFOVal(note->channel));
                 if (finishedVolume != note->finishedVolume)
                 {
@@ -899,7 +899,7 @@ void MIDI::updateEffects(Note* note)
         if (timeDiffUS < 0.0f)
         {
             // Time overflowed
-            note->EnvelopeTimeUS = currentTime;
+            note->envelopeTimeUS = currentTime;
         }
     }
 }

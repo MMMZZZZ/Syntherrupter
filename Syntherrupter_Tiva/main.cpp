@@ -91,11 +91,6 @@ int main(void)
                     Coil::allCoils[0].updateOutput();
                     break;
             }
-            /*for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
-            {
-                // Run non-static coil object methods
-                Coil::allCoils[coil].update();
-            }*/
         }
         else
         {
