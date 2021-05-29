@@ -600,7 +600,7 @@ bool MIDI::processBuffer(uint32_t b)
                             case 3:
                                 targetLSB = sysexData[2];
                             case 2:
-                                number += sysexData[1] << 7;
+                                number += sysexData[1] << 8;
                             case 1:
                                 number += sysexData[0];
                                 break;

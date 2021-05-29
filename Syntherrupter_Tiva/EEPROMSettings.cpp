@@ -15,7 +15,7 @@ EEPROMSettings::EEPROMData EEPROMSettings::eeprom;
 uint8_t &EEPROMSettings::version = EEPROMSettings::eeprom.data.version;
 EEPROMSettings::UserData (&EEPROMSettings::userData)[3] = EEPROMSettings::eeprom.data.userData;
 EEPROMSettings::CoilData (&EEPROMSettings::coilData)[6] = EEPROMSettings::eeprom.data.coilData;
-EEPROMSettings::DeviceData &(EEPROMSettings::uiData) = EEPROMSettings::eeprom.data.deviceData;
+EEPROMSettings::DeviceData &(EEPROMSettings::deviceData) = EEPROMSettings::eeprom.data.deviceData;
 EEPROMSettings::CurrentLayout EEPROMSettings::defaultSettings;
 EEPROMSettings::VolatileData EEPROMSettings::volatileData;
 
@@ -109,12 +109,12 @@ uint32_t EEPROMSettings::init()
 uint32_t EEPROMSettings::legacyImport()
 {
     // v2 used 2 banks for wear leveling.
-    uint8_t&  present0 = eeprom.legacyV2.bank0.data.present;
-    uint8_t&  present1 = eeprom.legacyV2.bank1.data.present;
-    uint8_t&  version0 = eeprom.legacyV2.bank0.data.version;
-    uint8_t&  version1 = eeprom.legacyV2.bank1.data.version;
-    uint16_t& wear0    = eeprom.legacyV2.bank0.data.wear;
-    uint16_t& wear1    = eeprom.legacyV2.bank1.data.wear;
+    uint8_t  present0 = eeprom.legacyV2.bank0.data.present;
+    uint8_t  present1 = eeprom.legacyV2.bank1.data.present;
+    uint8_t  version0 = eeprom.legacyV2.bank0.data.version;
+    uint8_t  version1 = eeprom.legacyV2.bank1.data.version;
+    uint16_t wear0    = eeprom.legacyV2.bank0.data.wear;
+    uint16_t wear1    = eeprom.legacyV2.bank1.data.wear;
     if ((present0 == PRESENT && version0 == 0x02) || (present1 == PRESENT && version1 == 0x02))
     {
         // Found old v2 layout. Import to current layout.
@@ -147,14 +147,19 @@ uint32_t EEPROMSettings::legacyImport()
             oldLayout = eeprom.legacyV2.bank1;
         }
 
-        // Import data to new layout
+        /*
+         * Since the old data has been backed up into oldLayout, the current
+         * layout can now be initialized with the default values. Afterwards,
+         * the old settings are copied over. This automatically sets all new
+         * values to their default that may not be contained in the old layout.
+         */
+        eeprom.data = defaultSettings;
 
         // User data
         for (uint32_t user = 0; user < 3; user++)
         {
             UserData& userData = eeprom.data.userData[user];
 
-            constexpr uint32_t V2_STR_CHAR_COUNT = 32;
             uint32_t copySize = std::min(V2_STR_CHAR_COUNT, STR_CHAR_COUNT);
             memset(userData.name,     '\x00', sizeof(userData.name));
             memset(userData.password, '\x00', sizeof(userData.password));
@@ -176,14 +181,6 @@ uint32_t EEPROMSettings::legacyImport()
             coilData.minOfftimeUS   = ((oldLayout.data.coilSettings[coil] & 0x007f0000) >> 16) * 10;
             coilData.midiMaxVoices  = ((oldLayout.data.coilSettings[coil] & 0x0000f000) >> 12) +  1;
             coilData.maxOntimeUS    =  (oldLayout.data.coilSettings[coil] & 0x00000fff)        * 10;
-
-            // The following values were not present in the old config; set them to default
-            coilData.outputInvert   = defaultSettings.coilData[coil].outputInvert;
-            coilData.minOntimeUS    = defaultSettings.coilData[coil].minOntimeUS;
-            coilData.simpleBPSFC    = defaultSettings.coilData[coil].simpleBPSFC;
-            coilData.simpleBPSFF    = defaultSettings.coilData[coil].simpleBPSFF;
-            coilData.simpleOntimeFC = defaultSettings.coilData[coil].simpleOntimeFC;
-            coilData.simpleOntimeFF = defaultSettings.coilData[coil].simpleOntimeFF;
         }
 
         // Envelopes
@@ -191,9 +188,33 @@ uint32_t EEPROMSettings::legacyImport()
         constexpr uint32_t ENV_DUR  = 1;
         constexpr uint32_t ENV_NTAU = 2;
         constexpr uint32_t ENV_NEXT = 3;
-        for (uint32_t prog = 0; prog < ENV_PROG_COUNT; prog++)
+        if (MIDIProgram::DATA_POINTS != V2_ENV_DATA_POINTS)
         {
-            for (uint32_t step = 0; step < MIDIProgram::DATA_POINTS; step++)
+            /*
+             * Restore old layout just in case...
+             * well, technically, only the valid bank will be restored but
+             * that should be 100% compatible with the previous firmwares.
+             */
+            eeprom.legacyV2.bank0.data.present = present0;
+            eeprom.legacyV2.bank0.data.version = version0;
+            eeprom.legacyV2.bank0.data.wear    = wear0;
+            eeprom.legacyV2.bank1.data.present = present1;
+            eeprom.legacyV2.bank1.data.version = version1;
+            eeprom.legacyV2.bank1.data.wear    = wear1;
+            if (wear0 > wear1)
+            {
+                eeprom.legacyV2.bank0 = oldLayout;
+            }
+            else
+            {
+                eeprom.legacyV2.bank1 = oldLayout;
+            }
+            return CFG_UNKNOWN;
+        }
+        uint32_t maxImportProgs = std::min(ENV_PROG_COUNT, V2_ENV_PROG_COUNT);
+        for (uint32_t prog = 0; prog < maxImportProgs; prog++)
+        {
+            for (uint32_t step = 0; step < V2_ENV_DATA_POINTS; step++)
             {
                 MIDIProgram::DataPoint& dataPoint = eeprom.data.envelopes[prog][step];
                 dataPoint.amplitude  = oldLayout.data.envelopes[prog][step][ENV_AMP].f32;
@@ -208,11 +229,6 @@ uint32_t EEPROMSettings::legacyImport()
         eeprom.data.deviceData.uiSleepDelay     = (oldLayout.data.otherSettings[0] >> 16) & 0xffff;
         eeprom.data.deviceData.uiBrightness     =  oldLayout.data.otherSettings[1]        & 0xff;
         eeprom.data.deviceData.uiColorMode      = (oldLayout.data.otherSettings[1] >>  9) & 0b1;
-
-        // The following values were not present in the old config:
-        eeprom.data.deviceData.uiBackOff       = defaultSettings.deviceData.uiBackOff;
-        eeprom.data.deviceData.deviceID        = defaultSettings.deviceData.deviceID;
-        eeprom.data.deviceData.midiLfoPeriodUS = defaultSettings.deviceData.midiLfoPeriodUS;
 
         // Import done
         eeprom.data.version = VERSION;
@@ -235,7 +251,6 @@ void EEPROMSettings::writeAll()
 
 void EEPROMSettings::updateAll()
 {
-    // Needs more testing! Edit 19.09.20: Apparently it works fine.
     rwuAll(UPDATE_EEPROM);
 }
 
@@ -283,11 +298,11 @@ void EEPROMSettings::writeSequence(void *newData, uint32_t byteSize)
     // Make sure byteSize is a multiple of 4 (= kill lowest two bits)
 
     byteSize &= ~0b11;
-    /*uint32_t error = EEPROMProgram((uint32_t *)newData, byteAddress, byteSize);
+    uint32_t error = EEPROMProgram((uint32_t *)newData, byteAddress, byteSize);
     if (error)
     {
         System::error();
-    }*/
+    }
     byteAddress += byteSize;
 }
 
@@ -308,6 +323,7 @@ bool EEPROMSettings::writeChangedSequence(void *newData, uint32_t byteSize)
      *  block will be rewritten anyways.
      */
     bool dataChanged = false;
+    uint32_t writeStartAddress = byteAddress;
     uint32_t temp = 0;
     uint32_t i;
     for (i = 0; i < (byteSize / 4); i++)
@@ -321,7 +337,7 @@ bool EEPROMSettings::writeChangedSequence(void *newData, uint32_t byteSize)
     }
     if (dataChanged)
     {
-        byteAddress -= i * 4;
+        byteAddress = writeStartAddress;
         writeSequence(newData, byteSize);
     }
     return dataChanged;
@@ -375,11 +391,12 @@ void EEPROMSettings::initDefault()
     /*
      * Default Device Settings
      */
+    defaultSettings.deviceData.deviceID         = 0;
+    defaultSettings.deviceData.eepromUpdateMode = 0; // Manual
     defaultSettings.deviceData.uiBackOff        = true;
     defaultSettings.deviceData.uiBrightness     = 100;
     defaultSettings.deviceData.uiButtonHoldTime = 250;
     defaultSettings.deviceData.uiColorMode      = 1; // Dark mode
-    defaultSettings.deviceData.deviceID         = 0;
     defaultSettings.deviceData.uiSleepDelay     = 0; // No sleep
     defaultSettings.deviceData.midiLfoPeriodUS  = 1.0f / 5.0f; // 5Hz
 

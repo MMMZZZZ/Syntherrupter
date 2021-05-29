@@ -34,7 +34,7 @@
 #endif
 
 #define MAX_VOICES 32
-// #define INVERT
+
 // #define DFLT_PASSWORDS
 
 

@@ -91,7 +91,7 @@ Structure:
 * `DMID`: I decided to use the manufacturer ID `26 05` (hex). It seems to be far enough in the european block to be sure that it won't be assigned to any manufacturer in the next years. *Note: getting a unique ID from the MMA (association behind MIDI) costs at least 240$/year. Surprisingly cheap but still too expensive for a niche project like this.*
 * `version`: Protocol version. Allows for future revisions that could break compatibility. Anything after this byte can potentially change with a new version.
 * `device ID`: Assuming multiple devices on the same MIDI bus, this allows addressing them individually. 127 means broadcast.
-* `PN`: Parameter number. Defines the meaning of the command
+* `PN`: Parameter number. Defines the meaning of the command. Note: unlike the parameter value, the parameter number is not split into 7 bit groups. Meaning, that the next PN after `0x7f` is `0x100` (`PN = (PN MSB << 8) + PN LSB`).
 * `TG`: Target. Specifies to what the command applies. Taking the example of an ontime command, the target specifies what coil is affected. 
 * `value`: Parameter value. With 5 MIDI data bytes, full 32 bit values can be covered. Any 32bits of data will be sent in groups of 7 bits, LSB first. 
 
@@ -135,16 +135,17 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 * [`0x100-0x10f`: Lightsaber mode parameters](#0x100-0x10f-lightsaber-mode-parameters). Control specific properties of Lightsaber mode.
 * `0x200-0x3ff`: Settings
 	* [`0x200-0x21f`: EEPROM and other control commands](#0x200-0x21f-eeprom-and-other-control-commands)
-	* [`0x220-0x23f`: General settings](#0x220-0x23f-general-settings)
+	* [`0x220-0x23f`: UI settings](#0x220-0x23f-ui-settings)
 	* [`0x240-0x25f`: User settings](#0x240-0x25f-user-settings)
-	* [`0x260-0x27f`: Coil settings (limits)](#0x260-0x27f-coil-settings-limits)
+	* [`0x260-0x27f`: Coil settings](#0x260-0x27f-coil-settings)
 	* [`0x300-0x31f`: Envelope settings](#0x300-0x31f-envelope-settings)
 	
 #### `0x01-0x1f`: System commands
 
 * `0x01`: [NS] Request parameter value
 * `0x02`: [NS] Request if parameter is supported
-* `0x10`: [NS] Response to request
+* `0x10`: [NS] Response type/length
+* `0x11`: [NS] Response to request
 
 #### `0x20-0x3f`: Common mode parameters
 
@@ -188,22 +189,22 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 
 #### `0x40-0x5f`: Simple mode parameters
 
-* `0x40`: [NS] Ontime Filter Factor
+* `0x40`: Ontime Filter Factor
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, factor value in 1/1000
-* `0x41`: [NS] Ontime Filter Constant
+* `0x41`: Ontime Filter Constant
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, factor value in 1/1000
-* `0x44`: [NS] BPS Filter Factor
+* `0x44`: BPS Filter Factor
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, factor value in 1/1000
-* `0x45`: [NS] BPS Filter Constant
+* `0x45`: BPS Filter Constant
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
@@ -264,15 +265,20 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 
 #### `0x200-0x21f`: EEPROM and other control commands
 
-* `0x200`: [NS] EEPROM Update Mode
+* `0x200`: EEPROM Update Mode
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
-		* 0: Manual mode
+		* 0: Manual mode (default)
 		* 1: Force update, does not affect current update mode.
 		* 2: Auto, update EEPROM after each command/change.
+* `0x201`: Device ID
+	* Target MSB: Reserved.
+	* Target LSB: Reserved.
+	* Value: int32
+		* 0-126: New ID for this device.
 
-#### `0x220-0x23f`: General settings
+#### `0x220-0x23f`: UI settings
 
 * `0x220`: Display brightness
 	* Target MSB: Reserved.
@@ -290,7 +296,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: Reserved.
 	* Value: int32
 		* 50-9999: Milliseconds to hold a button until alternate function is activated.
-* `0x223`: [NF] Safety Options
+* `0x223`: Safety Options
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: bf1
@@ -312,35 +318,35 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 
 #### `0x240-0x25f`: User settings
 
-* `0x240`: [NV] User Name
+* `0x240`: User Name
 	* Target MSB: uint, char group position within target string. When setting char group 0 the string will be deleted (set to `\x00`). Hence the null-termination does not need to be sent explicitly. 
-		* 0-7. 
+		* 0-7.  No broadcasting.
 	* Target LSB: uint, user
-		* 0-2.
+		* 0-2. No broadcasting.
 	* Value: char[4]
-* `0x241`: [NV] User Password
+* `0x241`: User Password
 	* Target MSB: uint, char group position within target string. When setting char group 0 the string will be deleted (set to `\x00`). Hence the null-termination does not need to be sent explicitly. 
-		* 0-7
+		* 0-7. No broadcasting.
 	* Target LSB: uint, user
-		* 0-2.
+		* 0-2. No broadcasting.
 	* Value: char[4]
-* `0x242`: [NS] User Max Ontime
+* `0x242`: User Max Ontime
 	* Target MSB: Reserved.
 	* Target LSB: uint, user
-		* 0-2.
+		* 0-2. No broadcasting.
 	* Value: int32, ontime in us
-* `0x243`: [NS] User Max Duty
+* `0x243`: User Max Duty
 	* Target MSB: Reserved.
 	* Target LSB: uint, user
-		* 0-2.
+		* 0-2. No broadcasting.
 	* Value: int32, duty in 1/1000
-* `0x244`: [NS] User Max BPS
+* `0x244`: User Max BPS
 	* Target MSB: Reserved.
 	* Target LSB: uint, user
-		* 0-2.
+		* 0-2. No broadcasting.
 	* Value: int32, BPS in Hz
 
-#### `0x260-0x27f`: Coil settings (limits)
+#### `0x260-0x27f`: Coil settings
 
 * `0x260`: Coil Max Ontime
 	* Target MSB: Reserved.
@@ -352,7 +358,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, duty in 1/1000
-* `0x262`: [NS] Coil Min Ontime
+* `0x262`: Coil Min Ontime
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
@@ -368,10 +374,17 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, voice limit
 		* 1-16
+* `0x265`: [NS] Coil Output Invert
+	* Target MSB: Reserved.
+	* Target LSB: uint, target coil
+	* Value: int32
+		* 0: Normal (ontime = 3.3V, offtime = 0V)
+		* 1: Inverted (ontime = 0V, offtime = 3.3V)
+
 
 #### `0x300-0x31f`: Envelope settings
 
-* `0x300`: Envelope Next Step
+* `0x300`: [NF] Envelope Next Step
 	* Target MSB: uint, program number
 		* 0-63
 	* Target LSB: uint, step number

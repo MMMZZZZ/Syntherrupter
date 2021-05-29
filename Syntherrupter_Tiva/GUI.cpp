@@ -125,11 +125,11 @@ void GUI::init(Nextion* nextion, bool nxtOk, uint32_t cfgStatus)
         }
 
         // Other Settings
-        nxt->setVal("Other_Settings.nHoldTime", EEPROMSettings::uiData.uiButtonHoldTime);
-        nxt->setVal("thsp", EEPROMSettings::uiData.uiSleepDelay, Nextion::NO_EXT);
-        nxt->setVal("dim", EEPROMSettings::uiData.uiBrightness, Nextion::NO_EXT);
+        nxt->setVal("Other_Settings.nHoldTime", EEPROMSettings::deviceData.uiButtonHoldTime);
+        nxt->setVal("thsp", EEPROMSettings::deviceData.uiSleepDelay, Nextion::NO_EXT);
+        nxt->setVal("dim", EEPROMSettings::deviceData.uiBrightness, Nextion::NO_EXT);
         //nxt->printf("Other_Settings.nBackOff.val=%i\xff\xff\xff", backOff);
-        nxt->setVal("Settings.colorMode", EEPROMSettings::uiData.uiColorMode);
+        nxt->setVal("Settings.colorMode", EEPROMSettings::deviceData.uiColorMode);
 
         nxt->setVal("TC_Settings.maxCoilCount", COIL_COUNT);
         nxt->setVal("Env_Settings.maxSteps", MIDIProgram::DATA_POINTS);
@@ -659,14 +659,14 @@ void GUI::settings()
                 // Other (general) settings
                 if (number == 0)
                 {
-                    EEPROMSettings::uiData.uiButtonHoldTime =  data        & 0xffff;
-                    EEPROMSettings::uiData.uiSleepDelay     = (data >> 16) & 0xffff;
+                    EEPROMSettings::deviceData.uiButtonHoldTime =  data        & 0xffff;
+                    EEPROMSettings::deviceData.uiSleepDelay     = (data >> 16) & 0xffff;
                 }
                 else if (number == 1)
                 {
-                    EEPROMSettings::uiData.uiBrightness =  data        & 0xff;
+                    EEPROMSettings::deviceData.uiBrightness =  data        & 0xff;
                     //EEPROMSettings::uiData.backOff  = (data >>  8) & 0b1;
-                    EEPROMSettings::uiData.uiColorMode  = (data >>  9) & 0b1;
+                    EEPROMSettings::deviceData.uiColorMode  = (data >>  9) & 0b1;
                 }
             }
         }

@@ -20,9 +20,6 @@
 #include "MIDI.h"
 #include "MIDIProgram.h"
 
-#define ANY_TO_UINT32(ANY) *((uint32_t*) ((void *) (&ANY)))
-#define ANY_TO_FLOAT(ANY)  *((float*)    ((void *) (&ANY)))
-
 
 class EEPROMSettings
 {
@@ -52,6 +49,7 @@ public:
     struct DeviceData
     {
         uint8_t  deviceID;
+        uint8_t  eepromUpdateMode;
         uint8_t  uiBrightness;
         uint8_t  uiColorMode;
         uint16_t uiButtonHoldTime;
@@ -74,7 +72,7 @@ public:
     static uint8_t& version;
     static UserData (&userData)[3];
     static CoilData (&coilData)[6];
-    static DeviceData &uiData;
+    static DeviceData &deviceData;
 private:
     static uint32_t legacyImport();
     static void initDefault();
@@ -123,6 +121,10 @@ private:
         float     f32;
         uint32_t ui32;
     };
+    // Constants used in old version
+    static constexpr uint32_t V2_STR_CHAR_COUNT  = 32;
+    static constexpr uint32_t V2_ENV_PROG_COUNT  = 20;
+    static constexpr uint32_t V2_ENV_DATA_POINTS =  8;
     // v2 used 2 Banks
     union LegacyV2Bank
     {
@@ -131,12 +133,18 @@ private:
             uint16_t wear;
             uint8_t version;
             uint8_t present;
-            char userNames[3][STR_CHAR_COUNT];
-            char userPwds[3][STR_CHAR_COUNT];
+            char userNames[3][V2_STR_CHAR_COUNT];
+            char userPwds[3][V2_STR_CHAR_COUNT];
             uint32_t userSettings[3];
             uint32_t coilSettings[6];
-            uint32_t otherSettings[10];
-            LegacyV2EnvelopeData envelopes[ENV_PROG_COUNT][MIDIProgram::DATA_POINTS][4];
+            /*
+             * Note: otherSettings was originally intended to be 10 fields in
+             * size but due to a bug only 6 fields were actually stored in
+             * EEPROM. Since only the first 2 were ever used, this is no real
+             * problem. It's just an explanation for the 6 instead of a 10.
+             */
+            uint32_t otherSettings[6];
+            LegacyV2EnvelopeData envelopes[V2_ENV_PROG_COUNT][V2_ENV_DATA_POINTS][4];
         } data;
 
         uint8_t raw[3072];

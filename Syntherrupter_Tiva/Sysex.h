@@ -37,8 +37,6 @@ private:
     static constexpr uint32_t MODE_MIDI_LIVE  = 2;
     static constexpr uint32_t MODE_LIGHTSABER = 3;
 
-    static uint32_t eepromUpdateMode;
-
     static Nextion* nxt;
 };
 
