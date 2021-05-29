@@ -383,17 +383,16 @@ void EEPROMSettings::initDefault()
     /*
      * Default Envelopes
      */
-    constexpr uint32_t HOLD = MIDIProgram::DATA_POINTS - 2;
-    constexpr uint32_t LAST = MIDIProgram::DATA_POINTS - 1;
+    constexpr uint8_t LAST = MIDIProgram::DATA_POINTS - 1;
 
     // Program 0 and all unspecified programs: No envelope (constant 100% volume while on, no rise/fall times)
-    volatileData.envelopes[0][0] = {.amplitude = 1.0f, .durationUS = 1.0f, .ntau = 0.1f, .nextStep = HOLD};
-    // Steps 1 to n-2 are "passive" but will be initialized nonetheless (such that the floats are legal values f.ex.)
-    for (uint32_t step = 1; step < LAST; step++)
+    for (uint8_t step = 0; step <= LAST; step++)
     {
-        volatileData.envelopes[0][step] = volatileData.envelopes[0][0];
+        volatileData.envelopes[0][step] = {.amplitude = 1.0f, .durationUS = 1.0f, .ntau = 0.1f, .nextStep = (uint8_t) (step + 1)};
     }
-    volatileData.envelopes[0][LAST] = {.amplitude = 0.0f, .durationUS = 1.0f, .ntau = 0.1f, .nextStep = LAST};
+    volatileData.envelopes[0][LAST - 1].nextStep = LAST - 1;
+    volatileData.envelopes[0][LAST].amplitude    = 0.0f;
+    volatileData.envelopes[0][LAST].nextStep     = LAST;
 
     // Initialize all EEPROM programs to the "empty" envelope
     for (uint32_t env = 0; env < ENV_PROG_COUNT; env++)
