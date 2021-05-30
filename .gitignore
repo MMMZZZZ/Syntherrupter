@@ -1,5 +1,5 @@
 # Exclude firmwares
-/Syntherrupter_Firmwares
+/Syntherrupter_Firmwares*
 
 # Exclude zip files in root directory
 /*.zip
