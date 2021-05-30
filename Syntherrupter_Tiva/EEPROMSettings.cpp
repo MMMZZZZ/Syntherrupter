@@ -8,8 +8,6 @@
 #include <EEPROMSettings.h>
 
 
-//char     EEPROMSettings::userNames[3][STR_CHAR_COUNT] = {"Padawan", "Jedi Knight", "Master Yoda"};
-//char     EEPROMSettings::userPwds[3][STR_CHAR_COUNT]  = {"1234",    "8079",        "0"};
 uint32_t EEPROMSettings::byteAddress = 0;
 EEPROMSettings::EEPROMData EEPROMSettings::eeprom;
 uint8_t &EEPROMSettings::version = EEPROMSettings::eeprom.data.version;
