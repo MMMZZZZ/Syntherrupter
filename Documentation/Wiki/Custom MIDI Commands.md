@@ -111,7 +111,7 @@ All conventions are to be read as "unless noted otherwise... ".
 
 * Reserved target bytes are expected to be 0.
 * Parameters and parameter options that are currently not supported by Syntherrupter are marked by an [NS].
-* Parameters and parameter options that are supported but won't show up on screen are marked as [NV] (not visible). 
+* Parameters that stored in EEPROM are marked by an [EE]. Other parameters will be reset to default after a power cycle.
 * Every integer parameter has a float version at offset `0x2000`. 
 	* If the integer parameter is expressed as fractional value, the float parameter is not.
 	* If the integer parameter covers a certain range, the float parameter is expected to cover that range with a value between 0.0f and 1.0f.
@@ -261,18 +261,18 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
-		* 0-4: New ID for the connected ESP8266
+		* 0-4: New ID for the connected ESP8266.  Will be remembered by the ESP8266.
 
 #### `0x200-0x21f`: EEPROM and other control commands
 
-* `0x200`: EEPROM Update Mode
+* `0x200`: [EE] EEPROM Update Mode
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
 		* 0: Manual mode (default)
 		* 1: Force update, does not affect current update mode.
 		* 2: Auto, update EEPROM after each command/change.
-* `0x201`: Device ID
+* `0x201`: [EE] Device ID
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
@@ -280,18 +280,18 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 
 #### `0x220-0x23f`: UI settings
 
-* `0x220`: Display brightness
+* `0x220`: [EE] Display brightness
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
 		* 0-100: Brightness in percent
-* `0x221`: Standby
+* `0x221`: [EE] Standby
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
 		* 0: Standby disabled
 		* 1-3600: Seconds until Syntherrupter goes into standby
-* `0x222`: UI Button Hold Time
+* `0x222`: [EE] UI Button Hold Time
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
@@ -301,7 +301,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: Reserved.
 	* Value: bf1
 		* [0]: Background shutdown enabled(1) or disabled(0)
-* `0x224`: [NF] UI Color Mode
+* `0x224`: [EE] [NF] UI Color Mode
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32, color mode
@@ -318,29 +318,29 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 
 #### `0x240-0x25f`: User settings
 
-* `0x240`: User Name
+* `0x240`: [EE] User Name
 	* Target MSB: uint, char group position within target string. When setting char group 0 the string will be deleted (set to `\x00`). Hence the null-termination does not need to be sent explicitly. 
 		* 0-7.  No broadcasting.
 	* Target LSB: uint, user
 		* 0-2. No broadcasting.
 	* Value: char[4]
-* `0x241`: User Password
+* `0x241`: [EE] User Password
 	* Target MSB: uint, char group position within target string. When setting char group 0 the string will be deleted (set to `\x00`). Hence the null-termination does not need to be sent explicitly. 
 		* 0-7. No broadcasting.
 	* Target LSB: uint, user
 		* 0-2. No broadcasting.
 	* Value: char[4]
-* `0x242`: User Max Ontime
+* `0x242`: [EE] User Max Ontime
 	* Target MSB: Reserved.
 	* Target LSB: uint, user
 		* 0-2. No broadcasting.
 	* Value: int32, ontime in us
-* `0x243`: User Max Duty
+* `0x243`: [EE] User Max Duty
 	* Target MSB: Reserved.
 	* Target LSB: uint, user
 		* 0-2. No broadcasting.
 	* Value: int32, duty in 1/1000
-* `0x244`: User Max BPS
+* `0x244`: [EE] User Max BPS
 	* Target MSB: Reserved.
 	* Target LSB: uint, user
 		* 0-2. No broadcasting.
@@ -348,33 +348,33 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 
 #### `0x260-0x27f`: Coil settings
 
-* `0x260`: Coil Max Ontime
+* `0x260`: [EE] Coil Max Ontime
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, ontime in us
-* `0x261`: Coil Max Duty
+* `0x261`: [EE] Coil Max Duty
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, duty in 1/1000
-* `0x262`: Coil Min Ontime
+* `0x262`: [EE] Coil Min Ontime. Important: the minimum ontime is an offset that gets added to every ontime *after* applying the duty limiter but *before* the ontime limiter. It doesn't affect the minimum offtime either. As a consequence, higher minimum ontimes in combination with many voices and/or high frequencies will likely exceed the coils duty limit.
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, ontime in us
-* `0x263`: Coil Min Offtime
+* `0x263`: [EE] Coil Min Offtime
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, offtime in us
-* `0x264`: [NF] Coil Max MIDI Voices
+* `0x264`: [EE] [NF] Coil Max MIDI Voices
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, voice limit
 		* 1-16
-* `0x265`: [NS] Coil Output Invert
+* `0x265`: [NS] [EE] Coil Output Invert
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 	* Value: int32
@@ -384,26 +384,26 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 
 #### `0x300-0x31f`: Envelope settings
 
-* `0x300`: [NF] Envelope Next Step
+* `0x300`: [EE] [NF] Envelope Next Step
 	* Target MSB: uint, program number
 		* 0-63
 	* Target LSB: uint, step number
 		* 0-7
 	* Value: int32, number of next step
 		* 0-7
-* `0x301`: Envelope Step Amplitude
+* `0x301`: [EE] Envelope Step Amplitude
 	* Target MSB: uint, program number
 		* 0-63
 	* Target LSB: uint, step number
 		* 0-7
 	* Value: int32, amplitude in 1/1000
-* `0x302`: Envelope Step Duration
+* `0x302`: [EE] Envelope Step Duration
 	* Target MSB: uint, program number
 		* 0-63
 	* Target LSB: uint, step number
 		* 0-7
 	* Value: int32, duration in us
-* `0x303`: Envelope Step n-tau
+* `0x303`: [EE] Envelope Step n-tau
 	* Target MSB: uint, program number
 		* 0-63
 	* Target LSB: uint, step number
