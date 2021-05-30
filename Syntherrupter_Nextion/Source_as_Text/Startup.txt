@@ -7,6 +7,8 @@ Page Startup
     
     Events
         Preinitialize Event
+            // Show a black screen until the initialization from the MCU is done.
+            Startup.bco=0
             vis 255,0
             //
             // Actual init code is in the comOk press event that is called by the uC after initialization.
@@ -98,7 +100,7 @@ Text tNxtFWVersion
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : v4.2.0-beta.2
+        Text               : v4.2.0-beta.3
         Max. Text Size     : 20
     
 Text tTivaFW
