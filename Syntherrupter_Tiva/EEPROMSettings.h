@@ -169,6 +169,7 @@ private:
     };
 
     static EEPROMData eeprom;
+    static_assert(sizeof(eeprom) <= 6144, "EEPROM struct exceeds actual EEPROM size.");
 
     // Some Data is not stored in EEPROM but still requires EEPROMSettings
     // to provide the memory locations.
