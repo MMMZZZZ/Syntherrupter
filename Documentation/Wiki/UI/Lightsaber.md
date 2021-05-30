@@ -10,9 +10,10 @@ Description
 * [What you get](#what-you-get)
 	* [Ontime](#ontime)
 	* [Lightsabers](#lightsabers)
-	* [Apply to Outputs and MIDI Coil Settings](#apply-to-outputs-and-midi-coil-settings)
+	* [Apply to Outputs and MIDI Coil Settings](#apply-to-outputs)
 	* [Applying Manually, On Release or Immediately](#applying-manually-on-release-or-immediately)
 	* [Return to Main Menu](#return-to-main-menu)
+* [Sysex Commands](#sysex-commands)
 
 ## What you see
 
@@ -30,11 +31,11 @@ Select which lightsabers play on the current outputs. This is similar to the [MI
 
 Keeping any of these buttons pressed, assigns that ID to the lightsaber that's currently connected. More details on this can be found in the [Lightsaber Setup](/Documentation/Wiki/Lightsaber%20ESP8266%20Setup.md#lightsaber-id-setting) article.
 
-### Apply to Outputs and MIDI Coil Settings
+### Apply to Outputs
 
 Whenever you change a setting it will affect the outputs selected here. You'll note that the values below the buttons change to your current settings. More details about this is explained on the [Simple mode](Simple.md#apply-to-outputs) page. 
 
-Unlike the information displayed in [Simple mode](Simple.md#apply-to-outputs), the displayed ontime can exceed the [Coil Limits](Coil%20Limits.md#readme). That is because it represents the maximum within which the lightsaber effect operates. Most of the time you'll see ontimes smaller than these on the output. As a reminder, the actual safety mechanisms are applied as a last step to the output signal. They work independently of what you see on the display.
+Unlike the information displayed in [Simple mode](Simple.md#apply-to-outputs), the displayed ontime can exceed the [Coil Limits](Coil%20Limits.md#readme). That is because it represents the maximum within which the lightsaber effect operates. Most of the time you'll see ontimes smaller than these on the output. As a reminder, the [actual safety mechanisms](Coil%20Limits.md#what-you-get) are applied as a last step to the output signal. They work independently of what you see on the display.
 
 ### Applying Manually, On Release or Immediately
 
@@ -43,3 +44,11 @@ Works in the same way as described here: [Simple Mode](Simple.md#applying-manual
 ### Return to Main Menu
 
 Works in the same way as described here: [Simple Mode](Simple.md#return-to-main-menu).
+
+## Sysex Commands
+
+Ontime and active outputs can be controller by the [Common Mode Parameters](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x20-0x3f-common-mode-parameters) group of the sysex commands. 
+
+Lightsaber specific settings are available through the [Lightsaber Mode Parameters](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x100-0x11f-lightsaber-mode-parameters) group of the sysex commands.
+
+The apply mode can be changed using the [UI Settings](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x220-0x23f-ui-settings) sysex commands.

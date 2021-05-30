@@ -12,8 +12,8 @@
 #include "stdint.h"
 #include "stdbool.h"
 #include "driverlib/gpio.h"
-#include "System.h"
 #include "InterrupterConfig.h"
+#include "System.h"
 #include "EEPROMSettings.h"
 #include "Nextion.h"
 #include "Coil.h"
@@ -24,7 +24,7 @@ class GUI
 public:
     GUI();
     virtual ~GUI();
-    static void init(Nextion* nextion, bool nxtOk);
+    static void init(Nextion* nextion, bool nxtOk, uint32_t cfgStatus);
     static uint32_t update();
     static void applyOutput();
     static void setError(const char* err);
@@ -96,7 +96,7 @@ private:
     static void settingsExit()
     {
         // Update EEPROM
-        EEPROMSettings::update();
+        EEPROMSettings::updateAll();
     };
 
     static void serialPassthrough(uint32_t uartNum);

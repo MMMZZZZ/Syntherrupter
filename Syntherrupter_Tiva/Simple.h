@@ -11,9 +11,9 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "System.h"
 #include "Filter.h"
 #include "ToneList.h"
-#include "System.h"
 
 
 class Simple
@@ -21,7 +21,7 @@ class Simple
 public:
     Simple();
     virtual ~Simple();
-    void init(ToneList* tonelist, float ontimeFact, float ontimeConst, float freqFact, float freqConst, uint32_t updatePeriodUS = 10000);
+    void init(ToneList* tonelist, uint32_t updatePeriodUS = 10000);
     void updateToneList();
     static void start()
     {
@@ -64,6 +64,8 @@ private:
     uint32_t updatePeriodUS = 10000, lastUpdateUS = 0;
     float frequency = 0.0f;
     static bool started;
+
+    friend class EEPROMSettings;
 };
 
 #endif /* SIMPLE_H_ */

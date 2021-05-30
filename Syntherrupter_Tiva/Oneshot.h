@@ -21,8 +21,15 @@
 #include "driverlib/gpio.h"             // Defines and macros for GPIO API of DriverLib. This includes API functions such as GPIOPinWrite.
 #include "driverlib/interrupt.h"        // Defines and macros for NVIC Controller (Interrupt) API of driverLib. This includes API functions such as IntEnable and IntPrioritySet.
 #include "driverlib/timer.h"            // Defines and macros for timer API of driverLib.
+#include "InterrupterConfig.h"
 #include "System.h"
 
+// Make sure inversion doesn't slip into public releases!
+#ifndef TEABUG
+#ifdef INVERT
+static_assert(false, "INVERT not allowed for release builds.");
+#endif /* INVERT */
+#endif /* TEABUG */
 
 class Oneshot
 {
@@ -74,8 +81,13 @@ private:
          {SYSCTL_PERIPH_TIMER4, TIMER4_BASE, SYSCTL_PERIPH_GPIOM, GPIO_PORTM_BASE, GPIO_PIN_4, GPIO_PM4_T4CCP0},
          {SYSCTL_PERIPH_TIMER5, TIMER5_BASE, SYSCTL_PERIPH_GPIOM, GPIO_PORTM_BASE, GPIO_PIN_6, GPIO_PM6_T5CCP0}
     };
+#ifdef INVERT
+    static constexpr uint32_t TIMER_CONFIG = (TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_ONE_SHOT | TIMER_CFG_A_ACT_CLRSETTO); //TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_PWM;
+    static constexpr uint32_t DEFAULT_STATE = 0xff;
+#else
     static constexpr uint32_t TIMER_CONFIG = (TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_ONE_SHOT | TIMER_CFG_A_ACT_SETCLRTO); //TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_PWM;
-
+    static constexpr uint32_t DEFAULT_STATE = 0x00;
+#endif
     uint32_t minOffValue = 160;
     uint32_t maxOnValue = 1600;
     uint32_t timerBase = 0;

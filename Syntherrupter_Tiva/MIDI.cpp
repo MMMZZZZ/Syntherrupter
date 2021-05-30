@@ -8,19 +8,19 @@
 #include <MIDI.h>
 
 
-UART                  MIDI::usbUart;
-UART                  MIDI::midiUart;
-ByteBuffer            MIDI::otherBuffer;
-constexpr ByteBuffer* MIDI::BUFFER_LIST[];
-Channel               MIDI::channels[];
-NoteList              MIDI::notelist;
-uint32_t              MIDI::notesCount = 0;
-uint32_t              MIDI::sysexDeviceID = 0;
-SysexMsg              MIDI::sysexMsg;
-bool                  MIDI::playing = false;
-float                 MIDI::freqTable[128];
-MIDIProgram           MIDI::programs[MAX_PROGRAMS];
-constexpr float       MIDI::ADSR_LEGACY_PROGRAMS[MIDI::ADSR_PROGRAM_COUNT + 1][8];
+UART                       MIDI::usbUart;
+UART                       MIDI::midiUart;
+Buffer<uint8_t>            MIDI::otherBuffer;
+constexpr Buffer<uint8_t>* MIDI::BUFFER_LIST[];
+Channel                    MIDI::channels[];
+NoteList                   MIDI::notelist;
+uint32_t                   MIDI::notesCount = 0;
+uint8_t*                   MIDI::sysexDeviceID;
+SysexMsg                   MIDI::sysexMsg;
+bool                       MIDI::playing = false;
+float                      MIDI::freqTable[128];
+MIDIProgram                MIDI::programs[MAX_PROGRAMS];
+float*                     MIDI::lfoPeriodUS;
 
 
 MIDI::MIDI()
@@ -34,8 +34,12 @@ MIDI::~MIDI()
     // TODO Auto-generated destructor stub
 }
 
-void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPort, uint32_t midiUartRx, uint32_t midiUartTx, void(*midiISR)(void))
+void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void),
+                uint32_t midiUartPort, uint32_t midiUartRx,
+                uint32_t midiUartTx, void(*midiISR)(void))
 {
+    // Static init. This stuff only needs to be done once (NOT for every instance).
+
     // Enable MIDI receiving over the USB UART (selectable baud rate) and a separate MIDI UART (31250 fixed baud rate).
     usbUart.init(0, usbBaudRate, usbISR, 0b00100000);
     midiUart.init(midiUartPort, midiUartRx, midiUartTx, 31250, midiISR, 0b01100000);
@@ -44,36 +48,10 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPor
     midiUart.enable();
 
     MIDIProgram::setResolutionUS(effectResolutionUS);
-
-    // Copy legacy ADSR table to new MIDIProgram class.
-    for (uint32_t prog = 1; prog < ADSR_PROGRAM_COUNT + 1; prog++)
+    for (uint32_t prog = 0; prog < MAX_PROGRAMS; prog++)
     {
-        programs[prog].setMode(MIDIProgram::Mode::lin);
-        programs[prog+10].setMode(MIDIProgram::Mode::exp);
-        for (uint32_t i = 0; i < 4; i++)
-        {
-            uint32_t dataPnt = i;
-            uint32_t nextPnt = dataPnt + 1;
-            if (dataPnt == 2)
-            {
-                nextPnt = dataPnt;
-            }
-            if (dataPnt == 3)
-            {
-                dataPnt = MIDIProgram::DATA_POINTS - 1;
-                nextPnt = dataPnt;
-            }
-            programs[prog   ].setDataPoint(dataPnt, ADSR_LEGACY_PROGRAMS[prog][i*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][i*2+1], 0.0f, nextPnt);
-            programs[prog+10].setDataPoint(dataPnt, ADSR_LEGACY_PROGRAMS[prog][i*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][i*2+1], 3.0f, nextPnt);
-        }
+        programs[prog].init();
     }
-
-    // The "new" piano envelope
-    programs[10].setDataPoint(0,                            2.0f,   15e3f, 2.0f, 1);
-    programs[10].setDataPoint(1,                            1.0f,  100e3f, 2.0f, 2);
-    programs[10].setDataPoint(2,                            0.0f, 8000e3f, 7.0f, 2);
-    programs[10].setDataPoint(MIDIProgram::DATA_POINTS - 1, 0.0f,  200e3f, 4.0f, MIDIProgram::DATA_POINTS - 1);
-
 
     for (uint32_t note = 0; note < 128; note++)
     {
@@ -86,6 +64,19 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPor
         channels[chn].number = chn;
     }
 }
+
+void MIDI::init(uint32_t num, ToneList* tonelist)
+{
+    // Non-static init. This needs to be done for every instance of the class.
+
+    this->tonelist = tonelist;
+    this->coilNum  = num;
+    this->coilBit  = 1 << num;
+
+    // Correctly apply the settings already loaded by EEPROMSettings
+    setMaxVoices(*coilMaxVoices);
+}
+
 
 bool MIDI::processBuffer(uint32_t b)
 {
@@ -114,7 +105,7 @@ bool MIDI::processBuffer(uint32_t b)
     uint32_t& channel    = channelAll[b];
     uint8_t&  c1         = c1All[b];
 
-    ByteBuffer* buffer = BUFFER_LIST[b];
+    Buffer<uint8_t>* buffer = BUFFER_LIST[b];
 
     c1 = buffer->read();
 
@@ -184,14 +175,14 @@ bool MIDI::processBuffer(uint32_t b)
                         note = notelist.addNote();
                         note->afterTouch     = 0;
                         note->rawVolume      = 0.0f;
-                        note->EnvelopeVolume = 0.0f;
+                        note->envelopeVolume = 0.0f;
                         channels[channel].addNote(note);
                     }
 
                     note->number         = number;
                     note->velocity       = c1;
-                    note->EnvelopeStep   = 0;
-                    note->EnvelopeTimeUS = 0.0f;
+                    note->envelopeStep   = 0;
+                    note->envelopeTimeUS = 0.0f;
                     note->changed        = true;
                     channels[channel].notesChanged = true;
                 }
@@ -425,7 +416,7 @@ bool MIDI::processBuffer(uint32_t b)
                         Note* note = channels[channel].firstNote;
                         while (note != 0)
                         {
-                            note->EnvelopeStep = MIDIProgram::DATA_POINTS - 1;
+                            note->envelopeStep = MIDIProgram::DATA_POINTS - 1;
                             note = note->nextChnNote;
                         }
                         break;
@@ -544,7 +535,7 @@ bool MIDI::processBuffer(uint32_t b)
                             }
                             break;
                         case 5: // Device ID
-                            if (c1 != sysexDeviceID && c1 != 127)
+                            if (c1 != *sysexDeviceID && c1 != 127)
                             {
                                 // Only reply to messages directed to this
                                 // device. 127 = broadcast.
@@ -609,7 +600,7 @@ bool MIDI::processBuffer(uint32_t b)
                             case 3:
                                 targetLSB = sysexData[2];
                             case 2:
-                                number += sysexData[1] << 7;
+                                number += sysexData[1] << 8;
                             case 1:
                                 number += sysexData[0];
                                 break;
@@ -730,7 +721,7 @@ void MIDI::setMaxVoices(uint32_t maxVoices)
     {
         maxVoices = MAX_VOICES;
     }
-    coilMaxVoices = maxVoices;
+    *coilMaxVoices = maxVoices;
     coilChange = true;
 }
 
@@ -813,7 +804,7 @@ void MIDI::process()
                             }
                             else if (!channel->sustainPedal)
                             {
-                                note->EnvelopeStep = MIDIProgram::DATA_POINTS - 1;
+                                note->envelopeStep = MIDIProgram::DATA_POINTS - 1;
                             }
                         }
                         note = note->nextChnNote;
@@ -888,18 +879,18 @@ void MIDI::updateEffects(Note* note)
 {
     // Needed for envelopes
     float currentTime = System::getSystemTimeUS();
-    if (note->EnvelopeTimeUS == 0.0f)
+    if (note->envelopeTimeUS == 0.0f)
     {
-        note->EnvelopeTimeUS = currentTime;
+        note->envelopeTimeUS = currentTime;
     }
     else
     {
-        float timeDiffUS = currentTime - note->EnvelopeTimeUS;
+        float timeDiffUS = currentTime - note->envelopeTimeUS;
         if (timeDiffUS > effectResolutionUS)
         {
-            note->EnvelopeTimeUS = currentTime;
+            note->envelopeTimeUS = currentTime;
             MIDIProgram* program = &(programs[note->channel->program]);
-            if (!program->setEnvelopeAmp(&(note->EnvelopeStep), &(note->EnvelopeVolume)))
+            if (!program->setEnvelopeAmp(&(note->envelopeStep), &(note->envelopeVolume)))
             {
                 // Note ended.
                 note->number = 128;
@@ -910,7 +901,7 @@ void MIDI::updateEffects(Note* note)
 
                 // After calculation of envelope, add other effects like modulation
                 float finishedVolume =   note->rawVolume
-                                       * note->EnvelopeVolume
+                                       * note->envelopeVolume
                                        * (1.0f - getLFOVal(note->channel));
                 if (finishedVolume != note->finishedVolume)
                 {
@@ -922,7 +913,7 @@ void MIDI::updateEffects(Note* note)
         if (timeDiffUS < 0.0f)
         {
             // Time overflowed
-            note->EnvelopeTimeUS = currentTime;
+            note->envelopeTimeUS = currentTime;
         }
     }
 }
@@ -931,7 +922,7 @@ void MIDI::updateToneList()
 {
     Tone* lastTone = (Tone*) 1;
     Note* note = notelist.firstNote;
-    uint32_t voicesLeft = coilMaxVoices;
+    uint32_t voicesLeft = *coilMaxVoices;
     while (note != notelist.newNote)
     {
         Note* nextNote = note->nextNote;
@@ -998,10 +989,4 @@ void MIDI::updateToneList()
     }
     coilChange     = false;
     coilPanChanged = false;
-}
-
-void MIDI::setCoilNum(uint32_t num)
-{
-    coilNum = num;
-    coilBit = 1 << num;
 }

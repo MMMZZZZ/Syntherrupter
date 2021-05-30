@@ -15,6 +15,7 @@ Syntherrupter has three different built-in user accounts. You can control the li
 		* [Auto Login](#auto-login)
 	* [Max. Ontime, Max. BPS, Max. Duty](#max-ontime-max-bps-max-duty)
 	* [Return](#return)
+* [Sysex Commands](#sysex-commands)
 
 ## What you see
 
@@ -58,7 +59,11 @@ Note: if you give two users the same password, you'll get logged in as the user 
 
 #### Auto Login
 
-If you set the password of a user to `0`, Syntherrupter will automatically log in to that user on startup. This is for the users that don't require any sort of password protection. You can still log in to the other two accounts using the [Switch User button](Menu.md#switch-user) in the Main Menu.
+If you set the password of a user to `0`, Syntherrupter will automatically log in to that user on startup. This is for the users that don't require any sort of password protection. You can still log in to the other two accounts using the [Switch User Button](Menu.md#switch-user) in the Main Menu. 
+
+#### Forgotten Password(s)
+
+If you forgot a password and can't access the settings to change it, you can use the [sysex commands](#sysex-commands) to set a new password (f.ex. reset the admin password to auto login). The sysex commands don't require any authentification. 
 
 ### Max. Ontime, Max. BPS, Max. Duty
 
@@ -69,3 +74,7 @@ The only sort of exception are the ontime and duty settings for user 2. Since us
 ### Return
 
 Applies the settings and brings you back to the [Settings Menu](Settings.md#readme).
+
+## Sysex Commands
+
+All of the settings above can be controlled by the [User Settings](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x240-0x2ff-user-settings) group of the sysex commands.

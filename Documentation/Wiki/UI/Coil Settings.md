@@ -1,4 +1,4 @@
-# Coil Settings
+# MIDI Coil Settings
 
 [Back to the User Interface Reference page](README.md#readme)
 
@@ -14,6 +14,7 @@ Select what MIDI channels play on this coil and change the coils stereo properti
 		* [Reach Slider and Mode](#reach-slider-and-mode)
 	* [Previous/Next Coil](#previousnext-coil)
 	* [Return to MIDI Live Mode](#return-to-midi-live-mode)
+* [Sysex Commands](#sysex-commands)
 
 ## What you see
 
@@ -71,3 +72,6 @@ The *Previous* (*Next*) button brings you to the previous (next) coil. This allo
 
 Leaving the page brings you back to the [MIDI Live mode](MIDI%20Live.md#readme) page.
 
+## Sysex Commands
+
+All of the settings above can be controlled by the [MIDI Live Mode Commands](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x60-0x7f-midi-live-mode-parameters) group of the sysex commands. 

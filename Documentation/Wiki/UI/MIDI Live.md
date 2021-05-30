@@ -14,6 +14,7 @@ MIDI Live mode allows you to play MIDI data received over any of Syntherrupters 
 	* [Applying Manually, On Release or Immediately](#applying-manually-on-release-or-immediately)
 	* [NRP Reset](#nrp-reset)
 	* [Return to Main Menu](#return-to-main-menu)
+* [Sysex Commands](#sysex-commands)
 
 ## What you see
 
@@ -54,3 +55,11 @@ On Syntherrupter NRPs are not affected by the channel controllers reset command.
 ### Return to Main Menu
 
 Works in the same way as described here: [Simple Mode](Simple.md#return-to-main-menu).
+
+## Sysex Commands
+
+Ontime and active outputs can be controller by the [Common Mode Parameters](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x20-0x3f-common-mode-parameters) group of the sysex commands. 
+
+MIDI Live mode specific settings are available through the [MIDI Live Mode Parameters](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x60-0x7f-midi-live-mode-parameters) group of the sysex commands.
+
+The apply mode can be changed using the [UI Settings](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x220-0x23f-ui-settings) sysex commands.

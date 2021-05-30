@@ -52,6 +52,8 @@ void Oneshot::init(uint32_t timerNum)
 
     // Configure pins for highest output current.
     GPIOPadConfigSet(TIMER_MAPPING[timerNum][PORT_BASE], TIMER_MAPPING[timerNum][PIN], GPIO_STRENGTH_12MA, GPIO_PIN_TYPE_STD);
+
+    GPIOPinWrite(TIMER_MAPPING[timerNum][PORT_BASE], TIMER_MAPPING[timerNum][PIN], DEFAULT_STATE);
 }
 
 void Oneshot::setMaxOntimeUS(uint32_t maxOntimeUS)

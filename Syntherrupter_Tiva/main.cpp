@@ -8,9 +8,10 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <Sysex.h>
+#include <System.h>
 #include "InterrupterConfig.h"
-#include "System.h"
-#include "Settings.h"
+#include "EEPROMSettings.h"
 #include "Nextion.h"
 #include "Coil.h"
 #include "GUI.h"
@@ -42,6 +43,8 @@ int main(void)
     System::init(sysTickISR);
     System::setSystemTimeResUS(16);
 
+    uint32_t cfgStatus = EEPROMSettings::init();
+
     Nextion nextion;
     bool nxtOk = nextion.init(3, 115200);
 
@@ -53,8 +56,8 @@ int main(void)
         Coil::allCoils[coil].init(coil);
     }
 
-    GUI::init(&nextion, nxtOk);
-    Settings::init(&nextion);
+    GUI::init(&nextion, nxtOk, cfgStatus);
+    Sysex::init(&nextion);
 
     while (42)
     {
@@ -63,7 +66,7 @@ int main(void)
         if (state)
         {
             MIDI::process();
-            Settings::processSysex();
+            Sysex::processSysex();
             LightSaber::process();
 
             switch (COIL_COUNT)
@@ -88,11 +91,6 @@ int main(void)
                     Coil::allCoils[0].updateOutput();
                     break;
             }
-            /*for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
-            {
-                // Run non-static coil object methods
-                Coil::allCoils[coil].update();
-            }*/
         }
         else
         {

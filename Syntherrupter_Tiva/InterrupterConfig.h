@@ -9,7 +9,7 @@
 #define INTERRUPTER_CONFIG_H_
 
 
-#define TIVA_FW_VERSION "v4.2.0-beta.2"
+#define TIVA_FW_VERSION "v4.2.0-beta.3"
 
 #ifdef COIL_COUNT_1
 #define COIL_COUNT 1
@@ -34,6 +34,8 @@
 #endif
 
 #define MAX_VOICES 32
+
+// #define DFLT_PASSWORDS
 
 
 #endif /* INTERRUPTER_CONFIG_H_ */
