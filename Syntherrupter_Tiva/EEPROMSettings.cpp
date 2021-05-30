@@ -88,6 +88,7 @@ uint32_t EEPROMSettings::init()
             MIDI::programs[prog].steps = &(eeprom.data.envelopes[eepromProg++]);
         }
     }
+    MIDI::sysexDeviceID = &(deviceData.deviceID);
     for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
     {
         Coil::allCoils[coil].maxDutyPerm   = &(coilData[coil].maxDutyPerm);

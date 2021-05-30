@@ -165,7 +165,7 @@ private:
     static constexpr uint32_t MAX_NOTES_COUNT = 64;
     static NoteList notelist;
     static uint32_t notesCount;
-    static uint32_t sysexDeviceID;
+    static uint8_t* sysexDeviceID;
     static SysexMsg sysexMsg;
     ToneList* tonelist;
     float absFreq               =  0.0f;

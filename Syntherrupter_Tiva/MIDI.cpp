@@ -15,7 +15,7 @@ constexpr Buffer<uint8_t>* MIDI::BUFFER_LIST[];
 Channel                    MIDI::channels[];
 NoteList                   MIDI::notelist;
 uint32_t                   MIDI::notesCount = 0;
-uint32_t                   MIDI::sysexDeviceID = 0;
+uint8_t*                   MIDI::sysexDeviceID;
 SysexMsg                   MIDI::sysexMsg;
 bool                       MIDI::playing = false;
 float                      MIDI::freqTable[128];
@@ -535,7 +535,7 @@ bool MIDI::processBuffer(uint32_t b)
                             }
                             break;
                         case 5: // Device ID
-                            if (c1 != sysexDeviceID && c1 != 127)
+                            if (c1 != *sysexDeviceID && c1 != 127)
                             {
                                 // Only reply to messages directed to this
                                 // device. 127 = broadcast.
