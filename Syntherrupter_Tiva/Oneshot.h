@@ -24,6 +24,12 @@
 #include "InterrupterConfig.h"
 #include "System.h"
 
+// Make sure inversion doesn't slip into public releases!
+#ifndef TEABUG
+#ifdef INVERT
+static_assert(false, "INVERT not allowed for release builds.");
+#endif /* INVERT */
+#endif /* TEABUG */
 
 class Oneshot
 {
