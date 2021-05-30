@@ -66,6 +66,8 @@ However with GM2, kind of a revision and extension of the MIDI standard, "Univer
 
 SysEx Messages have no channel information and are intended to control the device as a whole. Although, of course, every manufacturer can use them to implement whatever they want. Custom note on messages with additional information for example. 
 
+There are various tools out there for sysex commands. Some are vendor-specific, some are kept general. For the Sysex commands below I wrote a [custom python tool called Syfoh](https://github.com/MMMZZZZ/Syfoh#readme), that'll make handling them much easier. You can simply write the command in text form (or even provide a text file with a bunch of them) and Syfoh will convert them to sysex commands. Those can either be saved or directly sent to Syntherrupter over serial. 
+
 ### SysEx format
 
 #### General Format
