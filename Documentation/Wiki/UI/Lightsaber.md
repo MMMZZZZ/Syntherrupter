@@ -47,8 +47,8 @@ Works in the same way as described here: [Simple Mode](Simple.md#return-to-main-
 
 ## Sysex Commands
 
-Ontime and active outputs can be controller by the [Common Mode Parameters](Custom%20MIDI%20Commands.md#0x20-0x3f-common-mode-parameters) group of the sysex commands. 
+Ontime and active outputs can be controller by the [Common Mode Parameters](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x20-0x3f-common-mode-parameters) group of the sysex commands. 
 
-Lightsaber specific settings are available through the [Lightsaber Mode Parameters](Custom%20MIDI%20Commands.md#0x100-0x11f-lightsaber-mode-parameters) group of the sysex commands.
+Lightsaber specific settings are available through the [Lightsaber Mode Parameters](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x100-0x11f-lightsaber-mode-parameters) group of the sysex commands.
 
-The apply mode can be changed using the [UI Settings](Custom%20MIDI%20Commands.md#0x220-0x23f-ui-settings) sysex commands.
+The apply mode can be changed using the [UI Settings](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x220-0x23f-ui-settings) sysex commands.

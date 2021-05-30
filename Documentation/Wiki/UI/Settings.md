@@ -53,4 +53,4 @@ Instead of the usual *Return* label, the button is labeled with *Save* even thou
 
 ## Sysex Commands
 
-Saving the current settings to EEPROM manually or automatically can be configured over sysex using the [EEPROM Commands](Custom%20MIDI%20Commands.md#0x200-0x21f-eeprom-and-other-control-commands).
+Saving the current settings to EEPROM manually or automatically can be configured over sysex using the [EEPROM Commands](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x200-0x21f-eeprom-and-other-control-commands).

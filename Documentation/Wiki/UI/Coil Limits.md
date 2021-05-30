@@ -73,4 +73,4 @@ This minimum/offset ontime is added *after* applying the duty limitation for tec
 
 ## Sysex Commands
 
-All of the settings above can be controlled by the [Coil Settings](Custom%20MIDI%20Commands.md#0x260-0x27f-coil-settings) group of the sysex commands.
+All of the settings above can be controlled by the [Coil Settings](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x260-0x27f-coil-settings) group of the sysex commands.

@@ -45,4 +45,4 @@ Enables or disables Dark Mode. Dark Mode is better suited for dark environments,
 
 ## Sysex Commands
 
-All of the settings above can be controlled by the [UI settings](Custom%20MIDI%20Commands.md#0x220-0x23f-ui-settings) group of the sysex commands. 
+All of the settings above can be controlled by the [UI settings](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x220-0x23f-ui-settings) group of the sysex commands. 

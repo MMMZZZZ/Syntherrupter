@@ -74,4 +74,4 @@ Leaving the page brings you back to the [MIDI Live mode](MIDI%20Live.md#readme) 
 
 ## Sysex Commands
 
-All of the settings above can be controlled by the [MIDI Live Mode Commands](Custom%20MIDI%20Commands.md#0x60-0x7f-midi-live-mode-parameters) group of the sysex commands. 
+All of the settings above can be controlled by the [MIDI Live Mode Commands](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x60-0x7f-midi-live-mode-parameters) group of the sysex commands. 

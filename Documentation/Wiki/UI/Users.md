@@ -77,4 +77,4 @@ Applies the settings and brings you back to the [Settings Menu](Settings.md#read
 
 ## Sysex Commands
 
-All of the settings above can be controlled by the [User Settings](Custom%20MIDI%20Commands.md#0x240-0x2ff-user-settings) group of the sysex commands.
+All of the settings above can be controlled by the [User Settings](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x240-0x2ff-user-settings) group of the sysex commands.

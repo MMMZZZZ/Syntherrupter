@@ -71,4 +71,4 @@ The second example shows a simple looping curve. Looping is useful to create "pu
 
 ## Sysex Commands
 
-The envelopes can be fully configured by the [Envelope](Custom%20MIDI%20Commands.md#0x200-0x31f-envelope-settings) group of the sysex commands. 
+The envelopes can be fully configured by the [Envelope](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x200-0x31f-envelope-settings) group of the sysex commands. 
