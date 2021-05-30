@@ -15,6 +15,7 @@ Description
   * [Min Offtime](#min-offtime)
   * [Max MIDI Voices](#max-midi-voices)
   * [Min Ontime](#min-ontime)
+* [Sysex Commands](#sysex-commands)
 
 ## What you see
 
@@ -69,3 +70,7 @@ Most coils - especially those that operate at the lower pole - require a minimum
 All of Syntherrupters effects are based on a linear relationship. To "fix" this, a offset ontime will be added to *every* ontime of every mode. A fade in of lets say 0us to 20us would generate an ouput signal of 30us to 50us (with min ontime set to 30us). 
 
 This minimum/offset ontime is added *after* applying the duty limitation for technical reasons, but *before* the ontime limitation. It doesn't affect the minimum offtime either. The obvious consequence is that the minimum ontime causes the output signal to raise beyond the duty limit when (or even though) the duty cycle limiter is active. However, the minimum ontime usually covers only a small part of your primary current ring up. Thus the stress on your parts is lower than with a "normal" or "full" ontime. Another consequence of this design choice is that even if the duty limiter is active, the sound quality is not affected; no effect will suffer from dropping below the minimum ontime. 
+
+## Sysex Commands
+
+All of the settings above can be controlled by the [Coil Settings](Custom%20MIDI%20Commands.md#0x260-0x27f-coil-settings) group of the sysex commands.

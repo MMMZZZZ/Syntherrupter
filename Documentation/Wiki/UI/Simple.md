@@ -14,6 +14,7 @@ Simple mode allows you to generate classic, single tone interrupter signals. You
 	* [Apply to Outputs](#apply-to-outputs)
 	* [Applying Manually, On Release or Immediately](#applying-manually-on-release-or-immediately)
 	* [Return to Main Menu](#return-to-main-menu)
+* [Sysex Commands](#sysex-commands)
 
 ## What you see
 
@@ -66,3 +67,11 @@ Pressing the *Manually* button changes the mode again. The third and last mode a
 A simple press of the *Return* button stops Simple mode and brings the user back to the [Main Menu](Menu.md#readme). 
 
 Keeping the button pressed brings the user back to the [Main Menu](Menu.md#readme), too. However, Simple mode won't be stopped. It continues to run in the background. There are no limitations to this feature. Any combination of modes can run simultaneously.
+
+## Sysex Commands
+
+Ontime and active outputs can be controller by the [Common Mode Parameters](Custom%20MIDI%20Commands.md#0x20-0x3f-common-mode-parameters) group of the sysex commands. 
+
+Simple mode specific settings are available through the [Simple Mode Parameters](Custom%20MIDI%20Commands.md#0x40-0x5f-simple-mode-parameters) group of the sysex commands.
+
+The apply mode can be changed using the [UI Settings](Custom%20MIDI%20Commands.md#0x220-0x23f-ui-settings) sysex commands.

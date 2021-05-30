@@ -13,6 +13,7 @@ The General Settings mainly control user interface stuff.
 	* [Enter Sleep after](#enter-sleep-after)
 	* [Background shutdown](#background-shutdown)
 	* [Dark Mode](#dark-mode)
+* [Sysex Commands](#sysex-commands)
 
 ## What you see
 
@@ -41,3 +42,7 @@ By default, touching any part of the background, or any "passive" component like
 ### Dark Mode
 
 Enables or disables Dark Mode. Dark Mode is better suited for dark environments, however it offers less contrast (blue-white is higher contrast than blue-black).
+
+## Sysex Commands
+
+All of the settings above can be controlled by the [UI settings](Custom%20MIDI%20Commands.md#0x220-0x23f-ui-settings) group of the sysex commands. 
