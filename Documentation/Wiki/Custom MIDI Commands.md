@@ -158,7 +158,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 		* 3: Lightsaber mode
 	* Target LSB: Reserved.
 	* Value: int32
-		* 0: Disable mode
+		* 0: Disable mode (default)
 		* 1: Enable mode
 * `0x21`: Ontime
 	* Target MSB: uint, target mode
@@ -168,6 +168,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, ontime in us
+		* Default: 0
 * `0x22`: Duty cycle
 	* Target MSB: uint, target mode
 		* 1: Simple Mode
@@ -176,12 +177,14 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, duty cycle in 1/1000
+		* Default: 0
 * `0x23`: BPS
 	* Target MSB: uint, target mode
 		* 1: Simple Mode
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, BPS in Hz
+		* Default: 0
 * `0x24`: Period
 	* Target MSB: uint, target mode
 		* 1: Simple Mode
@@ -196,21 +199,25 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, factor value in 1/1000
+		* Default: 2000 (2.0)
 * `0x41`: Ontime Filter Constant
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
-	* Value: int32, factor value in 1/1000
+	* Value: int32, factor value in 1/1000 (default: 0)
+		* Default: 30000 (30.0)
 * `0x44`: BPS Filter Factor
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, factor value in 1/1000
+		* Default: 1800 (1.8)
 * `0x45`: BPS Filter Constant
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, factor value in 1/1000
+		* Default: 5000 (5.0)
 
 #### `0x60-0x7f`: MIDI Live mode parameters
 
@@ -219,11 +226,13 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: bf16, marking every channel as assigned (1) or unassigned (0) for this coil.	
+		* Default: 0xffff (all channels assigned)
 * `0x61`: [NS] Coils assigned to MIDI Channel
 	* Target MSB: Reserved.
 	* Target LSB: uint, target MIDI channel
 		* 0-15. 
 	* Value: bf6, marking every coil as assigned (1) or unassigned (0) for this MIDI channel. Bitfield size limited by your firmware if you flashed a binary for less outputs.
+		* Default: 0x3f (all coils assigned)
 * `0x62`: Pan Configuration
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
@@ -231,14 +240,14 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Value: bf3
 		* [0-2]: uint, Reach mode.
 			* 0: Constant
-			* 1: Linear
+			* 1: Linear (default)
 * `0x63`: Pan Position
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32
 		* 0-127: Pan position, 0=left, 127=right
-		* All other values: Stereo features disabled. 
+		* All other values: Stereo features disabled (default)
 * `0x64`: Pan Reach
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
@@ -259,6 +268,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: bf4, marking each lightsaber as assigned (1) or not (0)
+		* Default: 0x0f (all lightsabers assigned)
 * `0x101`: [NF] Set Lightsaber ID
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
@@ -279,6 +289,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: Reserved.
 	* Value: int32
 		* 0-126: New ID for this device.
+		* Default: 0
 
 #### `0x220-0x23f`: UI settings
 
@@ -287,35 +298,39 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: Reserved.
 	* Value: int32
 		* 0-100: Brightness in percent
+		* Default: 100
 * `0x221`: [EE] Standby
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
-		* 0: Standby disabled
+		* 0: Standby disabled (default)
 		* 1-3600: Seconds until Syntherrupter goes into standby
 * `0x222`: [EE] UI Button Hold Time
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
 		* 50-9999: Milliseconds to hold a button until alternate function is activated.
+		* Default: 250
 * `0x223`: Safety Options
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: bf1
-		* [0]: Background shutdown enabled(1) or disabled(0)
+		* [0]: Background shutdown
+			* 0: Disabled
+			* 1: Enabled (default)
 * `0x224`: [EE] [NF] UI Color Mode
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32, color mode
 		* 0: Light colors
-		* 1: Dark colors
+		* 1: Dark colors (default)
 * `0x225`: [NF] UI Apply Mode
 	* Target MSB: uint, target mode.
 		* 127: wildcard, affects all modes. 
 	* Target LSB: Reserved.
 	* Value: int32
 		* 0: Manually
-		* 1: On Release
+		* 1: On Release (default)
 		* 2: Immediately
 
 #### `0x240-0x25f`: User settings
@@ -355,32 +370,37 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, ontime in us
+		* Default: 10
 * `0x261`: [EE] Coil Max Duty
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, duty in 1/1000
+		* Default: 50 (0.05)
 * `0x262`: [EE] Coil Min Ontime. Important: the minimum ontime is an offset that gets added to every ontime *after* applying the duty limiter but *before* the ontime limiter. It doesn't affect the minimum offtime either. As a consequence, higher minimum ontimes in combination with many voices and/or high frequencies will likely exceed the coils duty limit.
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, ontime in us
+		* Default: 0
 * `0x263`: [EE] Coil Min Offtime
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, offtime in us
+		* Default: 10
 * `0x264`: [EE] [NF] Coil Max MIDI Voices
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, voice limit
 		* 1-16
+		* Default: 8
 * `0x265`: [NS] [EE] Coil Output Invert
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 	* Value: int32
-		* 0: Normal (ontime = 3.3V, offtime = 0V)
+		* 0: Normal (ontime = 3.3V, offtime = 0V) (default)
 		* 1: Inverted (ontime = 0V, offtime = 3.3V)
 
 
