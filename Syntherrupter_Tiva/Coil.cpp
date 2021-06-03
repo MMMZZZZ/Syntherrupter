@@ -9,6 +9,7 @@
 
 
 Coil Coil::allCoils[COIL_COUNT];
+constexpr void (*Coil::allISRs[6])(void);
 
 
 Coil::Coil()
@@ -24,10 +25,9 @@ Coil::~Coil()
 void Coil::init(uint32_t coilNum)
 {
     num = coilNum;
-    // As of now all coils share the same filter settings. However this is
-    // not mandatory.
+    out.init(num, allISRs[num]);
     simple.init(&toneList);
-    one.init(num);
+    //one.init(num);
     midi.init(num, &toneList);
     lightsaber.setCoilNum(num);
     lightsaber.setTonelist(&toneList);

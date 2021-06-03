@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include "InterrupterConfig.h"
 #include "Oneshot.h"
+#include "Output.h"
 #include "ToneList.h"
 #include "MIDI.h"
 #include "Simple.h"
@@ -57,13 +58,39 @@ public:
         }
     };
 
-    static Coil allCoils[COIL_COUNT];
     Oneshot  one;
+    Output out;
     ToneList toneList;
     MIDI     midi;
     Simple   simple;
     LightSaber lightsaber;
 
+    static Coil allCoils[COIL_COUNT];
+    static void timer0ISR()
+    {
+        allCoils[0].out.ISR();
+    };
+    static void timer1ISR()
+    {
+        allCoils[1].out.ISR();
+    };
+    static void timer2ISR()
+    {
+        allCoils[2].out.ISR();
+    };
+    static void timer3ISR()
+    {
+        allCoils[3].out.ISR();
+    };
+    static void timer4ISR()
+    {
+        allCoils[4].out.ISR();
+    };
+    static void timer5ISR()
+    {
+        allCoils[5].out.ISR();
+    };
+    static constexpr void (*allISRs[6])(void) = {timer0ISR, timer1ISR, timer2ISR, timer3ISR, timer4ISR, timer5ISR};
 
 private:
     uint32_t num =  0;
