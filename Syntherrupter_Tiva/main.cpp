@@ -16,6 +16,7 @@
 #include "Coil.h"
 #include "GUI.h"
 
+#define len(x) (sizeof(x) / sizeof(x[0]))
 
 void sysTickISR()
 {
@@ -42,55 +43,64 @@ int main(void)
     System::init(sysTickISR);
     System::setSystemTimeResUS(16);
 
-    //uint32_t cfgStatus = EEPROMSettings::init();
+    uint32_t cfgStatus = EEPROMSettings::init();
 
     //Nextion nextion;
     //bool nxtOk = nextion.init(3, 115200);
 
-    //MIDI::init(115200, uartUsbISR, GPIO_PORTC_BASE, GPIO_PIN_4, GPIO_PIN_5, uartMidiISR);
-    //LightSaber::init(GPIO_PORTA_BASE, GPIO_PIN_6, GPIO_PIN_7, 115200, uartLightSaberISR);
+    MIDI::init(115200, uartUsbISR, GPIO_PORTC_BASE, GPIO_PIN_4, GPIO_PIN_5, uartMidiISR);
+    LightSaber::init(GPIO_PORTA_BASE, GPIO_PIN_6, GPIO_PIN_7, 115200, uartLightSaberISR);
 
-    for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+    //for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
     {
-        Coil::allCoils[coil].init(coil);
+        Coil::allCoils[2].init(2);
     }
 
     //GUI::init(&nextion, nxtOk, cfgStatus);
     //Sysex::init(&nextion);
 
-    constexpr BUFFER_TIME_US = 10000;
+    constexpr uint32_t BUFFER_TIME_US = 10000;
+    uint32_t bufferEndTime = 0;
 
-    constexpr uint32_t P_C = 3;
+    constexpr uint32_t P_C = 1;
     float periods[P_C] = {0.0f};
-    periods[0] = 1 / 323.0f;
-    periods[1] = periods[0] / 1.5f;
-    periods[2] = periods[0] / 2.0f;
+    periods[0] = 1e6f / 1000.0f;//323.0f;
+    //periods[1] = periods[0] / 1.5f;
+    //periods[2] = periods[0] / 2.0f;
     float ontimes[P_C] = {0.0f};
-    ontimes[0] = 100;
-    ontimes[1] = 100;
-    ontimes[2] = 100;
+    ontimes[0] = 200;
+    //ontimes[1] = 150;
+    //ontimes[2] = 100;
 
     uint32_t next[P_C] = {0};
-
-    bool bufferSwap = false;
-    uint32_t bufferNum = 0;
+    float timesf[32];
+    float ontimesf[32];
+    volatile uint32_t run = 0;
 
     while (42)
     {
-        if (Coil::allCoils[0].out.currentBuffer == bufferNum)
+        if (!run)
         {
+            continue;
+        }
+        if (Coil::allCoils[2].out.wannaMore)
+        {
+            run--;
             // Buffer swapped, fill new empty buffer.
-            bufferNum = !bufferNum;
-            auto& buffer = bufferNum ? Coil::allCoils[0].out.buffer1 : Coil::allCoils[0].out.buffer0;
+            uint32_t bufferStartTime = bufferEndTime;
+            bufferEndTime += BUFFER_TIME_US;
             uint32_t index = 0;
             for (uint32_t i = 0; i < P_C; i++)
             {
-                if (System::getSystemTimeUS() >= next[i])
+                while (next[i] < bufferEndTime)
                 {
-                    next[i]
+                    timesf[index] = next[i] - bufferStartTime;
+                    ontimesf[index] = ontimes[i];
+                    index++;
+                    next[i] += periods[i];
                 }
-                buffer[index]
             }
+            Coil::allCoils[2].out.insert(timesf, ontimesf, index, BUFFER_TIME_US);
         }
 
         /*uint32_t state = GUI::update();

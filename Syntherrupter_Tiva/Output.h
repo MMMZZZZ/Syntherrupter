@@ -11,6 +11,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "string.h"
 #include "inc/hw_memmap.h"              // Macros defining the memory map of the Tiva C Series device. This includes defines such as peripheral base address locations such as GPIO_PORTF_BASE.
 #include "inc/hw_types.h"               // Defines common types and macros.
 #include "inc/hw_gpio.h"                // Defines and Macros for GPIO hardware.
@@ -32,43 +33,78 @@ public:
     Output();
     virtual ~Output();
     void init(uint32_t timer, void (*ISR)(void));
-    void insert(float* periods, float* ontimes, uint32_t count);
+    void insert(float* times, float* ontimes, uint32_t count, float bufferTime);
     void setMaxOntimeUS(uint32_t maxOntimeUS);
     void setMinOfftimeUS(uint32_t minOfftimeUS);
     void ISR()
     {
+        GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0xff);
         TimerIntClear(timerBase, TIMER_TIMA_TIMEOUT);
-        if (currentBuffer == 0)
+        if (size0)
         {
+            if (buffer0[index0].state)
+            {
+                TimerActionSet(TIMER_CFG_A_ACT_SETCLRTO);
+            }
+            else
+            {
+                TimerActionSet(TIMER_CFG_A_ACT_NONE);
+            }
             TimerLoadSet(timerBase, TIMER_A, buffer0[index0].load);
-            TimerMatchSet(timerBase, TIMER_A, buffer0[index0].match);
-            if (++index0 >= BUFFER_SIZE)
+
+            if (++index0 >= size0)
             {
+                if (!size1)
+                {
+                    TimerActionSet(TIMER_CFG_A_ACT_CLRTOGTO);
+                    TimerDisable(timerBase, TIMER_A);
+                }
                 index0 = 0;
-                currentBuffer = 1;
+                size0  = 0;
+                wannaMore = 1;
             }
         }
-        else
+        else if (size1)
         {
-            TimerLoadSet(timerBase, TIMER_A, buffer0[index1].load);
-            TimerMatchSet(timerBase, TIMER_A, buffer0[index1].match);
-            if (++index1 >= BUFFER_SIZE)
+            if (buffer1[index1].state)
             {
+                TimerActionSet(TIMER_CFG_A_ACT_SETCLRTO);
+            }
+            else
+            {
+                TimerActionSet(TIMER_CFG_A_ACT_NONE);
+            }
+            TimerLoadSet(timerBase, TIMER_A, buffer1[index1].load);
+            if (++index1 >= size1)
+            {
+                if (size0 == 0)
+                {
+                    TimerActionSet(TIMER_CFG_A_ACT_CLRTOGTO);
+                    TimerDisable(timerBase, TIMER_A);
+                }
                 index1 = 0;
-                currentBuffer = 0;
+                size1  = 0;
+                wannaMore = 1;
             }
         }
+        GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0x00);
     };
-    static constexpr uint32_t BUFFER_SIZE = 64;
+    static constexpr uint32_t BUFFER_SIZE = 128;
     struct Signal
     {
         uint32_t load;
-        uint32_t match;
+        uint32_t state;
     };
     volatile Signal buffer0[BUFFER_SIZE], buffer1[BUFFER_SIZE];
-    volatile uint32_t currentBuffer;
+    volatile uint32_t wannaMore = 1;
 
 private:
+    void TimerActionSet(uint32_t act)
+    {
+        HWREG(timerBase + TIMER_O_TAMR) = (act >> 4) |
+                                          (TIMER_CFG_PERIODIC & 0xff) |
+                                           TIMER_TAMR_TAPWMIE;
+    };
     static constexpr uint32_t TIMER_SYSCTL_PERIPH = 0;
     static constexpr uint32_t TIMER_BASE          = 1;
     static constexpr uint32_t PORT_SYSCTL_PERIPH  = 2;
@@ -89,7 +125,7 @@ private:
     uint32_t maxOnValue = 1600;
     uint32_t timerBase = 0;
 
-    volatile uint32_t index0 = 0, index1 = 0;
+    volatile uint32_t index0 = 0, index1 = 0, size0 = 0, size1 = 0;
 };
 
 #endif /* OUTPUT_H_ */
