@@ -40,7 +40,20 @@ public:
     {
         GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0xff);
         TimerIntClear(timerBase, TIMER_TIMA_TIMEOUT);
-        if (size0)
+        fired = true;
+        static uint32_t buffer = 0;
+        if (!buffer)
+        {
+            if (size0)
+            {
+                buffer = 1;
+            }
+            else if (size1)
+            {
+                buffer = 2;
+            }
+        }
+        if (buffer == 1)
         {
             if (buffer0[index0].state)
             {
@@ -59,12 +72,13 @@ public:
                     TimerActionSet(TIMER_CFG_A_ACT_CLRTOGTO);
                     TimerDisable(timerBase, TIMER_A);
                 }
+                buffer = 0;
                 index0 = 0;
                 size0  = 0;
                 wannaMore = 1;
             }
         }
-        else if (size1)
+        else if (buffer == 2)
         {
             if (buffer1[index1].state)
             {
@@ -82,6 +96,7 @@ public:
                     TimerActionSet(TIMER_CFG_A_ACT_CLRTOGTO);
                     TimerDisable(timerBase, TIMER_A);
                 }
+                buffer = 0;
                 index1 = 0;
                 size1  = 0;
                 wannaMore = 1;
@@ -89,13 +104,6 @@ public:
         }
         GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0x00);
     };
-    static constexpr uint32_t BUFFER_SIZE = 128;
-    struct Signal
-    {
-        uint32_t load;
-        uint32_t state;
-    };
-    volatile Signal buffer0[BUFFER_SIZE], buffer1[BUFFER_SIZE];
     volatile uint32_t wannaMore = 1;
 
 private:
@@ -125,7 +133,15 @@ private:
     uint32_t maxOnValue = 1600;
     uint32_t timerBase = 0;
 
+    static constexpr uint32_t BUFFER_SIZE = 128;
+    struct Signal
+    {
+        uint32_t load;
+        uint32_t state;
+    };
+    volatile Signal buffer0[BUFFER_SIZE], buffer1[BUFFER_SIZE];
     volatile uint32_t index0 = 0, index1 = 0, size0 = 0, size1 = 0;
+    volatile bool fired = false;
 };
 
 #endif /* OUTPUT_H_ */

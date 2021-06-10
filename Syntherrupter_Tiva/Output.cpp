@@ -76,7 +76,8 @@ void Output::insert(float* times, float* ontimes, uint32_t count, float bufferTi
         }
     }
 
-    uint32_t delayTilBufferEnd = bufferTime - times[count - 1] - ontimes[count - 1];
+    static int32_t delayTilBufferEnd = 0;
+    int32_t newDelayTilBufferEnd = bufferTime - times[count - 1] - ontimes[count - 1];
 
     for (uint32_t i = count - 1; i >= 1; i--)
     {
@@ -90,6 +91,16 @@ void Output::insert(float* times, float* ontimes, uint32_t count, float bufferTi
             times[i] -= temp;
         }
     }
+
+    if (delayTilBufferEnd < 0 && -delayTilBufferEnd > times[0])
+    {
+        times[0] = 0;
+    }
+    else
+    {
+        times[0] += delayTilBufferEnd;
+    }
+    delayTilBufferEnd = newDelayTilBufferEnd;
 
     Signal tempBuffer[BUFFER_SIZE];
     uint32_t index = 0;
@@ -112,14 +123,25 @@ void Output::insert(float* times, float* ontimes, uint32_t count, float bufferTi
             index++;
         }
     }
-    if (index >= BUFFER_SIZE)
+    if (tempBuffer[index - 1].state)
     {
-        index = BUFFER_SIZE - 1;
+        if (index >= BUFFER_SIZE)
+        {
+            index = BUFFER_SIZE - 1;
+            delayTilBufferEnd += tempBuffer[BUFFER_SIZE - 1].load;
+        }
+        delayTilBufferEnd -= 2;
+        tempBuffer[index].load = 240;
+        tempBuffer[index].state = false;
+        index++;
     }
-    tempBuffer[index].load = delayTilBufferEnd * 120;
-    tempBuffer[index].state = false;
-    index++;
 
+    if (size0 || size1)
+    {
+        // Timer is running => sync.
+        fired = false;
+        while (!fired);
+    }
     TimerIntDisable(timerBase, TIMER_TIMA_TIMEOUT);
     auto& buffer = size0 == 0 ? buffer0 : buffer1;
     auto& size   = size0 == 0 ? size0   : size1;
