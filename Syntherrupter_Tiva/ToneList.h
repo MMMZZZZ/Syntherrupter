@@ -14,6 +14,7 @@
 #include "InterrupterConfig.h"
 #include "System.h"
 #include "Tone.h"
+#include "Pulse.h"
 
 
 class ToneList
@@ -31,20 +32,27 @@ public:
     void setMaxDuty(float maxDuty)
     {
         this->maxDuty = maxDuty;
+        limit();
     };
-    uint32_t getOntimeUS(uint32_t timeUS)
+    uint32_t getOntimesUS(Pulse* pulses, uint32_t length, uint32_t startTimeUS, uint32_t endTimeUS)
     {
+        uint32_t index = 0;
         Tone* tone = firstTone;
         while (tone != newTone)
         {
-            if (timeUS >= tone->nextFireUS)
+            while (tone->nextFireUS < endTimeUS)
             {
-                tone->update(timeUS);
-                return tone->limitedOntimeUS;
+                if (tone->nextFireUS >= startTimeUS && index < length)
+                {
+                    pulses[index].ontimeUS = tone->limitedOntimeUS;
+                    pulses[index].timeUS = tone->nextFireUS;
+                    index++;
+                }
+                tone->update(endTimeUS);
             }
             tone = tone->nextTone;
         }
-        return 0;
+        return index;
     };
     Tone* firstTone;
 

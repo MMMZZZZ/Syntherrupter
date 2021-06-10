@@ -25,6 +25,7 @@
 #include "InterrupterConfig.h"
 #include "System.h"
 #include "Buffer.h"
+#include "Pulse.h"
 
 
 class Output
@@ -33,15 +34,21 @@ public:
     Output();
     virtual ~Output();
     void init(uint32_t timer, void (*ISR)(void));
-    void insert(float* times, float* ontimes, uint32_t count, float bufferTime);
+    void insert(Pulse* pulses, uint32_t count, int32_t bufferTime);
     void setMaxOntimeUS(uint32_t maxOntimeUS);
     void setMinOfftimeUS(uint32_t minOfftimeUS);
+    bool requiresData()
+    {
+        return wannaMore;
+    };
+    bool isRunning()
+    {
+        return (size0 || size1);
+    };
     void ISR()
     {
-        GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0xff);
+        //GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0xff);
         TimerIntClear(timerBase, TIMER_TIMA_TIMEOUT);
-        fired = true;
-        static uint32_t buffer = 0;
         if (!buffer)
         {
             if (size0)
@@ -52,26 +59,36 @@ public:
             {
                 buffer = 2;
             }
+            else
+            {
+                TimerActionSet(TIMER_CFG_A_ACT_CLRTOGTO);
+                TimerDisable(timerBase, TIMER_A);
+            }
         }
         if (buffer == 1)
         {
             if (buffer0[index0].state)
             {
                 TimerActionSet(TIMER_CFG_A_ACT_SETCLRTO);
+                if (firedLastTime && timerBase == TIMER2_BASE)
+                {
+                    firedLastTime = 2;
+                }
+                firedLastTime = true;
             }
             else
             {
                 TimerActionSet(TIMER_CFG_A_ACT_NONE);
+                if (!firedLastTime && timerBase == TIMER2_BASE)
+                {
+                    firedLastTime = 0;
+                }
+                firedLastTime = false;
             }
             TimerLoadSet(timerBase, TIMER_A, buffer0[index0].load);
 
             if (++index0 >= size0)
             {
-                if (!size1)
-                {
-                    TimerActionSet(TIMER_CFG_A_ACT_CLRTOGTO);
-                    TimerDisable(timerBase, TIMER_A);
-                }
                 buffer = 0;
                 index0 = 0;
                 size0  = 0;
@@ -91,20 +108,14 @@ public:
             TimerLoadSet(timerBase, TIMER_A, buffer1[index1].load);
             if (++index1 >= size1)
             {
-                if (size0 == 0)
-                {
-                    TimerActionSet(TIMER_CFG_A_ACT_CLRTOGTO);
-                    TimerDisable(timerBase, TIMER_A);
-                }
                 buffer = 0;
                 index1 = 0;
                 size1  = 0;
                 wannaMore = 1;
             }
         }
-        GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0x00);
+        //GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0x00);
     };
-    volatile uint32_t wannaMore = 1;
 
 private:
     void TimerActionSet(uint32_t act)
@@ -133,7 +144,8 @@ private:
     uint32_t maxOnValue = 1600;
     uint32_t timerBase = 0;
 
-    static constexpr uint32_t BUFFER_SIZE = 128;
+    bool startNeeded = false;
+    static constexpr uint32_t BUFFER_SIZE = 256;
     struct Signal
     {
         uint32_t load;
@@ -141,7 +153,9 @@ private:
     };
     volatile Signal buffer0[BUFFER_SIZE], buffer1[BUFFER_SIZE];
     volatile uint32_t index0 = 0, index1 = 0, size0 = 0, size1 = 0;
-    volatile bool fired = false;
+    volatile uint32_t wannaMore = 1;
+    volatile uint32_t buffer = 0;
+    volatile bool firedLastTime = false;
 };
 
 #endif /* OUTPUT_H_ */

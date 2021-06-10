@@ -29,6 +29,7 @@ void Output::init(uint32_t timerNum, void (*ISR)(void))
 
     SysCtlPeripheralEnable(TIMER_MAPPING[timerNum][TIMER_SYSCTL_PERIPH]);
     SysCtlPeripheralEnable(TIMER_MAPPING[timerNum][PORT_SYSCTL_PERIPH]);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);
     SysCtlDelay(2);
 
     // In case timer was previously configured differently
@@ -58,49 +59,23 @@ void Output::setMaxOntimeUS(uint32_t maxOntimeUS)
     maxOnValue = maxOntimeUS * (System::getPIOSCFreq() / 1000000);
 }
 
-void Output::insert(float* times, float* ontimes, uint32_t count, float bufferTime)
+void Output::insert(Pulse* pulses, uint32_t count, int32_t bufferTime)
 {
-    for (int32_t i = count - 1; i >= 0; i--)
-    {
-        for (int32_t j = 0; j < i; j++)
-        {
-            if (times[j] > times[i])
-            {
-                float temp = times[j];
-                times[j] = times[i];
-                times[i] = temp;
-                temp = ontimes[j];
-                ontimes[j] = ontimes[i];
-                ontimes[i] = temp;
-            }
-        }
-    }
-
-    static int32_t delayTilBufferEnd = 0;
-    int32_t newDelayTilBufferEnd = bufferTime - times[count - 1] - ontimes[count - 1];
-
+    // Replace timeUS (relative to start time of this buffer) by times relative
+    // to the last action (on-/offtime). Overlapping shouldn't occur but it is
+    // catched by setting the relative time to 0;
     for (uint32_t i = count - 1; i >= 1; i--)
     {
-        uint32_t temp = times[i - 1] + ontimes[i - 1];
-        if (temp >= times[i])
+        uint32_t temp = pulses[i - 1].timeUS + pulses[i - 1].ontimeUS;
+        if (temp >= pulses[i].timeUS)
         {
-            times[i] = 0;
+            pulses[i].timeUS = 0;
         }
         else
         {
-            times[i] -= temp;
+            pulses[i].timeUS -= temp;
         }
     }
-
-    if (delayTilBufferEnd < 0 && -delayTilBufferEnd > times[0])
-    {
-        times[0] = 0;
-    }
-    else
-    {
-        times[0] += delayTilBufferEnd;
-    }
-    delayTilBufferEnd = newDelayTilBufferEnd;
 
     Signal tempBuffer[BUFFER_SIZE];
     uint32_t index = 0;
@@ -110,56 +85,43 @@ void Output::insert(float* times, float* ontimes, uint32_t count, float bufferTi
         {
             break;
         }
-        if (times[i])
+        if (pulses[i].timeUS)
         {
-            tempBuffer[index].load  = times[i] * 120;
+            tempBuffer[index].load  = pulses[i].timeUS * 120;
             tempBuffer[index].state = false;
             index++;
         }
-        if (ontimes[i])
+        if (pulses[i].ontimeUS)
         {
-            tempBuffer[index].load  = ontimes[i] * 120;
+            tempBuffer[index].load  = pulses[i].ontimeUS * 120;
             tempBuffer[index].state = true;
             index++;
         }
     }
-    if (tempBuffer[index - 1].state)
-    {
-        if (index >= BUFFER_SIZE)
-        {
-            index = BUFFER_SIZE - 1;
-            delayTilBufferEnd += tempBuffer[BUFFER_SIZE - 1].load;
-        }
-        delayTilBufferEnd -= 2;
-        tempBuffer[index].load = 240;
-        tempBuffer[index].state = false;
-        index++;
-    }
 
-    if (size0 || size1)
-    {
-        // Timer is running => sync.
-        fired = false;
-        while (!fired);
-    }
     TimerIntDisable(timerBase, TIMER_TIMA_TIMEOUT);
     auto& buffer = size0 == 0 ? buffer0 : buffer1;
     auto& size   = size0 == 0 ? size0   : size1;
     auto& otherSize = size0 == 0 ? size1   : size0;
-    size = index;
-    for (uint32_t i = 0; i < size; i++)
+    for (uint32_t i = 0; i < index; i++)
     {
         buffer[i].load  = tempBuffer[i].load;
         buffer[i].state = tempBuffer[i].state;
     }
+    size = index;
     if (otherSize)
     {
         wannaMore = false;
+        if (startNeeded)
+        {
+            ISR();
+            TimerEnable(timerBase, TIMER_A);
+            startNeeded = false;
+        }
     }
     else
     {
-        ISR();
-        TimerEnable(timerBase, TIMER_A);
+        startNeeded = true;
     }
     TimerIntEnable(timerBase, TIMER_TIMA_TIMEOUT);
 }

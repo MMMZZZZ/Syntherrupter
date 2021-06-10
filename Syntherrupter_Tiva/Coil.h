@@ -31,32 +31,7 @@ public:
     void setMaxOntimeUS(uint32_t ontimeUS);
     void setMinOfftimeUS(uint32_t offtimeUS);
     void setMinOntimeUS(uint32_t ontimeUS);
-    void updateOutput()
-    {
-        /*
-         * Time critical updates.
-         */
-
-        uint32_t timeUS = System::getSystemTimeUS();
-        if (timeUS > nextAllowedFireUS)
-        {
-            uint32_t nextOntimeUS = toneList.getOntimeUS(timeUS);
-            if (nextOntimeUS)
-            {
-                nextOntimeUS += *minOntimeUS;
-                one.shot(nextOntimeUS);
-                nextAllowedFireUS = timeUS + nextOntimeUS + *minOfftimeUS;
-            }
-        }
-        /*
-         * Overflow detection. No ontime or min offtime is larger than
-         * 10 seconds.
-         */
-        else if (nextAllowedFireUS - timeUS > 10000000)
-        {
-            nextAllowedFireUS = 0;
-        }
-    };
+    void updateOutput();
 
     Oneshot  one;
     Output out;
@@ -76,7 +51,9 @@ public:
     };
     static void timer2ISR()
     {
+        GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0xff);
         allCoils[2].out.ISR();
+        GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0x00);
     };
     static void timer3ISR()
     {
@@ -95,11 +72,18 @@ public:
 private:
     uint32_t num =  0;
     uint32_t nextAllowedFireUS =  0;
+    uint32_t bufferEndTimeUS = 0;
+    static constexpr uint32_t PULSES_SIZE = 24;
+    uint32_t dataIndex = 0;
+    Pulse pulseData[100][PULSES_SIZE];
+    Pulse* pulses = pulseData[0];
+    uint32_t bufferDurationValue = 5000;
     // Actual memory (location) provided by EEPROMSettings
     uint32_t* minOntimeUS;
     uint32_t* minOfftimeUS;
     uint32_t* maxOntimeUS;
     uint32_t* maxDutyPerm;
+    uint32_t* bufferDurationUS = &bufferDurationValue;
     friend class EEPROMSettings;
 };
 
