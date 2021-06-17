@@ -89,6 +89,7 @@ uint32_t EEPROMSettings::init()
         }
     }
     MIDI::sysexDeviceID = &(deviceData.deviceID);
+    MIDI::lfoPeriodUS   = &(deviceData.midiLfoPeriodUS);
     for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
     {
         Coil::allCoils[coil].maxDutyPerm   = &(coilData[coil].maxDutyPerm);
