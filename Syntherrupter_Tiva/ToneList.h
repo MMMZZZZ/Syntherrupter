@@ -25,6 +25,7 @@ public:
     Tone* updateTone(uint32_t ontimeUS, uint32_t periodUS, void* owner, void* origin, Tone* tone);
     void deleteTone(Tone* tone);
     void limit();
+    void applyTimeOffsetUS(uint32_t offsetUS);
     void setMaxOntimeUS(float ontimeUSLimit)
     {
         this->maxOntimeUS = maxOntimeUS;
@@ -34,21 +35,15 @@ public:
         this->maxDuty = maxDuty;
         limit();
     };
-    uint32_t getOntimesUS(Pulse* pulses, uint32_t length, uint32_t startTimeUS, uint32_t endTimeUS)
+    uint32_t getOntimesUS(Pulse* pulses, uint32_t nowUS, uint32_t endUS)
     {
         uint32_t index = 0;
         Tone* tone = firstTone;
         while (tone != newTone)
         {
-            while (tone->nextFireUS < endTimeUS)
+            if (endUS >= tone->nextFireUS)
             {
-                if (tone->nextFireUS >= startTimeUS && index < length)
-                {
-                    pulses[index].ontimeUS = tone->limitedOntimeUS;
-                    pulses[index].timeUS = tone->nextFireUS;
-                    index++;
-                }
-                tone->update(endTimeUS);
+                pulses[index++] = tone->update(nowUS);
             }
             tone = tone->nextTone;
         }

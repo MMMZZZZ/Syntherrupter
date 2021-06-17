@@ -15,5 +15,7 @@ struct Pulse
     uint32_t ontimeUS;
 };
 
+static constexpr Pulse EMPTY_PULSE = {.timeUS = 0, .ontimeUS = 0};
+
 
 #endif /* PULSE_H_ */

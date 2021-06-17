@@ -71,8 +71,8 @@ public:
 
 private:
     uint32_t num =  0;
-    uint32_t nextAllowedFireUS =  0;
-    uint32_t bufferEndTimeUS = 0;
+    uint32_t readyForNextUS =  0;
+    uint32_t lastOntimeEndUS = 0;
     static constexpr uint32_t PULSES_SIZE = 24;
     uint32_t dataIndex = 0;
     Pulse pulseData[100][PULSES_SIZE];

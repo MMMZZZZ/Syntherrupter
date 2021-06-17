@@ -46,7 +46,7 @@ void Coil::setMaxDutyPerm(uint32_t dutyPerm)
 
 void Coil::setMaxOntimeUS(uint32_t ontimeUS)
 {
-    one.setMaxOntimeUS(ontimeUS);
+    out.setMaxOntimeUS(ontimeUS);
     toneList.setMaxOntimeUS(ontimeUS);
     *(this->maxOntimeUS) = ontimeUS;
 }
@@ -74,15 +74,18 @@ void Coil::updateData()
 
 void Coil::updateOutput()
 {
-    if (out.requiresData())
+    uint32_t currentWindowUS = out.lastFiredUS + *bufferDurationUS;
+    if (readyForNextUS < currentWindowUS || !out.isActive())
     {
-        uint32_t bufferStartTimeUS = bufferEndTimeUS;
-        bufferEndTimeUS += *bufferDurationUS;
-
-        // Load all pulses for this output. They'll be unsorted but guaranteed
-        // to have timeUS < bufferEndTimeUS
-        uint32_t pulseCount = toneList.getOntimesUS(pulses, PULSES_SIZE, bufferStartTimeUS, bufferEndTimeUS);
-        if (pulseCount)
+        // Load all pulses for this output. They'll be unsorted
+        uint32_t pulseCount = toneList.getOntimesUS(pulses, readyForNextUS, currentWindowUS);
+        if (!pulseCount)
+        {
+            pulses[0].timeUS = currentWindowUS;
+            pulses[0].ontimeUS = 0;
+            pulseCount = 1;
+        }
+        if (pulseCount >= 2)
         {
             // Bring all pulses in chronological order.
             for (int32_t i = pulseCount - 1; i >= 0; i--)
@@ -100,62 +103,35 @@ void Coil::updateOutput()
                     }
                 }
             }
-
-            /*
-             *  * Remove all pulses that violate the min offtime.
-             *  * Adjust the pulse.timeUS to be relative to the start time of this
-             *    buffer.
-             *  * Limit ontimes that are too high.
-             *
-             */
-            for (uint32_t i = 0; i < pulseCount; i++)
+        }
+        for (uint32_t i = 0; i < pulseCount; i++)
+        {
+            Pulse& pulse = pulses[i];
+            if (pulse.ontimeUS>(1<<30))
             {
-                if (pulses[i].timeUS > nextAllowedFireUS && pulses[i].ontimeUS >= 2)
-                {
-                    if (pulses[i].ontimeUS > *maxOntimeUS)
-                    {
-                        pulses[i].ontimeUS = *maxOntimeUS;
-                    }
-                    nextAllowedFireUS = pulses[i].timeUS + pulses[i].ontimeUS + *minOfftimeUS;
-                }
-                else
-                {
-                    pulses[i].ontimeUS = 0;
-                }
-                pulses[i].timeUS -= bufferStartTimeUS;
+                pulse.ontimeUS*=1;
             }
-
-            // Adjust the bufferEndTime to match the actual last pulse in the
-            // buffer.
-            bufferEndTimeUS = bufferStartTimeUS + pulses[pulseCount - 1].timeUS + pulses[pulseCount - 1].ontimeUS;
-        }
-        else
-        {
-            pulses[0].timeUS = *bufferDurationUS - 1;
-            pulses[0].ontimeUS = 0;
-            pulseCount = 1;
-        }
-        // Pulse list done, hand it to the output timer
-        out.insert(pulses, pulseCount, *bufferDurationUS);
-        /*
-         * Overflow detection. From the lines above, nextAllowedFireUS
-         * has to be greater or equal to bufferEndTimeUS - except if
-         * an overflow occured.
-         */
-        if (nextAllowedFireUS < bufferEndTimeUS)
-        {
-            nextAllowedFireUS = bufferEndTimeUS;
-        }
-
-
-        if (++dataIndex >= 100)
-        {
-            dataIndex = 0;
-            if (num == 2)
+            if (pulse.timeUS < readyForNextUS)
             {
-                dataIndex = 0;
+                // Ontime is too close to previous ontime; merge them together.
+                // Actually, the merge happens in the Output class.
+                pulse.timeUS = lastOntimeEndUS;
             }
+            readyForNextUS = pulse.timeUS + pulse.ontimeUS;
+            pulse.timeUS  -= lastOntimeEndUS;
+            out.addPulse(pulse);
+            lastOntimeEndUS =  readyForNextUS;
+            readyForNextUS += *minOfftimeUS;
         }
-        pulses = pulseData[dataIndex];
+    }
+    // Prevent overflow issues. Once the smallest variable is above a
+    // threshold, all of them are "reset" but substracting that offset.
+    static constexpr uint32_t OVERFLOW_THRESHOLD_US = 1 << 16;
+    if (out.lastFiredUS > OVERFLOW_THRESHOLD_US)
+    {
+        out.lastFiredUS -= OVERFLOW_THRESHOLD_US;
+        readyForNextUS  -= OVERFLOW_THRESHOLD_US;
+        lastOntimeEndUS -= OVERFLOW_THRESHOLD_US;
+        toneList.applyTimeOffsetUS(OVERFLOW_THRESHOLD_US);
     }
 }

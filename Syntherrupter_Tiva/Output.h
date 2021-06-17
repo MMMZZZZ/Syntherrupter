@@ -24,7 +24,6 @@
 #include "driverlib/timer.h"            // Defines and macros for timer API of driverLib.
 #include "InterrupterConfig.h"
 #include "System.h"
-#include "Buffer.h"
 #include "Pulse.h"
 
 
@@ -34,90 +33,59 @@ public:
     Output();
     virtual ~Output();
     void init(uint32_t timer, void (*ISR)(void));
-    void insert(Pulse* pulses, uint32_t count, int32_t bufferTime);
+    void addPulse(Pulse& pulse);
     void setMaxOntimeUS(uint32_t maxOntimeUS);
     void setMinOfftimeUS(uint32_t minOfftimeUS);
-    bool requiresData()
+    bool isActive()
     {
-        return wannaMore;
-    };
-    bool isRunning()
-    {
-        return (size0 || size1);
-    };
+        return !startNeeded;
+    }
     void ISR()
     {
         //GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0xff);
         TimerIntClear(timerBase, TIMER_TIMA_TIMEOUT);
-        if (!buffer)
-        {
-            if (size0)
-            {
-                buffer = 1;
-            }
-            else if (size1)
-            {
-                buffer = 2;
-            }
-            else
-            {
-                TimerActionSet(TIMER_CFG_A_ACT_CLRTOGTO);
-                TimerDisable(timerBase, TIMER_A);
-            }
-        }
-        if (buffer == 1)
-        {
-            if (buffer0[index0].state)
-            {
-                TimerActionSet(TIMER_CFG_A_ACT_SETCLRTO);
-                if (firedLastTime && timerBase == TIMER2_BASE)
-                {
-                    firedLastTime = 2;
-                }
-                firedLastTime = true;
-            }
-            else
-            {
-                TimerActionSet(TIMER_CFG_A_ACT_NONE);
-                if (!firedLastTime && timerBase == TIMER2_BASE)
-                {
-                    firedLastTime = 0;
-                }
-                firedLastTime = false;
-            }
-            TimerLoadSet(timerBase, TIMER_A, buffer0[index0].load);
 
-            if (++index0 >= size0)
-            {
-                buffer = 0;
-                index0 = 0;
-                size0  = 0;
-                wannaMore = 1;
-            }
-        }
-        else if (buffer == 2)
+        lastFiredUS += lastLoadUS;
+
+        if (readIndex == writeIndex)
         {
-            if (buffer1[index1].state)
-            {
-                TimerActionSet(TIMER_CFG_A_ACT_SETCLRTO);
-            }
-            else
-            {
-                TimerActionSet(TIMER_CFG_A_ACT_NONE);
-            }
-            TimerLoadSet(timerBase, TIMER_A, buffer1[index1].load);
-            if (++index1 >= size1)
-            {
-                buffer = 0;
-                index1 = 0;
-                size1  = 0;
-                wannaMore = 1;
-            }
+            TimerDisable(timerBase, TIMER_A);
+            TimerActionSet(TIMER_CFG_A_ACT_CLRSETTO);
+            TimerActionSet(TIMER_CFG_A_ACT_NONE);
+            startNeeded = true;
+            lastLoadUS = 0;
+        }
+        else
+        {
+            TimerActionSet(TIMER_CFG_A_ACT_SETCLRTO * buffer[readIndex].state);
+            lastLoadUS = buffer[readIndex].load;
+            TimerLoadSet(timerBase, TIMER_A, lastLoadUS * TICKS_PER_US);
+
+            readIndex = (readIndex + 1) % BUFFER_SIZE;
         }
         //GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0x00);
     };
+    volatile uint32_t lastFiredUS = 0;
 
 private:
+    struct Signal
+    {
+        uint32_t load;
+        uint32_t state;
+    };
+
+    uint32_t bufferInsert(Signal& signal);
+    uint32_t bufferLevel()
+    {
+        if (readIndex <= writeIndex)
+        {
+            return writeIndex - readIndex;
+        }
+        else
+        {
+            return BUFFER_SIZE - readIndex + writeIndex;
+        }
+    };
     void TimerActionSet(uint32_t act)
     {
         HWREG(timerBase + TIMER_O_TAMR) = (act >> 4) |
@@ -140,22 +108,17 @@ private:
     };
     static constexpr uint32_t TIMER_CONFIG_POS = (TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_PERIODIC | TIMER_CFG_A_ACT_SETCLRTO);
     static constexpr uint32_t TIMER_CONFIG_NEG = (TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_PERIODIC | TIMER_CFG_A_ACT_CLRSETTO);
-    uint32_t minOffValue = 160;
-    uint32_t maxOnValue = 1600;
+    static constexpr uint32_t TICKS_PER_US = 120;
+    uint32_t minOffValue = 10 * TICKS_PER_US;
+    uint32_t maxOntimeUS = 100 * TICKS_PER_US;
     uint32_t timerBase = 0;
 
-    bool startNeeded = false;
     static constexpr uint32_t BUFFER_SIZE = 256;
-    struct Signal
-    {
-        uint32_t load;
-        uint32_t state;
-    };
-    volatile Signal buffer0[BUFFER_SIZE], buffer1[BUFFER_SIZE];
-    volatile uint32_t index0 = 0, index1 = 0, size0 = 0, size1 = 0;
-    volatile uint32_t wannaMore = 1;
-    volatile uint32_t buffer = 0;
+    volatile Signal buffer[BUFFER_SIZE];
+    volatile uint32_t readIndex = 0, writeIndex = 0, lastWriteIndex = 0;
+    volatile uint32_t lastLoadUS = 0;
     volatile bool firedLastTime = false;
+    volatile bool startNeeded = true;
 };
 
 #endif /* OUTPUT_H_ */

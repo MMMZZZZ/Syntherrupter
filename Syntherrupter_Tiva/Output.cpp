@@ -42,7 +42,10 @@ void Output::init(uint32_t timerNum, void (*ISR)(void))
     // Timer A generates the ontime, timer B assures enough offtime until the next pulse
     TimerConfigure(timerBase, TIMER_CFG_PERIODIC);
     TimerControlStall(timerBase, TIMER_A, true);
-    //TimerClockSourceSet(timerBase, TIMER_CLOCK_PIOSC);
+    if (TICKS_PER_US == 16)
+    {
+        TimerClockSourceSet(timerBase, TIMER_CLOCK_PIOSC);
+    }
     TimerUpdateMode(timerBase, TIMER_A, TIMER_UP_LOAD_TIMEOUT);
     TimerLoadSet(timerBase, TIMER_A, 12000);
     TimerIntRegister(timerBase, TIMER_A, ISR);
@@ -56,72 +59,80 @@ void Output::init(uint32_t timerNum, void (*ISR)(void))
 
 void Output::setMaxOntimeUS(uint32_t maxOntimeUS)
 {
-    maxOnValue = maxOntimeUS * (System::getPIOSCFreq() / 1000000);
+    this->maxOntimeUS = maxOntimeUS;
 }
 
-void Output::insert(Pulse* pulses, uint32_t count, int32_t bufferTime)
+void Output::addPulse(Pulse& pulse)
 {
-    // Replace timeUS (relative to start time of this buffer) by times relative
-    // to the last action (on-/offtime). Overlapping shouldn't occur but it is
-    // catched by setting the relative time to 0;
-    for (uint32_t i = count - 1; i >= 1; i--)
+    Signal signal = {.load = 0, .state = false};
+    uint32_t excess = 0;
+    if (pulse.timeUS)
     {
-        uint32_t temp = pulses[i - 1].timeUS + pulses[i - 1].ontimeUS;
-        if (temp >= pulses[i].timeUS)
-        {
-            pulses[i].timeUS = 0;
-        }
-        else
-        {
-            pulses[i].timeUS -= temp;
-        }
+        signal.load  = pulse.timeUS;
+        signal.state = false;
+        bufferInsert(signal);
     }
-
-    Signal tempBuffer[BUFFER_SIZE];
-    uint32_t index = 0;
-    for (uint32_t i = 0; i < count; i++)
+    if (pulse.ontimeUS)
     {
-        if (index > BUFFER_SIZE - 1)
-        {
-            break;
-        }
-        if (pulses[i].timeUS)
-        {
-            tempBuffer[index].load  = pulses[i].timeUS * 120;
-            tempBuffer[index].state = false;
-            index++;
-        }
-        if (pulses[i].ontimeUS)
-        {
-            tempBuffer[index].load  = pulses[i].ontimeUS * 120;
-            tempBuffer[index].state = true;
-            index++;
-        }
+        signal.load  = pulse.ontimeUS;
+        signal.state = true;
+        excess = bufferInsert(signal);
     }
+    if (excess)
+    {
+        signal.load = excess;
+        signal.state = false;
+        bufferInsert(signal);
+    }
+}
 
+uint32_t Output::bufferInsert(Signal& signal)
+{
+    uint32_t excess = 0;
     TimerIntDisable(timerBase, TIMER_TIMA_TIMEOUT);
-    auto& buffer = size0 == 0 ? buffer0 : buffer1;
-    auto& size   = size0 == 0 ? size0   : size1;
-    auto& otherSize = size0 == 0 ? size1   : size0;
-    for (uint32_t i = 0; i < index; i++)
+    /*
+     * Prevent fragmentation of the buffer by merging identical states
+     * together - as long as those states are ahead of time (readIndex
+     * has not catched up with writeIndex).
+     * This greatly reduces the load of the CPU by minimizing the
+     * frequency of the ISRs (each buffer entry causes 1 ISR).
+     * The fragmentation happens because Coil::updateOutput always fills
+     * the buffer X ms ahead of the current position. If a 5us ontime is
+     * served by this class, a 5us offtime may be added in the next run
+     * of Coil::updateOutput. This would obviously lead to many small
+     * entries - possibly getting smaller over time.
+     */
+    if (readIndex != writeIndex && buffer[lastWriteIndex].state == signal.state)
     {
-        buffer[i].load  = tempBuffer[i].load;
-        buffer[i].state = tempBuffer[i].state;
-    }
-    size = index;
-    if (otherSize)
-    {
-        wannaMore = false;
-        if (startNeeded)
+        uint32_t mergedLoad = buffer[lastWriteIndex].load + signal.load;
+        if (signal.state && mergedLoad > maxOntimeUS)
         {
-            ISR();
-            TimerEnable(timerBase, TIMER_A);
-            startNeeded = false;
+            excess = mergedLoad - maxOntimeUS;
+            mergedLoad = maxOntimeUS;
         }
+        buffer[lastWriteIndex].load = mergedLoad;
     }
-    else
+    else if (signal.load >= 2)
     {
-        startNeeded = true;
+        buffer[writeIndex].load  = signal.load;
+        buffer[writeIndex].state = signal.state;
+        lastWriteIndex = writeIndex;
+        writeIndex++;
+        writeIndex %= BUFFER_SIZE;
+        if (writeIndex == readIndex)
+        {
+            readIndex++;
+            readIndex %= BUFFER_SIZE;
+        }
     }
     TimerIntEnable(timerBase, TIMER_TIMA_TIMEOUT);
+
+    if (startNeeded)
+    {
+        startNeeded = false;
+        ISR();
+        TimerEnable(timerBase, TIMER_A);
+    }
+
+    return excess;
 }

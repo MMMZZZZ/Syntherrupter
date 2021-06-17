@@ -72,23 +72,23 @@ int main(void)
             switch (COIL_COUNT)
             {
                 case 6:
-//                    Coil::allCoils[5].updateData();
-//                    Coil::allCoils[5].updateOutput();
-//                case 5:
-//                    Coil::allCoils[4].updateData();
-//                    Coil::allCoils[4].updateOutput();
-//                case 4:
-//                    Coil::allCoils[3].updateData();
-//                    Coil::allCoils[3].updateOutput();
-//                case 3:
+                    Coil::allCoils[5].updateData();
+                    Coil::allCoils[5].updateOutput();
+                case 5:
+                    Coil::allCoils[4].updateData();
+                    Coil::allCoils[4].updateOutput();
+                case 4:
+                    Coil::allCoils[3].updateData();
+                    Coil::allCoils[3].updateOutput();
+                case 3:
                     Coil::allCoils[2].updateData();
                     Coil::allCoils[2].updateOutput();
-//                case 2:
-//                    Coil::allCoils[1].updateData();
-//                    Coil::allCoils[1].updateOutput();
-//                case 1:
-//                    Coil::allCoils[0].updateData();
-//                    Coil::allCoils[0].updateOutput();
+                case 2:
+                    Coil::allCoils[1].updateData();
+                    Coil::allCoils[1].updateOutput();
+                case 1:
+                    Coil::allCoils[0].updateData();
+                    Coil::allCoils[0].updateOutput();
                     break;
             }
         }
