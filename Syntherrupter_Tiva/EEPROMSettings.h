@@ -9,6 +9,7 @@
 #define EEPROMSETTINGS_H_
 
 
+#include <EEPROMLayouts.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include "string.h"
@@ -97,7 +98,7 @@ private:
 
     static uint32_t byteAddress;
 
-    // EEPROM Layouts (current and past ones
+    // Current EEPROM Layout
     struct CurrentLayout
     {
         // All parameters that shall be stored in EEPROM
@@ -111,56 +112,12 @@ private:
         DeviceData deviceData;
     };
 
-    /*
-     *  Legacy layouts.
-     */
-
-    // v2 stored envelope data as float and/or uint32 (no structs)
-    union LegacyV2EnvelopeData
-    {
-        float     f32;
-        uint32_t ui32;
-    };
-    // Constants used in old version
-    static constexpr uint32_t V2_STR_CHAR_COUNT  = 32;
-    static constexpr uint32_t V2_ENV_PROG_COUNT  = 20;
-    static constexpr uint32_t V2_ENV_DATA_POINTS =  8;
-    // v2 used 2 Banks
-    union LegacyV2Bank
-    {
-        struct
-        {
-            uint16_t wear;
-            uint8_t version;
-            uint8_t present;
-            char userNames[3][V2_STR_CHAR_COUNT];
-            char userPwds[3][V2_STR_CHAR_COUNT];
-            uint32_t userSettings[3];
-            uint32_t coilSettings[6];
-            /*
-             * Note: otherSettings was originally intended to be 10 fields in
-             * size but due to a bug only 6 fields were actually stored in
-             * EEPROM. Since only the first 2 were ever used, this is no real
-             * problem. It's just an explanation for the 6 instead of a 10.
-             */
-            uint32_t otherSettings[6];
-            LegacyV2EnvelopeData envelopes[V2_ENV_PROG_COUNT][V2_ENV_DATA_POINTS][4];
-        } data;
-
-        uint8_t raw[3072];
-    };
-    struct LegacyV2Layout
-    {
-        LegacyV2Bank bank0;
-        LegacyV2Bank bank1;
-    };
-
-
     union EEPROMData
     {
-        // All Layouts (each one being exactly 6144 bytes in size)
+        // All Layouts (each one being at most 6144 bytes in size)
+        LegacyV2::Layout legacyV2;
+        LegacyV3::Layout legacyV3;
         CurrentLayout data;
-        LegacyV2Layout legacyV2;
 
         // The Array that represents the entire EEPROM (6144 bytes)
         uint8_t raw[PAGE_COUNT][PAGE_SIZE];
