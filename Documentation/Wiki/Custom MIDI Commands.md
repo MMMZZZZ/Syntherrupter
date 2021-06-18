@@ -260,17 +260,17 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32
 		* bf16: channels whose NRPs shall be reset to default.
-* `0x67`: LFO Modulation Depth
+* `0x67`: [EE] LFO Modulation Depth
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
 		* 0-127: Modulation depth. 0=no modulation, 127=full depth
 		* Default: 63
-* `0x68`: LFO Frequency
+* `0x68`: [EE] LFO Frequency
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32, Frequency in 1/1000
-* `0x69`: LFO BPM
+* `0x69`: [EE] LFO BPM
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32, Beats per minute.
