@@ -248,14 +248,14 @@ uint32_t EEPROMSettings::legacyImport()
         eeprom.data = defaultSettings;
 
         // CoilData is identical for both versions. Hence memcpy can be used.
-        memcpy(eeprom.data.coilData, oldLayout.coilData, 6 * sizeof(*(eeprom.data.coilData)));
+        memcpy(eeprom.data.coilData, oldLayout.coilData, 6 * sizeof(eeprom.data.coilData[0]));
 
         // Same thing for UserData
-        memcpy(eeprom.data.userData, oldLayout.userData, 3 * sizeof(*(eeprom.data.userData)));
+        memcpy(eeprom.data.userData, oldLayout.userData, 3 * sizeof(eeprom.data.userData[0]));
 
         // Aaand for the envelopes
         memcpy(eeprom.data.envelopes, oldLayout.envelopes,
-               LegacyV3::ENV_DATA_POINTS * LegacyV3::ENV_PROG_COUNT * sizeof(*(eeprom.data.envelopes)));
+               LegacyV3::ENV_DATA_POINTS * LegacyV3::ENV_PROG_COUNT * sizeof(eeprom.data.envelopes[0][0]));
 
         // DeviceData got *extended* and since the order is guaranteed, the first,
         // identical part can be memcpy'ed, too.
