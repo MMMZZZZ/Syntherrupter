@@ -57,6 +57,8 @@ public:
         uint16_t uiSleepDelay;
         bool     uiBackOff;
         float    midiLfoFreq;
+        float    midiLfoDepth;
+        uint32_t bufferTimeUS;
     };
 
     static constexpr uint32_t NO_CFG       = 0;
@@ -84,7 +86,7 @@ private:
     static bool writeChangedSequence(void *newData, uint32_t byteSize);
 
     static constexpr uint32_t PRESENT       = 0x42;
-    static constexpr uint32_t VERSION       = 0x03;
+    static constexpr uint32_t VERSION       = 0x04;
 
     static constexpr uint32_t WRITE_EEPROM  = 0;
     static constexpr uint32_t READ_EEPROM   = 1;

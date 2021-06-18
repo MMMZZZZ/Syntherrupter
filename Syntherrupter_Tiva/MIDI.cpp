@@ -21,6 +21,7 @@ bool                       MIDI::playing = false;
 float                      MIDI::freqTable[128];
 MIDIProgram                MIDI::programs[MAX_PROGRAMS];
 float*                     MIDI::lfoFreq;
+float*                     MIDI::lfoDepth;
 
 
 MIDI::MIDI()

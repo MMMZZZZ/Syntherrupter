@@ -11,10 +11,15 @@
 
 #include "stdint.h"
 #include "stdbool.h"
+#include "string.h"
 
 
-namespace LegacyV2
+class LegacyV2
 {
+public:
+    static constexpr uint8_t VERSION = 0x02;
+    static constexpr uint8_t PRESENT = 0x42;
+
     static constexpr uint32_t STR_CHAR_COUNT  = 32;
     static constexpr uint32_t ENV_PROG_COUNT  = 20;
     static constexpr uint32_t ENV_DATA_POINTS =  8;
@@ -54,10 +59,14 @@ namespace LegacyV2
         Bank bank0;
         Bank bank1;
     };
-}
+};
 
-namespace LegacyV3
+class LegacyV3
 {
+public:
+    static constexpr uint8_t VERSION = 0x03;
+    static constexpr uint8_t PRESENT = 0x42;
+
     static constexpr uint32_t STR_CHAR_COUNT  = 32;
     static constexpr uint32_t ENV_PROG_COUNT  = 20;
     static constexpr uint32_t ENV_DATA_POINTS =  8;
@@ -115,13 +124,13 @@ namespace LegacyV3
         DeviceData deviceData;
     };
 
-    void setDefaultLayout(Layout& layout)
+    static void setDefaultLayout(Layout& layout)
     {
         /*
          * Default "Header"
          */
-        layout.present  = PRESENT;
-        layout.version  = VERSION;
+        layout.present  = 0x42;
+        layout.version  = 0x03;
         layout.reserved = 1;
 
         /*
@@ -170,12 +179,12 @@ namespace LegacyV3
         layout.deviceData.uiButtonHoldTime = 250;
         layout.deviceData.uiColorMode      = 1; // Dark mode
         layout.deviceData.uiSleepDelay     = 0; // No sleep
-        layout.deviceData.midiLfoPeriodUS  = 1.0f / 5.0f; // 5Hz
+        layout.deviceData.midiLfoPeriodUS  = 1e6f / 5.0f; // 5Hz
 
         /*
          * Default Envelopes
          */
-        constexpr uint8_t LAST = MIDIProgram::DATA_POINTS - 1;
+        constexpr uint8_t LAST = ENV_DATA_POINTS - 1;
 
         // Program 0 and all unspecified programs: No envelope (constant 100% volume while on, no rise/fall times)
         for (uint8_t step = 0; step <= LAST; step++)
@@ -192,7 +201,7 @@ namespace LegacyV3
             memcpy(layout.envelopes[env], layout.envelopes[0], sizeof(layout.envelopes[0]));
         }
     }
-}
+};
 
 
 #endif /* EEPROMLAYOUTS_H_ */

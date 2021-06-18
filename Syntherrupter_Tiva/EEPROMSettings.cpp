@@ -89,7 +89,8 @@ uint32_t EEPROMSettings::init()
         }
     }
     MIDI::sysexDeviceID = &(deviceData.deviceID);
-    MIDI::lfoFreq   = &(deviceData.midiLfoFreq);
+    MIDI::lfoFreq       = &(deviceData.midiLfoFreq);
+    MIDI::lfoDepth      = &(deviceData.midiLfoDepth);
     for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
     {
         Coil::allCoils[coil].maxDutyPerm   = &(coilData[coil].maxDutyPerm);
@@ -102,6 +103,7 @@ uint32_t EEPROMSettings::init()
         Coil::allCoils[coil].simple.filteredOntimeUS.factor    = &(coilData[coil].simpleOntimeFF);
         Coil::allCoils[coil].simple.filteredOntimeUS.constant  = &(coilData[coil].simpleOntimeFC);
     }
+    Coil::bufferDurationUS = &(deviceData.bufferTimeUS);
 
     return result;
 }
@@ -119,7 +121,8 @@ uint32_t EEPROMSettings::legacyImport()
     uint8_t  version1 = eeprom.legacyV2.bank1.data.version;
     uint16_t wear0    = eeprom.legacyV2.bank0.data.wear;
     uint16_t wear1    = eeprom.legacyV2.bank1.data.wear;
-    if ((present0 == PRESENT && version0 == 0x02) || (present1 == PRESENT && version1 == 0x02))
+    if ((present0 == LegacyV2::PRESENT && version0 == LegacyV2::VERSION) ||
+        (present1 == LegacyV2::PRESENT && version1 == LegacyV2::VERSION))
     {
         // Found old v2 layout. Import to v3 layout.
 
@@ -128,12 +131,12 @@ uint32_t EEPROMSettings::legacyImport()
         // assignments from one to the other would corrupt everything).
         LegacyV2::Bank oldLayout;
 
-        if (present0 != PRESENT)
+        if (present0 != LegacyV2::PRESENT)
         {
             // No valid bank. Set wear to 0 such that it will be ignored
             wear0 = 0;
         }
-        if (present1 != PRESENT)
+        if (present1 != LegacyV2::PRESENT)
         {
             wear1 = 0;
         }
@@ -162,7 +165,7 @@ uint32_t EEPROMSettings::legacyImport()
         // User data
         for (uint32_t user = 0; user < 3; user++)
         {
-            UserData& userData = eeprom.legacyV3.userData[user];
+            LegacyV3::UserData& userData = eeprom.legacyV3.userData[user];
 
             uint32_t copySize = std::min(LegacyV2::STR_CHAR_COUNT, STR_CHAR_COUNT);
             memset(userData.name,     '\x00', sizeof(userData.name));
@@ -179,7 +182,7 @@ uint32_t EEPROMSettings::legacyImport()
         // Coil data
         for (uint32_t coil = 0; coil < 6; coil++)
         {
-            CoilData& coilData = eeprom.legacyV3.coilData[coil];
+            LegacyV3::CoilData& coilData = eeprom.legacyV3.coilData[coil];
 
             coilData.maxDutyPerm    =  (oldLayout.data.coilSettings[coil] & 0xff800000) >> 23;
             coilData.minOfftimeUS   = ((oldLayout.data.coilSettings[coil] & 0x007f0000) >> 16) * 10;
@@ -220,7 +223,7 @@ uint32_t EEPROMSettings::legacyImport()
         {
             for (uint32_t step = 0; step < LegacyV2::ENV_DATA_POINTS; step++)
             {
-                MIDIProgram::DataPoint& dataPoint = eeprom.legacyV3.envelopes[prog][step];
+                LegacyV3::MIDIProgramDataPoint& dataPoint = eeprom.legacyV3.envelopes[prog][step];
                 dataPoint.amplitude  = oldLayout.data.envelopes[prog][step][ENV_AMP].f32;
                 dataPoint.durationUS = oldLayout.data.envelopes[prog][step][ENV_DUR].f32;
                 dataPoint.ntau       = oldLayout.data.envelopes[prog][step][ENV_NTAU].f32;
@@ -235,20 +238,20 @@ uint32_t EEPROMSettings::legacyImport()
         eeprom.legacyV3.deviceData.uiColorMode      = (oldLayout.data.otherSettings[1] >>  9) & 0b1;
 
         // Import done
-        eeprom.legacyV3.version = 0x03;
+        eeprom.legacyV3.version = LegacyV3::VERSION;
     }
 
-    if (eeprom.legacyV3.present == PRESENT && eeprom.legacyV3.version == 0x03)
+    if (eeprom.legacyV3.present == LegacyV3::PRESENT && eeprom.legacyV3.version == LegacyV3::VERSION)
     {
         LegacyV3::Layout oldLayout = eeprom.legacyV3;
 
-        initDefault();
+        eeprom.data = defaultSettings;
 
         // CoilData is identical for both versions. Hence memcpy can be used.
         memcpy(eeprom.data.coilData, oldLayout.coilData, 6 * sizeof(*(eeprom.data.coilData)));
 
         // Same thing for UserData
-        memcpy(eeprom.data.userData, oldLayout.coilData, 3 * sizeof(*(eeprom.data.coilData)));
+        memcpy(eeprom.data.userData, oldLayout.userData, 3 * sizeof(*(eeprom.data.userData)));
 
         // Aaand for the envelopes
         memcpy(eeprom.data.envelopes, oldLayout.envelopes,
@@ -257,8 +260,19 @@ uint32_t EEPROMSettings::legacyImport()
         // DeviceData got *extended* and since the order is guaranteed, the first,
         // identical part can be memcpy'ed, too.
         memcpy(&(eeprom.data.deviceData), &(oldLayout.deviceData), sizeof(oldLayout.deviceData));
+
+        // v3 set a wrong LFO value (0.2us), fix it - and also remove nonsense values
+        eeprom.data.deviceData.midiLfoFreq = 5.0f;
+        // Actually legit value, migrate
+        if (oldLayout.deviceData.midiLfoPeriodUS > 1000.0f)
+        {
+            eeprom.data.deviceData.midiLfoFreq = 1e6f / oldLayout.deviceData.midiLfoPeriodUS;
+        }
+
+        // Import done
+        eeprom.data.version = VERSION;
+        return CFG_UPGRADED;
     }
-    return CFG_UPGRADED;
 
     // Unknown config version; can't import.
     return CFG_UNKNOWN;
@@ -424,6 +438,8 @@ void EEPROMSettings::initDefault()
     defaultSettings.deviceData.uiColorMode      = 1; // Dark mode
     defaultSettings.deviceData.uiSleepDelay     = 0; // No sleep
     defaultSettings.deviceData.midiLfoFreq      = 5.0f;
+    defaultSettings.deviceData.midiLfoDepth     = 0.5f;
+    defaultSettings.deviceData.bufferTimeUS     = 5000;
 
     /*
      * Default Envelopes

@@ -10,6 +10,7 @@
 
 Coil Coil::allCoils[COIL_COUNT];
 constexpr void (*Coil::allISRs[6])(void);
+uint32_t* Coil::bufferDurationUS;
 
 
 Coil::Coil()
