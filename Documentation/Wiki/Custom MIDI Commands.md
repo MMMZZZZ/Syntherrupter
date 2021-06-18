@@ -416,7 +416,12 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Value: int32
 		* 0: Normal (ontime = 3.3V, offtime = 0V) (default)
 		* 1: Inverted (ontime = 0V, offtime = 3.3V)
-
+* `0x266`: [EE] Buffer Time
+	* Target MSB: Reserved.
+	* Target LSB: Reserved.
+	* Value: int32
+		* 0-100000: Duration of the output buffer in us. Same for all coils.
+		* Default: 5000
 
 #### `0x300-0x31f`: Envelope settings
 
