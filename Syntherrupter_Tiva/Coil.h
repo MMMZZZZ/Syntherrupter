@@ -77,13 +77,12 @@ private:
     uint32_t dataIndex = 0;
     Pulse pulseData[100][PULSES_SIZE];
     Pulse* pulses = pulseData[0];
-    uint32_t bufferDurationValue = 5000;
     // Actual memory (location) provided by EEPROMSettings
     uint32_t* minOntimeUS;
     uint32_t* minOfftimeUS;
     uint32_t* maxOntimeUS;
     uint32_t* maxDutyPerm;
-    uint32_t* bufferDurationUS = &bufferDurationValue;
+    static uint32_t* bufferDurationUS;
     friend class EEPROMSettings;
 };
 

@@ -123,8 +123,8 @@ private:
              *
              * sine wave between 0 and 1 mapped to the desired modulation depth (50% max).
              */
-            return (sinf(6.283185307179586e-6f * float(System::getSystemTimeUS()) * (*lfoFreq)) + 1) / 4.0f
-                    * channel->modulation;
+            return (sinf(6.283185307179586e-6f * float(System::getSystemTimeUS()) * (*lfoFreq)) + 1) / 2.0f
+                    * channel->modulation * (*lfoDepth);
         }
         else
         {
@@ -182,6 +182,7 @@ private:
 
     static bool playing;
     static float* lfoFreq;
+    static float* lfoDepth;
 
     friend class EEPROMSettings;
 };
