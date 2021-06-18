@@ -72,6 +72,9 @@ bool Sysex::checkSysex(SysexMsg& msg)
             }
             break;
 
+        case 0x0067:
+        case 0x0068:
+        case 0x0069:
         case 0x0020:
         case 0x0101:
         case 0x0200:
@@ -168,6 +171,9 @@ bool Sysex::checkSysex(SysexMsg& msg)
             }
             break;
 
+        case 0x0067:
+        case 0x0068:
+        case 0x0069:
         case 0x0200:
         case 0x0220:
         case 0x0221:
@@ -657,6 +663,18 @@ void Sysex::processSysex()
 
         case 0x0066: // (msb=ml)(lsb=0), bf16 reset NRPs of given channels.
             MIDI::resetNRPs(msg.value.ui32 & 0xffff);
+            break;
+
+        case 0x0067:
+
+            break;
+
+        case 0x0068:
+
+            break;
+
+        case 0x0069:
+
             break;
 
         case 0x0100: // (msb=ls)[lsb=coil], bf4 assigned lightsabers
