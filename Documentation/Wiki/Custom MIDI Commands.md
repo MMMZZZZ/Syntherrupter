@@ -259,7 +259,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32
-		* 0-127: bf16: channels whose NRPs shall be reset to default.
+		* bf16: channels whose NRPs shall be reset to default.
 * `0x67`: LFO Modulation Depth
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
