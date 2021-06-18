@@ -20,7 +20,7 @@ SysexMsg                   MIDI::sysexMsg;
 bool                       MIDI::playing = false;
 float                      MIDI::freqTable[128];
 MIDIProgram                MIDI::programs[MAX_PROGRAMS];
-float*                     MIDI::lfoPeriodUS;
+float*                     MIDI::lfoFreq;
 
 
 MIDI::MIDI()

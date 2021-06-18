@@ -89,7 +89,7 @@ uint32_t EEPROMSettings::init()
         }
     }
     MIDI::sysexDeviceID = &(deviceData.deviceID);
-    MIDI::lfoPeriodUS   = &(deviceData.midiLfoPeriodUS);
+    MIDI::lfoFreq   = &(deviceData.midiLfoFreq);
     for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
     {
         Coil::allCoils[coil].maxDutyPerm   = &(coilData[coil].maxDutyPerm);
@@ -398,7 +398,7 @@ void EEPROMSettings::initDefault()
     defaultSettings.deviceData.uiButtonHoldTime = 250;
     defaultSettings.deviceData.uiColorMode      = 1; // Dark mode
     defaultSettings.deviceData.uiSleepDelay     = 0; // No sleep
-    defaultSettings.deviceData.midiLfoPeriodUS  = 1.0f / 5.0f; // 5Hz
+    defaultSettings.deviceData.midiLfoFreq      = 5.0f;
 
     /*
      * Default Envelopes

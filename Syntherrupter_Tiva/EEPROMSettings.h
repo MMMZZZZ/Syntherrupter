@@ -55,7 +55,7 @@ public:
         uint16_t uiButtonHoldTime;
         uint16_t uiSleepDelay;
         bool     uiBackOff;
-        float    midiLfoPeriodUS;
+        float    midiLfoFreq;
     };
 
     static constexpr uint32_t NO_CFG       = 0;
