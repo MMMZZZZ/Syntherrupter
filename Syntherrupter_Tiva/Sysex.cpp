@@ -83,6 +83,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0222:
         case 0x0223:
         case 0x0224:
+        case 0x0266:
             if (msg.targetLSB == 0)
             {
                 lsbOk = true;
@@ -188,6 +189,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0262:
         case 0x0263:
         case 0x0264:
+        case 0x0266:
             if (msg.targetMSB == 0)
             {
                 msbOk = true;
@@ -665,16 +667,36 @@ void Sysex::processSysex()
             MIDI::resetNRPs(msg.value.ui32 & 0xffff);
             break;
 
-        case 0x0067:
-
+        case 0x0067: // () (), i32 modulation depth
+            msg.value.f32 = msg.value.i32 / 127.0f;
+        case 0x2067:
+            if (msg.value.f32 > 1.0f)
+            {
+                msg.value.f32 = 1.0f;
+            }
+            if (msg.value.f32 >= 0.0f)
+            {
+                EEPROMSettings::deviceData.midiLfoDepth = msg.value.f32;
+            }
             break;
 
-        case 0x0068:
-
+        case 0x0068: // () (), i32 modulation frequency in 1/1000 Hz
+            msg.value.f32 = msg.value.i32 / 1e3f;
+        case 0x2068:
+            if (msg.value.f32 > 0.0f && msg.value.f32 <= 1e3f)
+            {
+                EEPROMSettings::deviceData.midiLfoFreq = msg.value.f32;
+            }
             break;
 
-        case 0x0069:
-
+        case 0x0069: // () (), i32 modulation frequency in BPM
+            msg.value.f32 = msg.value.i32;
+        case 0x2069:
+            msg.value.f32 /= 60.0f;
+            if (msg.value.f32 > 0.0f && msg.value.f32 <= 1e3f)
+            {
+                EEPROMSettings::deviceData.midiLfoFreq = msg.value.f32;
+            }
             break;
 
         case 0x0100: // (msb=ls)[lsb=coil], bf4 assigned lightsabers
@@ -930,6 +952,15 @@ void Sysex::processSysex()
                         nxt->sendCmd("TC_Settings.coil%iOffVoics.val|=%i", i + 1, msg.value.ui32 << 16);
                     }
                 }
+            }
+            break;
+
+        case 0x2266: // () (), i32 buffer time
+            msg.value.ui32 = msg.value.f32;
+        case 0x0266:
+            if (msg.value.ui32 < 100000)
+            {
+                EEPROMSettings::deviceData.bufferTimeUS = msg.value.ui32;
             }
             break;
 
