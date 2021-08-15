@@ -567,7 +567,7 @@ void GUI::midiLive()
                     {
                         uint32_t ontimeUS = (commandData[2] << 8) + commandData[1];
                         uint32_t dutyPerm = (commandData[4] << 8) + commandData[3];
-                        Coil::allCoils[coil].midi.setVolSettingsProm(ontimeUS, dutyPerm);
+                        Coil::allCoils[coil].midi.setVolSettingsPerm(ontimeUS, dutyPerm);
                     }
                 }
             }

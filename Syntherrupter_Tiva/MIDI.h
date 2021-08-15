@@ -29,7 +29,7 @@ public:
     virtual ~MIDI();
     void init(uint32_t num, ToneList* tonelist);
     void updateToneList();
-    void setVolSettingsProm(float ontimeUSMax, float dutyMaxProm);
+    void setVolSettingsPerm(float ontimeUSMax, float dutyMaxProm);
     void setVolSettings(float ontimeUSMax, float dutyMax);
     void setOntimeUS(float ontimeUSMax)
     {

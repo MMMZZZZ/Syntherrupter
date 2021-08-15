@@ -649,15 +649,15 @@ void MIDI::stop()
     notelist.removeAllNotes();
 }
 
-void MIDI::setVolSettingsProm(float ontimeUSMax, float dutyPermMaxProm)
+void MIDI::setVolSettingsPerm(float ontimeUSMax, float dutyPermMax)
 {
     // duty in promille
-    setVolSettings(ontimeUSMax, dutyPermMaxProm / 1000.0f);
+    setVolSettings(ontimeUSMax, dutyPermMax / 1000.0f);
 }
-void MIDI::setVolSettings(float ontimeUSMax, float dutyPermMax)
+void MIDI::setVolSettings(float ontimeUSMax, float dutyMax)
 {
     singleNoteMaxOntimeUS = ontimeUSMax;
-    singleNoteMaxDuty     = dutyPermMax;
+    singleNoteMaxDuty     = dutyMax;
 
     // Prevent divide by 0.
     if (ontimeUSMax < 1.0f)
@@ -666,7 +666,7 @@ void MIDI::setVolSettings(float ontimeUSMax, float dutyPermMax)
     }
 
     // Determine crossover note at which abs. and rel. mode would have equal frequency.
-    absFreq = dutyPermMax / ontimeUSMax * 1000.0f;
+    absFreq = dutyMax / ontimeUSMax * 1e6f;
 
     coilChange = true;
 }
