@@ -11,6 +11,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <algorithm>
 #include "string.h"
 #include "inc/hw_memmap.h"              // Macros defining the memory map of the Tiva C Series device. This includes defines such as peripheral base address locations such as GPIO_PORTF_BASE.
 #include "inc/hw_types.h"               // Defines common types and macros.
@@ -33,7 +34,7 @@ public:
     Output();
     virtual ~Output();
     void init(uint32_t timer, void (*ISR)(void));
-    void addPulse(Pulse& pulse);
+    void addPulse(Pulse& pulse, uint32_t offSplitUS);
     void setMaxOntimeUS(uint32_t maxOntimeUS);
     void setMinOfftimeUS(uint32_t minOfftimeUS);
     bool isActive()
@@ -58,7 +59,19 @@ public:
         {
             TimerActionSet(TIMER_CFG_A_ACT_SETCLRTO * buffer[readIndex].state);
             lastLoadUS = buffer[readIndex].load;
-            TimerLoadSet(timerBase, TIMER_A, lastLoadUS * TICKS_PER_US);
+
+            /*
+             * The duration of the ISR adds to the load value and hence
+             * influences the signal period. Dynamic profiling (measure the
+             * runtime of the ISR each time and substract the last runtime)
+             * sounds like the most exact way of doing it but actually causes
+             * more jitter than a constant value.
+             * Disadvantage: this needs careful profiling every time the ISR
+             * changes. It also means that the debug-build (no optimizations)
+             * will be off by a bit (since it's ISR is slower) but that doesn't
+             * really matter.
+             */
+            TimerLoadSet(timerBase, TIMER_A, lastLoadUS * TICKS_PER_US - 180);
 
             readIndex = (readIndex + 1) % BUFFER_SIZE;
         }
@@ -90,6 +103,21 @@ private:
                                           (TIMER_CFG_PERIODIC & 0xff) |
                                            TIMER_TAMR_TAPWMIE;
     };
+    static constexpr uint32_t BRANCHLESS_MAX(uint32_t a, uint32_t b)
+    {
+        /*
+         * Branchless version of std::max(a, b)
+         * Speeds (with -O3):
+         *   std::max:   110-140ns
+         *   ? operator: 100ns
+         *   branchless:  60ns
+         *
+         * Note: with no optimizations, this is much slower because
+         *       the function won't be inlined.
+         */
+        bool x = a > b;
+        return x * a + (!x) * b;
+    }
     static constexpr uint32_t TIMER_SYSCTL_PERIPH = 0;
     static constexpr uint32_t TIMER_BASE          = 1;
     static constexpr uint32_t PORT_SYSCTL_PERIPH  = 2;
@@ -107,11 +135,14 @@ private:
     static constexpr uint32_t TIMER_CONFIG_POS = (TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_PERIODIC | TIMER_CFG_A_ACT_SETCLRTO);
     static constexpr uint32_t TIMER_CONFIG_NEG = (TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_PERIODIC | TIMER_CFG_A_ACT_CLRSETTO);
     static constexpr uint32_t TICKS_PER_US = 120;
+    static constexpr uint32_t MIN_TIME_US = 4;
     uint32_t minOffValue = 10 * TICKS_PER_US;
     uint32_t maxOntimeUS = 100 * TICKS_PER_US;
     uint32_t timerBase = 0;
 
-    static constexpr uint32_t BUFFER_SIZE = 256;
+    uint32_t offSplitUS = 1000;
+
+    static constexpr uint32_t BUFFER_SIZE = 1024;
     volatile Signal buffer[BUFFER_SIZE];
     volatile uint32_t readIndex = 0, writeIndex = 0, lastWriteIndex = 0;
     volatile uint32_t lastLoadUS = 0;

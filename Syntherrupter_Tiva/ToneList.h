@@ -35,7 +35,7 @@ public:
         this->maxDuty = maxDuty;
         limit();
     };
-    uint32_t getOntimesUS(Pulse* pulses, uint32_t nowUS, uint32_t endUS)
+    uint32_t getOntimesUS(Pulse* pulses, const uint32_t size, uint32_t nowUS, uint32_t endUS)
     {
         uint32_t index = 0;
         Tone* tone = firstTone;
@@ -43,7 +43,17 @@ public:
         {
             if (endUS >= tone->nextFireUS)
             {
-                pulses[index++] = tone->update(nowUS);
+                pulses[index] = tone->update(nowUS);
+                /*
+                 * Branchless version of
+                 *     if (index < size - 1)
+                 *     {
+                 *         index++;
+                 *     }
+                 * No profiling has been done in this case but other (similar)
+                 * cases have shown 50-100% speed increases.
+                 */
+                index += (index < size - 1);
             }
             tone = tone->nextTone;
         }

@@ -62,13 +62,19 @@ void Output::setMaxOntimeUS(uint32_t maxOntimeUS)
     this->maxOntimeUS = maxOntimeUS;
 }
 
-void Output::addPulse(Pulse& pulse)
+void Output::addPulse(Pulse& pulse, uint32_t offSplitUS)
 {
     Signal signal = {.load = 0, .state = false};
     uint32_t excess = 0;
+    this->offSplitUS = offSplitUS;
+    if (pulse.ontimeUS < MIN_TIME_US)
+    {
+        pulse.timeUS += pulse.ontimeUS;
+        pulse.ontimeUS = 0;
+    }
     if (pulse.timeUS)
     {
-        signal.load  = pulse.timeUS;
+        signal.load  = BRANCHLESS_MAX(pulse.timeUS, MIN_TIME_US);
         signal.state = false;
         bufferInsert(signal);
     }
@@ -80,7 +86,8 @@ void Output::addPulse(Pulse& pulse)
     }
     if (excess)
     {
-        signal.load = excess;
+        // Note: excess is guaranteed to be >=MIN_TIME_US
+        signal.load  = excess;
         signal.state = false;
         bufferInsert(signal);
     }
@@ -107,12 +114,14 @@ uint32_t Output::bufferInsert(Signal& signal)
         uint32_t mergedLoad = buffer[lastWriteIndex].load + signal.load;
         if (signal.state && mergedLoad > maxOntimeUS)
         {
-            excess = mergedLoad - maxOntimeUS;
-            mergedLoad = maxOntimeUS;
+            // Make sure the excess (which will result in an added offtime)
+            // is at least as long as the required minimum.
+            excess = BRANCHLESS_MAX(mergedLoad - maxOntimeUS, MIN_TIME_US);
+            mergedLoad -= excess;
         }
         buffer[lastWriteIndex].load = mergedLoad;
     }
-    else if (signal.load >= 2)
+    else if (signal.load)
     {
         buffer[writeIndex].load  = signal.load;
         buffer[writeIndex].state = signal.state;
@@ -125,6 +134,47 @@ uint32_t Output::bufferInsert(Signal& signal)
             readIndex %= BUFFER_SIZE;
         }
     }
+    /*
+     * Buffer defragmentation is nice but too long timer runtimes
+     * can cause issues, too (new signals could occur within this time
+     * that'll be missed).
+     * To solve the issue any load values that are too high will be
+     * split.
+     *
+     * req'd: new = high / n such that new <= thrs
+     * n >= high / thrs
+     * n  = high / thrs + 1
+     * new = high / n
+     * new = high / (high / thrs + 1)
+     * new = high / ((high + thrs) / thrs)
+     * new = high * thrs / (high + thrs)
+     *
+     * ... hmmm if the buffer get's defragmented and then refragmented
+     * again... maybe I should call the whole process buffer unification?
+     */
+    auto* lastSignal = &(buffer[lastWriteIndex]);
+    if (lastSignal->load > offSplitUS)
+    {
+        uint32_t newLoad = lastSignal->load * offSplitUS / (lastSignal->load + offSplitUS);
+        do
+        {
+            uint32_t remaining = lastSignal->load - newLoad;
+            buffer[writeIndex].load  = remaining;
+            buffer[writeIndex].state = lastSignal->state;
+            lastSignal->load = newLoad;
+            // Not happy that I copied this... TODO
+            lastWriteIndex = writeIndex;
+            writeIndex++;
+            writeIndex %= BUFFER_SIZE;
+            if (writeIndex == readIndex)
+            {
+                readIndex++;
+                readIndex %= BUFFER_SIZE;
+            }
+            lastSignal = &(buffer[lastWriteIndex]);
+        } while (lastSignal->load >= newLoad + MIN_TIME_US);
+    }
+
     TimerIntEnable(timerBase, TIMER_TIMA_TIMEOUT);
 
     if (startNeeded)

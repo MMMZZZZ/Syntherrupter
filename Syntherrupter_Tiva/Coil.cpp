@@ -79,7 +79,7 @@ void Coil::updateOutput()
     if (readyForNextUS < currentWindowUS || !out.isActive())
     {
         // Load all pulses for this output. They'll be unsorted
-        uint32_t pulseCount = toneList.getOntimesUS(pulses, readyForNextUS, currentWindowUS);
+        uint32_t pulseCount = toneList.getOntimesUS(pulses, PULSES_SIZE, readyForNextUS, currentWindowUS);
         if (!pulseCount)
         {
             pulses[0].timeUS = currentWindowUS;
@@ -116,7 +116,7 @@ void Coil::updateOutput()
             }
             readyForNextUS = pulse.timeUS + pulse.ontimeUS;
             pulse.timeUS  -= lastOntimeEndUS;
-            out.addPulse(pulse);
+            out.addPulse(pulse, std::min((*bufferDurationUS) / 2u, 1000u));
             lastOntimeEndUS =  readyForNextUS;
             readyForNextUS += *minOfftimeUS;
         }
