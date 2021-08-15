@@ -8,9 +8,7 @@
 #include <System.h>
 
 
-volatile uint32_t System::timeUS = 0;
-volatile uint32_t System::SYS_TICK_RES_US = 50;
-//uint32_t System::sysTickHalfRes = sysTickResUS / 2;
+volatile  uint32_t System::timeUS = 0;
 constexpr uint32_t System::PERIPH_COUNT;
 constexpr uint32_t System::ALL_PERIPHS[PERIPH_COUNT];
 
@@ -47,7 +45,7 @@ void System::init(void (*ISR)(void))
 
     SysTickIntRegister(ISR);
     IntPrioritySet(FAULT_SYSTICK, 0b00000000);
-    setSystemTimeResUS(100);
+    SysTickPeriodSet(CLOCK_TICKS_US * SYS_TICK_RES_US);
     SysTickIntEnable();
     SysTickEnable();
 }
@@ -65,11 +63,4 @@ void System::error()
     }
 
     while (42);
-}
-
-void System::setSystemTimeResUS(uint32_t us)
-{
-    SYS_TICK_RES_US = us;
-    //sysTickHalfRes = sysTickResUS / 2;
-    SysTickPeriodSet(clockTicksUS * SYS_TICK_RES_US);
 }

@@ -16,7 +16,6 @@
 #include "Coil.h"
 #include "GUI.h"
 
-#define len(x) (sizeof(x) / sizeof(x[0]))
 
 void sysTickISR()
 {
@@ -41,7 +40,6 @@ void uartLightSaberISR()
 int main(void)
 {
     System::init(sysTickISR);
-    System::setSystemTimeResUS(16);
 
     uint32_t cfgStatus = EEPROMSettings::init();
 
