@@ -177,6 +177,7 @@ bool MIDI::processBuffer(uint32_t b)
                         note->afterTouch     = 0;
                         note->rawVolume      = 0.0f;
                         note->envelopeVolume = 0.0f;
+                        note->finishedVolume = 0.0f;
                         channels[channel].addNote(note);
                     }
 
