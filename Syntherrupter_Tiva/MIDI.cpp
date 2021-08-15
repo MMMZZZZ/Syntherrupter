@@ -241,7 +241,7 @@ bool MIDI::processBuffer(uint32_t b)
                         break;
                     case 0x07: // Channel Volume
                         channels[channel].volume = c1 / 128.0f;
-                        channels[channel].controllersChanged = true;
+                        // channels[channel].controllersChanged = true;
                         break;
                     case 0x0A: // Pan
                         channels[channel].pan = c1 / 128.0f;
@@ -249,7 +249,7 @@ bool MIDI::processBuffer(uint32_t b)
                         break;
                     case 0x0B: // Expression coarse
                         channels[channel].expression = c1 / 128.0f;
-                        channels[channel].controllersChanged = true;
+                        // channels[channel].controllersChanged = true;
                         break;
                     case 0x40: // Sustain Pedal
                         if (c1 >= 64)
@@ -800,7 +800,6 @@ void MIDI::process()
                                     {
                                         note->rawVolume *= 0.6f;
                                     }
-                                    note->rawVolume *= channel->volume * channel->expression;
                                 }
                             }
                             else if (!channel->sustainPedal)
@@ -902,6 +901,8 @@ void MIDI::updateEffects(Note* note)
 
                 // After calculation of envelope, add other effects like modulation
                 float finishedVolume =   note->rawVolume
+                                       * note->channel->volume
+                                       * note->channel->expression
                                        * note->envelopeVolume
                                        * (1.0f - getLFOVal(note->channel));
                 if (finishedVolume != note->finishedVolume)
