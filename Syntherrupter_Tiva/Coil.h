@@ -33,7 +33,6 @@ public:
     void setMinOntimeUS(uint32_t ontimeUS);
     void updateOutput();
 
-    Oneshot  one;
     Output out;
     ToneList toneList;
     MIDI     midi;

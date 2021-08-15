@@ -53,7 +53,7 @@ void Output::init(uint32_t timerNum, void (*ISR)(void))
     TimerActionSet(TIMER_CFG_A_ACT_NONE);
 
     // Configure pins for highest output current.
-    //GPIOPadConfigSet(TIMER_MAPPING[timerNum][PORT_BASE], TIMER_MAPPING[timerNum][PIN], GPIO_STRENGTH_12MA, GPIO_PIN_TYPE_STD);
+    GPIOPadConfigSet(TIMER_MAPPING[timerNum][PORT_BASE], TIMER_MAPPING[timerNum][PIN], GPIO_STRENGTH_12MA, GPIO_PIN_TYPE_STD);
     GPIOPinTypeGPIOOutput(GPIO_PORTM_BASE, GPIO_PIN_1);
 }
 

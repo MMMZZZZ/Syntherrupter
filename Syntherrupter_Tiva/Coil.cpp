@@ -108,10 +108,6 @@ void Coil::updateOutput()
         for (uint32_t i = 0; i < pulseCount; i++)
         {
             Pulse& pulse = pulses[i];
-            if (pulse.ontimeUS>(1<<30))
-            {
-                pulse.ontimeUS*=1;
-            }
             if (pulse.timeUS < readyForNextUS)
             {
                 // Ontime is too close to previous ontime; merge them together.
@@ -127,7 +123,7 @@ void Coil::updateOutput()
     }
     // Prevent overflow issues. Once the smallest variable is above a
     // threshold, all of them are "reset" but substracting that offset.
-    static constexpr uint32_t OVERFLOW_THRESHOLD_US = 1 << 16;
+    static constexpr uint32_t OVERFLOW_THRESHOLD_US = 1 << 30;
     if (out.lastFiredUS > OVERFLOW_THRESHOLD_US)
     {
         out.lastFiredUS -= OVERFLOW_THRESHOLD_US;

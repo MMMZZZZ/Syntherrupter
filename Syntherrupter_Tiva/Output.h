@@ -42,7 +42,6 @@ public:
     }
     void ISR()
     {
-        //GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0xff);
         TimerIntClear(timerBase, TIMER_TIMA_TIMEOUT);
 
         lastFiredUS += lastLoadUS;
@@ -63,7 +62,6 @@ public:
 
             readIndex = (readIndex + 1) % BUFFER_SIZE;
         }
-        //GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0x00);
     };
     volatile uint32_t lastFiredUS = 0;
 
