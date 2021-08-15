@@ -796,10 +796,14 @@ void MIDI::process()
                                 if (note->velocity)
                                 {
                                     note->rawVolume = note->velocity / 128.0f;
-                                    if (channel->damperPedal)
-                                    {
-                                        note->rawVolume *= 0.6f;
-                                    }
+                                    /*
+                                     * Branchless version of:
+                                     * if (channel->damperPedal)
+                                     * {
+                                     *     note->rawVolume *= 0.6f;
+                                     * }
+                                     */
+                                    note->rawVolume *= (1 - channel->damperPedal * 0.4f);
                                 }
                             }
                             else if (!channel->sustainPedal)
