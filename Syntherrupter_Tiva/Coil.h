@@ -11,7 +11,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <algorithm>
 #include "InterrupterConfig.h"
 #include "Output.h"
 #include "ToneList.h"

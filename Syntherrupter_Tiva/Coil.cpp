@@ -68,7 +68,7 @@ void Coil::setMinOntimeUS(uint32_t ontimeUS)
 void Coil::setBufferTimeUS(uint32_t bufferTimeUS)
 {
     *bufferDurationUS = bufferTimeUS;
-    Output::setMaxPeriodUS(std::min((*bufferDurationUS) / 2u, 1000u));
+    Output::setMaxPeriodUS(Branchless::min((*bufferDurationUS) / 2u, 1000u));
 }
 
 void Coil::updateData()
