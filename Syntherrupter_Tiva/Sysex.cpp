@@ -960,7 +960,7 @@ void Sysex::processSysex()
         case 0x0266:
             if (msg.value.ui32 < 100000)
             {
-                EEPROMSettings::deviceData.bufferTimeUS = msg.value.ui32;
+                Coil::setBufferTimeUS(msg.value.ui32);
             }
             break;
 

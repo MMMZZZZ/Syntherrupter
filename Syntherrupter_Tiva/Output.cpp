@@ -9,6 +9,7 @@
 
 
 constexpr uint32_t Output::TIMER_MAPPING[6][6];
+uint32_t Output::maxPeriodUS;
 
 
 Output::Output()
@@ -62,11 +63,10 @@ void Output::setMaxOntimeUS(uint32_t maxOntimeUS)
     this->maxOntimeUS = maxOntimeUS;
 }
 
-void Output::addPulse(Pulse& pulse, uint32_t offSplitUS)
+void Output::addPulse(Pulse& pulse)
 {
     Signal signal = {.load = 0, .state = false};
     uint32_t excess = 0;
-    this->offSplitUS = offSplitUS;
     if (pulse.ontimeUS < MIN_TIME_US)
     {
         pulse.timeUS += pulse.ontimeUS;
@@ -153,9 +153,9 @@ uint32_t Output::bufferInsert(Signal& signal)
      * again... maybe I should call the whole process buffer unification?
      */
     auto* lastSignal = &(buffer[lastWriteIndex]);
-    if (lastSignal->load > offSplitUS)
+    if (lastSignal->load > maxPeriodUS)
     {
-        uint32_t newLoad = lastSignal->load * offSplitUS / (lastSignal->load + offSplitUS);
+        uint32_t newLoad = lastSignal->load * maxPeriodUS / (lastSignal->load + maxPeriodUS);
         do
         {
             uint32_t remaining = lastSignal->load - newLoad;
@@ -172,6 +172,10 @@ uint32_t Output::bufferInsert(Signal& signal)
                 readIndex %= BUFFER_SIZE;
             }
             lastSignal = &(buffer[lastWriteIndex]);
+            // This loop can take some time. Therefore allow pending Interrupts
+            // to be processed.
+            TimerIntEnable(timerBase, TIMER_TIMA_TIMEOUT);
+            TimerIntDisable(timerBase, TIMER_TIMA_TIMEOUT);
         } while (lastSignal->load >= newLoad + MIN_TIME_US);
     }
 

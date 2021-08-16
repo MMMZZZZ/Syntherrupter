@@ -34,13 +34,13 @@ public:
     Output();
     virtual ~Output();
     void init(uint32_t timer, void (*ISR)(void));
-    void addPulse(Pulse& pulse, uint32_t offSplitUS);
+    void addPulse(Pulse& pulse);
     void setMaxOntimeUS(uint32_t maxOntimeUS);
     void setMinOfftimeUS(uint32_t minOfftimeUS);
     bool isActive()
     {
         return !startNeeded;
-    }
+    };
     void ISR()
     {
         TimerIntClear(timerBase, TIMER_TIMA_TIMEOUT);
@@ -77,6 +77,11 @@ public:
         }
     };
     volatile uint32_t lastFiredUS = 0;
+
+    static void setMaxPeriodUS(uint32_t maxPeriodUS)
+    {
+        Output::maxPeriodUS = maxPeriodUS;
+    };
 
 private:
     struct Signal
@@ -140,7 +145,7 @@ private:
     uint32_t maxOntimeUS = 100 * TICKS_PER_US;
     uint32_t timerBase = 0;
 
-    uint32_t offSplitUS = 1000;
+    static uint32_t maxPeriodUS;
 
     static constexpr uint32_t BUFFER_SIZE = 1024;
     volatile Signal buffer[BUFFER_SIZE];

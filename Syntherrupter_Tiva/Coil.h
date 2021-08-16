@@ -13,7 +13,6 @@
 #include <stdbool.h>
 #include <algorithm>
 #include "InterrupterConfig.h"
-#include "Oneshot.h"
 #include "Output.h"
 #include "ToneList.h"
 #include "MIDI.h"
@@ -41,6 +40,7 @@ public:
     LightSaber lightsaber;
 
     static Coil allCoils[COIL_COUNT];
+    static void setBufferTimeUS(uint32_t bufferTimeUS);
     static void timer0ISR()
     {
         allCoils[0].out.ISR();
