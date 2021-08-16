@@ -958,7 +958,7 @@ void Sysex::processSysex()
         case 0x2266: // () (), i32 buffer time
             msg.value.ui32 = msg.value.f32;
         case 0x0266:
-            if (msg.value.ui32 < 100000)
+            if (msg.value.ui32 >= 1000 && msg.value.ui32 <= 100000)
             {
                 Coil::setBufferTimeUS(msg.value.ui32);
             }

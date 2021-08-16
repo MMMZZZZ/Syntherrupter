@@ -420,7 +420,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
-		* 0-100000: Duration of the output buffer in us. Same for all coils.
+		* 1000-100000: Duration of the output buffer in us. Same for all coils.
 		* Default: 5000
 
 #### `0x300-0x31f`: Envelope settings
