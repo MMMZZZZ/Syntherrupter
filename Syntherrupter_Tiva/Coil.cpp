@@ -112,7 +112,14 @@ void Coil::updateOutput()
             {
                 // Ontime is too close to previous ontime; merge them together.
                 // Actually, the merge happens in the Output class.
+                // Because of the merge, no ontime offset is required (already
+                // included in previous ontime).
                 pulse.timeUS = lastOntimeEndUS;
+            }
+            else if (pulse.ontimeUS)
+            {
+                // "standalone" pulse; add ontime offset
+                pulse.ontimeUS += *minOntimeUS;
             }
             readyForNextUS = pulse.timeUS + pulse.ontimeUS;
             pulse.timeUS  -= lastOntimeEndUS;
