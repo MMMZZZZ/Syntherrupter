@@ -39,7 +39,7 @@ void Coil::init(uint32_t coilNum)
     setMinOntimeUS(*minOntimeUS);
     // yeah the next one is static (thus needs to run only once)
     // buuut having it here is easier and doesn't hurt.
-    setBufferTimeUS(*bufferDurationUS);
+    setBufferDurationUS(*bufferDurationUS);
 }
 
 void Coil::setMaxDutyPerm(uint32_t dutyPerm)
@@ -65,10 +65,10 @@ void Coil::setMinOntimeUS(uint32_t ontimeUS)
     *minOntimeUS = ontimeUS;
 }
 
-void Coil::setBufferTimeUS(uint32_t bufferTimeUS)
+void Coil::setBufferDurationUS(uint32_t bufferDurationUS)
 {
-    *bufferDurationUS = bufferTimeUS;
-    Output::setMaxPeriodUS(Branchless::min((*bufferDurationUS) / 2u, 1000u));
+    *Coil::bufferDurationUS = bufferDurationUS;
+    Output::setMaxPeriodUS(Branchless::min((*Coil::bufferDurationUS) / 2u, 1000u));
 }
 
 void Coil::updateData()

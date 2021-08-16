@@ -39,7 +39,7 @@ public:
     LightSaber lightsaber;
 
     static Coil allCoils[COIL_COUNT];
-    static void setBufferTimeUS(uint32_t bufferTimeUS);
+    static void setBufferDurationUS(uint32_t bufferTimeUS);
     static void timer0ISR()
     {
         allCoils[0].out.ISR();
