@@ -48,4 +48,4 @@ Brings you back to the [Log In page](Log%20In.md#readme). In case you have auto 
 
 ## Sysex Commands
 
-There are no sysex commands for this specific page. However, only when you're viewing this page, the on-screen data will be updated when receiving sysex commands. If you're f.ex. on the Simple mode page, Syntherrupter will still react and apply all sysex commands, but the values on screen won't follow these changes. 
+There are no sysex commands for this specific page. However, only when you're viewing this page (or the [startup screen](Startup.md#readme)), the on-screen data will be updated when receiving sysex commands. If you're f.ex. on the Simple mode page, Syntherrupter will still react and apply all sysex commands, but the values on screen won't follow these changes. 
