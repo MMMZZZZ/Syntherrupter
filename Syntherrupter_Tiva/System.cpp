@@ -25,7 +25,7 @@ System::~System()
     // TODO Auto-generated destructor stub
 }
 
-void System::init(void (*ISR)(void))
+void System::init()
 {
      uint32_t clock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ |SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), CLOCK_FREQ);
 
@@ -43,7 +43,7 @@ void System::init(void (*ISR)(void))
 
     IntMasterEnable();
 
-    SysTickIntRegister(ISR);
+    SysTickIntRegister(System::systemTimeIncrement);
     IntPrioritySet(FAULT_SYSTICK, 0b00000000);
     SysTickPeriodSet(CLOCK_TICKS_US * SYS_TICK_RES_US);
     SysTickIntEnable();

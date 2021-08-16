@@ -17,11 +17,6 @@
 #include "GUI.h"
 
 
-void sysTickISR()
-{
-    System::systemTimeIncrement();
-}
-
 void uartUsbISR()
 {
     MIDI::usbUart.ISR();
@@ -39,7 +34,7 @@ void uartLightSaberISR()
 
 int main(void)
 {
-    System::init(sysTickISR);
+    System::init();
 
     uint32_t cfgStatus = EEPROMSettings::init();
 

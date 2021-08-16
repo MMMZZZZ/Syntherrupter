@@ -26,7 +26,7 @@ class System
 public:
     System();
     virtual ~System();
-    static void init(void (*ISR)(void));
+    static void init();
     static void error();
     static uint32_t getClockFreq()
     {
