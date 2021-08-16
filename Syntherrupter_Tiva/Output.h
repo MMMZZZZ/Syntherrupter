@@ -24,6 +24,7 @@
 #include "driverlib/interrupt.h"        // Defines and macros for NVIC Controller (Interrupt) API of driverLib. This includes API functions such as IntEnable and IntPrioritySet.
 #include "driverlib/timer.h"            // Defines and macros for timer API of driverLib.
 #include "InterrupterConfig.h"
+#include "Branchless.h"
 #include "System.h"
 #include "Pulse.h"
 
@@ -108,21 +109,6 @@ private:
                                           (TIMER_CFG_PERIODIC & 0xff) |
                                            TIMER_TAMR_TAPWMIE;
     };
-    static constexpr uint32_t BRANCHLESS_MAX(uint32_t a, uint32_t b)
-    {
-        /*
-         * Branchless version of std::max(a, b)
-         * Speeds (with -O3):
-         *   std::max:   110-140ns
-         *   ? operator: 100ns
-         *   branchless:  60ns
-         *
-         * Note: with no optimizations, this is much slower because
-         *       the function won't be inlined.
-         */
-        bool x = a > b;
-        return x * a + (!x) * b;
-    }
     static constexpr uint32_t TIMER_SYSCTL_PERIPH = 0;
     static constexpr uint32_t TIMER_BASE          = 1;
     static constexpr uint32_t PORT_SYSCTL_PERIPH  = 2;

@@ -74,7 +74,7 @@ void Output::addPulse(Pulse& pulse)
     }
     if (pulse.timeUS)
     {
-        signal.load  = BRANCHLESS_MAX(pulse.timeUS, MIN_TIME_US);
+        signal.load  = Branchless::max(pulse.timeUS, MIN_TIME_US);
         signal.state = false;
         bufferInsert(signal);
     }
@@ -116,7 +116,7 @@ uint32_t Output::bufferInsert(Signal& signal)
         {
             // Make sure the excess (which will result in an added offtime)
             // is at least as long as the required minimum.
-            excess = BRANCHLESS_MAX(mergedLoad - maxOntimeUS, MIN_TIME_US);
+            excess = Branchless::max(mergedLoad - maxOntimeUS, MIN_TIME_US);
             mergedLoad -= excess;
         }
         buffer[lastWriteIndex].load = mergedLoad;
