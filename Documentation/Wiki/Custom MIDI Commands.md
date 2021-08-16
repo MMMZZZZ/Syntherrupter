@@ -408,7 +408,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, voice limit
-		* 1-16
+		* 0-16
 		* Default: 8
 * `0x265`: [NS] [EE] Coil Output Invert
 	* Target MSB: Reserved.
