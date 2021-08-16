@@ -778,11 +778,13 @@ void Sysex::processSysex()
             nxt->setVal("Other_Settings.nBackOff", msg.value.ui32 & 0b1);
             break;
         case 0x0224: // ()(), i32 color mode, 0=light, 1=dark, other=reserved
-            if (msg.value.ui32 < 2)
+            // Currently NOT supported! Needs changes on the Nextion side
+            // to work without unreasonable code copying.
+            /*if (msg.value.ui32 < 2)
             {
                 nxt->setVal("Settings.colorMode", msg.value.ui32);
                 nxt->sendCmd("click fLoadColors,1");
-            }
+            }*/
             break;
         case 0x0225: // [msb=s,ml,ls][lsb=0], ui apply mode. 0=manual, 1=on release, 2=immediate, other=reserved.
             if (msg.value.ui32 < 3)

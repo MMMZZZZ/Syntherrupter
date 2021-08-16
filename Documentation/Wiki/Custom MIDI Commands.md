@@ -332,7 +332,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 		* [0]: Background shutdown
 			* 0: Disabled
 			* 1: Enabled (default)
-* `0x224`: [EE] [NF] UI Color Mode
+* `0x224`: [NS] [EE] [NF] UI Color Mode
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32, color mode
