@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "InterrupterConfig.h"
+#include "Branchless.h"
 #include "System.h"
 #include "Channel.h"
 #include "UART.h"

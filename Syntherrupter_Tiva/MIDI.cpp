@@ -928,12 +928,15 @@ void MIDI::updateEffects(Note* note)
 void MIDI::updateToneList()
 {
     Tone* lastTone = (Tone*) 1;
-    Note* note = notelist.firstNote;
-    uint32_t voicesLeft = *coilMaxVoices;
-    while (note != notelist.newNote)
+    Note* note = notelist.newNote->prevNote;
+    int32_t voicesLeft = *coilMaxVoices;
+    while (note != notelist.firstNote->prevNote)
     {
-        Note* nextNote = note->nextNote;
-        if (note->toneChanged & coilBit || coilChange)
+        // Go backwards from the most recent to the oldest (firstNote)
+        // The next note of the loop needs to be stored at the beginning
+        // since the note might get deleted during the loop.
+        Note* nextNote = note->prevNote;
+        if ((note->toneChanged & coilBit) || coilChange || !voicesLeft)
         {
             note->toneChanged &= ~coilBit;
 
@@ -941,12 +944,16 @@ void MIDI::updateToneList()
 
             if (note->isDead())
             {
-                notelist.removeNote(note); // Removes tone from tonelists, too.
+                // Removes tone from tonelists, too.
+                notelist.removeNote(note);
+                // "undo" decrement at the end of the loop since no voice
+                // will actually be used.
+                voicesLeft++;
             }
-            else if (note->channel->coils & coilBit)
+            else if ((note->channel->coils & coilBit) && voicesLeft)
             {
                 setPanVol(note);
-                if (lastTone && voicesLeft)
+                if (lastTone)
                 {
                     float ontimeUS = note->finishedVolume * note->panVol[coilNum];
                     if (note->frequency >= absFreq)
@@ -974,8 +981,11 @@ void MIDI::updateToneList()
                     }
                     else
                     {
-                        voicesLeft--;
-                        lastTone = tonelist->updateTone(ontimeUS, note->periodUS, this, note, *assignedTone);
+                        lastTone = tonelist->updateTone(ontimeUS,
+                                                        note->periodUS,
+                                                        this,
+                                                        note,
+                                                        *assignedTone);
                         *assignedTone = lastTone;
                     }
                 }
@@ -984,6 +994,8 @@ void MIDI::updateToneList()
             {
                 // This coil is no more listening to this channel. Remove the
                 // assigned tone if there is one.
+                // Or the voice limit's been reached and the note doesn't fit
+                // into this output anymore.
                 if (*assignedTone)
                 {
                     (*assignedTone)->remove(note);
@@ -993,6 +1005,8 @@ void MIDI::updateToneList()
         }
 
         note = nextNote;
+        // Prevent voicesLeft from going negative.
+        voicesLeft = Branchless::max(0, voicesLeft - 1);
     }
     coilChange     = false;
     coilPanChanged = false;
