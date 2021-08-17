@@ -28,7 +28,7 @@ Note* NoteList::addNote()
 {
     Note* targetNote = newNote;
     newNote          = newNote->nextNote;
-    if (++activeNotes > maxVoices)
+    if (++activeNotes > MAX_NOTES)
     {
         removeNote(firstNote);
     }

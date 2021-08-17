@@ -930,7 +930,8 @@ void MIDI::updateToneList()
     Tone* lastTone = (Tone*) 1;
     Note* note = notelist.newNote->prevNote;
     int32_t voicesLeft = *coilMaxVoices;
-    while (note != notelist.firstNote->prevNote)
+    int32_t remainingNotes = notelist.activeNotes;
+    while (remainingNotes--)
     {
         // Go backwards from the most recent to the oldest (firstNote)
         // The next note of the loop needs to be stored at the beginning
