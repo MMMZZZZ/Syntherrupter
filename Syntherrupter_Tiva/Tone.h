@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "System.h"
+#include "Pulse.h"
 
 
 class ToneList;
@@ -26,7 +27,7 @@ public:
     {
         this->parent = list;
     };
-    void update(uint32_t timeUS)
+    Pulse update(uint32_t timeUS)
     {
 
         /*
@@ -37,28 +38,26 @@ public:
         {
             case Type::rand:
             {
-                uint32_t freq =  System::rand(lowerFreq, upperFreq);
+                uint32_t freq = System::rand(lowerFreq, upperFreq);
                 duty          = float(ontimeUS * freq) / 1e6f;
                 periodUS      = 1000000 / freq;
                 break;
             }
             case Type::newdflt:
             {
-                nextFireUS    = 0;
+                nextFireUS    = timeUS;
                 type          = Type::dflt;
                 break;
             }
         }
-        if (nextFireUS)
-        {
-            // Note that is already playing
-            nextFireUS += periodUS;
-        }
-        else
-        {
-            // New note
-            nextFireUS = timeUS + periodUS;
-        }
+
+        Pulse pulse;
+        pulse.ontimeUS = limitedOntimeUS;
+        pulse.timeUS   = nextFireUS;
+
+        nextFireUS += periodUS;
+
+        return pulse;
     };
     void remove(void* origin);
     void* owner  = 0;

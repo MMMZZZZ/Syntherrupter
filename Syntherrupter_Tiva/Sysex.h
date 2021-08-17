@@ -38,6 +38,7 @@ private:
     static constexpr uint32_t MODE_LIGHTSABER = 3;
 
     static Nextion* nxt;
+    static uint32_t uiUpdateMode;
 };
 
 

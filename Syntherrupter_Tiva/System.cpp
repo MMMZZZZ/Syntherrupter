@@ -8,9 +8,7 @@
 #include <System.h>
 
 
-volatile uint32_t System::timeUS = 0;
-volatile uint32_t System::SYS_TICK_RES_US = 50;
-//uint32_t System::sysTickHalfRes = sysTickResUS / 2;
+volatile  uint32_t System::timeUS = 0;
 constexpr uint32_t System::PERIPH_COUNT;
 constexpr uint32_t System::ALL_PERIPHS[PERIPH_COUNT];
 
@@ -27,7 +25,7 @@ System::~System()
     // TODO Auto-generated destructor stub
 }
 
-void System::init(void (*ISR)(void))
+void System::init()
 {
      uint32_t clock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ |SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), CLOCK_FREQ);
 
@@ -45,9 +43,9 @@ void System::init(void (*ISR)(void))
 
     IntMasterEnable();
 
-    SysTickIntRegister(ISR);
+    SysTickIntRegister(System::systemTimeIncrement);
     IntPrioritySet(FAULT_SYSTICK, 0b00000000);
-    setSystemTimeResUS(100);
+    SysTickPeriodSet(CLOCK_TICKS_US * SYS_TICK_RES_US);
     SysTickIntEnable();
     SysTickEnable();
 }
@@ -65,11 +63,4 @@ void System::error()
     }
 
     while (42);
-}
-
-void System::setSystemTimeResUS(uint32_t us)
-{
-    SYS_TICK_RES_US = us;
-    //sysTickHalfRes = sysTickResUS / 2;
-    SysTickPeriodSet(clockTicksUS * SYS_TICK_RES_US);
 }

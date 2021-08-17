@@ -36,31 +36,19 @@ public:
     };
     void add(T data)
     {
-        buffer[writeIndex++] = data;
-        if (writeIndex >= size)
-        {
-            writeIndex -= size;
-        }
+        buffer[writeIndex] = data;
+        writeIndex = (writeIndex + 1) % size;
         if (writeIndex == readIndex)
         {
-            readIndex++;
-            if (readIndex >= size)
-            {
-                readIndex -= size;
-            }
+            readIndex = (readIndex + 1) % size;
         }
     };
 
-    void remove(volatile uint32_t count = 1)
+    void remove()
     {
-        readIndex += count;
-        if (readIndex >= size)
+        if (readIndex != writeIndex)
         {
-            readIndex -= size;
-        }
-        if (readIndex > writeIndex)
-        {
-            readIndex = writeIndex;
+            readIndex = (readIndex + 1) % size;
         }
     };
     void flush()
@@ -69,14 +57,7 @@ public:
     }
     uint32_t level()
     {
-        if (readIndex <= writeIndex)
-        {
-            return writeIndex - readIndex;
-        }
-        else
-        {
-            return size - readIndex + writeIndex;
-        }
+        return (size - readIndex + writeIndex) % size;
     };
     T peek()
     {

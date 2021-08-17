@@ -10,6 +10,7 @@
 
 
 Nextion* Sysex::nxt;
+uint32_t Sysex::uiUpdateMode;
 
 
 Sysex::Sysex()
@@ -21,6 +22,7 @@ Sysex::Sysex()
 void Sysex::init(Nextion* nextion)
 {
     nxt = nextion;
+    uiUpdateMode = 2;
 }
 
 bool Sysex::checkSysex(SysexMsg& msg)
@@ -72,14 +74,20 @@ bool Sysex::checkSysex(SysexMsg& msg)
             }
             break;
 
+        case 0x0067:
+        case 0x0068:
+        case 0x0069:
         case 0x0020:
         case 0x0101:
         case 0x0200:
+        case 0x0202:
         case 0x0220:
         case 0x0221:
         case 0x0222:
         case 0x0223:
         case 0x0224:
+        case 0x0226:
+        case 0x0266:
             if (msg.targetLSB == 0)
             {
                 lsbOk = true;
@@ -168,12 +176,17 @@ bool Sysex::checkSysex(SysexMsg& msg)
             }
             break;
 
+        case 0x0067:
+        case 0x0068:
+        case 0x0069:
         case 0x0200:
+        case 0x0202:
         case 0x0220:
         case 0x0221:
         case 0x0222:
         case 0x0223:
         case 0x0224:
+        case 0x0226:
         case 0x0242:
         case 0x0243:
         case 0x0244:
@@ -182,6 +195,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0262:
         case 0x0263:
         case 0x0264:
+        case 0x0266:
             if (msg.targetMSB == 0)
             {
                 msbOk = true;
@@ -274,7 +288,7 @@ void Sysex::processSysex()
                 {
                     LightSaber::stop();
                 }
-                if (GUI::getAcceptsData())
+                if (GUI::getAcceptsData() && uiUpdateMode == 2)
                 {
                     if (msg.targetMSB == WILDCARD)
                     {
@@ -301,7 +315,7 @@ void Sysex::processSysex()
                 {
                     LightSaber::start();
                 }
-                if (GUI::getAcceptsData())
+                if (GUI::getAcceptsData() && uiUpdateMode == 2)
                 {
                     if (msg.targetMSB == WILDCARD)
                     {
@@ -333,7 +347,7 @@ void Sysex::processSysex()
                     if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == WILDCARD)
                     {
                         Coil::allCoils[i].simple.setOntimeUS(msg.value.f32);
-                        if (GUI::getAcceptsData())
+                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
                         {
                             nxt->sendCmd("Simple.set%i.val&=0xffff0000", i + 1);
                             nxt->sendCmd("Simple.set%i.val|=%i", i + 1, msg.value.f32);
@@ -342,7 +356,7 @@ void Sysex::processSysex()
                     if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == WILDCARD)
                     {
                         Coil::allCoils[i].midi.setOntimeUS(msg.value.f32);
-                        if (GUI::getAcceptsData())
+                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
                         {
                             nxt->sendCmd("MIDI_Live.set%i.val&=0xffff0000", i + 1);
                             nxt->sendCmd("MIDI_Live.set%i.val|=%i", i + 1, msg.value.f32);
@@ -351,7 +365,7 @@ void Sysex::processSysex()
                     if (msg.targetMSB == MODE_LIGHTSABER || msg.targetMSB == WILDCARD)
                     {
                         Coil::allCoils[i].lightsaber.setOntimeUS(msg.value.f32);
-                        if (GUI::getAcceptsData())
+                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
                         {
                             int32_t temp = msg.value.f32;
                             switch (i)
@@ -404,7 +418,7 @@ void Sysex::processSysex()
                     if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == WILDCARD)
                     {
                         Coil::allCoils[i].simple.setDuty(msg.value.f32);
-                        if (GUI::getAcceptsData())
+                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
                         {
                             nxt->sendCmd("Simple.set%i.val&=0xffff0000", i + 1);
                             uint32_t ontime = Coil::allCoils[i].simple.getOntimeUS();
@@ -414,7 +428,7 @@ void Sysex::processSysex()
                     if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == WILDCARD)
                     {
                         Coil::allCoils[i].midi.setDuty(msg.value.f32);
-                        if (GUI::getAcceptsData())
+                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
                         {
                             nxt->sendCmd("MIDI_Live.set%i.val&=0x0000ffff", i + 1);
                             nxt->sendCmd("MIDI_Live.set%i.val|=%i", i + 1, temp);
@@ -441,7 +455,7 @@ void Sysex::processSysex()
                     for (uint32_t i = start; i < end; i++)
                     {
                         Coil::allCoils[i].simple.setFrequency(msg.value.f32);
-                        if (GUI::getAcceptsData())
+                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
                         {
                             nxt->sendCmd("Simple.set%i.val&=0x0000ffff", i + 1);
                             nxt->sendCmd("Simple.set%i.val|=%i", i + 1, temp << 16);
@@ -469,7 +483,7 @@ void Sysex::processSysex()
                     for (uint32_t i = start; i < end; i++)
                     {
                         Coil::allCoils[i].simple.setFrequency(msg.value.f32);
-                        if (GUI::getAcceptsData())
+                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
                         {
                             nxt->sendCmd("Simple.set%i.val&=0x0000ffff", i + 1);
                             nxt->sendCmd("Simple.set%i.val|=%i", i + 1, temp << 16);
@@ -565,7 +579,7 @@ void Sysex::processSysex()
             for (uint32_t i = start; i < end; i++)
             {
                 Coil::allCoils[i].midi.setChannels(msg.value.ui32);
-                if (GUI::getAcceptsData())
+                if (GUI::getAcceptsData() && uiUpdateMode == 2)
                 {
                     nxt->sendCmd("TC_Settings.coil%iChn.val&=0x0000ffff", i + 1);
                     nxt->sendCmd("TC_Settings.coil%iChn.val|=%i", i + 1, msg.value.ui32);
@@ -587,7 +601,7 @@ void Sysex::processSysex()
                 if ((msg.value.ui32 & 0b111) == 0)
                 {
                     Coil::allCoils[i].midi.setPanConstVol(true);
-                    if (GUI::getAcceptsData())
+                    if (GUI::getAcceptsData() && uiUpdateMode == 2)
                     {
                         nxt->sendCmd("TC_Settings.coil%iChn.val|=%i", i + 1, (1 << 7) << 16);
                     }
@@ -595,7 +609,7 @@ void Sysex::processSysex()
                 else if ((msg.value.ui32 & 0b111) == 1)
                 {
                     Coil::allCoils[i].midi.setPanConstVol(false);
-                    if (GUI::getAcceptsData())
+                    if (GUI::getAcceptsData() && uiUpdateMode == 2)
                     {
                         nxt->sendCmd("TC_Settings.coil%iChn.val&=%i", i + 1, ~((1 << 7) << 16));
                     }
@@ -621,7 +635,7 @@ void Sysex::processSysex()
             for (uint32_t i = start; i < end; i++)
             {
                 Coil::allCoils[i].midi.setPan(msg.value.i32);
-                if (GUI::getAcceptsData())
+                if (GUI::getAcceptsData() && uiUpdateMode == 2)
                 {
                     nxt->sendCmd("TC_Settings.coil%iChn.val&=%i", i + 1, ~(0xff << 24));
                     nxt->sendCmd("TC_Settings.coil%iChn.val|=%i", i + 1, msg.value.i32 << 24);
@@ -645,7 +659,7 @@ void Sysex::processSysex()
                 for (uint32_t i = start; i < end; i++)
                 {
                     Coil::allCoils[i].midi.setPanReach(msg.value.i32);
-                    if (GUI::getAcceptsData())
+                    if (GUI::getAcceptsData() && uiUpdateMode == 2)
                     {
                         nxt->sendCmd("TC_Settings.coil%iChn.val&=%i", i + 1, ~(127 << 16));
                         nxt->sendCmd("TC_Settings.coil%iChn.val|=%i", i + 1, msg.value.ui32 << 16);
@@ -659,11 +673,43 @@ void Sysex::processSysex()
             MIDI::resetNRPs(msg.value.ui32 & 0xffff);
             break;
 
+        case 0x0067: // () (), i32 modulation depth
+            msg.value.f32 = msg.value.i32 / 127.0f;
+        case 0x2067:
+            if (msg.value.f32 > 1.0f)
+            {
+                msg.value.f32 = 1.0f;
+            }
+            if (msg.value.f32 >= 0.0f)
+            {
+                EEPROMSettings::deviceData.midiLfoDepth = msg.value.f32;
+            }
+            break;
+
+        case 0x0068: // () (), i32 modulation frequency in 1/1000 Hz
+            msg.value.f32 = msg.value.i32 / 1e3f;
+        case 0x2068:
+            if (msg.value.f32 > 0.0f && msg.value.f32 <= 1e3f)
+            {
+                EEPROMSettings::deviceData.midiLfoFreq = msg.value.f32;
+            }
+            break;
+
+        case 0x0069: // () (), i32 modulation frequency in BPM
+            msg.value.f32 = msg.value.i32;
+        case 0x2069:
+            msg.value.f32 /= 60.0f;
+            if (msg.value.f32 > 0.0f && msg.value.f32 <= 1e3f)
+            {
+                EEPROMSettings::deviceData.midiLfoFreq = msg.value.f32;
+            }
+            break;
+
         case 0x0100: // (msb=ls)[lsb=coil], bf4 assigned lightsabers
         {
             msg.value.ui32 &= 0b1111;
             char* sLS = "____";
-            if (GUI::getAcceptsData())
+            if (GUI::getAcceptsData() && uiUpdateMode == 2)
             {
                 for (uint32_t i = 0; i < 4; i++)
                 {
@@ -683,7 +729,7 @@ void Sysex::processSysex()
             for (uint32_t i = start; i < end; i++)
             {
                 Coil::allCoils[i].lightsaber.setActiveLightsabers(msg.value.ui32);
-                if (GUI::getAcceptsData())
+                if (GUI::getAcceptsData() && uiUpdateMode == 2)
                 {
                     nxt->setVal("Lightsabers.sLS%i.txt=%s", i + 1, sLS);
                 }
@@ -703,10 +749,19 @@ void Sysex::processSysex()
             }
             break;
 
-        case 0x0200: // ()(), i32 EEPROM update mode, 0=manual, 1=force update, 2=auto (after each settings command), other=reserved.
+        case 0x0200: // ()(), i32 EEPROM update mode, 0=manual, 1=force update, 2=auto (after each sysex command), other=reserved.
             if (msg.value.ui32 < 3)
             {
                 EEPROMSettings::deviceData.eepromUpdateMode = msg.value.ui32;
+            }
+            break;
+
+        case 0x2202:
+            msg.value.ui32 = msg.value.f32 * 1e3f;
+        case 0x0202:
+            if (msg.value.ui32 == 41153700)
+            {
+                SysCtlReset();
             }
             break;
 
@@ -738,11 +793,13 @@ void Sysex::processSysex()
             nxt->setVal("Other_Settings.nBackOff", msg.value.ui32 & 0b1);
             break;
         case 0x0224: // ()(), i32 color mode, 0=light, 1=dark, other=reserved
-            if (msg.value.ui32 < 2)
+            // Currently NOT supported! Needs changes on the Nextion side
+            // to work without unreasonable code copying.
+            /*if (msg.value.ui32 < 2)
             {
                 nxt->setVal("Settings.colorMode", msg.value.ui32);
                 nxt->sendCmd("click fLoadColors,1");
-            }
+            }*/
             break;
         case 0x0225: // [msb=s,ml,ls][lsb=0], ui apply mode. 0=manual, 1=on release, 2=immediate, other=reserved.
             if (msg.value.ui32 < 3)
@@ -753,6 +810,12 @@ void Sysex::processSysex()
                 }
             }
             break;
+        case 0x0226: // ()(), i32 UI update mode, 0=manual, 1=force update [NS], 2=auto (after each sysex command), other=reserved.
+            if (msg.value.ui32 == 0 || msg.value.ui32 == 2)
+            {
+                uiUpdateMode = msg.value.ui32;
+            }
+            break;
 
         case 0x0240: // [msb=charGroup][lsb=user], char[4] username
             if (msg.targetLSB == 0)
@@ -761,7 +824,7 @@ void Sysex::processSysex()
                 memset(EEPROMSettings::userData[msg.targetLSB].name, 0, EEPROMSettings::STR_CHAR_COUNT);
             }
             memcpy(&(EEPROMSettings::userData[msg.targetLSB].name[msg.targetMSB * 4]), msg.value.chr, 4);
-            if (GUI::getAcceptsData())
+            if (GUI::getAcceptsData() && uiUpdateMode == 2)
             {
                 nxt->sendCmd("User_Settings.u%iName.txt=%s",
                              msg.targetLSB,
@@ -775,7 +838,7 @@ void Sysex::processSysex()
                 memset(EEPROMSettings::userData[msg.targetLSB].password, 0, EEPROMSettings::STR_CHAR_COUNT);
             }
             memcpy(&(EEPROMSettings::userData[msg.targetLSB].password[msg.targetMSB * 4]), msg.value.chr, 4);
-            if (GUI::getAcceptsData())
+            if (GUI::getAcceptsData() && uiUpdateMode == 2)
             {
                 nxt->sendCmd("User_Settings.u%iCode.txt=%s",
                              msg.targetLSB,
@@ -786,7 +849,7 @@ void Sysex::processSysex()
             msg.value.i32 = msg.value.f32;
         case 0x0242: // ()[lsb=user,nb], i32 user max ontime in us
             EEPROMSettings::userData[msg.targetLSB].maxOntimeUS = msg.value.i32;
-            if (GUI::getAcceptsData())
+            if (GUI::getAcceptsData() && uiUpdateMode == 2)
             {
                 nxt->sendCmd("User_Settings.u%iOntime.val=%i", msg.targetLSB, msg.value.i32);
             }
@@ -795,7 +858,7 @@ void Sysex::processSysex()
             msg.value.i32 = msg.value.f32 * 1000.0f;
         case 0x0243: // ()[lsb=user,nb], i32 user max duty in 1/1000
             EEPROMSettings::userData[msg.targetLSB].maxDutyPerm = msg.value.i32;
-            if (GUI::getAcceptsData())
+            if (GUI::getAcceptsData() && uiUpdateMode == 2)
             {
                 nxt->sendCmd("User_Settings.u%iDuty.val=%i", msg.targetLSB, msg.value.i32);
             }
@@ -804,7 +867,7 @@ void Sysex::processSysex()
             msg.value.i32 = msg.value.f32;
         case 0x0244: // ()[lsb=user,nb], i32 user max BPS in Hz
             EEPROMSettings::userData[msg.targetLSB].maxBPS = msg.value.i32;
-            if (GUI::getAcceptsData())
+            if (GUI::getAcceptsData() && uiUpdateMode == 2)
             {
                 nxt->sendCmd("User_Settings.u%iBPS.val=%i", msg.targetLSB, msg.value.i32);
             }
@@ -824,7 +887,7 @@ void Sysex::processSysex()
             for (uint32_t i = start; i < end; i++)
             {
                 Coil::allCoils[i].setMaxOntimeUS(msg.value.ui32);
-                if (GUI::getAcceptsData())
+                if (GUI::getAcceptsData() && uiUpdateMode == 2)
                 {
                     nxt->sendCmd("TC_Settings.coil%iOn.val=%i", i + 1, msg.value.i32);
                 }
@@ -846,7 +909,7 @@ void Sysex::processSysex()
             for (uint32_t i = start; i < end; i++)
             {
                 Coil::allCoils[i].setMaxDutyPerm(msg.value.f32);
-                if (GUI::getAcceptsData())
+                if (GUI::getAcceptsData() && uiUpdateMode == 2)
                 {
                     nxt->sendCmd("TC_Settings.coil%iDuty.val=%i", i + 1, msg.value.f32);
                 }
@@ -884,7 +947,7 @@ void Sysex::processSysex()
                 for (uint32_t i = start; i < end; i++)
                 {
                     Coil::allCoils[i].setMinOfftimeUS(msg.value.i32);
-                    if (GUI::getAcceptsData())
+                    if (GUI::getAcceptsData() && uiUpdateMode == 2)
                     {
                         nxt->sendCmd("TC_Settings.coil%iOffVoics.val&=0xffff0000", i + 1);
                         nxt->sendCmd("TC_Settings.coil%iOffVoics.val|=%i", i + 1, msg.value.ui32);
@@ -894,7 +957,7 @@ void Sysex::processSysex()
             break;
         }
         case 0x0264: // ()[lsb=coil], i32 coil max MIDI voices, 1-16, ohter=reserved
-            if (msg.value.ui32 < 16)
+            if (msg.value.ui32 <= 16)
             {
                 uint32_t start = msg.targetLSB;
                 uint32_t end = msg.targetLSB + 1;
@@ -906,12 +969,21 @@ void Sysex::processSysex()
                 for (uint32_t i = start; i < end; i++)
                 {
                     Coil::allCoils[i].midi.setMaxVoices(msg.value.ui32);
-                    if (GUI::getAcceptsData())
+                    if (GUI::getAcceptsData() && uiUpdateMode == 2)
                     {
                         nxt->sendCmd("TC_Settings.coil%iOffVoics.val&=0x0000ffff", i + 1);
                         nxt->sendCmd("TC_Settings.coil%iOffVoics.val|=%i", i + 1, msg.value.ui32 << 16);
                     }
                 }
+            }
+            break;
+
+        case 0x2266: // () (), i32 buffer duration in us
+            msg.value.ui32 = msg.value.f32;
+        case 0x0266:
+            if (msg.value.ui32 >= 1000 && msg.value.ui32 <= 100000)
+            {
+                Coil::setBufferDurationUS(msg.value.ui32);
             }
             break;
 

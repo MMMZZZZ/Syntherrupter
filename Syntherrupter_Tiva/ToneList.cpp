@@ -157,3 +157,16 @@ void ToneList::limit()
     }
     limiterActive = stillActive;
 }
+
+void ToneList::applyTimeOffsetUS(uint32_t offsetUS)
+{
+    Tone* tone = firstTone;
+    while (tone != newTone)
+    {
+        if (tone->nextFireUS > offsetUS)
+        {
+            tone->nextFireUS -= offsetUS;
+        }
+        tone = tone->nextTone;
+    }
+}

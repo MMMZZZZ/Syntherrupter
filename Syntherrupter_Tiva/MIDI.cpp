@@ -20,7 +20,8 @@ SysexMsg                   MIDI::sysexMsg;
 bool                       MIDI::playing = false;
 float                      MIDI::freqTable[128];
 MIDIProgram                MIDI::programs[MAX_PROGRAMS];
-float*                     MIDI::lfoPeriodUS;
+float*                     MIDI::lfoFreq;
+float*                     MIDI::lfoDepth;
 
 
 MIDI::MIDI()
@@ -176,6 +177,7 @@ bool MIDI::processBuffer(uint32_t b)
                         note->afterTouch     = 0;
                         note->rawVolume      = 0.0f;
                         note->envelopeVolume = 0.0f;
+                        note->finishedVolume = 0.0f;
                         channels[channel].addNote(note);
                     }
 
@@ -240,7 +242,7 @@ bool MIDI::processBuffer(uint32_t b)
                         break;
                     case 0x07: // Channel Volume
                         channels[channel].volume = c1 / 128.0f;
-                        channels[channel].controllersChanged = true;
+                        // channels[channel].controllersChanged = true;
                         break;
                     case 0x0A: // Pan
                         channels[channel].pan = c1 / 128.0f;
@@ -248,7 +250,7 @@ bool MIDI::processBuffer(uint32_t b)
                         break;
                     case 0x0B: // Expression coarse
                         channels[channel].expression = c1 / 128.0f;
-                        channels[channel].controllersChanged = true;
+                        // channels[channel].controllersChanged = true;
                         break;
                     case 0x40: // Sustain Pedal
                         if (c1 >= 64)
@@ -648,15 +650,15 @@ void MIDI::stop()
     notelist.removeAllNotes();
 }
 
-void MIDI::setVolSettingsProm(float ontimeUSMax, float dutyPermMaxProm)
+void MIDI::setVolSettingsPerm(float ontimeUSMax, float dutyPermMax)
 {
     // duty in promille
-    setVolSettings(ontimeUSMax, dutyPermMaxProm / 1000.0f);
+    setVolSettings(ontimeUSMax, dutyPermMax / 1000.0f);
 }
-void MIDI::setVolSettings(float ontimeUSMax, float dutyPermMax)
+void MIDI::setVolSettings(float ontimeUSMax, float dutyMax)
 {
     singleNoteMaxOntimeUS = ontimeUSMax;
-    singleNoteMaxDuty     = dutyPermMax;
+    singleNoteMaxDuty     = dutyMax;
 
     // Prevent divide by 0.
     if (ontimeUSMax < 1.0f)
@@ -665,7 +667,7 @@ void MIDI::setVolSettings(float ontimeUSMax, float dutyPermMax)
     }
 
     // Determine crossover note at which abs. and rel. mode would have equal frequency.
-    absFreq = dutyPermMax / ontimeUSMax * 1000.0f;
+    absFreq = dutyMax / ontimeUSMax * 1e6f;
 
     coilChange = true;
 }
@@ -795,11 +797,14 @@ void MIDI::process()
                                 if (note->velocity)
                                 {
                                     note->rawVolume = note->velocity / 128.0f;
-                                    if (channel->damperPedal)
-                                    {
-                                        note->rawVolume *= 0.6f;
-                                    }
-                                    note->rawVolume *= channel->volume * channel->expression;
+                                    /*
+                                     * Branchless version of:
+                                     * if (channel->damperPedal)
+                                     * {
+                                     *     note->rawVolume *= 0.6f;
+                                     * }
+                                     */
+                                    note->rawVolume *= (1 - channel->damperPedal * 0.4f);
                                 }
                             }
                             else if (!channel->sustainPedal)
@@ -901,6 +906,8 @@ void MIDI::updateEffects(Note* note)
 
                 // After calculation of envelope, add other effects like modulation
                 float finishedVolume =   note->rawVolume
+                                       * note->channel->volume
+                                       * note->channel->expression
                                        * note->envelopeVolume
                                        * (1.0f - getLFOVal(note->channel));
                 if (finishedVolume != note->finishedVolume)
@@ -921,12 +928,16 @@ void MIDI::updateEffects(Note* note)
 void MIDI::updateToneList()
 {
     Tone* lastTone = (Tone*) 1;
-    Note* note = notelist.firstNote;
-    uint32_t voicesLeft = *coilMaxVoices;
-    while (note != notelist.newNote)
+    Note* note = notelist.newNote->prevNote;
+    int32_t voicesLeft = *coilMaxVoices;
+    int32_t remainingNotes = notelist.activeNotes;
+    while (remainingNotes--)
     {
-        Note* nextNote = note->nextNote;
-        if (note->toneChanged & coilBit || coilChange)
+        // Go backwards from the most recent to the oldest (firstNote)
+        // The next note of the loop needs to be stored at the beginning
+        // since the note might get deleted during the loop.
+        Note* nextNote = note->prevNote;
+        if ((note->toneChanged & coilBit) || coilChange || !voicesLeft)
         {
             note->toneChanged &= ~coilBit;
 
@@ -934,12 +945,16 @@ void MIDI::updateToneList()
 
             if (note->isDead())
             {
-                notelist.removeNote(note); // Removes tone from tonelists, too.
+                // Removes tone from tonelists, too.
+                notelist.removeNote(note);
+                // "undo" decrement at the end of the loop since no voice
+                // will actually be used.
+                voicesLeft++;
             }
-            else if (note->channel->coils & coilBit)
+            else if ((note->channel->coils & coilBit) && voicesLeft)
             {
                 setPanVol(note);
-                if (lastTone && voicesLeft)
+                if (lastTone)
                 {
                     float ontimeUS = note->finishedVolume * note->panVol[coilNum];
                     if (note->frequency >= absFreq)
@@ -967,8 +982,11 @@ void MIDI::updateToneList()
                     }
                     else
                     {
-                        voicesLeft--;
-                        lastTone = tonelist->updateTone(ontimeUS, note->periodUS, this, note, *assignedTone);
+                        lastTone = tonelist->updateTone(ontimeUS,
+                                                        note->periodUS,
+                                                        this,
+                                                        note,
+                                                        *assignedTone);
                         *assignedTone = lastTone;
                     }
                 }
@@ -977,6 +995,8 @@ void MIDI::updateToneList()
             {
                 // This coil is no more listening to this channel. Remove the
                 // assigned tone if there is one.
+                // Or the voice limit's been reached and the note doesn't fit
+                // into this output anymore.
                 if (*assignedTone)
                 {
                     (*assignedTone)->remove(note);
@@ -986,6 +1006,8 @@ void MIDI::updateToneList()
         }
 
         note = nextNote;
+        // Prevent voicesLeft from going negative.
+        voicesLeft = Branchless::max(0, voicesLeft - 1);
     }
     coilChange     = false;
     coilPanChanged = false;

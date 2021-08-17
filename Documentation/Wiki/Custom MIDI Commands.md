@@ -259,7 +259,21 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32
-		* 0-127: bf16: channels whose NRPs shall be reset to default.
+		* bf16: channels whose NRPs shall be reset to default.
+* `0x67`: [EE] LFO Modulation Depth
+	* Target MSB: Reserved.
+	* Target LSB: Reserved.
+	* Value: int32
+		* 0-127: Modulation depth. 0=no modulation, 127=full depth
+		* Default: 63
+* `0x68`: [EE] LFO Frequency
+	* Target MSB: Reserved.
+	* Target LSB: Reserved.
+	* Value: int32, Frequency in 1/1000
+* `0x69`: [EE] LFO BPM
+	* Target MSB: Reserved.
+	* Target LSB: Reserved.
+	* Value: int32, Beats per minute.
 
 #### `0x100-0x10f`: Lightsaber mode parameters
 
@@ -290,6 +304,11 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Value: int32
 		* 0-126: New ID for this device.
 		* Default: 0
+* `0x202`: Reset
+	* Target MSB: Reserved.
+	* Target LSB: Reserved.
+	* Value: int32, reset key in 1/1000. To prevent an accidental reset of the device, a specific value must be sent. 
+		* 41153700: Causes a reset of the Tiva microcontroller and in consequence of the Nextion display. Note: this doesn't work when any [passthrough mode](/Documentation/UI/Nextion-USB.md#readme) is active.
 
 #### `0x220-0x23f`: UI settings
 
@@ -318,7 +337,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 		* [0]: Background shutdown
 			* 0: Disabled
 			* 1: Enabled (default)
-* `0x224`: [EE] [NF] UI Color Mode
+* `0x224`: [NS] [EE] [NF] UI Color Mode
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32, color mode
@@ -332,6 +351,14 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 		* 0: Manually
 		* 1: On Release (default)
 		* 2: Immediately
+
+* `0x226`: [NF] UI Update Mode
+	* Target MSB: Reserved.
+	* Target LSB: Reserved.
+	* Value: int32, Specify when the Nextion UI is updated after receiving sysex commands. Similar to the [EEPROM Update Mode command](#0x200-0x21f-eeprom-and-other-control-commands). However, the [Nextion UI is not always capable of receiving updates](/Documentation/UI/Menu.md##sysex-commands). In this case the update is discarded. Disabling auto updates speeds up the execution significantly, thus reduces the risk of audible hickups when sending sysex commands. 
+		* 0: Manual updates, sysex commands will not affect on-screen data.
+		* 1: [NS] Force update, if possible, update all outdated values. Does not affect current update mode. 
+		* 2: Auto (default), if possible, sysex commands do immediately update the Nextion data. 
 
 #### `0x240-0x25f`: User settings
 
@@ -394,7 +421,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32, voice limit
-		* 1-16
+		* 0-16
 		* Default: 8
 * `0x265`: [NS] [EE] Coil Output Invert
 	* Target MSB: Reserved.
@@ -402,7 +429,12 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Value: int32
 		* 0: Normal (ontime = 3.3V, offtime = 0V) (default)
 		* 1: Inverted (ontime = 0V, offtime = 3.3V)
-
+* `0x266`: [EE] Buffer Duration
+	* Target MSB: Reserved.
+	* Target LSB: Reserved.
+	* Value: int32
+		* 1000-100000: Duration of the output buffer in us. Same for all coils.
+		* Default: 5000
 
 #### `0x300-0x31f`: Envelope settings
 

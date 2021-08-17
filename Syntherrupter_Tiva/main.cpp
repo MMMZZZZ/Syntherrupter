@@ -17,11 +17,6 @@
 #include "GUI.h"
 
 
-void sysTickISR()
-{
-    System::systemTimeIncrement();
-}
-
 void uartUsbISR()
 {
     MIDI::usbUart.ISR();
@@ -37,11 +32,9 @@ void uartLightSaberISR()
     LightSaber::uart.ISR();
 }
 
-
 int main(void)
 {
-    System::init(sysTickISR);
-    System::setSystemTimeResUS(16);
+    System::init();
 
     uint32_t cfgStatus = EEPROMSettings::init();
 
@@ -56,7 +49,7 @@ int main(void)
         Coil::allCoils[coil].init(coil);
     }
 
-    GUI::init(&nextion, nxtOk, cfgStatus);
+    GUI::init(&nextion, nxtOk|true, cfgStatus);
     Sysex::init(&nextion);
 
     while (42)

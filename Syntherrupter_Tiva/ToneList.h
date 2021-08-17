@@ -14,6 +14,7 @@
 #include "InterrupterConfig.h"
 #include "System.h"
 #include "Tone.h"
+#include "Pulse.h"
 
 
 class ToneList
@@ -24,6 +25,7 @@ public:
     Tone* updateTone(uint32_t ontimeUS, uint32_t periodUS, void* owner, void* origin, Tone* tone);
     void deleteTone(Tone* tone);
     void limit();
+    void applyTimeOffsetUS(uint32_t offsetUS);
     void setMaxOntimeUS(float ontimeUSLimit)
     {
         this->maxOntimeUS = maxOntimeUS;
@@ -31,20 +33,31 @@ public:
     void setMaxDuty(float maxDuty)
     {
         this->maxDuty = maxDuty;
+        limit();
     };
-    uint32_t getOntimeUS(uint32_t timeUS)
+    uint32_t getOntimesUS(Pulse* pulses, const uint32_t size, uint32_t nowUS, uint32_t endUS)
     {
+        uint32_t index = 0;
         Tone* tone = firstTone;
         while (tone != newTone)
         {
-            if (timeUS >= tone->nextFireUS)
+            if (endUS >= tone->nextFireUS)
             {
-                tone->update(timeUS);
-                return tone->limitedOntimeUS;
+                pulses[index] = tone->update(nowUS);
+                /*
+                 * Branchless version of
+                 *     if (index < size - 1)
+                 *     {
+                 *         index++;
+                 *     }
+                 * No profiling has been done in this case but other (similar)
+                 * cases have shown 50-100% speed increases.
+                 */
+                index += (index < size - 1);
             }
             tone = tone->nextTone;
         }
-        return 0;
+        return index;
     };
     Tone* firstTone;
 

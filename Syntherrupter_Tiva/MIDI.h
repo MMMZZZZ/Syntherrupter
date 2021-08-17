@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "InterrupterConfig.h"
+#include "Branchless.h"
 #include "System.h"
 #include "Channel.h"
 #include "UART.h"
@@ -29,7 +30,7 @@ public:
     virtual ~MIDI();
     void init(uint32_t num, ToneList* tonelist);
     void updateToneList();
-    void setVolSettingsProm(float ontimeUSMax, float dutyMaxProm);
+    void setVolSettingsPerm(float ontimeUSMax, float dutyMaxProm);
     void setVolSettings(float ontimeUSMax, float dutyMax);
     void setOntimeUS(float ontimeUSMax)
     {
@@ -115,9 +116,7 @@ private:
         if (channel->modulation)
         {
             /*
-             *               /            t   \
-             * LFO_SINE = sin| 2 * Pi * ----- |
-             *               \           T_0  /
+             * LFO_SINE = sin( 2 * Pi * f * t[us] * 1e-6 )
              *
              *       1   /  LFO_SINE + 1       ModWheelValue    \
              * val = - * | --------------- * ------------------ |
@@ -125,8 +124,8 @@ private:
              *
              * sine wave between 0 and 1 mapped to the desired modulation depth (50% max).
              */
-            return (sinf(6.283185307179586f * float(System::getSystemTimeUS()) / *lfoPeriodUS) + 1) / 4.0f
-                    * channel->modulation;
+            return (sinf(6.283185307179586e-6f * float(System::getSystemTimeUS()) * (*lfoFreq)) + 1) / 2.0f
+                    * channel->modulation * (*lfoDepth);
         }
         else
         {
@@ -183,7 +182,8 @@ private:
     bool panConstVol            = false;
 
     static bool playing;
-    static float* lfoPeriodUS;
+    static float* lfoFreq;
+    static float* lfoDepth;
 
     friend class EEPROMSettings;
 };
