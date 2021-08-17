@@ -100,7 +100,7 @@ Text tNxtFWVersion
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : v4.2.0-beta.3
+        Text               : v4.2.0-beta.4
         Max. Text Size     : 20
     
 Text tTivaFW
