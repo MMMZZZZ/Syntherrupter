@@ -88,6 +88,7 @@ bool MIDI::processBuffer(uint32_t b)
      * If so, the serial buffers shouldn't be processed any further until
      * all of the data parsed so far has indeed been used.
      */
+    bool urgentData = false;
 
     /*
      * It would probably be better to have a child class of the ByteBuffer
@@ -264,6 +265,9 @@ bool MIDI::processBuffer(uint32_t b)
                         else
                         {
                             channels[channel].sustainPedal = false;
+                            // Pedal lifts can be very short but must be
+                            // caught under all circumstances
+                            urgentData = true;
                         }
                         channels[channel].controllersChanged = true;
                         break;
@@ -615,15 +619,14 @@ bool MIDI::processBuffer(uint32_t b)
 
                         // Make sure the SysEx Message will be processed before
                         // it'll be overwritten by a new one.
-                        return true;
+                        urgentData = true;
                     }
                 }
             }
         }
     }
 
-    // Default response is: No urgent data that'd need immediate processing.
-    return false;
+    return urgentData;
 }
 
 void MIDI::start()
