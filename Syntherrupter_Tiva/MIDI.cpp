@@ -178,6 +178,7 @@ bool MIDI::processBuffer(uint32_t b)
                         note->rawVolume      = 0.0f;
                         note->envelopeVolume = 0.0f;
                         note->finishedVolume = 0.0f;
+                        note->panChanged = (1 << COIL_COUNT) - 1;
                         channels[channel].addNote(note);
                     }
 
