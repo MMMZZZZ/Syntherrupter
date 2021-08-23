@@ -50,9 +50,9 @@ public:
     };
     static void timer2ISR()
     {
-        GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0xff);
+        //GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0xff);
         allCoils[2].out.ISR();
-        GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0x00);
+        //GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_1, 0x00);
     };
     static void timer3ISR()
     {
