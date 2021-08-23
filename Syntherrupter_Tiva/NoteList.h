@@ -20,6 +20,7 @@ public:
     NoteList();
     virtual ~NoteList();
     Note* addNote();
+    void moveToEnd(Note* note);
     void removeNote(Note* note);
     void removeAllNotes();
     Note* getNote(uint32_t channel, uint32_t noteNum);
@@ -30,6 +31,7 @@ public:
 
 private:
     void buildLinks();
+    void moveBefore(Note* noteToMove, Note* noteToInsertBefore);
     float maxOntimeUS    = 10;
     float maxDuty        = 0.01f;
     bool limiterActive   = false;

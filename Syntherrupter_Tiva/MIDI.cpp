@@ -181,7 +181,10 @@ bool MIDI::processBuffer(uint32_t b)
                         note->panChanged = (1 << COIL_COUNT) - 1;
                         channels[channel].addNote(note);
                     }
-
+                    else
+                    {
+                        notelist.moveToEnd(note);
+                    }
                     note->number         = number;
                     note->velocity       = c1;
                     note->envelopeStep   = 0;
