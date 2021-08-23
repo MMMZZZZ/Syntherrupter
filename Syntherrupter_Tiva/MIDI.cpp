@@ -375,16 +375,6 @@ bool MIDI::processBuffer(uint32_t b)
                         else if (channels[channel].NRPN == (42 << 8) + 0) // Note pan mode - enable/disable
                         {
                             channels[channel].notePanMode = c1;
-                            /*if (c1 == 2)
-                            {
-                                // Omni Mode (Note plays everywhere)
-                                channels[channel].notePanOmniMode = true;
-                            }
-                            else
-                            {
-                                channels[channel].notePanOmniMode = false;
-                                channels[channel].notePanEnabled = c1;
-                            }*/
                         }
                         else if (channels[channel].NRPN == (42 << 8) + 1) // Note pan mode - source range lower limit
                         {
