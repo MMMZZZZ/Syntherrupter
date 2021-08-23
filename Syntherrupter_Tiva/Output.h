@@ -123,11 +123,10 @@ private:
          {SYSCTL_PERIPH_TIMER5, TIMER5_BASE, SYSCTL_PERIPH_GPIOM, GPIO_PORTM_BASE, GPIO_PIN_6, GPIO_PM6_T5CCP0}
     };
     static constexpr uint32_t TIMER_CONFIG_POS = (TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_PERIODIC | TIMER_CFG_A_ACT_SETCLRTO);
-    static constexpr uint32_t TIMER_CONFIG_NEG = (TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_PERIODIC | TIMER_CFG_A_ACT_CLRSETTO);
     static constexpr uint32_t TICKS_PER_US = 120;
     static constexpr uint32_t MIN_TIME_US = 4;
-    uint32_t minOffValue = 10 * TICKS_PER_US;
-    uint32_t maxOntimeUS = 100 * TICKS_PER_US;
+    uint32_t minOffValue = 10;
+    uint32_t maxOntimeUS = 100;
     uint32_t timerBase = 0;
 
     static uint32_t maxPeriodUS;
