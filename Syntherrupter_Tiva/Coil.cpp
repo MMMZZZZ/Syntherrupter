@@ -138,9 +138,9 @@ void Coil::updateOutput()
         }
     }
     // Prevent overflow issues. Once the smallest variable is above a
-    // threshold, all of them are "reset" but substracting that offset.
+    // threshold, all of them are "reset" by substracting that offset.
     static constexpr uint32_t OVERFLOW_THRESHOLD_US = 1 << 30;
-    if (out.lastFiredUS > OVERFLOW_THRESHOLD_US)
+    if (out.lastFiredUS > 2 * OVERFLOW_THRESHOLD_US)
     {
         out.lastFiredUS -= OVERFLOW_THRESHOLD_US;
         readyForNextUS  -= OVERFLOW_THRESHOLD_US;
