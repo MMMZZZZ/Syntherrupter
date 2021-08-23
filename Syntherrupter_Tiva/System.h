@@ -56,7 +56,7 @@ private:
     static constexpr uint32_t CLOCK_FREQ = 120000000;
     static constexpr uint32_t CLOCK_TICKS_US = CLOCK_FREQ / 1000000;
     static constexpr uint32_t PIOSCFreq = 16000000;
-    static constexpr uint32_t SYS_TICK_RES_US = 100;
+    static constexpr uint32_t SYS_TICK_RES_US = 500;
     static volatile uint32_t timeUS;
 
     // Peripherals that should be turned off in case of an error
