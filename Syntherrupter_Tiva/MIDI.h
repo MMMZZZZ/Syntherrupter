@@ -90,26 +90,34 @@ private:
     {
         if (note->panChanged || coilPanChanged)
         {
-            if (note->panChanged & coilBit)
-            {
-                note->panChanged &= ~coilBit;
-            }
+            note->panChanged &= ~coilBit;
             // 1.01f instead of 1.0f to include the borders of the range.
-            note->panVol[coilNum] = 1.01f - inversPanReach * fabsf(note->pan - coilPan);
-            if (note->panVol[coilNum] <= 0.0f)
-            {
-                note->panVol[coilNum] = 0.0f;
-            }
-            else if (panConstVol)
-            {
-                note->panVol[coilNum] = 1.0f;
-            }
 
-            if (coilPan < 0.0f || note->channel->notePanMode == Channel::NOTE_PAN_OMNI)
-            {
-                note->panVol[coilNum] = 1.0f;
-            }
+            // Limit lower range to 0.0f
+            note->panVol[coilNum] = Branchless::max(0.0f, 1.01f - inversPanReach * fabsf(note->pan - coilPan));
+
+            // if panVol != 0 and panConstVol, set panVol to 1.0f
+            // Detailed explanation of the reasoning below.
+            float panConstant = (panConstVol && note->panVol[coilNum]);
+            note->panVol[coilNum] = Branchless::max(note->panVol[coilNum], panConstant);
         }
+
+        /*
+         * panVol now ranges from 0-1. If pan stuff is for some reason disabled
+         * panVol should be 1. So if condition is true == 1, set panVol to 1.
+         * Effectively this is the same as max(panVol, condition). If the
+         * condition is false (== 0, meaning that pan stuff *is* enabled), then
+         * the panVol is in all cases >= than the condition and remains
+         * unchanged. Otherwise - with the same reasoning - it'll be changed to
+         * 1.0f.
+         * Previous code:
+         *     if (coilPan < 0.0f || note->channel->notePanMode == Channel::NOTE_PAN_OMNI)
+         *     {
+         *         note->panVol[coilNum] = 1.0f;
+         *     }
+         */
+        float panDisabled = (coilPan < 0.0f || note->channel->notePanMode == Channel::NOTE_PAN_OMNI);
+        note->panVol[coilNum] = Branchless::max(note->panVol[coilNum], panDisabled);
     };
     static float getLFOVal(Channel* channel)
     {
