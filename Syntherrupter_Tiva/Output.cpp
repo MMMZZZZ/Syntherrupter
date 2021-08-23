@@ -43,10 +43,6 @@ void Output::init(uint32_t timerNum, void (*ISR)(void))
     // Timer A generates the ontime, timer B assures enough offtime until the next pulse
     TimerConfigure(timerBase, TIMER_CFG_PERIODIC);
     TimerControlStall(timerBase, TIMER_A, true);
-    if (TICKS_PER_US == 16)
-    {
-        TimerClockSourceSet(timerBase, TIMER_CLOCK_PIOSC);
-    }
     TimerUpdateMode(timerBase, TIMER_A, TIMER_UP_LOAD_TIMEOUT);
     TimerLoadSet(timerBase, TIMER_A, 12000);
     TimerIntRegister(timerBase, TIMER_A, ISR);
