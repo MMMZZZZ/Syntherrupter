@@ -31,4 +31,6 @@ In addition, Mads Barnkob from [Kaizer Power Electronics](https://kaizerpowerele
 * [Tesla Coil Show Controller Project (Part 1 of 6)](https://www.youtube.com/watch?v=Ad2129sZv6w)
 * [Tesla Coil Show Controller - Programming Syntherrupter (Part 2 of 6)](https://www.youtube.com/watch?v=jQZj8DPNvJg)
 * [Tesla Coil Show Controller - 6 Optical Output Control Panel (Part 3 of 6)](https://www.youtube.com/watch?v=DCFt82_SrNI)
+* [Tesla Coil Show Controller - 6 Interrupters (Part 4 of 8)](https://www.youtube.com/watch?v=pOEmQ9KFFWY)
+* [Tesla Coil Show Controller - Syntherrupter Installation And MIDI Test (Part 5 of 8)](https://www.youtube.com/watch?v=JB4-n_mJty4)
 * *(Other parts will be added as soon as they're released)*
