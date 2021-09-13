@@ -32,9 +32,6 @@ public:
 private:
     void buildLinks();
     void moveBefore(Note* noteToMove, Note* noteToInsertBefore);
-    float maxOntimeUS    = 10;
-    float maxDuty        = 0.01f;
-    bool limiterActive   = false;
     Note unorderedNotes[MAX_NOTES + 1];
 };
 
