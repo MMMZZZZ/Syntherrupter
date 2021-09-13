@@ -26,6 +26,12 @@ public:
     {
         return (number > 127);
     };
+    // For debugging purposes only.
+    uint32_t id = 0;
+
+    Note* prevNote = 0;
+    Note* nextNote = 0;
+    Note* nextChnNote = 0;
     Channel* channel = 0;
     uint32_t envelopeStep    = 0;
     uint8_t number           = 0;
@@ -45,12 +51,6 @@ public:
     uint8_t toneChanged      = (1 << COIL_COUNT) - 1;
     bool  changed            = true;
     Tone* assignedTones[COIL_COUNT];
-    Note* prevNote = 0;
-    Note* nextNote = 0;
-    Note* nextChnNote = 0;
-
-    // For debugging purposes only.
-    uint32_t id = 0;
 };
 
 #endif /* NOTE_H_ */
