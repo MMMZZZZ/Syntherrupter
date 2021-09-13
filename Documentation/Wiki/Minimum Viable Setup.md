@@ -80,7 +80,8 @@ The user interface can be run on a Windows PC. This requires an additional Seria
 
 * Download, install and open the Nextion Editor. 
   * For firmwares up to v4.1.3 you need Nextion Editor v1.61.1 (Download as [ZIP (portable)](https://nextion.tech/download/nextion-setup-v1-61-1.zip) or [Installer](https://nextion.tech/download/nextion-setup-v1-61-1.exe)). 
-  * For firmware versions 4.1.4 and later you need Nextion Editor v1.62.1 (Download as [ZIP (portable)](https://nextion.tech/download/nextion-setup-v1-62-1.zip) or [Installer](https://nextion.tech/download/nextion-setup-v1-62-1.exe)). 
+  * For firmware versions 4.1.4 to 4.2.0-beta.5 you need Nextion Editor v1.62.1 which is not available for download anymore; Nextion wants to force people to use v1.63.x and newer. For the record, here are the broken links: [ZIP (portable)](https://nextion.tech/download/nextion-setup-v1-62-1.zip), [Installer](https://nextion.tech/download/nextion-setup-v1-62-1.exe). Workaround: download the "Source Code" zip file attached to the release and open the .HMI file that can be found in the extraced zip content under `Syntherrupter_Nextion/Syntherrupter_Nextion.HMI`. You can use pretty much any Nextion editor version but I'd recommend v1.63.3 (see next point). Once you opened the file in the editor, contine with the steps below. 
+  * For firmware versions 4.2.0-beta.6 and newer you need Nextion editor v1.63.3 (Download as [ZIP (portable)](https://nextion.tech/download/nextion-setup-v1-63-3.zip) or [Installer](https://nextion.tech/download/nextion-setup-v1-63-3.exe)). 
 * Click "Debug" on the top right. A file dialog opens. Select the *Syntherrupter_Nextion_NX8048T050.tft* file from the release zip file. 
 * A new window opens. At the bottom left select "User MCU Input" and then the COM port of the Serial to USB converter. Baud rate is 115200baud/s.
 * You may need to reset the Tiva. 
