@@ -49,7 +49,7 @@ int main(void)
         Coil::allCoils[coil].init(coil);
     }
 
-    GUI::init(&nextion, nxtOk|true, cfgStatus);
+    GUI::init(&nextion, nxtOk, cfgStatus);
     Sysex::init(&nextion);
 
     while (42)
