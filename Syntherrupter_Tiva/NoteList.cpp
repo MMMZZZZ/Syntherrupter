@@ -37,15 +37,17 @@ Note* NoteList::addNote()
 
 void NoteList::moveToEnd(Note* note)
 {
+    if (note == newNote->prevNote)
+    {
+        // Note is already at the end. This case must be caught first!
+        return;
+    }
     if (note == firstNote)
     {
+        // Adjust pointer to firstNote.
         firstNote = note->nextNote;
     }
-    if (note != newNote->prevNote)
-    {
-        moveBefore(note, newNote);
-    }
-    // else: note is already at the end, no moving needed.
+    moveBefore(note, newNote);
 }
 
 void NoteList::removeNote(Note* note)
