@@ -12,7 +12,9 @@ Syntherrupter's MIDI functions can be controlled via custom MIDI commands. Since
 		* [NRP Format](#nrp-format)
 		* [Syntherrupters NRPs](#syntherrupters-nrps)
 	* [System Exclusive Messages (SysEx)](#system-exclusive-messages-sysex)
-		* [SysEx format](#sysex-format)
+		* [Quick Start](#quick-start)
+		* [Technical Introduction](#technical-introduction)
+		* [SysEx Format](#sysex-format)
 		* [Syntherrupters SysEx Commands Version 1 (Draft!)](#syntherrupters-sysex-commands-version-1-draft)
 
 ## Non-registered Parameters (NRP)
@@ -60,15 +62,24 @@ Syntherrupter allows you to map notes to stereo positions based on different par
 
 ## System Exclusive Messages (SysEx)
 
-SysEx messages were originally intended to allow manufacturers to implement completely custom commands within the MIDI protocol. Part of each command is a device manufacturer ID (DMID) to make sure the commands of different manufacturers don't interfere with each other. Hence, with your own ID you can implement whatever you want. 
+### Quick Start
 
-However with GM2, kind of a revision and extension of the MIDI standard, "Universal SysEx Messages" were introduced. They have a ID just like any other SysEx message but as the "universal" indicates, they are well defined and intended to be implemented on any suitable device. It's basically a backward compatible extension of the existing MIDI standard. As of now, Syntherrupter has no support for Universal SysEx Messages (and tbh they're quite rare in MIDI files).
+If you are a regular user, you only need to know the following three things:
+1. Sysex are MIDI messages that allow manufacturers and people like me to completely control their devices over MIDI. This allows f.ex. to embed the entire device setup into a MIDI file and thus "hands free" operation. 
+2. **The only practical way to use this extremely powerful and useful feature is a tool called [Syfoh](https://github.com/MMMZZZZ/Syfoh#readme)**. It allows you to control Syntherrupter with simple sentences like *set ontime for coil 1 and mode simple to 100*. You can just write all your commands into a text file and Syfoh will apply them with one click. 
+3. Once you figured out Syfoh, this page only serves you as a reference which commands exist and what they do. Syfoh contains a list of the commands, too, but the actual documentation of them lives here, [further down the page](#syntherrupters-sysex-commands-version-1-draft). Note: the documentation (especially the [Conventions](#conventions) section) below contains more info than you need, but most of it is highly relevant for you, too. F.ex. you can ignore that float commands all have a command number >= `0x2000` but you should know what the [NF] tag means, or how ranges work with floats, etc.
+
+From now on the documentation goes into all the technical details that'd be required to write your own compatible program.  
+
+### Technical Introduction
+
+SysEx messages were originally intended to allow manufacturers to implement completely custom commands within the MIDI protocol*. Part of each command is a device manufacturer ID (DMID) to make sure the commands of different manufacturers don't interfere with each other. Hence, with your own ID you can implement whatever you want. 
 
 SysEx Messages have no channel information and are intended to control the device as a whole. Although, of course, every manufacturer can use them to implement whatever they want. Custom note on messages with additional information for example. 
 
-There are various tools out there for sysex commands. Some are vendor-specific, some are kept general. For the Sysex commands below I wrote a [custom python tool called Syfoh](https://github.com/MMMZZZZ/Syfoh#readme), that'll make handling them much easier. You can simply write the command in text form (or even provide a text file with a bunch of them) and Syfoh will convert them to sysex commands. Those can either be saved or directly sent to Syntherrupter over serial. 
+*\*With GM2, kind of a revision and extension of the MIDI standard, "Universal SysEx Messages" have been introduced. They have an ID just like any other SysEx message but as the "universal" indicates, they are well defined and intended to be implemented on any suitable device. It's basically a backward compatible extension of the existing MIDI standard. As of now, Syntherrupter has no support for Universal SysEx Messages (and tbh they're quite rare in MIDI files).*
 
-### SysEx format
+### SysEx Format
 
 #### General Format
 
@@ -100,6 +111,10 @@ Structure:
 *Note: Since not every parameter requires the full 9 bytes, it will be possible to send shorter messages which omit some of those bytes. However, they aren't standarized yet.*
 
 ### Syntherrupters SysEx Commands Version 1 (Draft!)
+
+#### Use [Syfoh](https://github.com/MMMZZZZ/Syfoh#readme)!
+
+Just in case you missed the [bold part above](#quick-start)... 
 
 #### This is still a draft!
 
