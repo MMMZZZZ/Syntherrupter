@@ -37,7 +37,7 @@ Once you have the minimum viable setup, you can extend it by any combination of 
 * Shielded encasing
 * Powerbank for standalone operation
 * [MIDI Input jack](HW/MIDI%20Input.md#readme)
-* [Lightsabers](HW/Lightsabers.md#readme)
+* [Lightsabers](HW/Lightsaber%20Receiver.md#readme)
 
 ## Firmware
 
