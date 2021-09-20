@@ -57,10 +57,21 @@ void GUI::init(Nextion* nextion, bool nxtOk, uint32_t cfgStatus)
 
     if (!nxtOk)
     {
-        mode = Mode::nxtFWUpdate;
+        // No screen connected. Thus no need to send any data to it.
+        acceptsData = false;
+        return;
     }
     else
     {
+        // Check if the screen got the correct firmware. Otherwise enter
+        // passthrough mode to allow flashing the screen.
+        nxt->setVal("comOk", 2);
+        if (nxt->getVal("comOk") != 2)
+        {
+            mode = Mode::nxtFWUpdate;
+            return;
+        }
+
         /*
          * Send all the settings to the Nextion display.
          * Note: even if no valid config was found, meaningful
