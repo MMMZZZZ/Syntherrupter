@@ -2,9 +2,9 @@
 
 [Back to the Settings Menu page](Settings.md#readme)
 
-The envelope editor allows you to modify any of Syntherrupters envelopes. With envelopes you can control how Syntherrupter sounds. Because of the limitations of Nextion it is not possible to have a graphical editor. However, since you're probably not going to use this on a daily base, it should be "good enough" and especially better than nothing.
+If Syntherrupters envelopes are new to you, you should start with using the [build-in envelopes](/Documentation/Wiki/Envelopes.md#readme). They require no work at all and already provide impressive results (previous link includes a demo). 
 
-If Syntherrupters envelopes are new to you, you should check out the [Getting Started with Envelopes](/Documentation/Wiki/Tutorials/Getting%20Started%20with%20Envelopes.md#readme). 
+The envelope editor allows you to modify any of Syntherrupters envelopes. Because of the limitations of Nextion it is not possible to have a graphical editor. However, since you're probably not going to use this on a daily base, it should be "good enough" and especially better than nothing.
 
 ## Index
 * [Index](#index)
