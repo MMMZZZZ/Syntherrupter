@@ -2,7 +2,7 @@
 
 [Back to the wiki main page](README.md#readme)
 
-Syntherrupter comes with a bunch of envelopes included in its firmware. Envelopes allow you to modify the sound (soft & long, sharp & short, ...). I made some [forum posts](README.md#external-content) that go into greater detail.
+Syntherrupter comes with a bunch of envelopes included in its firmware. Envelopes allow you to modify the sound (soft & long, sharp & short, ...). Why? Check this out. Here's a demo of Pirates of the Carribean [with](https://soundcloud.com/user-754038701/pirates-of-the-carribean-jarrod-radnich-syntherrupter-v420-beta4) and [without](https://soundcloud.com/user-754038701/pirates-of-the-carribean-jarrod-radnich-no-envelope-syntherrupter-v420-beta4) envelopes. I also made some [forum posts](README.md#external-content) that go into greater detail.
 
 The sound can be selected by the MIDI command "Program Change". In your MIDI software you can select it by changing the instrument of the channel. Program 0 is f.ex. called "Accoustic Grand Piano". Some MIDI softwares only list the name, others list the program number, too. Syntherrupter doesn't care about the name, since its programs don't match those labels. The meaning of each program for Syntherrupter is listed below.
 
