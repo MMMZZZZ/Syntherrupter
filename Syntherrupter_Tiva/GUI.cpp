@@ -794,26 +794,9 @@ void GUI::serialPassthrough(uint32_t uartNum)
 
     while (42)
     {
-        uint8_t USBRXState    = 0;
-        uint8_t targetRXState = 0;
-
         // Read Pins
-        if (GPIOPinRead(USBPort, USBRXPin) & 0xff)
-        {
-            USBRXState    = 0xff;
-        }
-        else
-        {
-            USBRXState = 0;
-        }
-        if (GPIOPinRead(targetPort, targetRXPin) & 0xff)
-        {
-            targetRXState = 0xff;
-        }
-        else
-        {
-            targetRXState = 0;
-        }
+        auto USBRXState    = Branchless::selectByCond(0xff, 0x00, GPIOPinRead(USBPort, USBRXPin)    & 0xff);
+        auto targetRXState = Branchless::selectByCond(0xff, 0x00, GPIOPinRead(USBPort, targetRXPin) & 0xff);
 
         // Pass to other port
         GPIOPinWrite(USBPort,    USBTXPin,    targetRXState);

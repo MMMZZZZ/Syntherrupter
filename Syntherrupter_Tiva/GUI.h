@@ -13,6 +13,7 @@
 #include "stdbool.h"
 #include "driverlib/gpio.h"
 #include "InterrupterConfig.h"
+#include "Branchless.h"
 #include "System.h"
 #include "EEPROMSettings.h"
 #include "Nextion.h"
