@@ -120,7 +120,7 @@ Just in case you missed the [bold part above](#quick-start)...
 
 Currently these commands are only implemented in beta firmware versions. Since the version number is a single integer from 1-127 I can't name this version `0.1` or `1.0-beta.1`. Hence this note. This protocol shall be considered as draft and can change at any time until a stable firmware is released. At that point this note will disappear. 
 
-Also, keep in mind that there is a ton of parameters that has to be documented here, checked and implemented in the firmware and implemented in [Syfoh](https://github.com/MMMZZZZ/Syfoh#readme). That's a looot of sources for errors and oversights... Let me know if you find any oopsies!
+Also, keep in mind that there is a ton of parameters that has to be documented here, checked and implemented in the firmware and in [Syfoh](https://github.com/MMMZZZZ/Syfoh#readme). That's a looot of sources for errors and oversights... Let me know if you find any oopsies!
 
 #### Conventions
 
@@ -168,10 +168,28 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	
 #### `0x01-0x1f`: System commands
 
-* `0x01`: [NS] Request parameter value
-* `0x02`: [NS] Request if parameter is supported
-* `0x10`: [NS] Response type/length
-* `0x11`: [NS] Response to request
+* `0x01`: Response to request
+	* Target MSB: Target MSB that has been requested.
+	* Target LSB: Target LSB that has been requested.
+	* Value: Value of the requested parameter.
+* `0x02`: Request if parameter is supported
+	* Target MSB: 0 or any target value you want to check if it's supported.
+	* Target LSB: 0 or any target value you want to check if it's supported.
+	* Value: uint, parameter number to check. The response will be a `0x01` response message with one of the following values:
+		* 0: Not supported
+		* 1: Supported
+* `0x03`: Read Parameter. Get reply as `0x01` response message.
+	* Target MSB: Target MSB to read for the given parameter. Wildcards are supported (resulting in multiple responses).
+	* Target LSB: Target LSB to read for the given parameter. Wildcards are supported (resulting in multiple responses).
+	* Value: uint, Parameter number to read. No ranges supported.
+* `0x04`: Get Parameter(s). Get reply as normal command. F.ex. reading parameter `0x20` would return a `0x20` command with the current settings.
+	* Target MSB: Target MSB to read for the given parameter. Wildcards are supported (resulting in multiple responses).
+	* Target LSB: Target LSB to read for the given parameter. Wildcards are supported (resulting in multiple responses).
+	* Value: char[4], parameter number or range to read. When leaving the last parameter number to 0 only the rage start parameter number is read. Otherwise all parameters in the range will be read. When reading a range of parameters, the last number is included within the range.
+		* [0]: First parameter number LSB
+		* [1]: First parameter number MSB
+		* [2]: Last parameter number LSB (optional)
+		* [3]: Last parameter number MSB (optional)
 
 #### `0x20-0x3f`: Common mode parameters
 
