@@ -13,26 +13,21 @@
 #include <stdbool.h>
 
 
-template <class T>
+template <class T, uint32_t size>
 class Buffer
 {
 public:
     Buffer()
     {
         // Default Constructor
-    };
-    virtual ~Buffer()
-    {
-        // Default Destructor
-    };
-    void init(uint32_t size)
-    {
-        this->size = size;
-        buffer = new T[size];
         for (uint32_t i = 0; i < size; i++)
         {
             buffer[i] = 0;
         }
+    };
+    virtual ~Buffer()
+    {
+        // Default Destructor
     };
     void add(T data)
     {
@@ -46,10 +41,15 @@ public:
 
     void remove()
     {
-        if (readIndex != writeIndex)
-        {
-            readIndex = (readIndex + 1) % size;
-        }
+        /*
+         * Branchless version of
+         *   if (readIndex != writeIndex
+         *   {
+         *       readIndex = (readIndex + 1) % size;
+         *   }
+         */
+        bool increment = (readIndex != writeIndex);
+        readIndex = (readIndex + increment) % size;
     };
     void flush()
     {
@@ -57,7 +57,11 @@ public:
     }
     uint32_t level()
     {
-        return (size - readIndex + writeIndex) % size;
+        return (size - readIndex + writeIndex) % (size + 1);
+    };
+    uint32_t avail()
+    {
+        return (size - writeIndex + readIndex) % (size + 1);
     };
     T peek()
     {
@@ -69,9 +73,10 @@ public:
         remove();
         return data;
     };
+    static constexpr auto sze = size;
 private:
-    volatile T* buffer;
-    volatile uint32_t size = 0, readIndex = 0, writeIndex = 0;
+    volatile T buffer[size];
+    volatile uint32_t readIndex = 0, writeIndex = 0;
 };
 
 #endif /* BUFFER_H_ */

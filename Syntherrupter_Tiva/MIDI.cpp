@@ -10,8 +10,8 @@
 
 UART                       MIDI::usbUart;
 UART                       MIDI::midiUart;
-Buffer<uint8_t>            MIDI::otherBuffer;
-constexpr Buffer<uint8_t>* MIDI::BUFFER_LIST[];
+Buffer<uint8_t, 512>            MIDI::otherBuffer;
+constexpr Buffer<uint8_t, 512>* MIDI::BUFFER_LIST[];
 Channel                    MIDI::channels[];
 NoteList                   MIDI::notelist;
 uint32_t                   MIDI::notesCount = 0;
@@ -44,7 +44,6 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void),
     // Enable MIDI receiving over the USB UART (selectable baud rate) and a separate MIDI UART (31250 fixed baud rate).
     usbUart.init(0, usbBaudRate, usbISR, 0b00100000);
     midiUart.init(midiUartPort, midiUartRx, midiUartTx, 31250, midiISR, 0b01100000);
-    otherBuffer.init(128);
     usbUart.enable();
     midiUart.enable();
 
@@ -107,7 +106,7 @@ bool MIDI::processBuffer(uint32_t b)
     uint32_t& channel    = channelAll[b];
     uint8_t&  c1         = c1All[b];
 
-    Buffer<uint8_t>* buffer = BUFFER_LIST[b];
+    auto* buffer = BUFFER_LIST[b];
 
     c1 = buffer->read();
 
@@ -130,7 +129,6 @@ bool MIDI::processBuffer(uint32_t b)
     else
     {
         dataBytes++;
-
     }
 
     switch ((midiStatus) & 0xf0)
