@@ -1123,7 +1123,7 @@ void Sysex::processSysex()
                 if (reading)
                 {
                     msg.value.ui32 = Coil::allCoils[i].lightsaber.getActiveLightsabers();
-                    txMsg.data.targetLSB = 0;
+                    txMsg.data.targetLSB = i;
                     txMsg.data.targetMSB = MODE_LIGHTSABER;
                     sendSysex();
                 }
