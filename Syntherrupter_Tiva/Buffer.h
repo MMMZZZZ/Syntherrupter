@@ -57,11 +57,11 @@ public:
     }
     uint32_t level()
     {
-        return (size - readIndex + writeIndex) % (size + 1);
+        return (size - readIndex + writeIndex) % size;
     };
     uint32_t avail()
     {
-        return (size - writeIndex + readIndex) % (size + 1);
+        return (size - 1 - writeIndex + readIndex) % size;
     };
     T peek()
     {
