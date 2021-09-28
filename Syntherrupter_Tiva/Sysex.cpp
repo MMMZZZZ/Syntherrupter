@@ -128,7 +128,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0301:
         case 0x0302:
         case 0x0303:
-            if (msg.targetLSB < MIDIProgram::DATA_POINTS)
+            if (msg.targetLSB < MIDIProgram::DATA_POINTS || msg.targetMSB == WILDCARD)
             {
                 lsbOk = true;
             }
@@ -243,7 +243,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0301:
         case 0x0302:
         case 0x0303:
-            if (msg.targetMSB < MIDI::MAX_PROGRAMS)
+            if (msg.targetMSB < MIDI::MAX_PROGRAMS || msg.targetMSB == WILDCARD)
             {
                 msbOk = true;
             }
@@ -1678,105 +1678,193 @@ void Sysex::processSysex()
             break;
 
         case 0x0300: // (msb=program)(lsb=step), i32 envelope next step, 0-7
-            if (reading)
+        {
+            if (msg.value.ui32 < MIDIProgram::DATA_POINTS || reading)
             {
-                msg.value.ui32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
-                txMsg.data.targetLSB = msg.targetLSB;
-                txMsg.data.targetMSB = msg.targetMSB;
-                sendSysex();
-            }
-            else
-            {
-                if (msg.value.i32 >= 0 && msg.value.i32 < MIDIProgram::DATA_POINTS)
+                uint32_t progStart = msg.targetMSB;
+                uint32_t progEnd   = msg.targetMSB + 1;
+                if (msg.targetMSB == WILDCARD)
                 {
-                    float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
-                    float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
-                    float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
-                    MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, dur, ntau, msg.value.i32);
+                    progStart = 0;
+                    progEnd = MIDI::MAX_PROGRAMS;
+                }
+                uint32_t stepStart = msg.targetLSB;
+                uint32_t stepEnd   = msg.targetLSB + 1;
+                if (msg.targetLSB == WILDCARD)
+                {
+                    stepStart = 0;
+                    stepEnd = MIDIProgram::DATA_POINTS;
+                }
+                for (uint32_t prog = progStart; prog < progEnd; prog++)
+                {
+                    for (uint32_t step = stepStart; step < stepEnd; step++)
+                    {
+                        if (reading)
+                        {
+                            msg.value.ui32 = MIDI::programs[msg.targetMSB].steps[step]->nextStep;
+                            txMsg.data.targetLSB = step;
+                            txMsg.data.targetMSB = prog;
+                            sendSysex();
+                        }
+                        else
+                        {
+                            float& amp     = MIDI::programs[prog].steps[step]->amplitude;
+                            float& dur     = MIDI::programs[prog].steps[step]->durationUS;
+                            float& ntau    = MIDI::programs[prog].steps[step]->ntau;
+                            MIDI::programs[prog].setDataPoint(step, amp, dur, ntau, msg.value.i32);
+                        }
+                    }
                 }
             }
             break;
+        }
         case 0x0301: // (msb=program)(lsb=step), i32 envelope step amplitude in 1/1000
             msg.value.f32 = msg.value.i32 / 1e3f;
         case 0x2301:
-            if (reading)
+        {
+            if (msg.value.f32 >= 0 || reading)
             {
-                if (readFloat)
+                uint32_t progStart = msg.targetMSB;
+                uint32_t progEnd   = msg.targetMSB + 1;
+                if (msg.targetMSB == WILDCARD)
                 {
-                    msg.value.f32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
+                    progStart = 0;
+                    progEnd = MIDI::MAX_PROGRAMS;
                 }
-                else
+                uint32_t stepStart = msg.targetLSB;
+                uint32_t stepEnd   = msg.targetLSB + 1;
+                if (msg.targetLSB == WILDCARD)
                 {
-                    msg.value.ui32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude * 1e3f;
+                    stepStart = 0;
+                    stepEnd = MIDIProgram::DATA_POINTS;
                 }
-                txMsg.data.targetLSB = msg.targetLSB;
-                txMsg.data.targetMSB = msg.targetMSB;
-                sendSysex();
-            }
-            else
-            {
-                if (msg.value.f32 >= 0)
+                for (uint32_t prog = progStart; prog < progEnd; prog++)
                 {
-                    float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
-                    float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
-                    uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
-                    MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, msg.value.f32, dur, ntau, next);
+                    for (uint32_t step = stepStart; step < stepEnd; step++)
+                    {
+                        if (reading)
+                        {
+                            if (readFloat)
+                            {
+                                msg.value.f32 = MIDI::programs[prog].steps[step]->amplitude;
+                            }
+                            else
+                            {
+                                msg.value.ui32 = MIDI::programs[prog].steps[step]->amplitude * 1e3f;
+                            }
+                            txMsg.data.targetLSB = step;
+                            txMsg.data.targetMSB = prog;
+                            sendSysex();
+                        }
+                        else
+                        {
+                            float& dur     = MIDI::programs[prog].steps[step]->durationUS;
+                            float& ntau    = MIDI::programs[prog].steps[step]->ntau;
+                            uint8_t& next  = MIDI::programs[prog].steps[step]->nextStep;
+                            MIDI::programs[prog].setDataPoint(step, msg.value.f32, dur, ntau, next);
+                        }
+                    }
                 }
             }
             break;
+        }
         case 0x0302: // (msb=program)(lsb=step), i32 envelope step duration in us
             msg.value.f32 = msg.value.i32;
         case 0x2302:
-            if (reading)
+        {
+            if (msg.value.f32 >= 0 || reading)
             {
-                if (readFloat)
+                uint32_t progStart = msg.targetMSB;
+                uint32_t progEnd   = msg.targetMSB + 1;
+                if (msg.targetMSB == WILDCARD)
                 {
-                    msg.value.f32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
+                    progStart = 0;
+                    progEnd = MIDI::MAX_PROGRAMS;
                 }
-                else
+                uint32_t stepStart = msg.targetLSB;
+                uint32_t stepEnd   = msg.targetLSB + 1;
+                if (msg.targetLSB == WILDCARD)
                 {
-                    msg.value.ui32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
+                    stepStart = 0;
+                    stepEnd = MIDIProgram::DATA_POINTS;
                 }
-                txMsg.data.targetLSB = msg.targetLSB;
-                txMsg.data.targetMSB = msg.targetMSB;
-                sendSysex();
-            }
-            else
-            {
-                if (msg.value.f32 >= 0)
+                for (uint32_t prog = progStart; prog < progEnd; prog++)
                 {
-                    float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
-                    float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
-                    uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
-                    MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, msg.value.f32, ntau, next);
+                    for (uint32_t step = stepStart; step < stepEnd; step++)
+                    {
+                        if (reading)
+                        {
+                            if (readFloat)
+                            {
+                                msg.value.f32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
+                            }
+                            else
+                            {
+                                msg.value.ui32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
+                            }
+                            txMsg.data.targetLSB = msg.targetLSB;
+                            txMsg.data.targetMSB = msg.targetMSB;
+                            sendSysex();
+                        }
+                        else
+                        {
+                            float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
+                            float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
+                            uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
+                            MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, msg.value.f32, ntau, next);
+                        }
+                    }
                 }
             }
             break;
+        }
         case 0x0303: // (msb=program)(lsb=step), i32 envelope step n-tau in 1/1000
             msg.value.f32 = msg.value.i32 / 1e3f;
         case 0x2303:
-            if (reading)
+        {
+            uint32_t progStart = msg.targetMSB;
+            uint32_t progEnd   = msg.targetMSB + 1;
+            if (msg.targetMSB == WILDCARD)
             {
-                if (readFloat)
-                {
-                    msg.value.f32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
-                }
-                else
-                {
-                    msg.value.ui32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau * 1e3f;
-                }
-                txMsg.data.targetLSB = msg.targetLSB;
-                txMsg.data.targetMSB = msg.targetMSB;
-                sendSysex();
+                progStart = 0;
+                progEnd = MIDI::MAX_PROGRAMS;
             }
-            else
+            uint32_t stepStart = msg.targetLSB;
+            uint32_t stepEnd   = msg.targetLSB + 1;
+            if (msg.targetLSB == WILDCARD)
             {
-                float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
-                float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
-                uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
-                MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, dur, msg.value.f32, next);
-                break;
+                stepStart = 0;
+                stepEnd = MIDIProgram::DATA_POINTS;
             }
+            for (uint32_t prog = progStart; prog < progEnd; prog++)
+            {
+                for (uint32_t step = stepStart; step < stepEnd; step++)
+                {
+                    if (reading)
+                    {
+                        if (readFloat)
+                        {
+                            msg.value.f32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
+                        }
+                        else
+                        {
+                            msg.value.ui32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau * 1e3f;
+                        }
+                        txMsg.data.targetLSB = msg.targetLSB;
+                        txMsg.data.targetMSB = msg.targetMSB;
+                        sendSysex();
+                    }
+                    else
+                    {
+                        float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
+                        float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
+                        uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
+                        MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, dur, msg.value.f32, next);
+                    }
+                }
+            }
+            break;
+        }
         default:
             break;
     }
