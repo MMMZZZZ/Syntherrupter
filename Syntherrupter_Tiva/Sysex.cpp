@@ -15,9 +15,9 @@ uint32_t Sysex::uiUpdateMode;
 
 Sysex::Sysex()
 {
-    // TODO Auto-generated constructor stub
-
+    // Auto-generated constructor stub
 }
+
 
 void Sysex::init(Nextion* nextion)
 {
@@ -244,35 +244,17 @@ void Sysex::processSysex()
     switch (msg.number)
     {
         /*
-         * Structure:  0x01-0x1f: System commands
-         *                 0x01: request value of X
-         *                 0x02: request support for X
-         *                 0x10: reply to request
+         * Structure of all commands is documented in this git under
+         * /Documentation/Wiki/Custom MIDI Commands.md#system-exclusive-messages-sysex
          *
-         *             0x20- 0x3f:  "common" mode parameters (ontime, duty, ...)
-         *                          may not be supported by all modes but are
-         *                          likely to be required by a new mode.
-         *              0x40- 0x5f: simple mode parameters
-         *              0x60- 0x7f: midi live mode parameters
-         *             0x100-0x12f: lightsaber mode parameters
-         *             0x200-0x3ff: settings
-         * If applicable, any PN + 0x2000 is the float32 version of that
-         * parameter (default: int32).
-         * Unless noted otherwise...
-         *   * the float version is not fractional. f.ex. if int32 version is
-         *     in 1/1000, the f32 version isn't.
-         *   * the float version of an abstract range is from 0.0f-1.0f. If
-         *     f.ex. a parameter covers a range from 0-127, the float version
-         *     would equal to that value divided by 127.
-         *
-         * If no target is required, the value is expected to be 0 can be
-         * omitted if possible. Unless noted otherwise 127 is broadcast,
-         * meaning it affects all possible targets. If no broadcast is
-         * supported, it is noted by an "nb".
+         * Each case has a quick one-line description of the command with the
+         * following formatting:
+         * parameter number: (not required target byte, if target is
+         * transmitted, value must be 0 or the value specified here.)
+         * [required target], ui=unsigned int, f32=float(32bit),
+         * bfx = x bit bitfield, description
          */
 
-        // parameter number: (not required target byte, if target is transmitted, value must be 0 or the value specified here.)
-        // [required target], ui=unsigned int, f32=float(32bit), bfx = x bit bitfield, description
         case 0x0020: // [msb=s,ml,ls][lsb=0], enable/disable mode. 0=disable, 1=enable, other=reserved
             // Command documentation explicitly requires a 1.
             msg.value.ui32 = (msg.value.ui32 == 1);

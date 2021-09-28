@@ -23,7 +23,6 @@
 #include "EEPROMSettings.h"
 #include "SysexMsg.h"
 
-
 class Sysex
 {
 public:
