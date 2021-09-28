@@ -106,6 +106,7 @@ bool UART::write(uint8_t* buffer, uint32_t size, bool discard)
              *   }
              */
             txEnabled = (level > 1);
+            UARTIntClear(uartBase, UART_INT_TX * txEnabled);
             UARTIntEnable(uartBase, UART_INT_TX * txEnabled);
             UARTCharPut(uartBase, txBuffer.read());
         }
