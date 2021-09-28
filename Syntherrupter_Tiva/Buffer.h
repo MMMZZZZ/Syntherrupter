@@ -57,11 +57,13 @@ public:
     }
     uint32_t level()
     {
-        return (size - readIndex + writeIndex) % size;
+        return Branchless::selectByCond(writeIndex - readIndex,
+                                        size + writeIndex - readIndex,
+                                        writeIndex >= readIndex);
     };
     uint32_t avail()
     {
-        return (size - 1 - writeIndex + readIndex) % size;
+        return size - level() - 1;
     };
     T peek()
     {
