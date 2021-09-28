@@ -186,6 +186,9 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0063:
         case 0x0064:
         case 0x0066:
+        case 0x0067:
+        case 0x0068:
+        case 0x0069:
             if (msg.targetMSB == 0
                     || msg.targetMSB == MODE_MIDI_LIVE
                     || msg.targetMSB == WILDCARD)
@@ -203,10 +206,6 @@ bool Sysex::checkSysex(SysexMsg& msg)
                 msbOk = true;
             }
             break;
-
-        case 0x0067:
-        case 0x0068:
-        case 0x0069:
         case 0x0200:
         case 0x0202:
         case 0x0220:
