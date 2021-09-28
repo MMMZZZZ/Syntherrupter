@@ -1701,7 +1701,7 @@ void Sysex::processSysex()
                     {
                         if (reading)
                         {
-                            msg.value.ui32 = MIDI::programs[msg.targetMSB].steps[step]->nextStep;
+                            msg.value.ui32 = MIDI::programs[prog].steps[step]->nextStep;
                             txMsg.data.targetLSB = step;
                             txMsg.data.targetMSB = prog;
                             sendSysex();
@@ -1796,22 +1796,22 @@ void Sysex::processSysex()
                         {
                             if (readFloat)
                             {
-                                msg.value.f32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
+                                msg.value.f32 = MIDI::programs[prog].steps[step]->durationUS;
                             }
                             else
                             {
-                                msg.value.ui32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
+                                msg.value.ui32 = MIDI::programs[prog].steps[step]->durationUS;
                             }
-                            txMsg.data.targetLSB = msg.targetLSB;
-                            txMsg.data.targetMSB = msg.targetMSB;
+                            txMsg.data.targetLSB = step;
+                            txMsg.data.targetMSB = prog;
                             sendSysex();
                         }
                         else
                         {
-                            float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
-                            float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
-                            uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
-                            MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, msg.value.f32, ntau, next);
+                            float& amp     = MIDI::programs[prog].steps[step]->amplitude;
+                            float& ntau    = MIDI::programs[prog].steps[step]->ntau;
+                            uint8_t& next  = MIDI::programs[prog].steps[step]->nextStep;
+                            MIDI::programs[prog].setDataPoint(step, amp, msg.value.f32, ntau, next);
                         }
                     }
                 }
@@ -1844,22 +1844,22 @@ void Sysex::processSysex()
                     {
                         if (readFloat)
                         {
-                            msg.value.f32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
+                            msg.value.f32 = MIDI::programs[prog].steps[step]->ntau;
                         }
                         else
                         {
-                            msg.value.ui32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau * 1e3f;
+                            msg.value.ui32 = MIDI::programs[prog].steps[step]->ntau * 1e3f;
                         }
-                        txMsg.data.targetLSB = msg.targetLSB;
-                        txMsg.data.targetMSB = msg.targetMSB;
+                        txMsg.data.targetLSB = step;
+                        txMsg.data.targetMSB = prog;
                         sendSysex();
                     }
                     else
                     {
-                        float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
-                        float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
-                        uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
-                        MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, dur, msg.value.f32, next);
+                        float& amp     = MIDI::programs[prog].steps[step]->amplitude;
+                        float& dur     = MIDI::programs[prog].steps[step]->durationUS;
+                        uint8_t& next  = MIDI::programs[prog].steps[step]->nextStep;
+                        MIDI::programs[prog].setDataPoint(step, amp, dur, msg.value.f32, next);
                     }
                 }
             }
