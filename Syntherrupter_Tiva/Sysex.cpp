@@ -98,6 +98,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0020:
         case 0x0101:
         case 0x0200:
+        case 0x0201:
         case 0x0202:
         case 0x0220:
         case 0x0221:
@@ -207,6 +208,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
             }
             break;
         case 0x0200:
+        case 0x0201:
         case 0x0202:
         case 0x0220:
         case 0x0221:
@@ -1166,6 +1168,22 @@ void Sysex::processSysex()
             }
             break;
 
+        case 0x201: // ()(), i32 sysex device id
+            if (reading)
+            {
+                msg.value.ui32 = EEPROMSettings::deviceData.deviceID;
+                txMsg.data.targetLSB = 0;
+                txMsg.data.targetMSB = 0;
+                sendSysex();
+            }
+            else
+            {
+                if (msg.value.ui32 <= 126)
+                {
+                    EEPROMSettings::deviceData.deviceID = msg.value.ui32;
+                }
+            }
+            break;
         case 0x2202: // ()(), i32 microcontroller reset, requires specific star date in 1/1000 to execute reset.
             msg.value.ui32 = msg.value.f32 * 1e3f;
         case 0x0202:
