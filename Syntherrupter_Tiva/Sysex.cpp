@@ -11,6 +11,10 @@
 
 Nextion* Sysex::nxt;
 uint32_t Sysex::uiUpdateMode;
+SysexMsg Sysex::msg;
+bool     Sysex::reading;
+bool     Sysex::readFloat;
+Sysex::TxMsg Sysex::txMsg;
 
 
 Sysex::Sysex()
@@ -23,6 +27,14 @@ void Sysex::init(Nextion* nextion)
 {
     nxt = nextion;
     uiUpdateMode = 2;
+    reading = false;
+
+    txMsg.data.START  = 0xf0;
+    txMsg.data.END    = 0xf7;
+    txMsg.data.DMID_0 = 0x00;
+    txMsg.data.DMID_1 = 0x26;
+    txMsg.data.DMID_2 = 0x05;
+    txMsg.data.VERSION = MIDI::SYSEX_PROTOCOL_VERSION;
 }
 
 bool Sysex::checkSysex(SysexMsg& msg)
@@ -47,6 +59,11 @@ bool Sysex::checkSysex(SysexMsg& msg)
     // targetLSB check
     switch(number)
     {
+        case 0x0002:
+        case 0x0003:
+        case 0x0004:
+            lsbOk = true;
+            break;
         case 0x0021:
         case 0x0022:
         case 0x0023:
@@ -125,6 +142,11 @@ bool Sysex::checkSysex(SysexMsg& msg)
     // targetMSB check
     switch (number)
     {
+        case 0x0002:
+        case 0x0003:
+        case 0x0004:
+            msbOk = true;
+            break;
         case 0x0020:
         case 0x0021:
         case 0x0022:
@@ -226,7 +248,25 @@ bool Sysex::checkSysex(SysexMsg& msg)
 
 void Sysex::processSysex()
 {
-    SysexMsg msg = MIDI::getSysex();
+    if (reading)
+    {
+        // if read is set, the message has already been created by the previous
+        // command. Otherwise any new incoming messages are processed.
+
+        // The outgoing data is stored within txMsg - though the value is
+        // temporarily stored in msg.value (because it's otherwise unused
+        // during the read operation and it already has the union aaaand
+        // because it cannot be serialized directly (8->7bit conversion).
+        txMsg.data.deviceID = EEPROMSettings::deviceData.deviceID;
+        txMsg.data.number   = msg.number;
+
+        // Mark whether we're reading a float or non-float value
+        readFloat = (msg.number >= 0x2000 && msg.number < 0x4000);
+    }
+    else
+    {
+        msg = MIDI::getSysex();
+    }
 
     if (!msg.newMsg)
     {
@@ -255,22 +295,59 @@ void Sysex::processSysex()
          * bfx = x bit bitfield, description
          */
 
+        case 0x0002: // ()(), i32 Request if parameter is supported.
+            msg.number = msg.value.ui32;
+            msg.value.ui32 = 0;
+            reading = true;
+            processSysex();
+            break;
+
         case 0x0020: // [msb=s,ml,ls][lsb=0], enable/disable mode. 0=disable, 1=enable, other=reserved
             // Command documentation explicitly requires a 1.
             msg.value.ui32 = (msg.value.ui32 == 1);
             if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == WILDCARD)
             {
-                Simple::setRunning(msg.value.ui32);
+                if (reading)
+                {
+                    msg.value.ui32 = Simple::getRunning();
+                    txMsg.data.targetLSB = 0;
+                    txMsg.data.targetMSB = MODE_SIMPLE;
+                    sendSysex();
+                }
+                else
+                {
+                    Simple::setRunning(msg.value.ui32);
+                }
             }
             if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == WILDCARD)
             {
-                MIDI::setRunning(msg.value.ui32);
+                if (reading)
+                {
+                    msg.value.ui32 = MIDI::getRunning();
+                    txMsg.data.targetLSB = 0;
+                    txMsg.data.targetMSB = MODE_MIDI_LIVE;
+                    sendSysex();
+                }
+                else
+                {
+                    MIDI::setRunning(msg.value.ui32);
+                }
             }
             if (msg.targetMSB == MODE_LIGHTSABER || msg.targetMSB == WILDCARD)
             {
-                LightSaber::setRunning(msg.value.ui32);
+                if (reading)
+                {
+                    msg.value.ui32 = LightSaber::getRunning();
+                    txMsg.data.targetLSB = 0;
+                    txMsg.data.targetMSB = MODE_LIGHTSABER;
+                    sendSysex();
+                }
+                else
+                {
+                    LightSaber::setRunning(msg.value.ui32);
+                }
             }
-            if (GUI::getAcceptsData() && uiUpdateMode == 2)
+            if (GUI::getAcceptsData() && uiUpdateMode == 2 && !reading)
             {
                 if (msg.targetMSB == WILDCARD)
                 {
@@ -287,7 +364,7 @@ void Sysex::processSysex()
         case 0x0021: // [msb=s,ml,ls][lsb=coil] i32 ontime in us
             msg.value.f32 = msg.value.i32;
         case 0x2021:
-            if (msg.value.f32 >= 0.0f)
+            if (msg.value.f32 >= 0.0f || reading)
             {
                 uint32_t start = msg.targetLSB;
                 uint32_t end = msg.targetLSB + 1;
@@ -300,54 +377,105 @@ void Sysex::processSysex()
                 {
                     if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == WILDCARD)
                     {
-                        Coil::allCoils[i].simple.setOntimeUS(msg.value.f32);
-                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                        if (reading)
                         {
-                            nxt->sendCmd("Simple.set%i.val&=0xffff0000", i + 1);
-                            nxt->sendCmd("Simple.set%i.val|=%i", i + 1, msg.value.f32);
+                            if (readFloat)
+                            {
+                                msg.value.f32 = Coil::allCoils[i].simple.getOntimeUS();
+                            }
+                            else
+                            {
+                                msg.value.ui32 = Coil::allCoils[i].simple.getOntimeUS();
+                            }
+                            txMsg.data.targetLSB = i;
+                            txMsg.data.targetMSB = MODE_SIMPLE;
+                            sendSysex();
+                        }
+                        else
+                        {
+                            Coil::allCoils[i].simple.setOntimeUS(msg.value.f32);
+                            if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                            {
+                                nxt->sendCmd("Simple.set%i.val&=0xffff0000", i + 1);
+                                nxt->sendCmd("Simple.set%i.val|=%i", i + 1, msg.value.f32);
+                            }
                         }
                     }
                     if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == WILDCARD)
                     {
-                        Coil::allCoils[i].midi.setOntimeUS(msg.value.f32);
-                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                        if (reading)
                         {
-                            nxt->sendCmd("MIDI_Live.set%i.val&=0xffff0000", i + 1);
-                            nxt->sendCmd("MIDI_Live.set%i.val|=%i", i + 1, msg.value.f32);
+                            if (readFloat)
+                            {
+                                msg.value.f32 = Coil::allCoils[i].midi.getOntimeUS();
+                            }
+                            else
+                            {
+                                msg.value.ui32 = Coil::allCoils[i].midi.getOntimeUS();
+                            }
+                            txMsg.data.targetLSB = i;
+                            txMsg.data.targetMSB = MODE_MIDI_LIVE;
+                            sendSysex();
+                        }
+                        else
+                        {
+                            Coil::allCoils[i].midi.setOntimeUS(msg.value.f32);
+                            if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                            {
+                                nxt->sendCmd("MIDI_Live.set%i.val&=0xffff0000", i + 1);
+                                nxt->sendCmd("MIDI_Live.set%i.val|=%i", i + 1, msg.value.f32);
+                            }
                         }
                     }
                     if (msg.targetMSB == MODE_LIGHTSABER || msg.targetMSB == WILDCARD)
                     {
-                        Coil::allCoils[i].lightsaber.setOntimeUS(msg.value.f32);
-                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                        if (reading)
                         {
-                            int32_t temp = msg.value.f32;
-                            switch (i)
+                            if (readFloat)
                             {
-                                case 0:
-                                    nxt->sendCmd("Lightsaber.ontimes12.val&=0x0000ffff");
-                                    nxt->sendCmd("Lightsaber.ontimes12.val|=%i", temp << 16);
-                                    break;
-                                case 1:
-                                    nxt->sendCmd("Lightsaber.ontimes12.val&=0xffff0000");
-                                    nxt->sendCmd("Lightsaber.ontimes12.val|=%i", temp);
-                                    break;
-                                case 2:
-                                    nxt->sendCmd("Lightsaber.ontimes34.val&=0x0000ffff");
-                                    nxt->sendCmd("Lightsaber.ontimes34.val|=%i", temp << 16);
-                                    break;
-                                case 3:
-                                    nxt->sendCmd("Lightsaber.ontimes34.val&=0xffff0000");
-                                    nxt->sendCmd("Lightsaber.ontimes34.val|=%i", temp);
-                                    break;
-                                case 4:
-                                    nxt->sendCmd("Lightsaber.ontimes56.val&=0x0000ffff");
-                                    nxt->sendCmd("Lightsaber.ontimes56.val|=%i", temp << 16);
-                                    break;
-                                case 5:
-                                    nxt->sendCmd("Lightsaber.ontimes56.val&=0xffff0000");
-                                    nxt->sendCmd("Lightsaber.ontimes56.val|=%i", temp);
-                                    break;
+                                msg.value.f32 = Coil::allCoils[i].lightsaber.getOntimeUS();
+                            }
+                            else
+                            {
+                                msg.value.ui32 = Coil::allCoils[i].lightsaber.getOntimeUS();
+                            }
+                            txMsg.data.targetLSB = i;
+                            txMsg.data.targetMSB = MODE_LIGHTSABER;
+                            sendSysex();
+                        }
+                        else
+                        {
+                            Coil::allCoils[i].lightsaber.setOntimeUS(msg.value.f32);
+                            if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                            {
+                                int32_t temp = msg.value.f32;
+                                switch (i)
+                                {
+                                    case 0:
+                                        nxt->sendCmd("Lightsaber.ontimes12.val&=0x0000ffff");
+                                        nxt->sendCmd("Lightsaber.ontimes12.val|=%i", temp << 16);
+                                        break;
+                                    case 1:
+                                        nxt->sendCmd("Lightsaber.ontimes12.val&=0xffff0000");
+                                        nxt->sendCmd("Lightsaber.ontimes12.val|=%i", temp);
+                                        break;
+                                    case 2:
+                                        nxt->sendCmd("Lightsaber.ontimes34.val&=0x0000ffff");
+                                        nxt->sendCmd("Lightsaber.ontimes34.val|=%i", temp << 16);
+                                        break;
+                                    case 3:
+                                        nxt->sendCmd("Lightsaber.ontimes34.val&=0xffff0000");
+                                        nxt->sendCmd("Lightsaber.ontimes34.val|=%i", temp);
+                                        break;
+                                    case 4:
+                                        nxt->sendCmd("Lightsaber.ontimes56.val&=0x0000ffff");
+                                        nxt->sendCmd("Lightsaber.ontimes56.val|=%i", temp << 16);
+                                        break;
+                                    case 5:
+                                        nxt->sendCmd("Lightsaber.ontimes56.val&=0xffff0000");
+                                        nxt->sendCmd("Lightsaber.ontimes56.val|=%i", temp);
+                                        break;
+                                }
                             }
                         }
                     }
@@ -998,4 +1126,24 @@ void Sysex::processSysex()
 
         EEPROMSettings::updateAll();
     }
+}
+
+void Sysex::sendSysex()
+{
+    /*
+     * Sends the current (sysex) msg to the uart it came from.
+     */
+
+    // For a complete documentation of the encoding see wiki.
+
+    // Serialize sysex message. Parameter number and targets
+    // are already set.
+    for (uint32_t i = 0; i < 5; i++)
+    {
+        txMsg.data.splitValue[i] = msg.value.ui32 & 0x7f;
+        msg.value.ui32 >>= 7;
+    }
+
+    // Put it into the transmit buffer (blocking)
+    while (!msg.origin->write(txMsg.serialized, sizeof(txMsg.serialized)));
 }

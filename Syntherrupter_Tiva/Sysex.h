@@ -31,6 +31,7 @@ public:
     static void processSysex();
 private:
     static bool checkSysex(SysexMsg& msg);
+    static void sendSysex();
     static constexpr uint32_t WILDCARD        = 127;
     static constexpr uint32_t MODE_SIMPLE     = 1;
     static constexpr uint32_t MODE_MIDI_LIVE  = 2;
@@ -38,6 +39,29 @@ private:
 
     static Nextion* nxt;
     static uint32_t uiUpdateMode;
+    static SysexMsg msg;
+    static bool reading;
+    static bool readFloat;
+
+    union TxMsg {
+        struct
+        {
+            uint8_t START;
+            uint8_t DMID_0;
+            uint8_t DMID_1;
+            uint8_t DMID_2;
+            uint8_t VERSION;
+            uint8_t deviceID;
+            uint16_t number;
+            uint8_t targetLSB;
+            uint8_t targetMSB;
+            uint8_t splitValue[5];
+            uint8_t END;
+        } data;
+        uint8_t serialized[16];
+    };
+
+    static TxMsg txMsg;
 };
 
 

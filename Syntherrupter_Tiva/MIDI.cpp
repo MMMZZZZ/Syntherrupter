@@ -615,6 +615,17 @@ bool MIDI::processBuffer(uint32_t b)
                         sysexMsg.value.i32 = sysexVal;
                         sysexMsg.newMsg    = 2;
 
+                        // This is not nice, I know.
+                        if (buffer == &midiUart.rxBuffer)
+                        {
+                            sysexMsg.origin = &midiUart;
+                        }
+                        else
+                        {
+                            // Use the USB UART as default
+                            sysexMsg.origin = &usbUart;
+                        }
+
                         // Make sure the SysEx Message will be processed before
                         // it'll be overwritten by a new one.
                         urgentData = true;

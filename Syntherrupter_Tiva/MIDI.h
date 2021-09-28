@@ -80,6 +80,7 @@ public:
     static Buffer<uint8_t, 512> otherBuffer;
     static constexpr uint32_t MAX_PROGRAMS = 64;
     static MIDIProgram programs[MAX_PROGRAMS];
+    static constexpr uint32_t SYSEX_PROTOCOL_VERSION = 1;
 
 private:
     static bool processBuffer(uint32_t b);
@@ -165,7 +166,6 @@ private:
     static constexpr uint32_t effectResolutionUS = 2000;
 
     static constexpr uint32_t SYSEX_MAX_SIZE = 16;
-    static constexpr uint32_t SYSEX_PROTOCOL_VERSION = 1;
     static constexpr uint32_t    BUFFER_COUNT = 3;
     static constexpr Buffer<uint8_t, 512>* BUFFER_LIST[BUFFER_COUNT] = {&(usbUart.rxBuffer), &(midiUart.rxBuffer), &otherBuffer};
     static constexpr uint32_t MAX_NOTES_COUNT = 64;
