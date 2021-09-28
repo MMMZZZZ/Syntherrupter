@@ -148,12 +148,17 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0004:
             msbOk = true;
             break;
+        case 0x0225:
+            if (msg.targetMSB == WILDCARD)
+            {
+                msbOk = true;
+            }
+            break;
         case 0x0020:
         case 0x0021:
         case 0x0022:
         case 0x0023:
         case 0x0024:
-        case 0x0225:
             if (msg.targetMSB == MODE_SIMPLE
                     || msg.targetMSB == MODE_MIDI_LIVE
                     || msg.targetMSB == MODE_LIGHTSABER
@@ -289,6 +294,10 @@ void Sysex::processSysex()
     // Store current EEPROM update mode in case of a forced update
     // (which doesn't change the stored update mode).
     uint8_t eepromUpdateModeOld = EEPROMSettings::deviceData.eepromUpdateMode;
+
+    // General purpose integer temp variable
+    static constexpr uint32_t INT_TMP_UNUSED = -1;
+    uint32_t intTmp = INT_TMP_UNUSED;
 
     switch (msg.number)
     {
@@ -532,7 +541,7 @@ void Sysex::processSysex()
         case 0x0022: // [msb=s,ml,ls][lsb=coil], i32 duty in 1/1000
             msg.value.f32 = msg.value.i32 / 1e3f;
         case 0x2022:
-            if (msg.value.f32 >= 0.0f)
+            if (msg.value.f32 >= 0.0f || reading)
             {
                 uint32_t temp = ((uint32_t) msg.value.f32) << 16;
                 uint32_t start = msg.targetLSB;
@@ -546,21 +555,55 @@ void Sysex::processSysex()
                 {
                     if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == WILDCARD)
                     {
-                        Coil::allCoils[i].simple.setDuty(msg.value.f32);
-                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                        if (reading)
                         {
-                            nxt->sendCmd("Simple.set%i.val&=0xffff0000", i + 1);
-                            uint32_t ontime = Coil::allCoils[i].simple.getOntimeUS();
-                            nxt->sendCmd("Simple.set%i.val|=%i", i + 1, ontime);
+                            if (readFloat)
+                            {
+                                msg.value.f32 = Coil::allCoils[i].simple.getDuty();
+                            }
+                            else
+                            {
+                                msg.value.ui32 = Coil::allCoils[i].simple.getDuty() * 1e3f;
+                            }
+                            txMsg.data.targetLSB = i;
+                            txMsg.data.targetMSB = MODE_SIMPLE;
+                            sendSysex();
+                        }
+                        else
+                        {
+                            Coil::allCoils[i].simple.setDuty(msg.value.f32);
+                            if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                            {
+                                nxt->sendCmd("Simple.set%i.val&=0xffff0000", i + 1);
+                                uint32_t ontime = Coil::allCoils[i].simple.getOntimeUS();
+                                nxt->sendCmd("Simple.set%i.val|=%i", i + 1, ontime);
+                            }
                         }
                     }
                     if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == WILDCARD)
                     {
-                        Coil::allCoils[i].midi.setDuty(msg.value.f32);
-                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                        if (reading)
                         {
-                            nxt->sendCmd("MIDI_Live.set%i.val&=0x0000ffff", i + 1);
-                            nxt->sendCmd("MIDI_Live.set%i.val|=%i", i + 1, temp);
+                            if (readFloat)
+                            {
+                                msg.value.f32 = Coil::allCoils[i].midi.getDuty();
+                            }
+                            else
+                            {
+                                msg.value.ui32 = Coil::allCoils[i].midi.getDuty() * 1e3f;
+                            }
+                            txMsg.data.targetLSB = i;
+                            txMsg.data.targetMSB = MODE_SIMPLE;
+                            sendSysex();
+                        }
+                        else
+                        {
+                            Coil::allCoils[i].midi.setDuty(msg.value.f32);
+                            if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                            {
+                                nxt->sendCmd("MIDI_Live.set%i.val&=0x0000ffff", i + 1);
+                                nxt->sendCmd("MIDI_Live.set%i.val|=%i", i + 1, temp);
+                            }
                         }
                     }
                 }
@@ -583,11 +626,28 @@ void Sysex::processSysex()
                     }
                     for (uint32_t i = start; i < end; i++)
                     {
-                        Coil::allCoils[i].simple.setFrequency(msg.value.f32);
-                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                        if (reading)
                         {
-                            nxt->sendCmd("Simple.set%i.val&=0x0000ffff", i + 1);
-                            nxt->sendCmd("Simple.set%i.val|=%i", i + 1, temp << 16);
+                            if (readFloat)
+                            {
+                                msg.value.f32 = Coil::allCoils[i].simple.getFrequency();
+                            }
+                            else
+                            {
+                                msg.value.ui32 = Coil::allCoils[i].simple.getFrequency();
+                            }
+                            txMsg.data.targetLSB = i;
+                            txMsg.data.targetMSB = MODE_SIMPLE;
+                            sendSysex();
+                        }
+                        else
+                        {
+                            Coil::allCoils[i].simple.setFrequency(msg.value.f32);
+                            if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                            {
+                                nxt->sendCmd("Simple.set%i.val&=0x0000ffff", i + 1);
+                                nxt->sendCmd("Simple.set%i.val|=%i", i + 1, temp << 16);
+                            }
                         }
                     }
                 }
@@ -611,11 +671,28 @@ void Sysex::processSysex()
                     }
                     for (uint32_t i = start; i < end; i++)
                     {
-                        Coil::allCoils[i].simple.setFrequency(msg.value.f32);
-                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                        if (reading)
                         {
-                            nxt->sendCmd("Simple.set%i.val&=0x0000ffff", i + 1);
-                            nxt->sendCmd("Simple.set%i.val|=%i", i + 1, temp << 16);
+                            if (readFloat)
+                            {
+                                msg.value.f32 = 1e6f / Coil::allCoils[i].simple.getFrequency();
+                            }
+                            else
+                            {
+                                msg.value.ui32 = 1e6f / Coil::allCoils[i].simple.getFrequency();
+                            }
+                            txMsg.data.targetLSB = i;
+                            txMsg.data.targetMSB = MODE_SIMPLE;
+                            sendSysex();
+                        }
+                        else
+                        {
+                            Coil::allCoils[i].simple.setFrequency(msg.value.f32);
+                            if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                            {
+                                nxt->sendCmd("Simple.set%i.val&=0x0000ffff", i + 1);
+                                nxt->sendCmd("Simple.set%i.val|=%i", i + 1, temp << 16);
+                            }
                         }
                     }
                 }
@@ -636,7 +713,24 @@ void Sysex::processSysex()
                 }
                 for (uint32_t i = start; i < end; i++)
                 {
-                    EEPROMSettings::coilData[i].simpleOntimeFF = msg.value.f32;
+                    if (reading)
+                    {
+                        if (readFloat)
+                        {
+                            msg.value.f32 = EEPROMSettings::coilData[i].simpleOntimeFF;
+                        }
+                        else
+                        {
+                            msg.value.ui32 = EEPROMSettings::coilData[i].simpleOntimeFF * 1e3f;
+                        }
+                        txMsg.data.targetLSB = i;
+                        txMsg.data.targetMSB = MODE_SIMPLE;
+                        sendSysex();
+                    }
+                    else
+                    {
+                        EEPROMSettings::coilData[i].simpleOntimeFF = msg.value.f32;
+                    }
                 }
             }
             break;
@@ -654,7 +748,24 @@ void Sysex::processSysex()
                 }
                 for (uint32_t i = start; i < end; i++)
                 {
-                    EEPROMSettings::coilData[i].simpleOntimeFC = msg.value.f32;
+                    if (reading)
+                    {
+                        if (readFloat)
+                        {
+                            msg.value.f32 = EEPROMSettings::coilData[i].simpleOntimeFC;
+                        }
+                        else
+                        {
+                            msg.value.ui32 = EEPROMSettings::coilData[i].simpleOntimeFC * 1e3f;
+                        }
+                        txMsg.data.targetLSB = i;
+                        txMsg.data.targetMSB = MODE_SIMPLE;
+                        sendSysex();
+                    }
+                    else
+                    {
+                        EEPROMSettings::coilData[i].simpleOntimeFC = msg.value.f32;
+                    }
                 }
             }
             break;
@@ -672,7 +783,24 @@ void Sysex::processSysex()
                 }
                 for (uint32_t i = start; i < end; i++)
                 {
-                    EEPROMSettings::coilData[i].simpleBPSFF = msg.value.f32;
+                    if (reading)
+                    {
+                        if (readFloat)
+                        {
+                            msg.value.f32 = EEPROMSettings::coilData[i].simpleBPSFF;
+                        }
+                        else
+                        {
+                            msg.value.ui32 = EEPROMSettings::coilData[i].simpleBPSFF * 1e3f;
+                        }
+                        txMsg.data.targetLSB = i;
+                        txMsg.data.targetMSB = MODE_SIMPLE;
+                        sendSysex();
+                    }
+                    else
+                    {
+                        EEPROMSettings::coilData[i].simpleBPSFF = msg.value.f32;
+                    }
                 }
             }
             break;
@@ -690,7 +818,24 @@ void Sysex::processSysex()
                 }
                 for (uint32_t i = start; i < end; i++)
                 {
-                    EEPROMSettings::coilData[i].simpleBPSFC = msg.value.f32;
+                    if (reading)
+                    {
+                        if (readFloat)
+                        {
+                            msg.value.f32 = EEPROMSettings::coilData[i].simpleBPSFC;
+                        }
+                        else
+                        {
+                            msg.value.ui32 = EEPROMSettings::coilData[i].simpleBPSFC * 1e3f;
+                        }
+                        txMsg.data.targetLSB = i;
+                        txMsg.data.targetMSB = MODE_SIMPLE;
+                        sendSysex();
+                    }
+                    else
+                    {
+                        EEPROMSettings::coilData[i].simpleBPSFC = msg.value.f32;
+                    }
                 }
             }
             break;
@@ -707,11 +852,21 @@ void Sysex::processSysex()
             }
             for (uint32_t i = start; i < end; i++)
             {
-                Coil::allCoils[i].midi.setChannels(msg.value.ui32);
-                if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                if (reading)
                 {
-                    nxt->sendCmd("TC_Settings.coil%iChn.val&=0x0000ffff", i + 1);
-                    nxt->sendCmd("TC_Settings.coil%iChn.val|=%i", i + 1, msg.value.ui32);
+                    msg.value.ui32 = Coil::allCoils[i].midi.getChannels();
+                    txMsg.data.targetLSB = i;
+                    txMsg.data.targetMSB = MODE_MIDI_LIVE;
+                    sendSysex();
+                }
+                else
+                {
+                    Coil::allCoils[i].midi.setChannels(msg.value.ui32);
+                    if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                    {
+                        nxt->sendCmd("TC_Settings.coil%iChn.val&=0x0000ffff", i + 1);
+                        nxt->sendCmd("TC_Settings.coil%iChn.val|=%i", i + 1, msg.value.ui32);
+                    }
                 }
             }
             break;
@@ -727,32 +882,48 @@ void Sysex::processSysex()
             }
             for (uint32_t i = start; i < end; i++)
             {
-                if ((msg.value.ui32 & 0b111) == 0)
+                if (reading)
                 {
-                    Coil::allCoils[i].midi.setPanConstVol(true);
-                    if (GUI::getAcceptsData() && uiUpdateMode == 2)
-                    {
-                        nxt->sendCmd("TC_Settings.coil%iChn.val|=%i", i + 1, (1 << 7) << 16);
-                    }
+                    msg.value.ui32 = Coil::allCoils[i].midi.getPanConstVol();
+                    txMsg.data.targetLSB = i;
+                    txMsg.data.targetMSB = MODE_MIDI_LIVE;
+                    sendSysex();
                 }
-                else if ((msg.value.ui32 & 0b111) == 1)
+                else
                 {
-                    Coil::allCoils[i].midi.setPanConstVol(false);
-                    if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                    if ((msg.value.ui32 & 0b111) == 0)
                     {
-                        nxt->sendCmd("TC_Settings.coil%iChn.val&=%i", i + 1, ~((1 << 7) << 16));
+                        Coil::allCoils[i].midi.setPanConstVol(true);
+                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                        {
+                            nxt->sendCmd("TC_Settings.coil%iChn.val|=%i", i + 1, (1 << 7) << 16);
+                        }
+                    }
+                    else if ((msg.value.ui32 & 0b111) == 1)
+                    {
+                        Coil::allCoils[i].midi.setPanConstVol(false);
+                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                        {
+                            nxt->sendCmd("TC_Settings.coil%iChn.val&=%i", i + 1, ~((1 << 7) << 16));
+                        }
                     }
                 }
             }
             break;
         }
-        case 0x2063: // (msb=ml)[lsb=coil], i32 pan position (0-127), other = disabled.
-            msg.value.i32 = msg.value.f32 * 127.0f;
-        case 0x0063:
+        case 0x0063: // (msb=ml)[lsb=coil], i32 pan position (0-127), other = disabled.
+            intTmp = msg.value.i32;
+            msg.value.f32 = intTmp / 127.0f;
+        case 0x2063:
         {
-            if (msg.value.i32 < 0 || msg.value.i32 > 127)
+            if (intTmp == INT_TMP_UNUSED)
             {
-                msg.value.i32 = 128;
+                intTmp = msg.value.f32 * 127.0f;
+            }
+            if (msg.value.f32 < 0.0f || msg.value.f32 > 1.0f)
+            {
+                msg.value.f32 = -1.0f;
+                intTmp = 128;
             }
             uint32_t start = msg.targetLSB;
             uint32_t end = msg.targetLSB + 1;
@@ -763,20 +934,43 @@ void Sysex::processSysex()
             }
             for (uint32_t i = start; i < end; i++)
             {
-                Coil::allCoils[i].midi.setPan(msg.value.i32);
-                if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                if (reading)
                 {
-                    nxt->sendCmd("TC_Settings.coil%iChn.val&=%i", i + 1, ~(0xff << 24));
-                    nxt->sendCmd("TC_Settings.coil%iChn.val|=%i", i + 1, msg.value.i32 << 24);
+                    if (readFloat)
+                    {
+                        msg.value.f32 = Coil::allCoils[i].midi.getPan();
+                    }
+                    else
+                    {
+                        int32_t tmp = Coil::allCoils[i].midi.getPan() * 127.0f;
+                        msg.value.ui32 = Branchless::selectByCond(128, tmp, tmp < 0);
+                    }
+                    txMsg.data.targetLSB = i;
+                    txMsg.data.targetMSB = MODE_MIDI_LIVE;
+                    sendSysex();
+                }
+                else
+                {
+                    Coil::allCoils[i].midi.setPan(msg.value.f32);
+                    if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                    {
+                        nxt->sendCmd("TC_Settings.coil%iChn.val&=%i", i + 1, ~(0xff << 24));
+                        nxt->sendCmd("TC_Settings.coil%iChn.val|=%i", i + 1, intTmp << 24);
+                    }
                 }
             }
             break;
         }
-        case 0x2064: // (msb=ml)[lsb=coil], i32 pan reach (0-127)
-            msg.value.i32 = msg.value.f32 * 127.0f;
-        case 0x0064:
+        case 0x0064: // (msb=ml)[lsb=coil], i32 pan reach (0-127)
+            intTmp = msg.value.ui32;
+            msg.value.f32 = msg.value.ui32;
+        case 0x2064:
         {
-            if (msg.value.i32 >= 0 && msg.value.i32 <= 127)
+            if (intTmp == INT_TMP_UNUSED)
+            {
+                intTmp = msg.value.f32 * 127.0f;
+            }
+            if (msg.value.f32 >= 0.0f && msg.value.f32 <= 1.0f)
             {
                 uint32_t start = msg.targetLSB;
                 uint32_t end = msg.targetLSB + 1;
@@ -787,11 +981,28 @@ void Sysex::processSysex()
                 }
                 for (uint32_t i = start; i < end; i++)
                 {
-                    Coil::allCoils[i].midi.setPanReach(msg.value.i32);
-                    if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                    if (reading)
                     {
-                        nxt->sendCmd("TC_Settings.coil%iChn.val&=%i", i + 1, ~(127 << 16));
-                        nxt->sendCmd("TC_Settings.coil%iChn.val|=%i", i + 1, msg.value.ui32 << 16);
+                        if (readFloat)
+                        {
+                            msg.value.f32 = Coil::allCoils[i].midi.getPanReach();
+                        }
+                        else
+                        {
+                            msg.value.ui32 = Coil::allCoils[i].midi.getPanReach() * 127.0f;
+                        }
+                        txMsg.data.targetLSB = i;
+                        txMsg.data.targetMSB = MODE_MIDI_LIVE;
+                        sendSysex();
+                    }
+                    else
+                    {
+                        Coil::allCoils[i].midi.setPanReach(msg.value.f32);
+                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                        {
+                            nxt->sendCmd("TC_Settings.coil%iChn.val&=%i", i + 1, ~(127 << 16));
+                            nxt->sendCmd("TC_Settings.coil%iChn.val|=%i", i + 1, intTmp << 16);
+                        }
                     }
                 }
             }
@@ -805,32 +1016,83 @@ void Sysex::processSysex()
         case 0x0067: // () (), i32 modulation depth
             msg.value.f32 = msg.value.i32 / 127.0f;
         case 0x2067:
-            if (msg.value.f32 > 1.0f)
+            if (reading)
             {
-                msg.value.f32 = 1.0f;
+                if (readFloat)
+                {
+                    msg.value.f32 = EEPROMSettings::deviceData.midiLfoDepth;
+                }
+                else
+                {
+                    msg.value.ui32 = EEPROMSettings::deviceData.midiLfoDepth * 127.0f;
+                }
+                txMsg.data.targetLSB = 0;
+                txMsg.data.targetMSB = MODE_MIDI_LIVE;
+                sendSysex();
             }
-            if (msg.value.f32 >= 0.0f)
+            else
             {
-                EEPROMSettings::deviceData.midiLfoDepth = msg.value.f32;
+                if (msg.value.f32 > 1.0f)
+                {
+                    msg.value.f32 = 1.0f;
+                }
+                if (msg.value.f32 >= 0.0f)
+                {
+                    EEPROMSettings::deviceData.midiLfoDepth = msg.value.f32;
+                }
             }
             break;
 
         case 0x0068: // () (), i32 modulation frequency in 1/1000 Hz
             msg.value.f32 = msg.value.i32 / 1e3f;
         case 0x2068:
-            if (msg.value.f32 > 0.0f && msg.value.f32 <= 1e3f)
+            if (reading)
             {
-                EEPROMSettings::deviceData.midiLfoFreq = msg.value.f32;
+                if (readFloat)
+                {
+                    msg.value.f32 = EEPROMSettings::deviceData.midiLfoFreq;
+                }
+                else
+                {
+                    msg.value.ui32 = EEPROMSettings::deviceData.midiLfoFreq * 1e3f;
+                }
+                txMsg.data.targetLSB = 0;
+                txMsg.data.targetMSB = MODE_MIDI_LIVE;
+                sendSysex();
+            }
+            else
+            {
+                if (msg.value.f32 > 0.0f && msg.value.f32 <= 1e3f)
+                {
+                    EEPROMSettings::deviceData.midiLfoFreq = msg.value.f32;
+                }
             }
             break;
 
         case 0x0069: // () (), i32 modulation frequency in BPM
             msg.value.f32 = msg.value.i32;
         case 0x2069:
-            msg.value.f32 /= 60.0f;
-            if (msg.value.f32 > 0.0f && msg.value.f32 <= 1e3f)
+            if (reading)
             {
-                EEPROMSettings::deviceData.midiLfoFreq = msg.value.f32;
+                if (readFloat)
+                {
+                    msg.value.f32 = EEPROMSettings::deviceData.midiLfoFreq * 60.0f;
+                }
+                else
+                {
+                    msg.value.ui32 = EEPROMSettings::deviceData.midiLfoFreq * 60.0f;
+                }
+                txMsg.data.targetLSB = 0;
+                txMsg.data.targetMSB = MODE_MIDI_LIVE;
+                sendSysex();
+            }
+            else
+            {
+                msg.value.f32 /= 60.0f;
+                if (msg.value.f32 > 0.0f && msg.value.f32 <= 1e3f)
+                {
+                    EEPROMSettings::deviceData.midiLfoFreq = msg.value.f32;
+                }
             }
             break;
 
@@ -838,7 +1100,7 @@ void Sysex::processSysex()
         {
             msg.value.ui32 &= 0b1111;
             char* sLS = "____";
-            if (GUI::getAcceptsData() && uiUpdateMode == 2)
+            if (GUI::getAcceptsData() && uiUpdateMode == 2 && !reading)
             {
                 for (uint32_t i = 0; i < 4; i++)
                 {
@@ -857,10 +1119,20 @@ void Sysex::processSysex()
             }
             for (uint32_t i = start; i < end; i++)
             {
-                Coil::allCoils[i].lightsaber.setActiveLightsabers(msg.value.ui32);
-                if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                if (reading)
                 {
-                    nxt->setVal("Lightsabers.sLS%i.txt=%s", i + 1, sLS);
+                    msg.value.ui32 = Coil::allCoils[i].lightsaber.getActiveLightsabers();
+                    txMsg.data.targetLSB = 0;
+                    txMsg.data.targetMSB = MODE_LIGHTSABER;
+                    sendSysex();
+                }
+                else
+                {
+                    Coil::allCoils[i].lightsaber.setActiveLightsabers(msg.value.ui32);
+                    if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                    {
+                        nxt->setVal("Lightsabers.sLS%i.txt=%s", i + 1, sLS);
+                    }
                 }
             }
             break;
@@ -879,13 +1151,23 @@ void Sysex::processSysex()
             break;
 
         case 0x0200: // ()(), i32 EEPROM update mode, 0=manual, 1=force update, 2=auto (after each sysex command), other=reserved.
-            if (msg.value.ui32 < 3)
+            if (reading)
             {
-                EEPROMSettings::deviceData.eepromUpdateMode = msg.value.ui32;
+                msg.value.ui32 = EEPROMSettings::deviceData.eepromUpdateMode;
+                txMsg.data.targetLSB = 0;
+                txMsg.data.targetMSB = 0;
+                sendSysex();
+            }
+            else
+            {
+                if (msg.value.ui32 < 3)
+                {
+                    EEPROMSettings::deviceData.eepromUpdateMode = msg.value.ui32;
+                }
             }
             break;
 
-        case 0x2202:
+        case 0x2202: // ()(), i32 microcontroller reset, requires specific star date in 1/1000 to execute reset.
             msg.value.ui32 = msg.value.f32 * 1e3f;
         case 0x0202:
             if (msg.value.ui32 == 41153700)
@@ -897,52 +1179,169 @@ void Sysex::processSysex()
         case 0x2220:
             msg.value.ui32 = msg.value.f32 * 100.0f;
         case 0x0220: // ()(), i32 display brightness, 0-100, other=reserved
-            if (msg.value.ui32 <= 100)
+            if (reading)
             {
-                nxt->setVal("dim", msg.value.ui32, Nextion::NO_EXT);
+                if (readFloat)
+                {
+                    msg.value.f32 = EEPROMSettings::deviceData.uiBrightness / 100.0f;
+                }
+                else
+                {
+                    msg.value.ui32 = EEPROMSettings::deviceData.uiBrightness;
+                }
+                txMsg.data.targetLSB = 0;
+                txMsg.data.targetMSB = 0;
+                sendSysex();
+            }
+            else
+            {
+                if (msg.value.ui32 <= 100)
+                {
+                    EEPROMSettings::deviceData.uiBrightness = msg.value.ui32;
+                    if (nxt->available() && uiUpdateMode == 2)
+                    {
+                        nxt->setVal("dim", msg.value.ui32, Nextion::NO_EXT);
+                    }
+                }
             }
             break;
         case 0x2221:
             msg.value.ui32 = msg.value.f32;
         case 0x0221: // ()(), i32 seconds til standby, 1-3600, 0=disabled, other=reserved
-            if (msg.value.ui32 <= 3600)
+            if (reading)
             {
-                nxt->setVal("thsp", msg.value.ui32, Nextion::NO_EXT);
+                if (readFloat)
+                {
+                    msg.value.f32 = EEPROMSettings::deviceData.uiSleepDelay;
+                }
+                else
+                {
+                    msg.value.ui32 = EEPROMSettings::deviceData.uiSleepDelay;
+                }
+                txMsg.data.targetLSB = 0;
+                txMsg.data.targetMSB = 0;
+                sendSysex();
+            }
+            else
+            {
+                if (msg.value.ui32 <= 3600)
+                {
+                    EEPROMSettings::deviceData.uiSleepDelay = msg.value.ui32;
+                    if (nxt->available() && uiUpdateMode == 2)
+                    {
+                        nxt->setVal("thsp", msg.value.ui32, Nextion::NO_EXT);
+                    }
+                }
             }
             break;
         case 0x2222:
             msg.value.ui32 = msg.value.f32;
         case 0x0222: // ()(), i32 button hold time (ms), 50-9999, other=reserved
-            if (msg.value.ui32 >= 50 && msg.value.ui32 <= 9999)
+            if (reading)
             {
-                nxt->setVal("Other_Settings.nHoldTime", msg.value.ui32);
+                if (readFloat)
+                {
+                    msg.value.f32 = EEPROMSettings::deviceData.uiButtonHoldTime;
+                }
+                else
+                {
+                    msg.value.ui32 = EEPROMSettings::deviceData.uiButtonHoldTime;
+                }
+                txMsg.data.targetLSB = 0;
+                txMsg.data.targetMSB = 0;
+                sendSysex();
+            }
+            else
+            {
+                if (msg.value.ui32 >= 50 && msg.value.ui32 <= 9999)
+                {
+                    EEPROMSettings::deviceData.uiButtonHoldTime = msg.value.ui32;
+                    if (nxt->available() && uiUpdateMode == 2)
+                    {
+                        nxt->setVal("Other_Settings.nHoldTime", msg.value.ui32);
+                    }
+                }
             }
             break;
         case 0x0223: // ()(), bf1 safety options, [0]: background shutdown, 0=disabled, 1=enabled.
-            nxt->setVal("Other_Settings.nBackOff", msg.value.ui32 & 0b1);
+            if (nxt->available())
+            {
+                if (reading)
+                {
+                    msg.value.ui32 = nxt->getVal("Other_Settings.nBackOff");
+                    txMsg.data.targetLSB = 0;
+                    txMsg.data.targetMSB = 0;
+                    sendSysex();
+                }
+                else
+                {
+                    if (nxt->available() && uiUpdateMode == 2)
+                    {
+                        nxt->setVal("Other_Settings.nBackOff", msg.value.ui32 & 0b1);
+                    }
+                }
+            }
             break;
         case 0x0224: // ()(), i32 color mode, 0=light, 1=dark, other=reserved
-            // Currently NOT supported! Needs changes on the Nextion side
-            // to work without unreasonable code copying.
-            /*if (msg.value.ui32 < 2)
+            if (reading)
             {
-                nxt->setVal("Settings.colorMode", msg.value.ui32);
-                nxt->sendCmd("click fLoadColors,1");
-            }*/
-            break;
-        case 0x0225: // [msb=s,ml,ls][lsb=0], ui apply mode. 0=manual, 1=on release, 2=immediate, other=reserved.
-            if (msg.value.ui32 < 3)
+                msg.value.ui32 = EEPROMSettings::deviceData.uiColorMode;
+                txMsg.data.targetLSB = 0;
+                txMsg.data.targetMSB = 0;
+                sendSysex();
+            }
+            else
             {
-                if (msg.targetMSB == WILDCARD)
+                if (msg.value.ui32 < 2)
                 {
-                    nxt->setVal("Settings.applyingMode", msg.value.ui32);
+                    EEPROMSettings::deviceData.uiColorMode = msg.value.ui32;
+                    // Currently NOT supported (requires reboot)! Needs changes on
+                    // the Nextion side to work without unreasonable code copying.
+                    /*
+                     * if (nxt->available() && uiUpdateMode == 2)
+                     * {
+                     *     nxt->setVal("Settings.colorMode", msg.value.ui32);
+                     *     nxt->sendCmd("click fLoadColors,1");
+                     * }
+                     */
+                }
+            }
+            break;
+        case 0x0225: // [msb=s&ml&ls][lsb=0], ui apply mode. 0=manual, 1=on release, 2=immediate, other=reserved.
+            if (nxt->available())
+            {
+                if (reading)
+                {
+                    msg.value.ui32 = nxt->getVal("Settings.applyingMode");
+                    txMsg.data.targetLSB = 0;
+                    txMsg.data.targetMSB = WILDCARD;
+                    sendSysex();
+                }
+                else
+                {
+                    if (msg.value.ui32 < 3)
+                    {
+                        if (nxt->available() && uiUpdateMode == 2)
+                        {
+                            nxt->setVal("Settings.applyingMode", msg.value.ui32);
+                        }
+                    }
                 }
             }
             break;
         case 0x0226: // ()(), i32 UI update mode, 0=manual, 1=force update [NS], 2=auto (after each sysex command), other=reserved.
-            if (msg.value.ui32 == 0 || msg.value.ui32 == 2)
+            if (reading)
             {
-                uiUpdateMode = msg.value.ui32;
+                msg.value.ui32 = uiUpdateMode;
+                txMsg.data.targetLSB = 0;
+                txMsg.data.targetMSB = 0;
+            }
+            else
+            {
+                if (msg.value.ui32 == 0 || msg.value.ui32 == 2)
+                {
+                    uiUpdateMode = msg.value.ui32;
+                }
             }
             break;
 
@@ -977,28 +1376,79 @@ void Sysex::processSysex()
         case 0x2242:
             msg.value.i32 = msg.value.f32;
         case 0x0242: // ()[lsb=user,nb], i32 user max ontime in us
-            EEPROMSettings::userData[msg.targetLSB].maxOntimeUS = msg.value.i32;
-            if (GUI::getAcceptsData() && uiUpdateMode == 2)
+            if (reading)
             {
-                nxt->sendCmd("User_Settings.u%iOntime.val=%i", msg.targetLSB, msg.value.i32);
+                if (readFloat)
+                {
+                    msg.value.f32 = EEPROMSettings::userData[msg.targetLSB].maxOntimeUS;
+                }
+                else
+                {
+                    msg.value.ui32 = EEPROMSettings::userData[msg.targetLSB].maxOntimeUS;
+                }
+                txMsg.data.targetLSB = msg.targetLSB;
+                txMsg.data.targetMSB = 0;
+                sendSysex();
+            }
+            else
+            {
+                EEPROMSettings::userData[msg.targetLSB].maxOntimeUS = msg.value.i32;
+                if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                {
+                    nxt->sendCmd("User_Settings.u%iOntime.val=%i", msg.targetLSB, msg.value.i32);
+                }
             }
             break;
         case 0x2243:
-            msg.value.i32 = msg.value.f32 * 1000.0f;
+            msg.value.i32 = msg.value.f32 * 1e3f;
         case 0x0243: // ()[lsb=user,nb], i32 user max duty in 1/1000
-            EEPROMSettings::userData[msg.targetLSB].maxDutyPerm = msg.value.i32;
-            if (GUI::getAcceptsData() && uiUpdateMode == 2)
+            if (reading)
             {
-                nxt->sendCmd("User_Settings.u%iDuty.val=%i", msg.targetLSB, msg.value.i32);
+                if (readFloat)
+                {
+                    msg.value.f32 = EEPROMSettings::userData[msg.targetLSB].maxDutyPerm / 1e3f;
+                }
+                else
+                {
+                    msg.value.ui32 = EEPROMSettings::userData[msg.targetLSB].maxDutyPerm;
+                }
+                txMsg.data.targetLSB = msg.targetLSB;
+                txMsg.data.targetMSB = 0;
+                sendSysex();
+            }
+            else
+            {
+                EEPROMSettings::userData[msg.targetLSB].maxDutyPerm = msg.value.i32;
+                if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                {
+                    nxt->sendCmd("User_Settings.u%iDuty.val=%i", msg.targetLSB, msg.value.i32);
+                }
             }
             break;
         case 0x2244:
             msg.value.i32 = msg.value.f32;
         case 0x0244: // ()[lsb=user,nb], i32 user max BPS in Hz
-            EEPROMSettings::userData[msg.targetLSB].maxBPS = msg.value.i32;
-            if (GUI::getAcceptsData() && uiUpdateMode == 2)
+            if (reading)
             {
-                nxt->sendCmd("User_Settings.u%iBPS.val=%i", msg.targetLSB, msg.value.i32);
+                if (readFloat)
+                {
+                    msg.value.f32 = EEPROMSettings::userData[msg.targetLSB].maxBPS;
+                }
+                else
+                {
+                    msg.value.ui32 = EEPROMSettings::userData[msg.targetLSB].maxBPS;
+                }
+                txMsg.data.targetLSB = msg.targetLSB;
+                txMsg.data.targetMSB = 0;
+                sendSysex();
+            }
+            else
+            {
+                EEPROMSettings::userData[msg.targetLSB].maxBPS = msg.value.i32;
+                if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                {
+                    nxt->sendCmd("User_Settings.u%iBPS.val=%i", msg.targetLSB, msg.value.i32);
+                }
             }
             break;
 

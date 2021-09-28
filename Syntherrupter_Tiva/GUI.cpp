@@ -42,7 +42,7 @@ GUI::~GUI()
 
 }
 
-void GUI::init(Nextion* nextion, bool nxtOk, uint32_t cfgStatus)
+void GUI::init(Nextion* nextion, uint32_t cfgStatus)
 {
     nxt = nextion;
 
@@ -55,7 +55,7 @@ void GUI::init(Nextion* nextion, bool nxtOk, uint32_t cfgStatus)
      */
     uint32_t startTime = System::getSystemTimeUS();
 
-    if (!nxtOk)
+    if (!nextion->available())
     {
         // No screen connected. Thus no need to send any data to it.
         acceptsData = false;
@@ -566,8 +566,8 @@ void GUI::midiLive()
                         {
                             Coil::allCoils[coil].midi.setPanConstVol(false);
                         }
-                        Coil::allCoils[coil].midi.setPanReach(commandData[3]);
-                        Coil::allCoils[coil].midi.setPan(commandData[4]);
+                        Coil::allCoils[coil].midi.setPanReach(commandData[3] / 127.0f);
+                        Coil::allCoils[coil].midi.setPan(commandData[4] / 127.0f);
                     }
                     else if (mode == 1)
                     {

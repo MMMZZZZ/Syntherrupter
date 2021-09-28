@@ -237,22 +237,22 @@ bool MIDI::processBuffer(uint32_t b)
                     default:
                         break;
                     case 0x01: // Modulation Wheel
-                        channels[channel].modulation = c1 / 128.0f;
+                        channels[channel].modulation = c1 / 127.0f;
                         channels[channel].controllersChanged = true;
                         break;
                     case 0x02: // Breath Controller
 
                         break;
                     case 0x07: // Channel Volume
-                        channels[channel].volume = c1 / 128.0f;
+                        channels[channel].volume = c1 / 127.0f;
                         // channels[channel].controllersChanged = true;
                         break;
                     case 0x0A: // Pan
-                        channels[channel].pan = c1 / 128.0f;
+                        channels[channel].pan = c1 / 127.0f;
                         channels[channel].controllersChanged = true;
                         break;
                     case 0x0B: // Expression coarse
-                        channels[channel].expression = c1 / 128.0f;
+                        channels[channel].expression = c1 / 127.0f;
                         // channels[channel].controllersChanged = true;
                         break;
                     case 0x40: // Sustain Pedal
@@ -344,7 +344,7 @@ bool MIDI::processBuffer(uint32_t b)
                         }
                         else if (channels[channel].NRPN == (42 << 8) + 2) // Note pan mode - target range upper limit
                         {
-                            channels[channel].notePanTargetRangeHigh = c1 / 128.0f;
+                            channels[channel].notePanTargetRangeHigh = c1 / 127.0f;
                         }
                         else
                         {
@@ -387,7 +387,7 @@ bool MIDI::processBuffer(uint32_t b)
                         }
                         else if (channels[channel].NRPN == (42 << 8) + 2) // Note pan mode - target range lower limit
                         {
-                            channels[channel].notePanTargetRangeLow = c1 / 128.0f;
+                            channels[channel].notePanTargetRangeLow = c1 / 127.0f;
                         }
                         else
                         {
@@ -700,9 +700,9 @@ void MIDI::setChannels(uint32_t chns)
 
 void MIDI::setPan(float pan)
 {
-    if (pan < 128)
+    if (pan >= 0.0f && pan <= 1.0f)
     {
-        coilPan = pan / 128.0f;
+        coilPan = pan;
     }
     else
     {
@@ -713,9 +713,9 @@ void MIDI::setPan(float pan)
 
 void MIDI::setPanReach(float reach)
 {
-    if (reach)
+    if (reach >= 0.0f && reach <= 1.0f)
     {
-        inversPanReach = 128.0f / reach;
+        inversPanReach = 1.0f / reach;
     }
     else
     {
@@ -804,7 +804,7 @@ void MIDI::process()
                                 // Determine MIDI volume, including all effects that are not time-dependant.
                                 if (note->velocity)
                                 {
-                                    note->rawVolume = note->velocity / 128.0f;
+                                    note->rawVolume = note->velocity / 127.0f;
                                     /*
                                      * Branchless version of:
                                      * if (channel->damperPedal)

@@ -55,6 +55,16 @@ public:
             }
         }
     };
+    uint32_t getActiveLightsabers()
+    {
+        uint32_t result = 0;
+        for (uint32_t lsNum = 0; lsNum < MAX_CLIENTS; lsNum++)
+        {
+            result <<= 1;
+            result |= (lightsabers[lsNum].assignedCoils & coilBit);
+        }
+        return result;
+    };
     void setCoilNum(uint32_t num)
     {
         this->coilNum = num;

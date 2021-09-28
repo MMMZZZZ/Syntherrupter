@@ -41,12 +41,28 @@ public:
         setVolSettings(singleNoteMaxOntimeUS, dutyMax);
     };
     void setChannels(uint32_t chns);
+    uint32_t getChannels()
+    {
+        return activeChannels;
+    };
     void setPan(float pan);
+    float getPan()
+    {
+        return coilPan;
+    };
     void setPanReach(float reach);
+    float getPanReach()
+    {
+        return 1.0f / inversPanReach;
+    };
     void setPanConstVol(bool cnst)
     {
         panConstVol    = cnst;
         coilPanChanged = true;
+    };
+    bool getPanConstVol()
+    {
+        return panConstVol;
     };
     void setMaxVoices(uint32_t maxVoices);
     float getOntimeUS()
