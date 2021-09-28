@@ -315,49 +315,66 @@ void Sysex::processSysex()
          */
 
         case 0x0002: // ()(), i32 Request if parameter is supported.
-            // For 0x02, 0x03 and 0x04 commands: targets will be set below.
-            // response type is set here.
-            msg.number = msg.value.ui32;
-            msg.value.ui32 = 0;
+        case 0x0003: // ()(), i32 Read parameter (0x01 reply)
+        case 0x0004: // ()(), i32 Get parameter (command reply)
+        {
+            // Targets will be set below during the read call. Response type
+            // is set here.
+
             reading = true;
-            readSupportOnly = true;
-            readSupportConfirmed = false;
-            // reply will be a 0x01 message
+            readSupportOnly = (msg.number == 0x02);
+            // reply will be a 0x01 message...
             txMsg.data.number = 0x01;
-            processSysex();
-            if (!readSupportConfirmed)
+            // except if the reply shall be a command
+            bool replyWithCmd = (msg.number == 0x04);
+
+            // read range. Note: End is included!
+            uint32_t readRangeStart = msg.value.ui32 & 0x7f7f;
+            uint32_t readRangeEnd   = (msg.value.ui32 >> 16) & 0x7f7f;
+            if (!readRangeEnd)
             {
-                // Command is *not* supported. Hence no confirmation has
-                // been sent so we need to communicate the missing support.
-                txMsg.data.targetLSB = msg.targetLSB;
-                txMsg.data.targetMSB = msg.targetMSB;
+                // No read range specified, read only single command.
+                readRangeEnd = readRangeStart;
+            }
+
+            msg.number = readRangeStart;
+            while (msg.number <= readRangeEnd)
+            {
+                if (replyWithCmd)
+                {
+                    txMsg.data.number = msg.number;
+                }
                 msg.value.ui32 = 0;
-                // disable readSupportOnly otherwise sendSysex will confirm
-                // support (see sendSysex)
-                readSupportOnly = false;
-                sendSysex();
+                readSupportConfirmed = false;
+                processSysex();
+                if (readSupportOnly && !readSupportConfirmed)
+                {
+                    // Command is *not* supported. Hence no confirmation has
+                    // been sent so we need to communicate the missing support.
+                    txMsg.data.targetLSB = msg.targetLSB;
+                    txMsg.data.targetMSB = msg.targetMSB;
+                    msg.value.ui32 = 0;
+                    // disable readSupportOnly otherwise sendSysex will confirm
+                    // support (see sendSysex)
+                    readSupportOnly = false;
+                    sendSysex();
+                    readSupportOnly = true;
+                }
+
+                // LSB and MSB of number cannot exceed 0x7f. Therefore skip all
+                // values with LSB of 0x80-0xff
+                // Effectively the 8th bit of the LSB is shifted into the MSB.
+                msg.number++;
+                if (msg.number & 0x80)
+                {
+                    msg.number &= ~0x80;
+                    msg.number += 0x100;
+                }
             }
             reading = false;
             readSupportOnly = false;
             break;
-        case 0x0003: // ()(), i32 Read parameter (0x01 reply)
-            msg.number = msg.value.ui32;
-            msg.value.ui32 = 0;
-            reading = true;
-            // reply will be a 0x01 message
-            txMsg.data.number = 0x01;
-            processSysex();
-            reading = false;
-            break;
-        case 0x0004: // ()(), i32 Get parameter (command reply)
-            msg.number = msg.value.ui32;
-            msg.value.ui32 = 0;
-            reading = true;
-            // reply will be a command (PN as requested)
-            txMsg.data.number = msg.number;
-            processSysex();
-            reading = false;
-            break;
+        }
 
         case 0x0020: // [msb=s,ml,ls][lsb=0], enable/disable mode. 0=disable, 1=enable, other=reserved
             // Command documentation explicitly requires a 1.
