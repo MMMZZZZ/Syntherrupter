@@ -88,11 +88,16 @@ bool UART::write(uint8_t* buffer, uint32_t size, bool discard)
     }
 
     uint32_t limit = Branchless::min(size, txBuffer.avail());
+    UARTIntDisable(uartBase, UART_INT_TX);
     for (uint32_t i = 0; i < limit; i++)
     {
         txBuffer.add(buffer[i]);
     }
-    if (!txEnabled)
+    if (txEnabled)
+    {
+        UARTIntEnable(uartBase, UART_INT_TX);
+    }
+    else
     {
         auto level = txBuffer.level();
         if (level)
