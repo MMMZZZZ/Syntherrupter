@@ -594,7 +594,7 @@ void Sysex::processSysex()
                                 msg.value.ui32 = Coil::allCoils[i].midi.getDuty() * 1e3f;
                             }
                             txMsg.data.targetLSB = i;
-                            txMsg.data.targetMSB = MODE_SIMPLE;
+                            txMsg.data.targetMSB = MODE_MIDI_LIVE;
                             sendSysex();
                         }
                         else
