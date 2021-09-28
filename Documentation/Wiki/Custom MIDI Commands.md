@@ -126,7 +126,7 @@ Also, keep in mind that there is a ton of parameters that has to be documented h
 
 All conventions are to be read as "unless noted otherwise... ".
 
-* Reserved target bytes are expected to be 0.
+* Reserved target bytes are expected to be 0 or 127 (Wildcard).
 * Parameters and parameter options that are currently not supported by Syntherrupter are marked by an [NS].
 * Parameters that stored in EEPROM are marked by an [EE]. Other parameters will be reset to default after a power cycle.
 * Every integer parameter has a float version at offset `0x2000`. 

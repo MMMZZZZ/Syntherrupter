@@ -106,7 +106,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0224:
         case 0x0226:
         case 0x0266:
-            if (msg.targetLSB == 0)
+            if (msg.targetLSB == 0 || msg.targetLSB == WILDCARD)
             {
                 lsbOk = true;
             }
@@ -224,7 +224,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0263:
         case 0x0264:
         case 0x0266:
-            if (msg.targetMSB == 0)
+            if (msg.targetMSB == 0 || msg.targetMSB == WILDCARD)
             {
                 msbOk = true;
             }
