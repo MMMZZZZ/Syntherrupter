@@ -25,8 +25,11 @@ public:
     virtual ~LightSaber();
     static void init(uint32_t uartPort, uint32_t uartRxPin, uint32_t uartTxPin, uint32_t baudRate, void (*rxISR)(void));
     static void process();
-    static void start();
-    static void stop();
+    static void setRunning(bool run);
+    static bool getRunning()
+    {
+        return modeRunning;
+    };
     static void ESPSetID(uint32_t id);
     void updateTonelist();
     void setTonelist(ToneList* tonelist)
@@ -84,7 +87,7 @@ private:
 
     static uint32_t lastPacket;
     static LSData lightsabers[MAX_CLIENTS];
-    static bool started;
+    static bool modeRunning;
 
     ToneList* tonelist;
     uint32_t coilNum = 0;

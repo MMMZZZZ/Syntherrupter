@@ -23,13 +23,13 @@ public:
     virtual ~Simple();
     void init(ToneList* tonelist, uint32_t updatePeriodUS = 10000);
     void updateToneList();
-    static void start()
+    static void setRunning(bool run)
     {
-        started = true;
+        modeRunning = run;
     };
-    static void stop()
+    static bool getRunning()
     {
-        started = false;
+        return modeRunning;
     };
     void setOntimeUS(float ontimeUS, bool force = false)
     {
@@ -63,7 +63,7 @@ private:
     Tone* tone;
     uint32_t updatePeriodUS = 10000, lastUpdateUS = 0;
     float frequency = 0.0f;
-    static bool started;
+    static bool modeRunning;
 
     friend class EEPROMSettings;
 };

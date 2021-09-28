@@ -8,7 +8,7 @@
 #include <Simple.h>
 
 
-bool Simple::started = false;
+bool Simple::modeRunning = false;
 
 
 Simple::Simple()
@@ -30,7 +30,7 @@ void Simple::init(ToneList* tonelist, uint32_t updatePeriodUS)
 
 void Simple::updateToneList()
 {
-    if (started)
+    if (modeRunning)
     {
         if (System::getSystemTimeUS() - lastUpdateUS > updatePeriodUS)
         {

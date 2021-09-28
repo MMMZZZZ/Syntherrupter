@@ -60,11 +60,10 @@ public:
     static void init(uint32_t usbBaudRate, void (*usbISR)(void),
                      uint32_t midiUartPort, uint32_t midiUartRx,
                      uint32_t midiUartTx, void (*midiISR)(void));
-    static void start();
-    static void stop();
-    static bool isPlaying()
+    static void setRunning(bool run);
+    static bool getRunning()
     {
-        return playing;
+        return modeRunning;
     };
     static void resetNRPs(uint32_t chns = 0xffff);
     static void process();
@@ -189,7 +188,7 @@ private:
     bool coilPanChanged         = false;
     bool panConstVol            = false;
 
-    static bool playing;
+    static bool modeRunning;
     static float* lfoFreq;
     static float* lfoDepth;
 

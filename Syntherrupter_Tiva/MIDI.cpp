@@ -17,7 +17,7 @@ NoteList                   MIDI::notelist;
 uint32_t                   MIDI::notesCount = 0;
 uint8_t*                   MIDI::sysexDeviceID;
 SysexMsg                   MIDI::sysexMsg;
-bool                       MIDI::playing = false;
+bool                       MIDI::modeRunning = false;
 float                      MIDI::freqTable[128];
 MIDIProgram                MIDI::programs[MAX_PROGRAMS];
 float*                     MIDI::lfoFreq;
@@ -629,22 +629,24 @@ bool MIDI::processBuffer(uint32_t b)
     return urgentData;
 }
 
-void MIDI::start()
+void MIDI::setRunning(bool run)
 {
-    if (!playing)
+    if (run != modeRunning)
     {
-        playing = true;
-        for (uint32_t channel = 0; channel < 16; channel++)
+        modeRunning = run;
+        if (modeRunning)
         {
-            channels[channel].resetControllers();
+            for (uint32_t channel = 0; channel < 16; channel++)
+            {
+                channels[channel].resetControllers();
+            }
+        }
+        else
+        {
+            modeRunning = false;
+            notelist.removeAllNotes();
         }
     }
-}
-
-void MIDI::stop()
-{
-    playing = false;
-    notelist.removeAllNotes();
 }
 
 void MIDI::setVolSettingsPerm(float ontimeUSMax, float dutyPermMax)
@@ -764,7 +766,7 @@ void MIDI::process()
         }
     }
 
-    if (playing)
+    if (modeRunning)
     {
         if (newData)
         {

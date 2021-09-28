@@ -9,7 +9,7 @@
 #include <LightSaber.h>
 
 
-bool     LightSaber::started = false;
+bool     LightSaber::modeRunning = false;
 uint32_t LightSaber::lastPacket = 0;
 UART     LightSaber::uart;
 LSData   LightSaber::lightsabers[MAX_CLIENTS];
@@ -46,22 +46,23 @@ void LightSaber::init(uint32_t uartPort, uint32_t uartRxPin, uint32_t uartTxPin,
     uart.disable();
 }
 
-void LightSaber::start()
+void LightSaber::setRunning(bool run)
 {
-    started = true;
-    uart.enable();
-}
-
-void LightSaber::stop()
-{
-    started = false;
-    uart.disable();
-    lastPacket = 0;
+    modeRunning = run;
+    if (run)
+    {
+        uart.enable();
+    }
+    else
+    {
+        uart.disable();
+        lastPacket = 0;
+    }
 }
 
 void LightSaber::process()
 {
-    if (started)
+    if (modeRunning)
     {
         uint32_t timeUS = System::getSystemTimeUS();
         static uint32_t lastBufferLevel{0};
@@ -133,7 +134,7 @@ void LightSaber::updateTonelist()
         {
             ls->changed &= ~coilBit;
 
-            if (started && ls->assignedCoils & coilBit)
+            if (modeRunning && ls->assignedCoils & coilBit)
             {
                 if (lastTone)
                 {

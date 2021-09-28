@@ -274,58 +274,30 @@ void Sysex::processSysex()
         // parameter number: (not required target byte, if target is transmitted, value must be 0 or the value specified here.)
         // [required target], ui=unsigned int, f32=float(32bit), bfx = x bit bitfield, description
         case 0x0020: // [msb=s,ml,ls][lsb=0], enable/disable mode. 0=disable, 1=enable, other=reserved
-            if (msg.value.i32 == 0)
+            // Command documentation explicitly requires a 1.
+            msg.value.ui32 = (msg.value.ui32 == 1);
+            if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == WILDCARD)
             {
-                if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == WILDCARD)
-                {
-                    Simple::stop();
-                }
-                if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == WILDCARD)
-                {
-                    MIDI::stop();
-                }
-                if (msg.targetMSB == MODE_LIGHTSABER || msg.targetMSB == WILDCARD)
-                {
-                    LightSaber::stop();
-                }
-                if (GUI::getAcceptsData() && uiUpdateMode == 2)
-                {
-                    if (msg.targetMSB == WILDCARD)
-                    {
-                        nxt->sendCmd("Settings.activeModes.val=0");
-                    }
-                    else
-                    {
-                        msg.targetMSB--;
-                        nxt->sendCmd("Settings.activeModes.val&=%i", ~(1 << msg.targetMSB));
-                    }
-                }
+                Simple::setRunning(msg.value.ui32);
             }
-            else if (msg.value.i32 == 1)
+            if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == WILDCARD)
             {
-                if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == WILDCARD)
+                MIDI::setRunning(msg.value.ui32);
+            }
+            if (msg.targetMSB == MODE_LIGHTSABER || msg.targetMSB == WILDCARD)
+            {
+                LightSaber::setRunning(msg.value.ui32);
+            }
+            if (GUI::getAcceptsData() && uiUpdateMode == 2)
+            {
+                if (msg.targetMSB == WILDCARD)
                 {
-                    Simple::start();
+                    nxt->sendCmd("Settings.activeModes.val=%i", 0xff * msg.value.ui32);
                 }
-                if (msg.targetMSB == MODE_MIDI_LIVE || msg.targetMSB == WILDCARD)
+                else
                 {
-                    MIDI::start();
-                }
-                if (msg.targetMSB == MODE_LIGHTSABER || msg.targetMSB == WILDCARD)
-                {
-                    LightSaber::start();
-                }
-                if (GUI::getAcceptsData() && uiUpdateMode == 2)
-                {
-                    if (msg.targetMSB == WILDCARD)
-                    {
-                        nxt->sendCmd("Settings.activeModes.val=0xff");
-                    }
-                    else
-                    {
-                        msg.targetMSB--;
-                        nxt->sendCmd("Settings.activeModes.val|=%i", (1 << msg.targetMSB));
-                    }
+                    msg.targetMSB--;
+                    nxt->sendCmd("Settings.activeModes.val&=%i", (~(1 << msg.targetMSB)) * msg.value.ui32);
                 }
             }
             break;
