@@ -24,7 +24,7 @@ class GUI
 public:
     GUI();
     virtual ~GUI();
-    static void init(Nextion* nextion, bool nxtOk, uint32_t cfgStatus);
+    static void init(Nextion* nextion, uint32_t cfgStatus);
     static uint32_t update();
     static void applyOutput();
     static void setError(const char* err);
