@@ -611,7 +611,7 @@ void Sysex::processSysex()
         case 0x0023: // [msb=s,ml,ls][lsb=coil], i32 BPS in Hz
             msg.value.f32 = msg.value.i32;
         case 0x2023:
-            if (msg.value.f32 >= 0.0f)
+            if (msg.value.f32 >= 0.0f || reading)
             {
                 uint32_t temp = msg.value.f32;
                 if (msg.targetMSB == MODE_SIMPLE || msg.targetMSB == WILDCARD)
@@ -655,7 +655,7 @@ void Sysex::processSysex()
         case 0x0024: // [msb=s,ml,ls][lsb=coil], i32 period in us
             msg.value.f32 = msg.value.i32;
         case 0x2024:
-            if (msg.value.f32 >= 0.0f)
+            if (msg.value.f32 >= 0.0f || reading)
             {
                 msg.value.f32 = 1e6f / msg.value.f32;
                 uint32_t temp = ((uint32_t) msg.value.f32) << 16;
@@ -701,7 +701,7 @@ void Sysex::processSysex()
         case 0x0040: // (msb=s)[lsb=all coils], i32 ontime filter factor /1000
             msg.value.f32 = msg.value.i32 / 1e3f;
         case 0x2040:
-            if (msg.value.f32 > 0.0f)
+            if (msg.value.f32 > 0.0f || reading)
             {
                 uint32_t start = msg.targetLSB;
                 uint32_t end = msg.targetLSB + 1;
@@ -736,7 +736,7 @@ void Sysex::processSysex()
         case 0x0041: // (msb=s)[lsb=all coils], i32 ontime filter constant /1000
             msg.value.f32 = msg.value.i32 / 1e3f;
         case 0x2041:
-            if (msg.value.f32 >= 0.0f)
+            if (msg.value.f32 >= 0.0f || reading)
             {
                 uint32_t start = msg.targetLSB;
                 uint32_t end = msg.targetLSB + 1;
@@ -771,7 +771,7 @@ void Sysex::processSysex()
         case 0x0044: // (msb=s)[lsb=all coils], i32 BPS filter factor /1000
             msg.value.f32 = msg.value.i32 / 1e3f;
         case 0x2044:
-            if (msg.value.f32 > 0.0f)
+            if (msg.value.f32 > 0.0f || reading)
             {
                 uint32_t start = msg.targetLSB;
                 uint32_t end = msg.targetLSB + 1;
@@ -806,7 +806,7 @@ void Sysex::processSysex()
         case 0x0045: // (msb=s)[lsb=all coils], i32 BPS filter constant /1000
             msg.value.f32 = msg.value.i32 / 1e3f;
         case 0x2045:
-            if (msg.value.f32 >= 0.0f)
+            if (msg.value.f32 >= 0.0f || reading)
             {
                 uint32_t start = msg.targetLSB;
                 uint32_t end = msg.targetLSB + 1;
@@ -1564,8 +1564,7 @@ void Sysex::processSysex()
         case 0x2263:
             msg.value.i32 = msg.value.f32;
         case 0x0263: // ()[lsb=coil], i32 coil min offtime in us
-        {
-            if (msg.value.ui32 <= 0xffff)
+            if (msg.value.ui32 <= 0xffff || reading)
             {
                 uint32_t start = msg.targetLSB;
                 uint32_t end = msg.targetLSB + 1;
@@ -1602,9 +1601,8 @@ void Sysex::processSysex()
                 }
             }
             break;
-        }
         case 0x0264: // ()[lsb=coil], i32 coil max MIDI voices, 1-16, ohter=reserved
-            if (msg.value.ui32 <= 16)
+            if (msg.value.ui32 <= 16 || reading)
             {
                 uint32_t start = msg.targetLSB;
                 uint32_t end = msg.targetLSB + 1;
