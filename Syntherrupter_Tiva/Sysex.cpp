@@ -1335,6 +1335,7 @@ void Sysex::processSysex()
                 msg.value.ui32 = uiUpdateMode;
                 txMsg.data.targetLSB = 0;
                 txMsg.data.targetMSB = 0;
+                sendSysex();
             }
             else
             {
