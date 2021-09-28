@@ -1465,16 +1465,33 @@ void Sysex::processSysex()
             }
             for (uint32_t i = start; i < end; i++)
             {
-                Coil::allCoils[i].setMaxOntimeUS(msg.value.ui32);
-                if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                if (reading)
                 {
-                    nxt->sendCmd("TC_Settings.coil%iOn.val=%i", i + 1, msg.value.i32);
+                    if (readFloat)
+                    {
+                        msg.value.f32 = Coil::allCoils[i].getMaxOntimeUS();
+                    }
+                    else
+                    {
+                        msg.value.ui32 = Coil::allCoils[i].getMaxOntimeUS();
+                    }
+                    txMsg.data.targetLSB = i;
+                    txMsg.data.targetMSB = 0;
+                    sendSysex();
+                }
+                else
+                {
+                    Coil::allCoils[i].setMaxOntimeUS(msg.value.ui32);
+                    if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                    {
+                        nxt->sendCmd("TC_Settings.coil%iOn.val=%i", i + 1, msg.value.i32);
+                    }
                 }
             }
             break;
         }
         case 0x0261:
-            msg.value.f32 = msg.value.i32 / 1000.0f;
+            msg.value.f32 = msg.value.i32 / 1e3f;
         case 0x2261: // ()[lsb=coil], i32 coil max duty in 1/1000
         {
             msg.value.f32 *= 1000.0f;
@@ -1487,10 +1504,27 @@ void Sysex::processSysex()
             }
             for (uint32_t i = start; i < end; i++)
             {
-                Coil::allCoils[i].setMaxDutyPerm(msg.value.f32);
-                if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                if (reading)
                 {
-                    nxt->sendCmd("TC_Settings.coil%iDuty.val=%i", i + 1, msg.value.f32);
+                    if (readFloat)
+                    {
+                        msg.value.f32 = Coil::allCoils[i].getMaxDutyPerm() / 1e3f;
+                    }
+                    else
+                    {
+                        msg.value.ui32 = Coil::allCoils[i].getMaxDutyPerm();
+                    }
+                    txMsg.data.targetLSB = i;
+                    txMsg.data.targetMSB = 0;
+                    sendSysex();
+                }
+                else
+                {
+                    Coil::allCoils[i].setMaxDutyPerm(msg.value.f32);
+                    if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                    {
+                        nxt->sendCmd("TC_Settings.coil%iDuty.val=%i", i + 1, msg.value.f32);
+                    }
                 }
             }
             break;
@@ -1507,7 +1541,24 @@ void Sysex::processSysex()
             }
             for (uint32_t i = start; i < end; i++)
             {
-                Coil::allCoils[i].setMinOntimeUS(msg.value.i32);
+                if (reading)
+                {
+                    if (readFloat)
+                    {
+                        msg.value.f32 = Coil::allCoils[i].getMinOntimeUS();
+                    }
+                    else
+                    {
+                        msg.value.ui32 = Coil::allCoils[i].getMinOntimeUS();
+                    }
+                    txMsg.data.targetLSB = i;
+                    txMsg.data.targetMSB = 0;
+                    sendSysex();
+                }
+                else
+                {
+                    Coil::allCoils[i].setMinOntimeUS(msg.value.i32);
+                }
             }
             break;
         case 0x2263:
@@ -1525,11 +1576,28 @@ void Sysex::processSysex()
                 }
                 for (uint32_t i = start; i < end; i++)
                 {
-                    Coil::allCoils[i].setMinOfftimeUS(msg.value.i32);
-                    if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                    if (reading)
                     {
-                        nxt->sendCmd("TC_Settings.coil%iOffVoics.val&=0xffff0000", i + 1);
-                        nxt->sendCmd("TC_Settings.coil%iOffVoics.val|=%i", i + 1, msg.value.ui32);
+                        if (readFloat)
+                        {
+                            msg.value.f32 = Coil::allCoils[i].getMinOfftimeUS();
+                        }
+                        else
+                        {
+                            msg.value.ui32 = Coil::allCoils[i].getMinOfftimeUS();
+                        }
+                        txMsg.data.targetLSB = i;
+                        txMsg.data.targetMSB = 0;
+                        sendSysex();
+                    }
+                    else
+                    {
+                        Coil::allCoils[i].setMinOfftimeUS(msg.value.i32);
+                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                        {
+                            nxt->sendCmd("TC_Settings.coil%iOffVoics.val&=0xffff0000", i + 1);
+                            nxt->sendCmd("TC_Settings.coil%iOffVoics.val|=%i", i + 1, msg.value.ui32);
+                        }
                     }
                 }
             }
@@ -1547,11 +1615,21 @@ void Sysex::processSysex()
                 }
                 for (uint32_t i = start; i < end; i++)
                 {
-                    Coil::allCoils[i].midi.setMaxVoices(msg.value.ui32);
-                    if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                    if (reading)
                     {
-                        nxt->sendCmd("TC_Settings.coil%iOffVoics.val&=0x0000ffff", i + 1);
-                        nxt->sendCmd("TC_Settings.coil%iOffVoics.val|=%i", i + 1, msg.value.ui32 << 16);
+                        msg.value.ui32 = Coil::allCoils[i].midi.getMaxVoices();
+                        txMsg.data.targetLSB = i;
+                        txMsg.data.targetMSB = 0;
+                        sendSysex();
+                    }
+                    else
+                    {
+                        Coil::allCoils[i].midi.setMaxVoices(msg.value.ui32);
+                        if (GUI::getAcceptsData() && uiUpdateMode == 2)
+                        {
+                            nxt->sendCmd("TC_Settings.coil%iOffVoics.val&=0x0000ffff", i + 1);
+                            nxt->sendCmd("TC_Settings.coil%iOffVoics.val|=%i", i + 1, msg.value.ui32 << 16);
+                        }
                     }
                 }
             }
@@ -1560,53 +1638,129 @@ void Sysex::processSysex()
         case 0x2266: // () (), i32 buffer duration in us
             msg.value.ui32 = msg.value.f32;
         case 0x0266:
-            if (msg.value.ui32 >= 1000 && msg.value.ui32 <= 100000)
+            if (reading)
             {
-                Coil::setBufferDurationUS(msg.value.ui32);
+                if (readFloat)
+                {
+                    msg.value.f32 = Coil::getBufferDurationUS();
+                }
+                else
+                {
+                    msg.value.ui32 = Coil::getBufferDurationUS();
+                }
+                txMsg.data.targetLSB = 0;
+                txMsg.data.targetMSB = 0;
+                sendSysex();
+            }
+            else
+            {
+                if (msg.value.ui32 >= 1000 && msg.value.ui32 <= 100000)
+                {
+                    Coil::setBufferDurationUS(msg.value.ui32);
+                }
             }
             break;
 
         case 0x0300: // (msb=program)(lsb=step), i32 envelope next step, 0-7
-            if (msg.value.i32 >= 0 && msg.value.i32 < MIDIProgram::DATA_POINTS)
+            if (reading)
             {
-                float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
-                float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
-                float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
-                MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, dur, ntau, msg.value.i32);
+                msg.value.ui32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
+                txMsg.data.targetLSB = msg.targetLSB;
+                txMsg.data.targetMSB = msg.targetMSB;
+                sendSysex();
+            }
+            else
+            {
+                if (msg.value.i32 >= 0 && msg.value.i32 < MIDIProgram::DATA_POINTS)
+                {
+                    float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
+                    float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
+                    float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
+                    MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, dur, ntau, msg.value.i32);
+                }
             }
             break;
         case 0x0301: // (msb=program)(lsb=step), i32 envelope step amplitude in 1/1000
             msg.value.f32 = msg.value.i32 / 1e3f;
         case 0x2301:
-            if (msg.value.f32 >= 0)
+            if (reading)
             {
-                float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
-                float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
-                uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
-                MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, msg.value.f32, dur, ntau, next);
+                if (readFloat)
+                {
+                    msg.value.f32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
+                }
+                else
+                {
+                    msg.value.ui32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude * 1e3f;
+                }
+                txMsg.data.targetLSB = msg.targetLSB;
+                txMsg.data.targetMSB = msg.targetMSB;
+                sendSysex();
+            }
+            else
+            {
+                if (msg.value.f32 >= 0)
+                {
+                    float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
+                    float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
+                    uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
+                    MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, msg.value.f32, dur, ntau, next);
+                }
             }
             break;
         case 0x0302: // (msb=program)(lsb=step), i32 envelope step duration in us
             msg.value.f32 = msg.value.i32;
         case 0x2302:
-            if (msg.value.f32 >= 0)
+            if (reading)
             {
-                float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
-                float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
-                uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
-                MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, msg.value.f32, ntau, next);
+                if (readFloat)
+                {
+                    msg.value.f32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
+                }
+                else
+                {
+                    msg.value.ui32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
+                }
+                txMsg.data.targetLSB = msg.targetLSB;
+                txMsg.data.targetMSB = msg.targetMSB;
+                sendSysex();
+            }
+            else
+            {
+                if (msg.value.f32 >= 0)
+                {
+                    float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
+                    float& ntau    = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
+                    uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
+                    MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, msg.value.f32, ntau, next);
+                }
             }
             break;
         case 0x0303: // (msb=program)(lsb=step), i32 envelope step n-tau in 1/1000
             msg.value.f32 = msg.value.i32 / 1e3f;
         case 0x2303:
-        {
-            float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
-            float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
-            uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
-            MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, dur, msg.value.f32, next);
-            break;
-        }
+            if (reading)
+            {
+                if (readFloat)
+                {
+                    msg.value.f32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau;
+                }
+                else
+                {
+                    msg.value.ui32 = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->ntau * 1e3f;
+                }
+                txMsg.data.targetLSB = msg.targetLSB;
+                txMsg.data.targetMSB = msg.targetMSB;
+                sendSysex();
+            }
+            else
+            {
+                float& amp     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->amplitude;
+                float& dur     = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->durationUS;
+                uint8_t& next  = MIDI::programs[msg.targetMSB].steps[msg.targetLSB]->nextStep;
+                MIDI::programs[msg.targetMSB].setDataPoint(msg.targetLSB, amp, dur, msg.value.f32, next);
+                break;
+            }
         default:
             break;
     }

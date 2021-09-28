@@ -27,9 +27,25 @@ public:
     void init(uint32_t coilNum);
     void updateData();
     void setMaxDutyPerm(uint32_t dutyPerm);
+    uint32_t getMaxDutyPerm()
+    {
+        return *maxDutyPerm;
+    };
     void setMaxOntimeUS(uint32_t ontimeUS);
+    uint32_t getMaxOntimeUS()
+    {
+        return *maxOntimeUS;
+    };
     void setMinOfftimeUS(uint32_t offtimeUS);
+    uint32_t getMinOfftimeUS()
+    {
+        return *minOfftimeUS;
+    };
     void setMinOntimeUS(uint32_t ontimeUS);
+    uint32_t getMinOntimeUS()
+    {
+        return *minOntimeUS;
+    };
     void updateOutput();
 
     Output out;
@@ -40,6 +56,10 @@ public:
 
     static Coil allCoils[COIL_COUNT];
     static void setBufferDurationUS(uint32_t bufferTimeUS);
+    static uint32_t getBufferDurationUS()
+    {
+        return *bufferDurationUS;
+    };
     static void timer0ISR()
     {
         allCoils[0].out.ISR();

@@ -65,6 +65,10 @@ public:
         return panConstVol;
     };
     void setMaxVoices(uint32_t maxVoices);
+    uint32_t getMaxVoices()
+    {
+        return *coilMaxVoices;
+    };
     float getOntimeUS()
     {
         return singleNoteMaxOntimeUS;
