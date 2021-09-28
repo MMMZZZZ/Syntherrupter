@@ -12,8 +12,10 @@
 Nextion* Sysex::nxt;
 uint32_t Sysex::uiUpdateMode;
 SysexMsg Sysex::msg;
-bool     Sysex::reading;
-bool     Sysex::readFloat;
+bool     Sysex::reading = false;
+bool     Sysex::readFloat = false;
+bool     Sysex::readSupportOnly = false;
+bool     Sysex::readSupportConfirmed = false;
 Sysex::TxMsg Sysex::txMsg;
 
 
@@ -27,7 +29,6 @@ void Sysex::init(Nextion* nextion)
 {
     nxt = nextion;
     uiUpdateMode = 2;
-    reading = false;
 
     txMsg.data.START  = 0xf0;
     txMsg.data.END    = 0xf7;
@@ -253,12 +254,20 @@ void Sysex::processSysex()
         // if read is set, the message has already been created by the previous
         // command. Otherwise any new incoming messages are processed.
 
+        // System commands cannot be read.
+        if (msg.number <= 0x1f)
+        {
+            // Prevent "unsupported" reply.
+            readSupportConfirmed = true;
+
+            return;
+        }
+
         // The outgoing data is stored within txMsg - though the value is
         // temporarily stored in msg.value (because it's otherwise unused
         // during the read operation and it already has the union aaaand
         // because it cannot be serialized directly (8->7bit conversion).
         txMsg.data.deviceID = EEPROMSettings::deviceData.deviceID;
-        txMsg.data.number   = msg.number;
 
         // Mark whether we're reading a float or non-float value
         readFloat = (msg.number >= 0x2000 && msg.number < 0x4000);
@@ -296,10 +305,48 @@ void Sysex::processSysex()
          */
 
         case 0x0002: // ()(), i32 Request if parameter is supported.
+            // For 0x02, 0x03 and 0x04 commands: targets will be set below.
+            // response type is set here.
             msg.number = msg.value.ui32;
             msg.value.ui32 = 0;
             reading = true;
+            readSupportOnly = true;
+            readSupportConfirmed = false;
+            // reply will be a 0x01 message
+            txMsg.data.number = 0x01;
             processSysex();
+            if (!readSupportConfirmed)
+            {
+                // Command is *not* supported. Hence no confirmation has
+                // been sent so we need to communicate the missing support.
+                txMsg.data.targetLSB = msg.targetLSB;
+                txMsg.data.targetMSB = msg.targetMSB;
+                msg.value.ui32 = 0;
+                // disable readSupportOnly otherwise sendSysex will confirm
+                // support (see sendSysex)
+                readSupportOnly = false;
+                sendSysex();
+            }
+            reading = false;
+            readSupportOnly = false;
+            break;
+        case 0x0003: // ()(), i32 Read parameter (0x01 reply)
+            msg.number = msg.value.ui32;
+            msg.value.ui32 = 0;
+            reading = true;
+            // reply will be a 0x01 message
+            txMsg.data.number = 0x01;
+            processSysex();
+            reading = false;
+            break;
+        case 0x0004: // ()(), i32 Get parameter (command reply)
+            msg.number = msg.value.ui32;
+            msg.value.ui32 = 0;
+            reading = true;
+            // reply will be a command (PN as requested)
+            txMsg.data.number = msg.number;
+            processSysex();
+            reading = false;
             break;
 
         case 0x0020: // [msb=s,ml,ls][lsb=0], enable/disable mode. 0=disable, 1=enable, other=reserved
@@ -1136,8 +1183,14 @@ void Sysex::sendSysex()
 
     // For a complete documentation of the encoding see wiki.
 
-    // Serialize sysex message. Parameter number and targets
-    // are already set.
+
+    if (readSupportOnly)
+    {
+        // If we entered this method we know the command
+        // is supported. Hence we can confirm support.
+        readSupportConfirmed = true;
+        msg.value.ui32 = true;
+    }
     for (uint32_t i = 0; i < 5; i++)
     {
         txMsg.data.splitValue[i] = msg.value.ui32 & 0x7f;
