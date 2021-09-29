@@ -176,13 +176,13 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 * `0x02`: Request if parameter is supported
 	* Target MSB: 0 or any target value you want to check if it's supported.
 	* Target LSB: 0 or any target value you want to check if it's supported.
-	* Value: uint, parameter number to check. The response will be a `0x01` response message with one of the following values:
+	* Value: uint, parameter number or range (see command `0x04` below) to check. The response will be a `0x01` response message with one of the following values:
 		* 0: Not supported
 		* 1: Supported
 * `0x03`: Read Parameter. Get reply as `0x01` response message.
 	* Target MSB: Target MSB to read for the given parameter. Wildcards are supported (resulting in multiple responses).
 	* Target LSB: Target LSB to read for the given parameter. Wildcards are supported (resulting in multiple responses).
-	* Value: uint, Parameter number to read. No ranges supported.
+	* Value: uint, Parameter number or range (see command `0x04` below) to read. 
 * `0x04`: Get Parameter(s). Get reply as normal command. F.ex. reading parameter `0x20` would return a `0x20` command with the current settings.
 	* Target MSB: Target MSB to read for the given parameter. Wildcards are supported (resulting in multiple responses).
 	* Target LSB: Target LSB to read for the given parameter. Wildcards are supported (resulting in multiple responses).
