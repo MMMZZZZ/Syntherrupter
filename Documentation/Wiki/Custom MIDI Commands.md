@@ -126,7 +126,8 @@ Also, keep in mind that there is a ton of parameters that has to be documented h
 
 All conventions are to be read as "unless noted otherwise... ".
 
-* Reserved target bytes are expected to be 0 or 127 (Wildcard).
+* Target value 127 is reserved for broadcasting, meaning it will affect all targets (works for LSB/MSB independently).
+* Reserved target bytes are expected to be 0 or 127.
 * Parameters and parameter options that are currently not supported by Syntherrupter are marked by an [NS].
 * Parameters that stored in EEPROM are marked by an [EE]. Other parameters will be reset to default after a power cycle.
 * Every integer parameter has a float version at offset `0x2000`. 
@@ -148,7 +149,6 @@ All conventions are to be read as "unless noted otherwise... ".
 	* char[4]
 	* bitfield, noted as bf8, where 8 would indicate that the field is 8 bits wide (starting at the least significant bit of the parameter value). A bitfield range within the bitfield is noted as [LSB-MSB], f.ex. [2-7]
 * Any parameter value or part of it that is not specified by this document is reserved.
-* Target value 127 is reserved for broadcasting, meaning it will affect all targets (works for LSB/MSB independently).
 * Any parameter that is not compliant with these specs shall be ignored.
 
 #### Overview
