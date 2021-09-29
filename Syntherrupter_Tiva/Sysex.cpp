@@ -107,6 +107,8 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0224:
         case 0x0226:
         case 0x0266:
+        case 0x0267:
+        case 0x0268:
             if (msg.targetLSB == 0 || msg.targetLSB == WILDCARD)
             {
                 lsbOk = true;
@@ -225,6 +227,8 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0263:
         case 0x0264:
         case 0x0266:
+        case 0x0267:
+        case 0x0268:
             if (msg.targetMSB == 0 || msg.targetMSB == WILDCARD)
             {
                 msbOk = true;
@@ -1690,6 +1694,52 @@ void Sysex::processSysex()
                 if (msg.value.ui32 >= 1000 && msg.value.ui32 <= 100000)
                 {
                     Coil::setBufferDurationUS(msg.value.ui32);
+                }
+            }
+            break;
+        case 0x0267: // ()[lsb=coil], active voices, read only
+            if (reading)
+            {
+                uint32_t start = msg.targetLSB;
+                uint32_t end   = msg.targetLSB + 1;
+                if (msg.targetLSB == WILDCARD)
+                {
+                    start = 0;
+                    end   = COIL_COUNT;
+                }
+                for (uint32_t i = start; i < end; i++)
+                {
+                    msg.value.ui32 = Coil::allCoils[i].toneList.getActiveTones();
+                    txMsg.data.targetLSB = i;
+                    txMsg.data.targetMSB = 0;
+                    sendSysex();
+                }
+            }
+            break;
+        case 0x2268:
+        case 0x0268: // ()[lsb=coil], output signal duty cycle, read only
+            if (reading)
+            {
+                uint32_t start = msg.targetLSB;
+                uint32_t end   = msg.targetLSB + 1;
+                if (msg.targetLSB == WILDCARD)
+                {
+                    start = 0;
+                    end   = COIL_COUNT;
+                }
+                for (uint32_t i = start; i < end; i++)
+                {
+                    if (readFloat)
+                    {
+                        msg.value.f32 = Coil::allCoils[i].toneList.getSignalDuty();
+                    }
+                    else
+                    {
+                        msg.value.ui32 = Coil::allCoils[i].toneList.getSignalDutyPerm();
+                    }
+                    txMsg.data.targetLSB = i;
+                    txMsg.data.targetMSB = 0;
+                    sendSysex();
                 }
             }
             break;

@@ -129,6 +129,7 @@ void ToneList::limit()
         totalDuty += tone->duty;
         tone = tone->nextTone;
     }
+    signalDuty = totalDuty;
     if (totalDuty > maxDuty)
     {
         // Duty of all notes together exceeds coil limit; reduce ontimes.

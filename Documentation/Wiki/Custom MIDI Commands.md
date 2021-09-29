@@ -130,6 +130,7 @@ All conventions are to be read as "unless noted otherwise... ".
 * Reserved target bytes are expected to be 0 or 127.
 * Parameters and parameter options that are currently not supported by Syntherrupter are marked by an [NS].
 * Parameters that stored in EEPROM are marked by an [EE]. Other parameters will be reset to default after a power cycle.
+* Parameters usually are read- and writable. Read- and write-only commands are marked by [RO] and [WO] respectively.
 * Every integer parameter has a float version at offset `0x2000`. 
 	* Float values in this documentation are always written with the C-style `f`-suffix to indicate that it are 32-bit floats (`xx.xf`).
 	* If the integer parameter is expressed as fractional (fixed point) value, the float parameter is not. Example: 
@@ -477,6 +478,14 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Value: int32
 		* 1000-100000: Duration of the output buffer in us. Same for all coils.
 		* Default: 5000
+* `0x267`: [RO][NF] Active Tones
+	* Target MSB: Reserved.
+	* Target LSB: uint, target coil
+	* Read value: int32, number of currently active tones (of all modes together) on this output.
+* `0x268`: [RO] Output Signal Duty Cycle
+	* Target MSB: Reserved.
+	* Target LSB: uint, target coil
+	* Read value: int32, duty cycle of the output signal in 1/1000.
 
 #### `0x300-0x31f`: Envelope settings
 

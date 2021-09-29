@@ -35,6 +35,21 @@ public:
         this->maxDuty = maxDuty;
         limit();
     };
+    uint32_t getActiveTones()
+    {
+        return activeTones;
+    };
+    uint32_t getSignalDutyPerm()
+    {
+        return getSignalDuty() * 1e3f;
+    };
+    float getSignalDuty()
+    {
+        // When the last tone gets removed the duty limiter is not called
+        // and thus signal duty not updated. This is only relevant for the
+        // get methods.
+        return signalDuty * (activeTones > 0);
+    };
     uint32_t getOntimesUS(Pulse* pulses, const uint32_t size, uint32_t nowUS, uint32_t endUS)
     {
         uint32_t index = 0;
@@ -65,6 +80,7 @@ private:
     void buildLinks();
     float maxOntimeUS    = 10;
     float maxDuty        = 0.01f;
+    float signalDuty     = 0.0f;
     bool limiterActive   = false;
     uint32_t maxVoices   = MAX_VOICES - 1;
     uint32_t activeTones = 0;
