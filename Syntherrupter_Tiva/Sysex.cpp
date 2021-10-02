@@ -1188,7 +1188,6 @@ void Sysex::processSysex()
                 }
             }
             break;
-
         case 0x201: // ()(), i32 sysex device id
             if (reading)
             {
