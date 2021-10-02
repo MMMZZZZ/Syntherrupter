@@ -100,6 +100,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0200:
         case 0x0201:
         case 0x0202:
+        case 0x0203:
         case 0x0220:
         case 0x0221:
         case 0x0222:
@@ -212,6 +213,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0200:
         case 0x0201:
         case 0x0202:
+        case 0x0203:
         case 0x0220:
         case 0x0221:
         case 0x0222:
@@ -1210,6 +1212,23 @@ void Sysex::processSysex()
             if (msg.value.ui32 == 41153700)
             {
                 SysCtlReset();
+            }
+            break;
+        case 0x2203: // ()(), i32 current time in us, read only.
+        case 0x0203:
+            if (reading)
+            {
+                if (readFloat)
+                {
+                    msg.value.f32 = System::getSystemTimeUS();
+                }
+                else
+                {
+                    msg.value.ui32 = System::getSystemTimeUS();
+                }
+                txMsg.data.targetLSB = 0;
+                txMsg.data.targetMSB = 0;
+                sendSysex();
             }
             break;
 
