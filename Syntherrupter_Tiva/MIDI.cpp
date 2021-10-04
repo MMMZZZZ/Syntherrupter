@@ -161,13 +161,13 @@ bool MIDI::processBuffer(uint32_t b)
             if (dataBytes == 1)
             {
                 number = c1;
-                note = channels[channel].getNote(c1);
             }
             else if (dataBytes == 2)
             {
                 // End of command, reset dataBytes counter
                 dataBytes = 0;
 
+                note = channels[channel].getNote(number);
                 if (c1) // Note has a velocity
                 {
                     if (!note)
