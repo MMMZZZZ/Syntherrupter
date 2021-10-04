@@ -57,7 +57,7 @@ Note* Channel::getNote(uint8_t noteNum)
 
     while (note != 0)
     {
-        if(noteNum == note->number)
+        if (noteNum == note->number)
         {
             return note;
         }
