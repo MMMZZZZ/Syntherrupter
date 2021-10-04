@@ -43,7 +43,6 @@ private:
     static bool reading;
     static bool readFloat;
     static bool readSupportOnly;
-    static bool readSupportConfirmed;
 
     union TxMsg {
         struct

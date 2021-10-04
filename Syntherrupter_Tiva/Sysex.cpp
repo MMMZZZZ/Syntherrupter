@@ -15,7 +15,6 @@ SysexMsg Sysex::msg;
 bool     Sysex::reading = false;
 bool     Sysex::readFloat = false;
 bool     Sysex::readSupportOnly = false;
-bool     Sysex::readSupportConfirmed = false;
 Sysex::TxMsg Sysex::txMsg;
 
 
@@ -266,15 +265,6 @@ void Sysex::processSysex()
         // if read is set, the message has already been created by the previous
         // command. Otherwise any new incoming messages are processed.
 
-        // System commands cannot be read.
-        if (msg.number <= 0x1f)
-        {
-            // Prevent "unsupported" reply.
-            readSupportConfirmed = true;
-
-            return;
-        }
-
         // The outgoing data is stored within txMsg - though the value is
         // temporarily stored in msg.value (because it's otherwise unused
         // during the read operation and it already has the union aaaand
@@ -351,21 +341,7 @@ void Sysex::processSysex()
                     txMsg.data.number = msg.number;
                 }
                 msg.value.ui32 = 0;
-                readSupportConfirmed = false;
                 processSysex();
-                if (readSupportOnly && !readSupportConfirmed)
-                {
-                    // Command is *not* supported. Hence no confirmation has
-                    // been sent so we need to communicate the missing support.
-                    txMsg.data.targetLSB = msg.targetLSB;
-                    txMsg.data.targetMSB = msg.targetMSB;
-                    msg.value.ui32 = 0;
-                    // disable readSupportOnly otherwise sendSysex will confirm
-                    // support (see sendSysex)
-                    readSupportOnly = false;
-                    sendSysex();
-                    readSupportOnly = true;
-                }
 
                 // LSB and MSB of number cannot exceed 0x7f. Therefore skip all
                 // values with LSB of 0x80-0xff
@@ -1979,10 +1955,9 @@ void Sysex::sendSysex()
 
     if (readSupportOnly)
     {
-        // If we entered this method we know the command
-        // is supported. Hence we can confirm support.
-        readSupportConfirmed = true;
-        msg.value.ui32 = true;
+        // If we entered this method we know the command is supported. The
+        // reply contains the supported parameter number as value.
+        msg.value.ui32 = msg.number;
     }
     for (uint32_t i = 0; i < 5; i++)
     {
