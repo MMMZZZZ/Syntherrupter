@@ -349,6 +349,10 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target LSB: Reserved.
 	* Value: int32, reset key in 1/1000. To prevent an accidental reset of the device, a specific value must be sent. 
 		* 41153700: Causes a reset of the Tiva microcontroller and in consequence of the Nextion display. Note: this doesn't work when any [passthrough mode](/Documentation/UI/Nextion-USB.md#readme) is active.
+* `0x203`: [RO] System Time
+	* Target MSB: Reserved.
+	* Target LSB: Reserved.
+	* Value: int32, time in microseconds since startup. 
 
 #### `0x220-0x23f`: UI settings
 
