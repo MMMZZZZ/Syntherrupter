@@ -395,7 +395,6 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 		* 0: Manually
 		* 1: On Release (default)
 		* 2: Immediately
-
 * `0x226`: [NF] UI Update Mode
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
