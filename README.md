@@ -59,10 +59,8 @@ Then there are a few videos from other people that build their own Syntherrupter
 
 To open and play MIDI files I use the free software [SynthFont 1](http://www.synthfont.com/). You can select a different output for each track which we can use to send some tracks to the interrupter. You might want to change the instrument of these tracks to use Syntherrupters [envelopes](/Documentation/Wiki/Envelopes.md#readme). For good sound quality download the [SGMv2.01-Sal-Guitar-Bass-v1.3](https://sites.google.com/site/soundfonts4u) soundfont).
 
-SynthFont allows you to send MIDI data directly to a serial port and thus to Syntherrupter. Its USB baud rate is 115200baud/s.
-
-If you want to use another Software you'll need two little tools that are very easy to use: [Hairless MIDI<->Serial](https://projectgus.github.io/hairless-midiserial/). and [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html). When you start loopMIDI it creates a virtual MIDI device that you can select in any MIDI software as output (or input btw). And hairless MIDI<->Serial makes the bridge between this virtual MIDI device and the serial COM port.
-This sounds complicated but since the last both programs remember the settings, you only have to start them - no other click needed. The setup has proven its reliability and usability many times and for many hours. 
+While SynthFont allows you to send MIDI data directly to a serial port and thus to Syntherrupter, I do recommend another solution. In my experience it is easier to use, more reliable and works with any MIDI software you like. All you need are two little tools that are very easy to use: [Hairless MIDI<->Serial](https://projectgus.github.io/hairless-midiserial/) and [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html). When you start loopMIDI it creates a virtual MIDI device that you can select in any MIDI software as output (or input btw). And hairless MIDI<->Serial makes the bridge between this virtual MIDI device and the serial COM port.
+This sounds complicated but since both programs remember all settings, you only have to start them - no other click needed. The setup has proven its reliability and usability many times and for many hours. 
 
 ## Credits
 
