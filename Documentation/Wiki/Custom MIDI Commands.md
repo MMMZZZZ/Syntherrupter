@@ -160,7 +160,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 * [`0x60-0x7f`: MIDI Live mode parameters](#0x60-0x7f-midi-live-mode-parameters). Control specific properties of MIDI Live mode.
 * [`0x100-0x10f`: Lightsaber mode parameters](#0x100-0x10f-lightsaber-mode-parameters). Control specific properties of Lightsaber mode.
 * `0x200-0x3ff`: Settings
-	* [`0x200-0x21f`: EEPROM and other control commands](#0x200-0x21f-eeprom-and-other-control-commands)
+	* [`0x200-0x21f`: Device control commands](#0x200-0x21f-device-control-commands)
 	* [`0x220-0x23f`: UI settings](#0x220-0x23f-ui-settings)
 	* [`0x240-0x25f`: User settings](#0x240-0x25f-user-settings)
 	* [`0x260-0x27f`: Coil settings](#0x260-0x27f-coil-settings)
@@ -329,7 +329,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Value: int32
 		* 0-4: New ID for the connected ESP8266.  Will be remembered by the ESP8266.
 
-#### `0x200-0x21f`: EEPROM and other control commands
+#### `0x200-0x21f`: Device control commands
 
 * `0x200`: [EE] EEPROM Update Mode
 	* Target MSB: Reserved.
