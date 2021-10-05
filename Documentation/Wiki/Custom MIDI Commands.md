@@ -132,16 +132,15 @@ All conventions are to be read as "unless noted otherwise... ".
 * Parameters that stored in EEPROM are marked by an [EE]. Other parameters will be reset to default after a power cycle.
 * Parameters usually are read- and writable. Read- and write-only commands are marked by [RO] and [WO] respectively.
 * Every integer parameter has a float version at offset `0x2000`. 
-	* Float values in this documentation are always written with the C-style `f`-suffix to indicate that it are 32-bit floats (`xx.xf`).
 	* If the integer parameter is expressed as fractional (fixed point) value, the float parameter is not. Example: 
 		* Integer command is in 1/1000
 		* Sending 1.2% as integer 0.012\*1000 => `12`
-		* Sending 1.2% as float => `0.012f` (NOT `12.0f`)
+		* Sending 1.2% as float => `0.012` (NOT `12.0`)
 		* Benefit: the float version is independent of the integer resolution. 
-	* If the integer parameter covers a certain range, the float parameter is expected to cover that range with a value between 0.0f and 1.0f. Example:
+	* If the integer parameter covers a certain range, the float parameter is expected to cover that range with a value between 0.0 and 1.0. Example:
 		* Integer range goes from 0 to 127
 		* Sending 1/4 of the range as integer: 127/4 => `32`
-		* Sending 1/4 of the range as float: `0.25f` (NOT `32.0f`)
+		* Sending 1/4 of the range as float: `0.25` (NOT `32.0`)
 		* Benefit: the float version is independent of the integer range size/resolution
 	* Commands without float version are marked with [NF]. Examples are the envelope steps. Since these need to be discrete values, a float version doesn't make sense. 
 * The parameter value can be one of the following types:
