@@ -32,7 +32,11 @@ class Nextion
 public:
     Nextion();
     virtual ~Nextion();
-    bool init(uint32_t portNumber, uint32_t baudRate);
+    void init(uint32_t portNumber, uint32_t baudRate);
+    bool available()
+    {
+        return initOk;
+    };
     bool sendCmd(const char* cmd);
     bool sendCmd(const char* cmd, const char* data);
     bool sendCmd(const char* cmd, int32_t val);
@@ -101,6 +105,7 @@ private:
     static constexpr uint32_t readDataSize = 100;
     char readData[readDataSize];
     bool acknowledgeEnabled = false;
+    bool initOk = false;
 };
 
 #endif /* NEXTION_H_ */

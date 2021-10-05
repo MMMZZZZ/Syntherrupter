@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+class UART;
 
 struct SysexMsg {
     uint32_t number;
@@ -24,6 +25,7 @@ struct SysexMsg {
         char chr[4];
     } value;
     uint8_t newMsg;
+    UART* origin;
 };
 
 

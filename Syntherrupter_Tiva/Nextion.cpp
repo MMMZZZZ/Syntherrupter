@@ -22,7 +22,7 @@ Nextion::~Nextion()
     // TODO Auto-generated destructor stub
 }
 
-bool Nextion::init(uint32_t uartNumber, uint32_t baudRate)
+void Nextion::init(uint32_t uartNumber, uint32_t baudRate)
 {
     this->baudRate = baudRate;
 
@@ -68,11 +68,12 @@ bool Nextion::init(uint32_t uartNumber, uint32_t baudRate)
         acknowledgeEnabled = true;
         if (setVal("bkcmd", 3, NO_EXT))
         {
-            return true;
+            initOk = true;
+            return;
         }
     }
 
-    return false;
+    initOk = false;
 }
 
 bool Nextion::acknowledge(char code, uint32_t timeoutUS)

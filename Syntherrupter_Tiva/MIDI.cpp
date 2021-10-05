@@ -10,14 +10,14 @@
 
 UART                       MIDI::usbUart;
 UART                       MIDI::midiUart;
-Buffer<uint8_t>            MIDI::otherBuffer;
-constexpr Buffer<uint8_t>* MIDI::BUFFER_LIST[];
+Buffer<uint8_t, 512>            MIDI::otherBuffer;
+constexpr Buffer<uint8_t, 512>* MIDI::BUFFER_LIST[];
 Channel                    MIDI::channels[];
 NoteList                   MIDI::notelist;
 uint32_t                   MIDI::notesCount = 0;
 uint8_t*                   MIDI::sysexDeviceID;
 SysexMsg                   MIDI::sysexMsg;
-bool                       MIDI::playing = false;
+bool                       MIDI::modeRunning = false;
 float                      MIDI::freqTable[128];
 MIDIProgram                MIDI::programs[MAX_PROGRAMS];
 float*                     MIDI::lfoFreq;
@@ -44,7 +44,6 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void),
     // Enable MIDI receiving over the USB UART (selectable baud rate) and a separate MIDI UART (31250 fixed baud rate).
     usbUart.init(0, usbBaudRate, usbISR, 0b00100000);
     midiUart.init(midiUartPort, midiUartRx, midiUartTx, 31250, midiISR, 0b01100000);
-    otherBuffer.init(128);
     usbUart.enable();
     midiUart.enable();
 
@@ -107,7 +106,7 @@ bool MIDI::processBuffer(uint32_t b)
     uint32_t& channel    = channelAll[b];
     uint8_t&  c1         = c1All[b];
 
-    Buffer<uint8_t>* buffer = BUFFER_LIST[b];
+    auto* buffer = BUFFER_LIST[b];
 
     c1 = buffer->read();
 
@@ -130,7 +129,6 @@ bool MIDI::processBuffer(uint32_t b)
     else
     {
         dataBytes++;
-
     }
 
     switch ((midiStatus) & 0xf0)
@@ -163,13 +161,13 @@ bool MIDI::processBuffer(uint32_t b)
             if (dataBytes == 1)
             {
                 number = c1;
-                note = channels[channel].getNote(c1);
             }
             else if (dataBytes == 2)
             {
                 // End of command, reset dataBytes counter
                 dataBytes = 0;
 
+                note = channels[channel].getNote(number);
                 if (c1) // Note has a velocity
                 {
                     if (!note)
@@ -239,22 +237,22 @@ bool MIDI::processBuffer(uint32_t b)
                     default:
                         break;
                     case 0x01: // Modulation Wheel
-                        channels[channel].modulation = c1 / 128.0f;
+                        channels[channel].modulation = c1 / 127.0f;
                         channels[channel].controllersChanged = true;
                         break;
                     case 0x02: // Breath Controller
 
                         break;
                     case 0x07: // Channel Volume
-                        channels[channel].volume = c1 / 128.0f;
+                        channels[channel].volume = c1 / 127.0f;
                         // channels[channel].controllersChanged = true;
                         break;
                     case 0x0A: // Pan
-                        channels[channel].pan = c1 / 128.0f;
+                        channels[channel].pan = c1 / 127.0f;
                         channels[channel].controllersChanged = true;
                         break;
                     case 0x0B: // Expression coarse
-                        channels[channel].expression = c1 / 128.0f;
+                        channels[channel].expression = c1 / 127.0f;
                         // channels[channel].controllersChanged = true;
                         break;
                     case 0x40: // Sustain Pedal
@@ -346,7 +344,7 @@ bool MIDI::processBuffer(uint32_t b)
                         }
                         else if (channels[channel].NRPN == (42 << 8) + 2) // Note pan mode - target range upper limit
                         {
-                            channels[channel].notePanTargetRangeHigh = c1 / 128.0f;
+                            channels[channel].notePanTargetRangeHigh = c1 / 127.0f;
                         }
                         else
                         {
@@ -389,7 +387,7 @@ bool MIDI::processBuffer(uint32_t b)
                         }
                         else if (channels[channel].NRPN == (42 << 8) + 2) // Note pan mode - target range lower limit
                         {
-                            channels[channel].notePanTargetRangeLow = c1 / 128.0f;
+                            channels[channel].notePanTargetRangeLow = c1 / 127.0f;
                         }
                         else
                         {
@@ -617,6 +615,17 @@ bool MIDI::processBuffer(uint32_t b)
                         sysexMsg.value.i32 = sysexVal;
                         sysexMsg.newMsg    = 2;
 
+                        // This is not nice, I know.
+                        if (buffer == &midiUart.rxBuffer)
+                        {
+                            sysexMsg.origin = &midiUart;
+                        }
+                        else
+                        {
+                            // Use the USB UART as default
+                            sysexMsg.origin = &usbUart;
+                        }
+
                         // Make sure the SysEx Message will be processed before
                         // it'll be overwritten by a new one.
                         urgentData = true;
@@ -629,22 +638,24 @@ bool MIDI::processBuffer(uint32_t b)
     return urgentData;
 }
 
-void MIDI::start()
+void MIDI::setRunning(bool run)
 {
-    if (!playing)
+    if (run != modeRunning)
     {
-        playing = true;
-        for (uint32_t channel = 0; channel < 16; channel++)
+        modeRunning = run;
+        if (modeRunning)
         {
-            channels[channel].resetControllers();
+            for (uint32_t channel = 0; channel < 16; channel++)
+            {
+                channels[channel].resetControllers();
+            }
+        }
+        else
+        {
+            modeRunning = false;
+            notelist.removeAllNotes();
         }
     }
-}
-
-void MIDI::stop()
-{
-    playing = false;
-    notelist.removeAllNotes();
 }
 
 void MIDI::setVolSettingsPerm(float ontimeUSMax, float dutyPermMax)
@@ -689,9 +700,9 @@ void MIDI::setChannels(uint32_t chns)
 
 void MIDI::setPan(float pan)
 {
-    if (pan < 128)
+    if (pan >= 0.0f && pan <= 1.0f)
     {
-        coilPan = pan / 128.0f;
+        coilPan = pan;
     }
     else
     {
@@ -702,9 +713,9 @@ void MIDI::setPan(float pan)
 
 void MIDI::setPanReach(float reach)
 {
-    if (reach)
+    if (reach >= 0.0f && reach <= 1.0f)
     {
-        inversPanReach = 128.0f / reach;
+        inversPanReach = 1.0f / reach;
     }
     else
     {
@@ -764,7 +775,7 @@ void MIDI::process()
         }
     }
 
-    if (playing)
+    if (modeRunning)
     {
         if (newData)
         {
@@ -793,7 +804,7 @@ void MIDI::process()
                                 // Determine MIDI volume, including all effects that are not time-dependant.
                                 if (note->velocity)
                                 {
-                                    note->rawVolume = note->velocity / 128.0f;
+                                    note->rawVolume = note->velocity / 127.0f;
                                     /*
                                      * Branchless version of:
                                      * if (channel->damperPedal)

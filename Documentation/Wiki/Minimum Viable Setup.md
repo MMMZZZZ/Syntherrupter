@@ -33,9 +33,12 @@ Everything else will connect to this board. How? Where? What pins? Beside the in
 ## Display
 
 ### Introduction
+
+Syntherrupter was originally designed as touch screen device. However, if you don't want a graphical user interface you can easily control it [via command line](https://github.com/MMMZZZZ/Syfoh#readme), too. In that case you really only need the Tiva board.
+
 Syntherrupters UI is designed for a special touch display called "Nextion". They have their own microcontroller that runs the whole UI which makes development *a lot* easier. Assembly gets easier, too. No 40 pin flat-flex cable, only 5V supply and two data pins. 
 
-There are multiple display versions that can do the job. If you don't care and simply want to go with the recommended display from the recommended shop, click [here](https://www.itead.cc/nextion-nx8048k050.html) and you're good.
+There are multiple display versions that can do the job. If you don't care and simply want to go with the recommended display from the recommended shop, click [here](https://www.itead.cc/5-0-nextion-intelligent-series-hmi-resistive-capacitive-touch-display-without-enclosure.html) and you're good.
 
 Btw. since they are resistive touch screens, they aren't affected by EMI like the capacitive screen of your smartpone. 
 
@@ -76,7 +79,7 @@ To keep things simple I won't write "Nextion or TJC display" every time but simp
 
 ### Without a display
 
-The user interface can be run on a Windows PC. This requires an additional Serial to USB converter that connects to the same Pins as the Nextion display would ([see below](#wiring)).
+The user interface can be run on a Windows PC. Unlike the command line interface the GUI requires an additional Serial to USB converter that connects to the same Pins as the Nextion display would ([see below](#wiring)). 
 
 * Download, install and open the Nextion Editor. 
   * For firmwares up to v4.1.3 you need Nextion Editor v1.61.1 (Download as [ZIP (portable)](https://nextion.tech/download/nextion-setup-v1-61-1.zip) or [Installer](https://nextion.tech/download/nextion-setup-v1-61-1.exe)). 

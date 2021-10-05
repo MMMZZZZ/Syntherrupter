@@ -39,7 +39,7 @@ int main(void)
     uint32_t cfgStatus = EEPROMSettings::init();
 
     Nextion nextion;
-    bool nxtOk = nextion.init(3, 115200);
+    nextion.init(3, 115200);
 
     MIDI::init(115200, uartUsbISR, GPIO_PORTC_BASE, GPIO_PIN_4, GPIO_PIN_5, uartMidiISR);
     LightSaber::init(GPIO_PORTA_BASE, GPIO_PIN_6, GPIO_PIN_7, 115200, uartLightSaberISR);
@@ -49,7 +49,7 @@ int main(void)
         Coil::allCoils[coil].init(coil);
     }
 
-    GUI::init(&nextion, nxtOk, cfgStatus);
+    GUI::init(&nextion, cfgStatus);
     Sysex::init(&nextion);
 
     while (42)

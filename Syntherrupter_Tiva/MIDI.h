@@ -41,14 +41,34 @@ public:
         setVolSettings(singleNoteMaxOntimeUS, dutyMax);
     };
     void setChannels(uint32_t chns);
+    uint32_t getChannels()
+    {
+        return activeChannels;
+    };
     void setPan(float pan);
+    float getPan()
+    {
+        return coilPan;
+    };
     void setPanReach(float reach);
+    float getPanReach()
+    {
+        return 1.0f / inversPanReach;
+    };
     void setPanConstVol(bool cnst)
     {
         panConstVol    = cnst;
         coilPanChanged = true;
     };
+    bool getPanConstVol()
+    {
+        return panConstVol;
+    };
     void setMaxVoices(uint32_t maxVoices);
+    uint32_t getMaxVoices()
+    {
+        return *coilMaxVoices;
+    };
     float getOntimeUS()
     {
         return singleNoteMaxOntimeUS;
@@ -60,11 +80,10 @@ public:
     static void init(uint32_t usbBaudRate, void (*usbISR)(void),
                      uint32_t midiUartPort, uint32_t midiUartRx,
                      uint32_t midiUartTx, void (*midiISR)(void));
-    static void start();
-    static void stop();
-    static bool isPlaying()
+    static void setRunning(bool run);
+    static bool getRunning()
     {
-        return playing;
+        return modeRunning;
     };
     static void resetNRPs(uint32_t chns = 0xffff);
     static void process();
@@ -78,9 +97,10 @@ public:
     }
     static Channel channels[16];
     static UART usbUart, midiUart;
-    static Buffer<uint8_t> otherBuffer;
+    static Buffer<uint8_t, 512> otherBuffer;
     static constexpr uint32_t MAX_PROGRAMS = 64;
     static MIDIProgram programs[MAX_PROGRAMS];
+    static constexpr uint32_t SYSEX_PROTOCOL_VERSION = 1;
 
 private:
     static bool processBuffer(uint32_t b);
@@ -166,9 +186,8 @@ private:
     static constexpr uint32_t effectResolutionUS = 2000;
 
     static constexpr uint32_t SYSEX_MAX_SIZE = 16;
-    static constexpr uint32_t SYSEX_PROTOCOL_VERSION = 1;
     static constexpr uint32_t    BUFFER_COUNT = 3;
-    static constexpr Buffer<uint8_t>* BUFFER_LIST[BUFFER_COUNT] = {&(usbUart.buffer), &(midiUart.buffer), &otherBuffer};;
+    static constexpr Buffer<uint8_t, 512>* BUFFER_LIST[BUFFER_COUNT] = {&(usbUart.rxBuffer), &(midiUart.rxBuffer), &otherBuffer};
     static constexpr uint32_t MAX_NOTES_COUNT = 64;
     static NoteList notelist;
     static uint32_t notesCount;
@@ -189,7 +208,7 @@ private:
     bool coilPanChanged         = false;
     bool panConstVol            = false;
 
-    static bool playing;
+    static bool modeRunning;
     static float* lfoFreq;
     static float* lfoDepth;
 

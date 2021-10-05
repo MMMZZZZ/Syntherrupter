@@ -120,26 +120,27 @@ Just in case you missed the [bold part above](#quick-start)...
 
 Currently these commands are only implemented in beta firmware versions. Since the version number is a single integer from 1-127 I can't name this version `0.1` or `1.0-beta.1`. Hence this note. This protocol shall be considered as draft and can change at any time until a stable firmware is released. At that point this note will disappear. 
 
-Also, keep in mind that there is a ton of parameters that has to be documented here, checked and implemented in the firmware and implemented in [Syfoh](https://github.com/MMMZZZZ/Syfoh#readme). That's a looot of sources for errors and oversights... Let me know if you find any oopsies!
+Also, keep in mind that there is a ton of parameters that has to be documented here, checked and implemented in the firmware and in [Syfoh](https://github.com/MMMZZZZ/Syfoh#readme). That's a looot of sources for errors and oversights... Let me know if you find any oopsies!
 
 #### Conventions
 
 All conventions are to be read as "unless noted otherwise... ".
 
-* Reserved target bytes are expected to be 0.
+* Target value 127 is reserved for broadcasting, meaning it will affect all targets (works for LSB/MSB independently).
+* Reserved target bytes are expected to be 0 or 127.
 * Parameters and parameter options that are currently not supported by Syntherrupter are marked by an [NS].
 * Parameters that stored in EEPROM are marked by an [EE]. Other parameters will be reset to default after a power cycle.
+* Parameters usually are read- and writable. Read- and write-only commands are marked by [RO] and [WO] respectively.
 * Every integer parameter has a float version at offset `0x2000`. 
-	* Float values in this documentation are always written with the C-style `f`-suffix to indicate that it are 32-bit floats (`xx.xf`).
 	* If the integer parameter is expressed as fractional (fixed point) value, the float parameter is not. Example: 
 		* Integer command is in 1/1000
 		* Sending 1.2% as integer 0.012\*1000 => `12`
-		* Sending 1.2% as float => `0.012f` (NOT `12.0f`)
+		* Sending 1.2% as float => `0.012` (NOT `12.0`)
 		* Benefit: the float version is independent of the integer resolution. 
-	* If the integer parameter covers a certain range, the float parameter is expected to cover that range with a value between 0.0f and 1.0f. Example:
+	* If the integer parameter covers a certain range, the float parameter is expected to cover that range with a value between 0.0 and 1.0. Example:
 		* Integer range goes from 0 to 127
 		* Sending 1/4 of the range as integer: 127/4 => `32`
-		* Sending 1/4 of the range as float: `0.25f` (NOT `32.0f`)
+		* Sending 1/4 of the range as float: `0.25` (NOT `32.0`)
 		* Benefit: the float version is independent of the integer range size/resolution
 	* Commands without float version are marked with [NF]. Examples are the envelope steps. Since these need to be discrete values, a float version doesn't make sense. 
 * The parameter value can be one of the following types:
@@ -148,7 +149,6 @@ All conventions are to be read as "unless noted otherwise... ".
 	* char[4]
 	* bitfield, noted as bf8, where 8 would indicate that the field is 8 bits wide (starting at the least significant bit of the parameter value). A bitfield range within the bitfield is noted as [LSB-MSB], f.ex. [2-7]
 * Any parameter value or part of it that is not specified by this document is reserved.
-* Target value 127 is reserved for broadcasting, meaning it will affect all targets (works for LSB/MSB independently).
 * Any parameter that is not compliant with these specs shall be ignored.
 
 #### Overview
@@ -160,7 +160,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 * [`0x60-0x7f`: MIDI Live mode parameters](#0x60-0x7f-midi-live-mode-parameters). Control specific properties of MIDI Live mode.
 * [`0x100-0x10f`: Lightsaber mode parameters](#0x100-0x10f-lightsaber-mode-parameters). Control specific properties of Lightsaber mode.
 * `0x200-0x3ff`: Settings
-	* [`0x200-0x21f`: EEPROM and other control commands](#0x200-0x21f-eeprom-and-other-control-commands)
+	* [`0x200-0x21f`: Device control commands](#0x200-0x21f-device-control-commands)
 	* [`0x220-0x23f`: UI settings](#0x220-0x23f-ui-settings)
 	* [`0x240-0x25f`: User settings](#0x240-0x25f-user-settings)
 	* [`0x260-0x27f`: Coil settings](#0x260-0x27f-coil-settings)
@@ -168,10 +168,26 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	
 #### `0x01-0x1f`: System commands
 
-* `0x01`: [NS] Request parameter value
-* `0x02`: [NS] Request if parameter is supported
-* `0x10`: [NS] Response type/length
-* `0x11`: [NS] Response to request
+* `0x01`: Response to request
+	* Target MSB: Target MSB that has been requested.
+	* Target LSB: Target LSB that has been requested.
+	* Value: Value of the requested parameter.
+* `0x02`: Request if parameter is supported
+	* Target MSB: 0 or any target value you want to check if it's supported.
+	* Target LSB: 0 or any target value you want to check if it's supported.
+	* Value: uint, parameter number or range (see command `0x04` below) to check. For every supported command and target combination Syntherrupter sends a `0x01` response message. The value of the response message contains the parameter number. 
+* `0x03`: Read Parameter. Get reply as `0x01` response message.
+	* Target MSB: Target MSB to read for the given parameter. Wildcards are supported (resulting in multiple responses).
+	* Target LSB: Target LSB to read for the given parameter. Wildcards are supported (resulting in multiple responses).
+	* Value: uint, Parameter number or range (see command `0x04` below) to read. 
+* `0x04`: Get Parameter(s). Get reply as normal command. F.ex. reading parameter `0x20` would return a `0x20` command with the current settings.
+	* Target MSB: Target MSB to read for the given parameter. Wildcards are supported (resulting in multiple responses).
+	* Target LSB: Target LSB to read for the given parameter. Wildcards are supported (resulting in multiple responses).
+	* Value: char[4], parameter number or range to read. When leaving the last parameter number to 0 only the rage start parameter number is read. Otherwise all parameters in the range will be read. When reading a range of parameters, the last number is included within the range.
+		* [0]: First parameter number LSB
+		* [1]: First parameter number MSB
+		* [2]: Last parameter number LSB (optional)
+		* [3]: Last parameter number MSB (optional)
 
 #### `0x20-0x3f`: Common mode parameters
 
@@ -278,7 +294,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32
 		* 0-127: Pan reach
-* `0x66`: Reset Channel NRPs
+* `0x66`: [WO] Reset Channel NRPs
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
@@ -307,32 +323,36 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: bf4, marking each lightsaber as assigned (1) or not (0)
 		* Default: 0x0f (all lightsabers assigned)
-* `0x101`: [NF] Set Lightsaber ID
+* `0x101`: [NF] [WO] Set Lightsaber ID
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
 		* 0-4: New ID for the connected ESP8266.  Will be remembered by the ESP8266.
 
-#### `0x200-0x21f`: EEPROM and other control commands
+#### `0x200-0x21f`: Device control commands
 
-* `0x200`: [EE] EEPROM Update Mode
+* `0x200`: [EE] [NF] EEPROM Update Mode
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
 		* 0: Manual mode (default)
 		* 1: Force update, does not affect current update mode.
 		* 2: Auto, update EEPROM after each command/change.
-* `0x201`: [EE] Device ID
+* `0x201`: [EE] [NF] Device ID
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
 		* 0-126: New ID for this device.
 		* Default: 0
-* `0x202`: Reset
+* `0x202`: [WO] Reset
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32, reset key in 1/1000. To prevent an accidental reset of the device, a specific value must be sent. 
 		* 41153700: Causes a reset of the Tiva microcontroller and in consequence of the Nextion display. Note: this doesn't work when any [passthrough mode](/Documentation/UI/Nextion-USB.md#readme) is active.
+* `0x203`: [RO] System Time
+	* Target MSB: Reserved.
+	* Target LSB: Reserved.
+	* Value: int32, time in microseconds since startup. 
 
 #### `0x220-0x23f`: UI settings
 
@@ -375,7 +395,6 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 		* 0: Manually
 		* 1: On Release (default)
 		* 2: Immediately
-
 * `0x226`: [NF] UI Update Mode
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
@@ -459,6 +478,14 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Value: int32
 		* 1000-100000: Duration of the output buffer in us. Same for all coils.
 		* Default: 5000
+* `0x267`: [NF] [RO] Active Tones
+	* Target MSB: Reserved.
+	* Target LSB: uint, target coil
+	* Read value: int32, number of currently active tones (of all modes together) on this output.
+* `0x268`: [RO] Output Signal Duty Cycle
+	* Target MSB: Reserved.
+	* Target LSB: uint, target coil
+	* Read value: int32, duty cycle of the output signal in 1/1000.
 
 #### `0x300-0x31f`: Envelope settings
 

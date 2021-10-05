@@ -21,6 +21,7 @@
 #include "driverlib/gpio.h"             // Defines and macros for GPIO API of DriverLib. This includes API functions such as GPIOPinWrite.
 #include "driverlib/interrupt.h"        // Defines and macros for NVIC Controller (Interrupt) API of driverLib. This includes API functions such as IntEnable and IntPrioritySet.
 #include "driverlib/uart.h"             // Defines and macros for UART API of driverLib.
+#include "Branchless.h"
 #include "System.h"
 #include "Buffer.h"
 
@@ -31,9 +32,9 @@ public:
     UART();
     virtual ~UART();
     void init(uint32_t port, uint32_t rxPin, uint32_t txPin, uint32_t baudRate, void (*rxISR)(void),
-              uint32_t intPriority = DEFAULT_INT_PRIO, bool buffered = true);
+              uint32_t intPriority = DEFAULT_INT_PRIO);
     void init(uint32_t uartNum, uint32_t baudRate, void (*rxISR)(void),
-              uint32_t intPriority = DEFAULT_INT_PRIO, bool buffered = true);
+              uint32_t intPriority = DEFAULT_INT_PRIO);
     void enable()
     {
         UARTIntEnable(uartBase, UART_INT_RX);
@@ -46,18 +47,10 @@ public:
     {
         UARTCharPut(uartBase, chr);
     };
-    void ISR()
-    {
-        // Read and clear the asserted interrupts
-        UARTIntClear(uartBase, UARTIntStatus(uartBase, true));
-
-        // Store all available chars in bigger buffer.
-        while (UARTCharsAvail(uartBase))
-        {
-            buffer.add(UARTCharGet(uartBase));
-        }
-    };
-    Buffer<uint8_t> buffer;
+    bool write(uint8_t* buffer, uint32_t size, bool discard = false);
+    void ISR();
+    Buffer<uint8_t, 512> rxBuffer;
+    Buffer<uint8_t, 512> txBuffer;
     static constexpr uint32_t DEFAULT_INT_PRIO = 42424242;
     static constexpr uint32_t UART_SYSCTL_PERIPH      = 0;
     static constexpr uint32_t UART_BASE               = 1;
@@ -79,6 +72,7 @@ public:
 private:
     uint32_t uartNum  = 0;
     volatile uint32_t uartBase = 0;
+    volatile bool txEnabled = false;
 };
 
 #endif /* UART_H_ */

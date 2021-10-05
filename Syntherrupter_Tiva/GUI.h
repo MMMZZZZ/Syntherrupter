@@ -24,7 +24,7 @@ class GUI
 public:
     GUI();
     virtual ~GUI();
-    static void init(Nextion* nextion, bool nxtOk, uint32_t cfgStatus);
+    static void init(Nextion* nextion, uint32_t cfgStatus);
     static uint32_t update();
     static void applyOutput();
     static void setError(const char* err);
@@ -59,36 +59,36 @@ private:
 
     static void simpleEnter()
     {
-        Simple::start();
+        Simple::setRunning(true);
     };
 
     static void simple();
     static void simpleExit()
     {
-        Simple::stop();
+        Simple::setRunning(false);
     };
 
     static void midiLiveEnter()
     {
-        MIDI::start();
+        MIDI::setRunning(true);
     };
 
     static void midiLive();
     static void midiLiveExit()
     {
         // Stop MIDI operation
-        MIDI::stop();
+        MIDI::setRunning(false);
         EEE = false;
     };
 
     static void lightsaberEnter()
     {
-        LightSaber::start();
+        LightSaber::setRunning(true);
     }
     static void lightsaber();
     static void lightsaberExit()
     {
-        LightSaber::stop();
+        LightSaber::setRunning(false);
     }
 
     static void userSelect();
