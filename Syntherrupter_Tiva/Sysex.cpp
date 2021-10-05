@@ -130,7 +130,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0301:
         case 0x0302:
         case 0x0303:
-            if (msg.targetLSB < MIDIProgram::DATA_POINTS || msg.targetMSB == WILDCARD)
+            if (msg.targetLSB < MIDIProgram::DATA_POINTS || msg.targetLSB == WILDCARD)
             {
                 lsbOk = true;
             }
