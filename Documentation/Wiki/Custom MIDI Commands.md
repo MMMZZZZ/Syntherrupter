@@ -294,7 +294,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32
 		* 0-127: Pan reach
-* `0x66`: Reset Channel NRPs
+* `0x66`: [WO] Reset Channel NRPs
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
@@ -323,7 +323,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: bf4, marking each lightsaber as assigned (1) or not (0)
 		* Default: 0x0f (all lightsabers assigned)
-* `0x101`: [NF] Set Lightsaber ID
+* `0x101`: [NF] [WO] Set Lightsaber ID
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
@@ -331,20 +331,20 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 
 #### `0x200-0x21f`: Device control commands
 
-* `0x200`: [EE] EEPROM Update Mode
+* `0x200`: [EE] [NF] EEPROM Update Mode
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
 		* 0: Manual mode (default)
 		* 1: Force update, does not affect current update mode.
 		* 2: Auto, update EEPROM after each command/change.
-* `0x201`: [EE] Device ID
+* `0x201`: [EE] [NF] Device ID
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32
 		* 0-126: New ID for this device.
 		* Default: 0
-* `0x202`: Reset
+* `0x202`: [WO] Reset
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32, reset key in 1/1000. To prevent an accidental reset of the device, a specific value must be sent. 
@@ -479,7 +479,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Value: int32
 		* 1000-100000: Duration of the output buffer in us. Same for all coils.
 		* Default: 5000
-* `0x267`: [RO][NF] Active Tones
+* `0x267`: [NF] [RO] Active Tones
 	* Target MSB: Reserved.
 	* Target LSB: uint, target coil
 	* Read value: int32, number of currently active tones (of all modes together) on this output.
