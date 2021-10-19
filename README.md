@@ -23,8 +23,9 @@ By Max Zuidberg. Credits [below](#credits).
 * Advanced stereo features. Notes and MIDI channels can seamlessly change between multiple coils, creating **fascinating visual effects**.
 * **Lightsabers**! An ESP8266, an IMU and a battery form a lightsaber that connects to Syntherrupter and allows "lightsaber-effects" to be played on your tesla coils! (credits: Netzpfuscher)
 * Different users with different limits. This is useful if you want to rent the coil to someone else who does not know the coils (thermal?) limits as well as you do.
+* **[Controllable via MIDI files](https://github.com/MMMZZZZ/Syfoh#readme)**. Any configuration can be embedded into your MIDI file. Just hit play and everything else happens automagically.
 * Sounds boring, but for me it belongs to an interrupter as well: **Normal interrupter mode** where you can control the ontime, BPS and duty.
-* **[Documentation/Wiki](/Documentation/Wiki#readme)**
+* **[Documentation/Wiki](/Documentation/Wiki#readme)**. This is not a joke; the wiki contains almost as much work as the software itself. It's not perfect but it covers pretty much everything from simple guides to technical documnetation.
 
 ## Documentation and Getting Started
 
