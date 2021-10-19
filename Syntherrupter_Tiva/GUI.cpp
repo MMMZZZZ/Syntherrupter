@@ -123,10 +123,8 @@ void GUI::init(Nextion* nextion, uint32_t cfgStatus)
 
             nxt->sendCmd("User_Settings.u%iName.txt=\"%s\"",
                          user, EEPROMSettings::userData[user].name);
-#ifndef DFLT_PASSWORDS
             nxt->sendCmd("User_Settings.u%iCode.txt=\"%s\"",
                          user, EEPROMSettings::userData[user].password);
-#endif /* DFLT_PASSWORDS */
             nxt->sendCmd("User_Settings.u%iOntime.val=%i",
                          user, maxOntimeUS);
             nxt->sendCmd("User_Settings.u%iBPS.val=%i",
