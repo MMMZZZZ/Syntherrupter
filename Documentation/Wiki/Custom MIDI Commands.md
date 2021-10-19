@@ -15,7 +15,7 @@ Syntherrupter's MIDI functions can be controlled via custom MIDI commands. Since
 		* [Quick Start](#quick-start)
 		* [Technical Introduction](#technical-introduction)
 		* [SysEx Format](#sysex-format)
-		* [Syntherrupters SysEx Commands Version 1 (Draft!)](#syntherrupters-sysex-commands-version-1-draft)
+		* [Syntherrupters SysEx Commands](#syntherrupters-sysex-commands)
 
 ## Non-registered Parameters (NRP)
 
@@ -67,7 +67,7 @@ Syntherrupter allows you to map notes to stereo positions based on different par
 If you are a regular user, you only need to know the following three things:
 1. Sysex are MIDI messages that allow manufacturers and people like me to completely control their devices over MIDI. This allows f.ex. to embed the entire device setup into a MIDI file and thus "hands free" operation. 
 2. **The only practical way to use this extremely powerful and useful feature is a tool called [Syfoh](https://github.com/MMMZZZZ/Syfoh#readme)**. It allows you to control Syntherrupter with simple sentences like *set ontime for coil 1 and mode simple to 100*. You can just write all your commands into a text file and Syfoh will apply them with one click. 
-3. Once you figured out Syfoh, this page only serves you as a reference which commands exist and what they do. Syfoh contains a list of the commands, too, but the actual documentation of them lives here, [further down the page](#syntherrupters-sysex-commands-version-1-draft). Note: the documentation (especially the [Conventions](#conventions) section) below contains more info than you need, but most of it is highly relevant for you, too. F.ex. you can ignore that float commands all have a command number >= `0x2000` but you should know what the [NF] tag means, or how ranges work with floats, etc.
+3. Once you figured out Syfoh, this page only serves you as a reference which commands exist and what they do. Syfoh contains a list of the commands, too, but the actual documentation of them lives here, [further down the page](#syntherrupters-sysex-commands). Note: the documentation below contains more info than you need, but most of it is highly relevant for you, too (especially the [Conventions](#conventions) section). F.ex. you can ignore that float commands all have a command number >= `0x2000` but you should know what the [EE] tag means, or how ranges work with floats, etc.
 
 From now on the documentation goes into all the technical details that'd be required to write your own compatible program.  
 
@@ -97,30 +97,30 @@ In a nutshell, the standard looks like this:
 
 #### Syntherrupters Format
 
-Synhterrupter SysEx messages are roughly inspired by [Rolands format](https://www.2writers.com/eddie/TutSysEx.htm). They are at most 16 bytes long, which is handy because the UART FIFOs of the Tiva microcontroller are 16 bytes large. 
+Synhterrupter SysEx messages are roughly inspired by [Rolands format](https://www.2writers.com/eddie/TutSysEx.htm). They are 16 bytes long, which is handy because the UART FIFOs of the Tiva microcontroller are 16 bytes large. 
 
 Structure: 
 ```F0 00 [DMID] [DMID] [version] [device ID] [PN LSB] [PN MSB] [TG LSB] [TG MSB] [value LSB] [value] [value] [value] [value MSB] F7```
 * `DMID`: I decided to use the manufacturer ID `26 05` (hex). It seems to be far enough in the european block to be sure that it won't be assigned to any manufacturer in the next years. *Note: getting a unique ID from the MMA (association behind MIDI) costs at least 240$/year. Surprisingly cheap but still too expensive for a niche project like this.*
-* `version`: Protocol version. Allows for future revisions that could break compatibility. Anything after this byte can potentially change with a new version.
+* `version`: Protocol version (see [below](#protocol-versions) for details). Anything after this byte can potentially change with a new version.
 * `device ID`: Assuming multiple devices on the same MIDI bus, this allows addressing them individually. 127 means broadcast.
 * `PN`: Parameter number. Defines the meaning of the command. Note: unlike the parameter value, the parameter number is not split into 7 bit groups. Meaning, that the next PN after `0x7f` is `0x100` (`PN = (PN MSB << 8) + PN LSB`).
 * `TG`: Target. Specifies to what the command applies. Taking the example of an ontime command, the target specifies what coil is affected. 
 * `value`: Parameter value. With 5 MIDI data bytes, full 32 bit values can be covered. Any 32bits of data will be sent in groups of 7 bits, LSB first. 
 
-*Note: Since not every parameter requires the full 9 bytes, it will be possible to send shorter messages which omit some of those bytes. However, they aren't standarized yet.*
-
-### Syntherrupters SysEx Commands Version 1 (Draft!)
+### Syntherrupters SysEx Commands
 
 #### Use [Syfoh](https://github.com/MMMZZZZ/Syfoh#readme)!
 
 Just in case you missed the [bold part above](#quick-start)... 
 
-#### This is still a draft!
+#### Protocol Versions
 
-Currently these commands are only implemented in beta firmware versions. Since the version number is a single integer from 1-127 I can't name this version `0.1` or `1.0-beta.1`. Hence this note. This protocol shall be considered as draft and can change at any time until a stable firmware is released. At that point this note will disappear. 
+The protocol version ranges from 1 to 127 (no subversions). New protocol versions mark incompatible changes compared to previous ones. 
 
-Also, keep in mind that there is a ton of parameters that has to be documented here, checked and implemented in the firmware and in [Syfoh](https://github.com/MMMZZZZ/Syfoh#readme). That's a looot of sources for errors and oversights... Let me know if you find any oopsies!
+This document describes the current state of protocol version 1. Backwards compatible changes (f.ex. new commands) may be added in the future. If you want to know what commands your specific firmware version supports, please check support using [Syfoh](https://github.com/MMMZZZZ/Syfoh#reading-and-monitoring-values) or by opening the version of this document that was released with your firmware version. If you're viewing this online you can select the document version at the top left (click on the drop-down menu next to the file path, select *Tags* and then the version you'd like to see). 
+
+In the future this section is going to contain links to past protocol versions (which don't exist right now). 
 
 #### Conventions
 
