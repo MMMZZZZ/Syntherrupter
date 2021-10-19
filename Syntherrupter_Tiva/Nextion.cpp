@@ -65,15 +65,22 @@ void Nextion::init(uint32_t uartNumber, uint32_t baudRate)
         {
             continue;
         }
+        // If we made it this far we know that a screen is connected (hence
+        // the return below).
+        nxtConnected = true;
+
         acknowledgeEnabled = true;
-        if (setVal("bkcmd", 3, NO_EXT))
+        if (!setVal("bkcmd", 3, NO_EXT))
         {
-            initOk = true;
-            return;
+            // bkcmd for some reason doesn't work (maybe reparse mode is
+            // active). Disable its usage.
+            acknowledgeEnabled = false;
         }
+
+        return;
     }
 
-    initOk = false;
+    nxtConnected = false;
 }
 
 bool Nextion::acknowledge(char code, uint32_t timeoutUS)

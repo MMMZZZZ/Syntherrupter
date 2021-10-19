@@ -35,7 +35,7 @@ public:
     void init(uint32_t portNumber, uint32_t baudRate);
     bool available()
     {
-        return initOk;
+        return nxtConnected;
     };
     bool sendCmd(const char* cmd);
     bool sendCmd(const char* cmd, const char* data);
@@ -105,7 +105,7 @@ private:
     static constexpr uint32_t readDataSize = 100;
     char readData[readDataSize];
     bool acknowledgeEnabled = false;
-    bool initOk = false;
+    bool nxtConnected = false;
 };
 
 #endif /* NEXTION_H_ */
