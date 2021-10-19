@@ -15,6 +15,7 @@
 class UART;
 
 struct SysexMsg {
+    uint32_t version;
     uint32_t number;
     uint32_t targetLSB;
     uint32_t targetMSB;

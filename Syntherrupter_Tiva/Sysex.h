@@ -51,7 +51,7 @@ private:
             uint8_t DMID_0;
             uint8_t DMID_1;
             uint8_t DMID_2;
-            uint8_t VERSION;
+            uint8_t version;
             uint8_t deviceID;
             uint16_t number;
             uint8_t targetLSB;

@@ -487,10 +487,12 @@ bool MIDI::processBuffer(uint32_t b)
             static uint8_t  sysexDataAll[BUFFER_COUNT][SYSEX_MAX_SIZE]{0};
             static uint32_t sysexDataIndexAll[BUFFER_COUNT]{0};
             static bool sysexUsableAll[BUFFER_COUNT]{false};
+            static uint8_t  sysexVersionAll[BUFFER_COUNT]{0};
 
             uint8_t (&sysexData)[SYSEX_MAX_SIZE] = sysexDataAll[b];
             uint32_t &sysexDataIndex = sysexDataIndexAll[b];
             bool &sysexUsable = sysexUsableAll[b];
+            uint8_t &sysexVersion = sysexVersionAll[b];
 
             if (dataBytes == 1)
             {
@@ -527,7 +529,8 @@ bool MIDI::processBuffer(uint32_t b)
                             }
                             break;
                         case 4: // Message Protocol Version
-                            if (c1 != SYSEX_PROTOCOL_VERSION)
+                            sysexVersion = c1;
+                            if (sysexVersion != SYSEX_PROTOCOL_VERSION)
                             {
                                 sysexUsable = false;
                             }
@@ -609,6 +612,7 @@ bool MIDI::processBuffer(uint32_t b)
                             sysexVal += sysexData[BYTE_COUNT[sysexDataIndex][0] + i] << (7 * i);
                         }
 
+                        sysexMsg.version   = sysexVersion;
                         sysexMsg.number    = number;
                         sysexMsg.targetLSB = targetLSB;
                         sysexMsg.targetMSB = targetMSB;

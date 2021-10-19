@@ -34,7 +34,6 @@ void Sysex::init(Nextion* nextion)
     txMsg.data.DMID_0 = 0x00;
     txMsg.data.DMID_1 = 0x26;
     txMsg.data.DMID_2 = 0x05;
-    txMsg.data.VERSION = MIDI::SYSEX_PROTOCOL_VERSION;
 }
 
 bool Sysex::checkSysex(SysexMsg& msg)
@@ -316,6 +315,10 @@ void Sysex::processSysex()
         {
             // Targets will be set below during the read call. Response type
             // is set here.
+
+            // By default, reply with the same version as has been specified
+            // in the request.
+            txMsg.data.version = msg.version;
 
             reading = true;
             readSupportOnly = (msg.number == 0x02);
