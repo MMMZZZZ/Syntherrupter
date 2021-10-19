@@ -20,29 +20,18 @@ public:
     NoteList();
     virtual ~NoteList();
     Note* addNote();
+    void moveToEnd(Note* note);
     void removeNote(Note* note);
     void removeAllNotes();
     Note* getNote(uint32_t channel, uint32_t noteNum);
-    void setMaxVoices(uint32_t maxVoices)
-    {
-        if (maxVoices > MAX_NOTES)
-        {
-            maxVoices = MAX_NOTES;
-        }
-        this->maxVoices = maxVoices;
-        buildLinks();
-    };
     Note* firstNote;
     Note* newNote;
-    uint32_t activeNotes = 0;
     static constexpr uint32_t MAX_NOTES = 64;
+    uint32_t activeNotes = 0;
 
 private:
     void buildLinks();
-    float maxOntimeUS    = 10;
-    float maxDuty        = 0.01f;
-    bool limiterActive   = false;
-    uint32_t maxVoices   = 8;
+    void moveBefore(Note* noteToMove, Note* noteToInsertBefore);
     Note unorderedNotes[MAX_NOTES + 1];
 };
 

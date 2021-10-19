@@ -48,6 +48,10 @@ Page Menu
             // Enable page refreshs again
             ref_star
         
+        Postinitialize Event
+            // Mode Accept Data, tell MCU that Nextion can accept data updates without disturbing anything
+            prints "mad",0
+        
         Touch Press Event
             if(showHelp.val==0)
             {
@@ -86,6 +90,10 @@ Page Menu
                 qrHelp.txt="git.io/Jkf2c"
                 click qrHelp,0
             }
+        
+        Page Exit Event
+            // Mode Deny Data, tell MCU that Nextion cannot accept data updates without disturbing anything
+            prints "mdd",0
         
 Variable (string) tempStr
     Attributes
@@ -170,9 +178,23 @@ Text tMLS
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
+Text tSysexInfo
+    Attributes
+        ID                 : 15
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Note: SysEx commands will only update on-screen values \r\n          when you have this page (Menu) opened. 
+        Max. Text Size     : 255
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
 QR Code qrHelp
     Attributes
-        ID               : 15
+        ID               : 14
         Scope            : local
         Send Component ID: disabled
         Text             : git.io/JkvOK
@@ -388,7 +410,7 @@ Button bHelp
         
 Hotspot fLoadModes
     Attributes
-        ID               : 14
+        ID               : 16
         Scope            : local
         Send Component ID: disabled
     
@@ -418,7 +440,7 @@ Hotspot fLoadModes
         
 Hotspot fLoadColors
     Attributes
-        ID               : 16
+        ID               : 17
         Scope            : local
         Send Component ID: disabled
     

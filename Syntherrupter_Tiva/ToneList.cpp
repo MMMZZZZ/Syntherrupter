@@ -35,24 +35,35 @@ Tone* ToneList::updateTone(uint32_t ontimeUS, uint32_t periodUS, void* owner, vo
     }
     if (!targetTone)
     {
-        targetTone       = newTone;
-        newTone          = newTone->nextTone;
+        targetTone = newTone;
+        newTone    = newTone->nextTone;
         if (++activeTones > maxVoices)
         {
             deleteTone(firstTone);
         }
-        targetTone->type = Tone::Type::newdflt;
+        targetTone->type  = Tone::Type::newdflt;
+        targetTone->owner = owner;
     }
-    if (periodUS != targetTone->periodUS || ontimeUS != targetTone->ontimeUS)
+
+    bool newDuty = false;
+    if (periodUS != targetTone->periodUS)
     {
+        newDuty = true;
+        targetTone->nextFireUS -= targetTone->periodUS;
+        targetTone->nextFireUS += periodUS;
         targetTone->periodUS = periodUS;
+    }
+    if (ontimeUS != targetTone->ontimeUS)
+    {
         targetTone->ontimeUS = ontimeUS;
-        targetTone->duty     = float(ontimeUS) / float(periodUS);
         targetTone->limitedOntimeUS = ontimeUS;
+    }
+    if (newDuty)
+    {
+        targetTone->duty = float(ontimeUS) / float(periodUS);
         limit();
     }
-    targetTone->owner    = owner;
-    targetTone->origin   = origin;
+    targetTone->origin = origin;
     return targetTone;
 }
 
@@ -62,8 +73,8 @@ void ToneList::deleteTone(Tone* tone)
     {
         activeTones--;
 
-        tone->ontimeUS   = 0;
-        tone->owner      = 0;
+        tone->ontimeUS = 0;
+        tone->owner    = 0;
 
         if (tone == firstTone)
         {
@@ -75,12 +86,12 @@ void ToneList::deleteTone(Tone* tone)
         }
         else
         {
-            tone->prevTone->nextTone       = tone->nextTone;
-            tone->nextTone->prevTone       = tone->prevTone;
-            tone->nextTone                 = firstTone;
-            tone->prevTone                 = firstTone->prevTone;
-            tone->prevTone->nextTone       = tone;
-            tone->nextTone->prevTone       = tone;
+            tone->prevTone->nextTone = tone->nextTone;
+            tone->nextTone->prevTone = tone->prevTone;
+            tone->nextTone           = firstTone;
+            tone->prevTone           = firstTone->prevTone;
+            tone->prevTone->nextTone = tone;
+            tone->nextTone->prevTone = tone;
         }
     }
 }
@@ -118,6 +129,7 @@ void ToneList::limit()
         totalDuty += tone->duty;
         tone = tone->nextTone;
     }
+    signalDuty = totalDuty;
     if (totalDuty > maxDuty)
     {
         // Duty of all notes together exceeds coil limit; reduce ontimes.
@@ -145,4 +157,17 @@ void ToneList::limit()
         }
     }
     limiterActive = stillActive;
+}
+
+void ToneList::applyTimeOffsetUS(uint32_t offsetUS)
+{
+    Tone* tone = firstTone;
+    while (tone != newTone)
+    {
+        if (tone->nextFireUS > offsetUS)
+        {
+            tone->nextFireUS -= offsetUS;
+        }
+        tone = tone->nextTone;
+    }
 }

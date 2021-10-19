@@ -2,9 +2,9 @@
 
 [Back to the Settings Menu page](Settings.md#readme)
 
-The envelope editor allows you to modify any of Syntherrupters envelopes. With envelopes you can control how Syntherrupter sounds. Because of the limitations of Nextion it is not possible to have a graphical editor. However, since you're probably not going to use this on a daily base, it should be "good enough" and especially better than nothing.
+If Syntherrupters envelopes are new to you, you should start with using the [build-in envelopes](/Documentation/Wiki/Envelopes.md#readme). They require no work at all and already provide impressive results (previous link includes a demo). 
 
-If Syntherrupters envelopes are new to you, you should check out the [Getting Started with Envelopes](/Documentation/Wiki/Tutorials/Getting%20Started%20with%20Envelopes.md#readme). 
+The envelope editor allows you to modify any of Syntherrupters envelopes. Because of the limitations of Nextion it is not possible to have a graphical editor. However, since you're probably not going to use this on a daily base, it should be "good enough" and especially better than nothing.
 
 ## Index
 * [Index](#index)
@@ -19,6 +19,7 @@ If Syntherrupters envelopes are new to you, you should check out the [Getting St
 	* [Set Values](#set-values)
 	* [Return](#return)
 	* [Envelope Examples](#envelope-examples)
+* [Sysex Commands](#sysex-commands)
   
 ## What you see
 
@@ -67,3 +68,7 @@ The following graph shows the [built-in envelope](#todo) number 8 for different 
 The second example shows a simple looping curve. Looping is useful to create "pulsations". 
 
 ![Envelope Looping](/Documentation/Pictures/Envelope%20Looping.png)
+
+## Sysex Commands
+
+The envelopes can be fully configured by the [Envelope](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x200-0x31f-envelope-settings) group of the sysex commands. 

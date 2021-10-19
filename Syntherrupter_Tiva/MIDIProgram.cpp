@@ -13,20 +13,12 @@ float MIDIProgram::resolutionUS = 1000.0f;
 
 MIDIProgram::MIDIProgram()
 {
-    setMode(Mode::cnst);
-    for (uint32_t i = 0; i < DATA_POINTS; i++)
-    {
-        setDataPoint(i, 1.0f, 1.0f);
-    }
-    amplitude[DATA_POINTS - 1] = 0.0f;
-    nextStep[DATA_POINTS - 1]  = DATA_POINTS - 1;
-    updateCoefficients();
-    setMode(Mode::exp);
+
 }
 
 MIDIProgram::~MIDIProgram()
 {
-    // TODO Auto-generated destructor stub
+
 }
 
 void MIDIProgram::setDataPoint(uint32_t index, float amplitude, float durationUS, float ntau, uint32_t nextStep)
@@ -39,26 +31,26 @@ void MIDIProgram::setDataPoint(uint32_t index, float amplitude, float durationUS
     {
         // Amplitude of the release datapoint cannot be set to another value
         // than the default 0.0f.
-        this->amplitude[index] = amplitude;
+        (*steps)[index].amplitude = amplitude;
     }
     else
     {
-        this->amplitude[index] = 0.0f;
+        (*steps)[index].amplitude = 0.0f;
     }
 
-    this->durationUS[index] = durationUS;
+    (*steps)[index].durationUS = durationUS;
 
     if (mode == Mode::cnst)
     {
-        this->ntau[index] = 1e6f;
+        (*steps)[index].ntau = 1e6f;
     }
     else if (mode == Mode::lin)
     {
-        this->ntau[index] = 0.0f;
+        (*steps)[index].ntau = 0.0f;
     }
     else if (mode == Mode::exp)
     {
-        this->ntau[index] = ntau;
+        (*steps)[index].ntau = ntau;
     }
 
     if (nextStep >= DATA_POINTS)
@@ -73,11 +65,11 @@ void MIDIProgram::setDataPoint(uint32_t index, float amplitude, float durationUS
         }
     }
 
-    this->nextStep[index] = nextStep;
+    (*steps)[index].nextStep = nextStep;
 
-    if (fabsf(this->ntau[index]) < 0.1f)
+    if (fabsf((*steps)[index].ntau) < 0.1f)
     {
-        this->ntau[index] = 0.1f;
+        (*steps)[index].ntau = 0.1f;
     }
 
     updateCoefficients();
@@ -93,15 +85,15 @@ void MIDIProgram::setMode(Mode mode)
         {
             if (mode == Mode::cnst)
             {
-                this->ntau[i] = 1e6f;
+                (*steps)[i].ntau = 1e6f;
             }
             else if (mode == Mode::lin)
             {
-                this->ntau[i] = 0.0f;
+                (*steps)[i].ntau = 0.0f;
             }
             else if (mode == Mode::exp)
             {
-                this->ntau[i] = 3.0f;
+                (*steps)[i].ntau = 3.0f;
             }
         }
     }
@@ -176,25 +168,25 @@ void MIDIProgram::updateCoefficients()
     uint32_t beforeReleaseStep = DATA_POINTS - 2;
     for (uint32_t i = 0; i < 2 * DATA_POINTS; i++)
     {
-        amplitudeDiff[currentStep] = amplitude[currentStep] - amplitude[lastDifferentStep];
+        amplitudeDiff[currentStep] = (*steps)[currentStep].amplitude - (*steps)[lastDifferentStep].amplitude;
 
-        coefficient[currentStep]   = expf(- ntau[currentStep] / durationUS[currentStep] * resolutionUS); // powf(expf(-ntau[currentStep]), 1.0f / * ticksPerStep[currentStep]);
-        expTargetAmp[currentStep]  = amplitude[lastDifferentStep] - amplitudeDiff[currentStep] / expm1f(- ntau[currentStep]);
+        coefficient[currentStep]   = expf(- (*steps)[currentStep].ntau / (*steps)[currentStep].durationUS * resolutionUS); // powf(expf(-ntau[currentStep]), 1.0f / * ticksPerStep[currentStep]);
+        expTargetAmp[currentStep]  = (*steps)[lastDifferentStep].amplitude - amplitudeDiff[currentStep] / expm1f(- (*steps)[currentStep].ntau);
 
         // Prevent +/- infinity
         coefficient[currentStep]   = fmaxf(-1e6f, fminf(1e6f, coefficient[currentStep]));
         expTargetAmp[currentStep]  = fmaxf(-1e6f, fminf(1e6f, expTargetAmp[currentStep]));
 
         stepDone[currentStep] = true;
-        if (amplitude[nextStep[currentStep]] != amplitude[currentStep])
+        if ((*steps)[(*steps)[currentStep].nextStep].amplitude != (*steps)[currentStep].amplitude)
         {
             lastDifferentStep = currentStep;
         }
-        if (amplitude[currentStep] != amplitude[DATA_POINTS - 1])
+        if ((*steps)[currentStep].amplitude != (*steps)[DATA_POINTS - 1].amplitude)
         {
             beforeReleaseStep = currentStep;
         }
-        currentStep = nextStep[currentStep];
+        currentStep = (*steps)[currentStep].nextStep;
         if (stepDone[currentStep])
         {
             /*

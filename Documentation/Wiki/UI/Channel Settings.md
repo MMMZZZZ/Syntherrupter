@@ -13,6 +13,7 @@ Set NRPs or send any MIDI command for the given MIDI channel. Note: Syntherrupte
 	* [MIDI Command](#midi-command)
 	* [Previous/Next Channel](#previousnext-channel)
 	* [Return to MIDI Coil Settings](#return-to-midi-coil-settings)
+* [Sysex Commands](#sysex-commands)
 
 ## What you see
 
@@ -45,3 +46,7 @@ The *Previous* (*Next*) button brings you to the previous (next) channel. This a
 ### Return to MIDI Coil Settings
 
 Leaving the page brings you back to the [MIDI Coil Settings](Coil%20Settings.md#readme).
+
+## Sysex Commands
+
+The changes on this page are channel specific and done via NRP commands. Thus there are no sysex commands needed/available.

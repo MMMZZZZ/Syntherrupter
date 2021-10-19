@@ -7,6 +7,8 @@ Page Identification
     
     Events
         Preinitialize Event
+            // Hide functions
+            vis fLoadColors,0
             // Prevent page refreshs until postinit
             ref_stop
             //
@@ -18,6 +20,36 @@ Page Identification
         
         Postinitialize Event
             click bOK,0
+        
+        Touch Press Event
+            if(Other_Settings.nBackOff.val!=0)
+            {
+                // Default "stop" action.
+                // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                prints "mes",3
+                // Set all ontime and duty settings of all pages to 0.
+                // First come the global variables then the local variables.
+                Simple.ontime.val=0
+                Simple.duty.val=0
+                Simple.set1.val=Simple.set1.val&0x0000ffff
+                Simple.set2.val=Simple.set2.val&0x0000ffff
+                Simple.set3.val=Simple.set3.val&0x0000ffff
+                Simple.set4.val=Simple.set4.val&0x0000ffff
+                Simple.set5.val=Simple.set5.val&0x0000ffff
+                Simple.set6.val=Simple.set6.val&0x0000ffff
+                MIDI_Live.ontime.val=0
+                MIDI_Live.duty.val=0
+                MIDI_Live.set1.val=0
+                MIDI_Live.set2.val=0
+                MIDI_Live.set3.val=0
+                MIDI_Live.set4.val=0
+                MIDI_Live.set5.val=0
+                MIDI_Live.set6.val=0
+                Lightsaber.ontime.val=0
+                Lightsaber.ontimes12.val=0
+                Lightsaber.ontimes34.val=0
+                Lightsaber.ontimes56.val=0
+            }
         
         Page Exit Event
             // Tell the MCU that a user has been selected / changed: Mode User Select
@@ -48,6 +80,11 @@ Text tTitle
         Text               : Enter Code
         Max. Text Size     : 37
     
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
 Button b0
     Attributes
         ID               : 2

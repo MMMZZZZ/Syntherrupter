@@ -7,9 +7,41 @@ Page Startup
     
     Events
         Preinitialize Event
+            // Show a black screen until the initialization from the MCU is done.
+            Startup.bco=0
             vis 255,0
             //
             // Actual init code is in the comOk press event that is called by the uC after initialization.
+        
+        Touch Press Event
+            if(Other_Settings.nBackOff.val!=0)
+            {
+                // Default "stop" action.
+                // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                prints "mes",3
+                // Set all ontime and duty settings of all pages to 0.
+                // First come the global variables then the local variables.
+                Simple.ontime.val=0
+                Simple.duty.val=0
+                Simple.set1.val=Simple.set1.val&0x0000ffff
+                Simple.set2.val=Simple.set2.val&0x0000ffff
+                Simple.set3.val=Simple.set3.val&0x0000ffff
+                Simple.set4.val=Simple.set4.val&0x0000ffff
+                Simple.set5.val=Simple.set5.val&0x0000ffff
+                Simple.set6.val=Simple.set6.val&0x0000ffff
+                MIDI_Live.ontime.val=0
+                MIDI_Live.duty.val=0
+                MIDI_Live.set1.val=0
+                MIDI_Live.set2.val=0
+                MIDI_Live.set3.val=0
+                MIDI_Live.set4.val=0
+                MIDI_Live.set5.val=0
+                MIDI_Live.set6.val=0
+                Lightsaber.ontime.val=0
+                Lightsaber.ontimes12.val=0
+                Lightsaber.ontimes34.val=0
+                Lightsaber.ontimes56.val=0
+            }
         
 Variable (string) sNoConfig
     Attributes
@@ -68,8 +100,8 @@ Text tStartup
     
     Events
         Touch Press Event
-            // This component should actually be named "tStartup" since its a text box.
-            // However it formerly was a picture and the name is kept for compatibility.
+            // Trigger emergency shutdown - just in case.
+            click 0,1
         
         Touch Release Event
             // If one of the user passwords is blank, do auto login to this user.
@@ -96,15 +128,25 @@ Text tNxtFW
         Text               : Nextion Firmware:
         Max. Text Size     : 20
     
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
 Text tNxtFWVersion
     Attributes
         ID                 : 3
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : v4.1.4
+        Text               : v4.2.0       
         Max. Text Size     : 20
     
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
 Text tTivaFW
     Attributes
         ID                 : 4
@@ -114,6 +156,11 @@ Text tTivaFW
         Text               : Tiva Firmware:
         Max. Text Size     : 20
     
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
 Text tTivaFWVersion
     Attributes
         ID                 : 5
@@ -126,6 +173,9 @@ Text tTivaFWVersion
     Events
         Touch Press Event
             // Will be set by the microcontroller on startup.
+            //
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
         
 Hotspot fLoadColors
     Attributes

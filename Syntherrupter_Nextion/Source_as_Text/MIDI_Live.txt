@@ -1029,7 +1029,6 @@ Slider sOn
         Position         : 0
         Upper range limit: 366
         Lower range limit: 0
-        Channel count    : 25
     
     Events
         Touch Press Event
@@ -1106,7 +1105,6 @@ Slider sDuty
         Position         : 0
         Upper range limit: 366
         Lower range limit: 0
-        Channel count    : 25
     
     Events
         Touch Press Event

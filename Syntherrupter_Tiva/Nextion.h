@@ -32,15 +32,23 @@ class Nextion
 public:
     Nextion();
     virtual ~Nextion();
-    void init(uint32_t portNumber, uint32_t baudRate, uint32_t timeoutUS = 300000);
-    void sendCmd(const char* cmd);
-    void setTxt(const char* comp, const char* txt);
-    void setVal(const char* comp, uint32_t val);
-    void setPage(const char* page);
-    void setPage(uint32_t page);
-    void setTimeoutUS(uint32_t us);
-    void flushRx();
-    void printf(const char *pcString, ...);
+    void init(uint32_t portNumber, uint32_t baudRate);
+    bool available()
+    {
+        return nxtConnected;
+    };
+    bool sendCmd(const char* cmd);
+    bool sendCmd(const char* cmd, const char* data);
+    bool sendCmd(const char* cmd, int32_t val);
+    bool sendCmd(const char* cmd, int32_t val1, int32_t val2);
+    bool sendCmd(const char* cmd, const char* str, int32_t val);
+    bool sendCmd(const char* cmd, int32_t val, const char* str);
+    bool setTxt(const char* comp, const char* txt);
+    bool setVal(const char* comp, uint32_t val, bool noExt = false);
+    bool setPage(const char* page);
+    bool setPage(uint32_t page);
+    //void flushRx();
+    //void printf(const char *pcString, ...);
     void disableStdio();
     void enableStdio();
     uint32_t getUARTBase();
@@ -49,12 +57,16 @@ public:
     uint32_t charsAvail();
     uint32_t peek(const char c);
     char getChar();
-    uint32_t getVal(const char* comp);
+    int32_t getVal(const char* comp);
     char* getTxt(const char* comp);
-    static constexpr uint32_t receiveErrorVal   = 424242420;
-    static constexpr uint32_t receiveTimeoutVal = 424242421;
-
+    static constexpr int32_t receiveErrorVal   = -24242420;
+    static constexpr int32_t receiveTimeoutVal = -24242421;
+    static constexpr uint32_t defaultTimeoutUS =    300000;
+    static constexpr uint32_t startTimeoutUS   =    700000;
+    static constexpr bool NO_EXT = true;
 private:
+    bool acknowledge(char code = 0x01, uint32_t timeoutUS = defaultTimeoutUS);
+
     // UART mapping
     static constexpr uint32_t UART_SYSCTL_PERIPH      = 0;
     static constexpr uint32_t UART_BASE               = 1;
@@ -88,11 +100,12 @@ private:
     static constexpr uint32_t WAKE_UP             = 0x87;
     static constexpr uint32_t STARTUP_OK          = 0x88;
 
-    uint32_t timeoutUS = 300000;
     uint32_t UARTNum = 0;
     uint32_t baudRate = 0;
     static constexpr uint32_t readDataSize = 100;
     char readData[readDataSize];
+    bool acknowledgeEnabled = false;
+    bool nxtConnected = false;
 };
 
 #endif /* NEXTION_H_ */

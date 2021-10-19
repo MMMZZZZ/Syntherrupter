@@ -11,9 +11,9 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "System.h"
 #include "Filter.h"
 #include "ToneList.h"
-#include "System.h"
 
 
 class Simple
@@ -21,30 +21,51 @@ class Simple
 public:
     Simple();
     virtual ~Simple();
-    void init(ToneList* tonelist, float ontimeFact, float ontimeConst, float freqFact, float freqConst, uint32_t updatePeriodUS = 10000);
+    void init(ToneList* tonelist, uint32_t updatePeriodUS = 10000);
     void updateToneList();
-    static void start()
+    static void setRunning(bool run)
     {
-        started = true;
+        modeRunning = run;
     };
-    static void stop()
+    static bool getRunning()
     {
-        started = false;
+        return modeRunning;
     };
     void setOntimeUS(float ontimeUS, bool force = false)
     {
         filteredOntimeUS.setTarget(ontimeUS, force);
     };
+    void setDuty(float duty, bool force = false)
+    {
+        float ontimeUS = duty * 1e6f / frequency;
+        filteredOntimeUS.setTarget(ontimeUS, force);
+    };
     void setFrequency(float freq, bool force = false)
     {
+        frequency = freq;
         filteredFrequency.setTarget(freq, force);
+    };
+    float getDuty()
+    {
+        return filteredOntimeUS.getTarget() * filteredFrequency.getTarget() / 1e6f;
+    };
+    float getOntimeUS()
+    {
+        return filteredOntimeUS.getTarget();
+    };
+    float getFrequency()
+    {
+        return filteredFrequency.getTarget();
     };
 private:
     Filter filteredOntimeUS, filteredFrequency;
     ToneList* tonelist;
     Tone* tone;
     uint32_t updatePeriodUS = 10000, lastUpdateUS = 0;
-    static bool started;
+    float frequency = 0.0f;
+    static bool modeRunning;
+
+    friend class EEPROMSettings;
 };
 
 #endif /* SIMPLE_H_ */

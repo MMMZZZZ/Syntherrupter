@@ -33,16 +33,19 @@ Everything else will connect to this board. How? Where? What pins? Beside the in
 ## Display
 
 ### Introduction
+
+Syntherrupter was originally designed as touch screen device. However, if you don't want a graphical user interface you can easily control it [via command line](https://github.com/MMMZZZZ/Syfoh#readme), too. In that case you really only need the Tiva board.
+
 Syntherrupters UI is designed for a special touch display called "Nextion". They have their own microcontroller that runs the whole UI which makes development *a lot* easier. Assembly gets easier, too. No 40 pin flat-flex cable, only 5V supply and two data pins. 
 
-There are multiple display versions that can do the job. If you don't care and simply want to go with the recommended display from the recommended shop, click [here](https://www.itead.cc/nextion-nx8048k050.html) and you're good.
+There are multiple display versions that can do the job. If you don't care and simply want to go with the recommended display from the recommended shop, click [here](https://www.itead.cc/5-0-nextion-intelligent-series-hmi-resistive-capacitive-touch-display-without-enclosure.html) and you're good.
 
 Btw. since they are resistive touch screens, they aren't affected by EMI like the capacitive screen of your smartpone. 
 
 You don't need a standalone interrupter? Well, you can run the user interface on the PC, too. In that case you don't need a display at all ([see below](#without-a-display)).
 
 ### Suitable Models
-Nextions ease of use comes at a cost. Litterally. These displays are rather expensive, starting at 64$ for the 5" version. Starting? Yes, there are actually 6 displays that are suitable for Syntherrupter:
+Nextions ease of use comes at a cost. Literally. These displays are rather expensive, starting at 64$ for the 5" version. Starting? Yes, there are actually 6 displays that are suitable for Syntherrupter:
 
 * `NX8048T050_011R`: Nextion 5" Basic series ([Official shop: 65$](https://www.itead.cc/nextion-nx8048t050.html))
 * `NX8048T070_011R`: Nextion 7" Basic series ([Official shop: 75$](https://www.itead.cc/nextion-nx8048t070.html))
@@ -76,9 +79,12 @@ To keep things simple I won't write "Nextion or TJC display" every time but simp
 
 ### Without a display
 
-The user interface can be run on a Windows PC. This requires an additional Serial to USB converter that connects to the same Pins as the Nextion display would ([see below](#wiring)).
+The user interface can be run on a Windows PC. Unlike the command line interface the GUI requires an additional Serial to USB converter that connects to the same Pins as the Nextion display would ([see below](#wiring)). 
 
-* Download, install and open the Nextion Editor. For firmwares up to  v4.1.0 you need Nextion Editor v1.61.1 (Download as [ZIP (portable)](https://nextion.tech/download/nextion-setup-v1-61-1.zip) or [Installer](https://nextion.tech/download/nextion-setup-v1-61-1.exe)). Unfortunately each of their updates breaks compatibility... I'll keep this section updated.
+* Download, install and open the Nextion Editor. 
+  * For firmwares up to v4.1.3 you need Nextion Editor v1.61.1 (Download as [ZIP (portable)](https://nextion.tech/download/nextion-setup-v1-61-1.zip) or [Installer](https://nextion.tech/download/nextion-setup-v1-61-1.exe)). 
+  * For firmware versions 4.1.4 to 4.2.0-beta.5 you need Nextion Editor v1.62.1 which is not available for download anymore; Nextion wants to force people to use v1.63.x and newer. For the record, here are the broken links: [ZIP (portable)](https://nextion.tech/download/nextion-setup-v1-62-1.zip), [Installer](https://nextion.tech/download/nextion-setup-v1-62-1.exe). Workaround: download the "Source Code" zip file attached to the release and open the .HMI file that can be found in the extraced zip content under `Syntherrupter_Nextion/Syntherrupter_Nextion.HMI`. You can use pretty much any Nextion editor version but I'd recommend v1.63.3 (see next point). Once you opened the file in the editor, contine with the steps below. 
+  * For firmware versions 4.2.0-beta.6 and newer you need Nextion editor v1.63.3 (Download as [ZIP (portable)](https://nextion.tech/download/nextion-setup-v1-63-3.zip) or [Installer](https://nextion.tech/download/nextion-setup-v1-63-3.exe)). 
 * Click "Debug" on the top right. A file dialog opens. Select the *Syntherrupter_Nextion_NX8048T050.tft* file from the release zip file. 
 * A new window opens. At the bottom left select "User MCU Input" and then the COM port of the Serial to USB converter. Baud rate is 115200baud/s.
 * You may need to reset the Tiva. 

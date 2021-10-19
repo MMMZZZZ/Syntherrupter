@@ -9,7 +9,7 @@
 #include <LightSaber.h>
 
 
-bool     LightSaber::started = false;
+bool     LightSaber::modeRunning = false;
 uint32_t LightSaber::lastPacket = 0;
 UART     LightSaber::uart;
 LSData   LightSaber::lightsabers[MAX_CLIENTS];
@@ -35,38 +35,39 @@ void LightSaber::init(uint32_t uartPort, uint32_t uartRxPin, uint32_t uartTxPin,
     uint32_t startTimeUS = System::getSystemTimeUS();
     while (System::getSystemTimeUS() - startTimeUS < ESP_START_TIMEOUT_US)
     {
-        if (uart.buffer.level() > 10)
+        if (uart.rxBuffer.level() > 10)
         {
             // Message has started
             System::delayUS(ESP_START_MSG_DURATION_US);
             break;
         }
     }
-    uart.buffer.flush();
+    uart.rxBuffer.flush();
     uart.disable();
 }
 
-void LightSaber::start()
+void LightSaber::setRunning(bool run)
 {
-    started = true;
-    uart.enable();
-}
-
-void LightSaber::stop()
-{
-    started = false;
-    uart.disable();
-    lastPacket = 0;
+    modeRunning = run;
+    if (run)
+    {
+        uart.enable();
+    }
+    else
+    {
+        uart.disable();
+        lastPacket = 0;
+    }
 }
 
 void LightSaber::process()
 {
-    if (started)
+    if (modeRunning)
     {
         uint32_t timeUS = System::getSystemTimeUS();
         static uint32_t lastBufferLevel{0};
         static uint32_t lastTimeUS{0};
-        uint32_t newBufferLevel = uart.buffer.level();
+        uint32_t newBufferLevel = uart.rxBuffer.level();
         float data[6];
         uint32_t target = 0;
 
@@ -78,13 +79,13 @@ void LightSaber::process()
         }
         else if (timeUS - lastTimeUS > PACKET_TIMEOUT_US)
         {
-            uart.buffer.flush();
+            uart.rxBuffer.flush();
             lastTimeUS = timeUS;
         }
 
-        if (uart.buffer.level() >= DATA_SIZE + 1)
+        if (uart.rxBuffer.level() >= DATA_SIZE + 1)
         {
-            uint8_t dataByte = uart.buffer.read();
+            uint8_t dataByte = uart.rxBuffer.read();
             if (dataByte && dataByte < MAX_CLIENTS)
             {
                 lastPacket = timeUS;
@@ -93,12 +94,12 @@ void LightSaber::process()
                 // Data is originally an array of 6 floats, transmitted byte by byte.
                 for (uint32_t i = 0; i < 24; i++)
                 {
-                    ((uint8_t*) ((void*) data))[i] = uart.buffer.read();
+                    ((uint8_t*) ((void*) data))[i] = uart.rxBuffer.read();
                 }
             }
             else
             {
-                uart.buffer.flush();
+                uart.rxBuffer.flush();
             }
         }
 
@@ -133,7 +134,7 @@ void LightSaber::updateTonelist()
         {
             ls->changed &= ~coilBit;
 
-            if (started && ls->assignedCoils & coilBit)
+            if (modeRunning && ls->assignedCoils & coilBit)
             {
                 if (lastTone)
                 {
@@ -186,7 +187,7 @@ void LightSaber::updateTonelist()
 
 bool LightSaber::ESPCommand(uint8_t address, uint8_t data)
 {
-    uart.buffer.flush();
+    uart.rxBuffer.flush();
     uart.sendChar(address);
     uart.sendChar(data);
 
@@ -194,9 +195,9 @@ bool LightSaber::ESPCommand(uint8_t address, uint8_t data)
     uint32_t startTimeUS = System::getSystemTimeUS();
     while (System::getSystemTimeUS() - startTimeUS < ESP_CMD_TIMEOUT_US)
     {
-        if (uart.buffer.level() == 1)
+        if (uart.rxBuffer.level() == 1)
         {
-            if (uart.buffer.read() == data)
+            if (uart.rxBuffer.read() == data)
             {
                 return true;
             }

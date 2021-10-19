@@ -26,15 +26,20 @@ public:
     {
         return (number > 127);
     };
+    // For debugging purposes only.
+    uint32_t id = 0;
+
+    Note* prevNote = 0;
+    Note* nextNote = 0;
+    Note* nextChnNote = 0;
     Channel* channel = 0;
-    uint32_t EnvelopeStep    = 0;
+    uint32_t envelopeStep    = 0;
     uint8_t number           = 0;
     uint8_t velocity         = 0;
     uint8_t afterTouch       = 0;
-    float EnvelopeTimeUS     = 0.0f;
-    float EnvelopeStepTimeUS = 0.0f;
+    float envelopeTimeUS     = 0.0f;
     float rawVolume          = 0.0f;
-    float EnvelopeVolume     = 0.0f;
+    float envelopeVolume     = 0.0f;
     float finishedVolume     = 0.0f;
     float pitch              = 0.0f;
     float frequency          = 0.0f;
@@ -45,12 +50,6 @@ public:
     uint8_t toneChanged      = (1 << COIL_COUNT) - 1;
     bool  changed            = true;
     Tone* assignedTones[COIL_COUNT];
-    Note* prevNote = 0;
-    Note* nextNote = 0;
-    Note* nextChnNote = 0;
-
-    // For debugging purposes only.
-    uint32_t id = 0;
 };
 
 #endif /* NOTE_H_ */

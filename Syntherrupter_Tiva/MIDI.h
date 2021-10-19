@@ -11,15 +11,16 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <math.h>
 #include "InterrupterConfig.h"
+#include "Branchless.h"
 #include "System.h"
 #include "Channel.h"
 #include "UART.h"
-#include "ByteBuffer.h"
+#include "Buffer.h"
 #include "ToneList.h"
 #include "NoteList.h"
 #include "MIDIProgram.h"
+#include "SysexMsg.h"
 
 
 class MIDI
@@ -27,70 +28,123 @@ class MIDI
 public:
     MIDI();
     virtual ~MIDI();
+    void init(uint32_t num, ToneList* tonelist);
+    void updateToneList();
+    void setVolSettingsPerm(float ontimeUSMax, float dutyMaxProm);
+    void setVolSettings(float ontimeUSMax, float dutyMax);
+    void setOntimeUS(float ontimeUSMax)
+    {
+        setVolSettings(ontimeUSMax, singleNoteMaxDuty);
+    };
+    void setDuty(float dutyMax)
+    {
+        setVolSettings(singleNoteMaxOntimeUS, dutyMax);
+    };
+    void setChannels(uint32_t chns);
+    uint32_t getChannels()
+    {
+        return activeChannels;
+    };
+    void setPan(float pan);
+    float getPan()
+    {
+        return coilPan;
+    };
+    void setPanReach(float reach);
+    float getPanReach()
+    {
+        return 1.0f / inversPanReach;
+    };
+    void setPanConstVol(bool cnst)
+    {
+        panConstVol    = cnst;
+        coilPanChanged = true;
+    };
+    bool getPanConstVol()
+    {
+        return panConstVol;
+    };
+    void setMaxVoices(uint32_t maxVoices);
+    uint32_t getMaxVoices()
+    {
+        return *coilMaxVoices;
+    };
+    float getOntimeUS()
+    {
+        return singleNoteMaxOntimeUS;
+    };
+    float getDuty()
+    {
+        return singleNoteMaxDuty;
+    };
     static void init(uint32_t usbBaudRate, void (*usbISR)(void),
                      uint32_t midiUartPort, uint32_t midiUartRx,
                      uint32_t midiUartTx, void (*midiISR)(void));
-    void updateToneList();
-    void setCoilsToneList(ToneList* tonelist)
+    static void setRunning(bool run);
+    static bool getRunning()
     {
-        this->tonelist = tonelist;
+        return modeRunning;
     };
-    void setCoilNum(uint32_t num);
-    static void start();
-    static void stop();
     static void resetNRPs(uint32_t chns = 0xffff);
-    void setVolSettings(float ontimeUSMax, float dutyMax);
-    void setChannels(uint32_t chns);
-    void setPan(uint32_t pan);
-    void setPanReach(uint32_t reach);
-    void setMaxVoices(uint32_t maxVoices);
-    static bool isPlaying()
-    {
-        return playing;
-    };
     static void process();
+    static SysexMsg getSysex()
+    {
+        if (sysexMsg.newMsg)
+        {
+            sysexMsg.newMsg--;
+        }
+        return sysexMsg;
+    }
     static Channel channels[16];
     static UART usbUart, midiUart;
-    static ByteBuffer otherBuffer;
+    static Buffer<uint8_t, 512> otherBuffer;
     static constexpr uint32_t MAX_PROGRAMS = 64;
     static MIDIProgram programs[MAX_PROGRAMS];
+    static constexpr uint32_t SYSEX_PROTOCOL_VERSION = 1;
 
 private:
     static bool processBuffer(uint32_t b);
     static void updateEffects(Note* note);
+    static void processSysex(uint32_t sysexNum, uint32_t targetLSB, uint32_t targetMSB, int32_t sysexVal);
     void setPanVol(Note* note)
     {
         if (note->panChanged || coilPanChanged)
         {
-            if (note->panChanged & coilBit)
-            {
-                note->panChanged &= ~coilBit;
-            }
+            note->panChanged &= ~coilBit;
             // 1.01f instead of 1.0f to include the borders of the range.
-            note->panVol[coilNum] = 1.01f - inversPanReach * fabsf(note->pan - coilPan);
-            if (note->panVol[coilNum] <= 0.0f)
-            {
-                note->panVol[coilNum] = 0.0f;
-            }
-            else if (panConstVol)
-            {
-                note->panVol[coilNum] = 1.0f;
-            }
 
-            if (coilPan < 0.0f || note->channel->notePanMode == Channel::NOTE_PAN_OMNI)
-            {
-                note->panVol[coilNum] = 1.0f;
-            }
+            // Limit lower range to 0.0f
+            note->panVol[coilNum] = Branchless::max(0.0f, 1.01f - inversPanReach * fabsf(note->pan - coilPan));
+
+            // if panVol != 0 and panConstVol, set panVol to 1.0f
+            // Detailed explanation of the reasoning below.
+            float panConstant = (panConstVol && note->panVol[coilNum]);
+            note->panVol[coilNum] = Branchless::max(note->panVol[coilNum], panConstant);
         }
+
+        /*
+         * panVol now ranges from 0-1. If pan stuff is for some reason disabled
+         * panVol should be 1. So if condition is true == 1, set panVol to 1.
+         * Effectively this is the same as max(panVol, condition). If the
+         * condition is false (== 0, meaning that pan stuff *is* enabled), then
+         * the panVol is in all cases >= than the condition and remains
+         * unchanged. Otherwise - with the same reasoning - it'll be changed to
+         * 1.0f.
+         * Previous code:
+         *     if (coilPan < 0.0f || note->channel->notePanMode == Channel::NOTE_PAN_OMNI)
+         *     {
+         *         note->panVol[coilNum] = 1.0f;
+         *     }
+         */
+        float panDisabled = (coilPan < 0.0f || note->channel->notePanMode == Channel::NOTE_PAN_OMNI);
+        note->panVol[coilNum] = Branchless::max(note->panVol[coilNum], panDisabled);
     };
     static float getLFOVal(Channel* channel)
     {
         if (channel->modulation)
         {
             /*
-             *               /            t   \
-             * LFO_SINE = sin| 2 * Pi * ----- |
-             *               \           T_0  /
+             * LFO_SINE = sin( 2 * Pi * f * t[us] * 1e-6 )
              *
              *       1   /  LFO_SINE + 1       ModWheelValue    \
              * val = - * | --------------- * ------------------ |
@@ -98,8 +152,8 @@ private:
              *
              * sine wave between 0 and 1 mapped to the desired modulation depth (50% max).
              */
-            return (sinf(6.283185307179586f * float(System::getSystemTimeUS()) / LFO_PERIOD_US) + 1) / 4.0f
-                    * channel->modulation;
+            return (sinf(6.283185307179586e-6f * float(System::getSystemTimeUS()) * (*lfoFreq)) + 1) / 2.0f
+                    * channel->modulation * (*lfoDepth);
         }
         else
         {
@@ -129,39 +183,16 @@ private:
 
     static float freqTable[128];
 
-    static constexpr uint32_t ADSR_PROGRAM_COUNT     = 9;
-    // TODO: The following list is missing the newer sounds.
-    // Note Durations cant be 0. To "skip" D/S/R set Duration to 1.0f (any very small value) and Amplitude to exactly the previous one.
-    // 0: No ADSR
-    // 1: Normal ("Piano")
-    // 2: Slow Pad (Slooow rise, sloow fall)
-    // 3: Slow Step Pad (As Slow Pad, but with a faster step at the beginning. good for faster notes
-    // 4: Pad
-    // 5: Staccato (no long notes possible. They're short. Always.
-    // 6: Legator (release = prolonged sustain)
-    static constexpr float ADSR_LEGACY_PROGRAMS[ADSR_PROGRAM_COUNT + 1][8]
-
-             // Attack Amp/Invers Dur.       Decay Amp/Invers Dur.        Sustain Amp/Invers Dur.       Release Amp/Invers Dur.
-           = {{1.0f,              1.0f,     1.0f,              1.0f,     1.0f,               1.0f,      0.0f,              1.0f},
-
-              {1.0f, 1.0f /   30000.0f,     0.5f, 1.0f /   10000.0f,     0.10f, 1.0f /  3500000.0f,     0.0f, 1.0f /   10000.0f},
-              {1.0f, 1.0f / 4000000.0f,     1.0f, 1.0f /       1.0f,     1.00f, 1.0f /        1.0f,     0.0f, 1.0f / 1000000.0f},
-              {0.3f, 1.0f /    8000.0f,     1.0f, 1.0f / 4000000.0f,     1.00f, 1.0f /        1.0f,     0.0f, 1.0f / 1000000.0f},
-              {1.0f, 1.0f / 1500000.0f,     1.0f, 1.0f /       1.0f,     1.00f, 1.0f /        1.0f,     0.0f, 1.0f /  500000.0f},
-              {1.0f, 1.0f /    3000.0f,     0.4f, 1.0f /   30000.0f,     0.00f, 1.0f /   400000.0f,     0.0f, 1.0f /       1.0f},
-              {1.0f, 1.0f /    7000.0f,     0.5f, 1.0f /   10000.0f,     0.25f, 1.0f /  3000000.0f,     0.0f, 1.0f / 3000000.0f},
-              {0.3f, 1.0f /    8000.0f,     1.0f, 1.0f / 4000000.0f,     1.00f, 1.0f /        1.0f,     0.0f, 1.0f /  400000.0f},
-              {2.0f, 1.0f /   30000.0f,     1.0f, 1.0f /    2500.0f,     0.10f, 1.0f /  3500000.0f,     0.0f, 1.0f /   10000.0f},
-              {3.0f, 1.0f /    3000.0f,     1.0f, 1.0f /   27000.0f,     0.00f, 1.0f /   400000.0f,     0.0f, 1.0f /       1.0f},
-    };
-
     static constexpr uint32_t effectResolutionUS = 2000;
 
+    static constexpr uint32_t SYSEX_MAX_SIZE = 16;
     static constexpr uint32_t    BUFFER_COUNT = 3;
-    static constexpr ByteBuffer* BUFFER_LIST[BUFFER_COUNT] = {&(usbUart.buffer), &(midiUart.buffer), &otherBuffer};;
+    static constexpr Buffer<uint8_t, 512>* BUFFER_LIST[BUFFER_COUNT] = {&(usbUart.rxBuffer), &(midiUart.rxBuffer), &otherBuffer};
     static constexpr uint32_t MAX_NOTES_COUNT = 64;
     static NoteList notelist;
-    static uint32_t           notesCount;
+    static uint32_t notesCount;
+    static uint8_t* sysexDeviceID;
+    static SysexMsg sysexMsg;
     ToneList* tonelist;
     float absFreq               =  0.0f;
     float singleNoteMaxDuty     =  0.0f;
@@ -170,15 +201,18 @@ private:
     float inversPanReach        =  0.0f;
     uint8_t volMode             =  3;
     uint16_t activeChannels     =  0xffff;
-    uint32_t coilMaxVoices      =  0;
+    uint32_t* coilMaxVoices;
     uint32_t coilNum            =  0;
     uint8_t  coilBit            =  0;
     bool coilChange             = false;
     bool coilPanChanged         = false;
     bool panConstVol            = false;
 
-    static bool playing;
-    static constexpr float LFO_PERIOD_US          = 200000.0f;
+    static bool modeRunning;
+    static float* lfoFreq;
+    static float* lfoDepth;
+
+    friend class EEPROMSettings;
 };
 
 #endif /* H_ */

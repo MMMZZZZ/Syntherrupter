@@ -9,7 +9,7 @@
 #include <GUI.h>
 
 
-Nextion GUI::nxt;
+Nextion* GUI::nxt;
 
 uint32_t GUI::state           = 0;
 uint32_t GUI::command         = 0;
@@ -18,10 +18,12 @@ uint32_t GUI::commandData[33] = {0, 0, 0, 0, 0, 0, 0, 0,
                                  0, 0, 0, 0, 0, 0, 0, 0,
                                  0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-Mode GUI::mode = Mode::idle;
+GUI::Mode GUI::mode = GUI::Mode::idle;
 
 constexpr uint32_t GUI::errorLen;
 char GUI::errorTxt[errorLen];
+
+bool GUI::acceptsData = true;
 
 bool GUI::EEE = false;
 uint32_t GUI::EET = 0;
@@ -40,10 +42,9 @@ GUI::~GUI()
 
 }
 
-void GUI::init()
+void GUI::init(Nextion* nextion, uint32_t cfgStatus)
 {
-    bool cfgInEEPROM = EEPROMSettings::init();
-    nxt.init(3, 115200, nxtTimeoutUS);
+    nxt = nextion;
 
     /* Try to modify and read a Nextion value. If this works we know the
      * Nextion is ready. If this doesn't work, something is wrong with
@@ -53,138 +54,125 @@ void GUI::init()
      * that mode).
      */
     uint32_t startTime = System::getSystemTimeUS();
-    bool nxtOK = false;
-    while ((System::getSystemTimeUS() - startTime) < nxtStartTimeoutUS && !nxtOK)
-    {
-        nxt.sendCmd("rest");
-        System::delayUS(700000);
-        nxt.setVal("comOk", 1);
-        System::delayUS(20000);
-        if (nxt.getVal("comOk") == 1)
-        {
-            nxtOK = true;
-        }
-    }
 
-    if (!nxtOK)
+    if (!nextion->available())
     {
-        mode = Mode::nxtFWUpdate;
+        // No screen connected. Thus no need to send any data to it.
+        acceptsData = false;
+        return;
     }
     else
     {
+        // Check if the screen got the correct firmware. Otherwise enter
+        // passthrough mode to allow flashing the screen.
+        nxt->setVal("comOk", 2);
+        if (nxt->getVal("comOk") != 2)
+        {
+            mode = Mode::nxtFWUpdate;
+            return;
+        }
+
         /*
-         * If there is a valid configuration in the EEPROM, load it and send it to
-         * the Nextion GUI. Note: While the Nextion class has methods for setting
-         * component values without knowing the Nextion command structure, it is
-         * easier here to create the commands directly.
-         * Data format is equal to the microcontroller command format and
-         * documented in a separate file.
+         * Send all the settings to the Nextion display.
+         * Note: even if no valid config was found, meaningful
+         * default values have been loaded.
          */
-        if (cfgInEEPROM)
+
+        // User 2 ontime and duty are determined by the max coil settings.
+        uint32_t allCoilsMaxOntimeUS = 0;
+        uint32_t allCoilsMaxDutyPerm = 0;
+
+        // Settings of all coils
+        for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
         {
-            // User 2 ontime and duty are determined by the max coil settings.
-            uint32_t allCoilsMaxOntimeUS = 0;
-            uint32_t allCoilsMaxDutyPerm = 0;
+            uint32_t& maxOntimeUS   = EEPROMSettings::coilData[coil].maxOntimeUS;
+            uint32_t& minOfftimeUS  = EEPROMSettings::coilData[coil].minOfftimeUS;
+            uint32_t& maxMidiVoices = EEPROMSettings::coilData[coil].midiMaxVoices;
+            uint32_t& maxDutyPerm   = EEPROMSettings::coilData[coil].maxDutyPerm;
 
-            // Settings of all coils
-            const char *AllCoilSettings = "TC_Settings";
-            for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+            if (maxOntimeUS > allCoilsMaxOntimeUS)
             {
-                // Load settings
-                uint32_t maxOntimeUS = EEPROMSettings::getCoilsMaxOntimeUS(coil);
-                uint32_t minOffUS    = EEPROMSettings::getCoilsMinOffUS(coil);
-                uint32_t maxVoices   = EEPROMSettings::getCoilsMaxVoices(coil);
-                uint32_t maxDutyPerm = EEPROMSettings::getCoilsMaxDutyPerm(coil);
-
-                if (maxOntimeUS > allCoilsMaxOntimeUS)
-                {
-                    allCoilsMaxOntimeUS = maxOntimeUS;
-                }
-                if (maxDutyPerm > allCoilsMaxDutyPerm)
-                {
-                    allCoilsMaxDutyPerm = maxDutyPerm;
-                }
-
-                // Apply to coil objects
-                coils[coil].setMaxVoices(maxVoices);
-                coils[coil].setMaxDutyPerm(maxDutyPerm);
-                coils[coil].setMaxOntimeUS(maxOntimeUS);
-                coils[coil].setMinOfftimeUS(minOffUS);
-
-                // Send to Nextion
-                nxt.printf("%s.coil%iOn.val=%i\xff\xff\xff",
-                           AllCoilSettings, coil + 1, maxOntimeUS);
-                nxt.printf("%s.coil%iOffVoics.val=%i\xff\xff\xff",
-                           AllCoilSettings, coil + 1, (maxVoices << 16) + minOffUS);
-                nxt.printf("%s.coil%iDuty.val=%i\xff\xff\xff",
-                           AllCoilSettings, coil + 1, maxDutyPerm);
-                // Give time to the UART to send the data
-                System::delayUS(20000);
+                allCoilsMaxOntimeUS = maxOntimeUS;
+            }
+            if (maxDutyPerm > allCoilsMaxDutyPerm)
+            {
+                allCoilsMaxDutyPerm = maxDutyPerm;
             }
 
-            // Settings of the 3 users
-            const char *AllUsersPage = "User_Settings";
-            for (uint32_t user = 0; user < 3; user++)
+            // Send to Nextion
+            nxt->sendCmd("TC_Settings.coil%iOn.val=%i",
+                         coil + 1, maxOntimeUS);
+            nxt->sendCmd("TC_Settings.coil%iOffVoics.val=%i",
+                         coil + 1, (maxMidiVoices << 16) + minOfftimeUS);
+            nxt->sendCmd("TC_Settings.coil%iDuty.val=%i",
+                         coil + 1, maxDutyPerm);
+        }
+
+        // Settings of the 3 users
+        for (uint32_t user = 0; user < 3; user++)
+        {
+            uint16_t& maxOntimeUS = EEPROMSettings::userData[user].maxOntimeUS;
+            uint16_t& maxBPS      = EEPROMSettings::userData[user].maxBPS;
+            uint16_t& maxDutyPerm = EEPROMSettings::userData[user].maxDutyPerm;
+
+            if (user == 2)
             {
-                uint32_t maxOntimeUS = EEPROMSettings::getUsersMaxOntimeUS(user);
-                uint32_t maxBPS      = EEPROMSettings::getUsersMaxBPS(user);
-                uint32_t maxDutyPerm = EEPROMSettings::getUsersMaxDutyPerm(user);
-
-                if (user == 2)
-                {
-                    maxOntimeUS = allCoilsMaxOntimeUS;
-                    maxDutyPerm = allCoilsMaxDutyPerm;
-                }
-
-                nxt.printf("%s.u%iName.txt=\"%s\"\xff\xff\xff",
-                           AllUsersPage, user, EEPROMSettings::userNames[user]);
-                nxt.printf("%s.u%iCode.txt=\"%s\"\xff\xff\xff",
-                           AllUsersPage, user, EEPROMSettings::userPwds[user]);
-                nxt.printf("%s.u%iOntime.val=%i\xff\xff\xff",
-                           AllUsersPage, user, maxOntimeUS);
-                nxt.printf("%s.u%iBPS.val=%i\xff\xff\xff",
-                           AllUsersPage, user, maxBPS);
-                nxt.printf("%s.u%iDuty.val=%i\xff\xff\xff",
-                           AllUsersPage, user, maxDutyPerm);
-                // Give time to the UART to send the data
-                System::delayUS(20000);
+                maxOntimeUS = allCoilsMaxOntimeUS;
+                maxDutyPerm = allCoilsMaxDutyPerm;
             }
 
-            // Load envelopes
-            EEPROMSettings::getMIDIPrograms();
-
-            // Other Settings
-            uint32_t buttonHoldTime =  EEPROMSettings::otherSettings[0]        & 0xffff;
-            uint32_t sleepDelay     = (EEPROMSettings::otherSettings[0] >> 16) & 0xffff;
-            uint32_t dispBrightness =  EEPROMSettings::otherSettings[1]        & 0xff;
-            uint32_t backOff        = (EEPROMSettings::otherSettings[1] >>  8) & 0b1;
-            uint32_t colorMode      = (EEPROMSettings::otherSettings[1] >>  9) & 0b1;
-            nxt.printf("Other_Settings.nHoldTime.val=%i\xff\xff\xff",
-                          buttonHoldTime);
-            nxt.printf("thsp=%i\xff\xff\xff", sleepDelay);
-            nxt.printf("dim=%i\xff\xff\xff", dispBrightness);
-            //nxt.printf("Other_Settings.nBackOff.val=%i\xff\xff\xff", backOff);
-            nxt.printf("Settings.colorMode.val=%i\xff\xff\xff", colorMode);
-
-            // Give time to the UART to send the data
-            System::delayUS(20000);
+            nxt->sendCmd("User_Settings.u%iName.txt=\"%s\"",
+                         user, EEPROMSettings::userData[user].name);
+            nxt->sendCmd("User_Settings.u%iCode.txt=\"%s\"",
+                         user, EEPROMSettings::userData[user].password);
+            nxt->sendCmd("User_Settings.u%iOntime.val=%i",
+                         user, maxOntimeUS);
+            nxt->sendCmd("User_Settings.u%iBPS.val=%i",
+                         user, maxBPS);
+            nxt->sendCmd("User_Settings.u%iDuty.val=%i",
+                         user, maxDutyPerm);
         }
-        else
+
+        // Other Settings
+        nxt->setVal("Other_Settings.nHoldTime", EEPROMSettings::deviceData.uiButtonHoldTime);
+        nxt->setVal("thsp", EEPROMSettings::deviceData.uiSleepDelay, Nextion::NO_EXT);
+        nxt->setVal("dim", EEPROMSettings::deviceData.uiBrightness, Nextion::NO_EXT);
+        //nxt->printf("Other_Settings.nBackOff.val=%i\xff\xff\xff", backOff);
+        nxt->setVal("Settings.colorMode", EEPROMSettings::deviceData.uiColorMode);
+
+        nxt->setVal("TC_Settings.maxCoilCount", COIL_COUNT);
+        nxt->setVal("Env_Settings.maxSteps", MIDIProgram::DATA_POINTS);
+
+        // If default values had to be loaded, inform the user.
+        if (cfgStatus == EEPROMSettings::CFG_UNKNOWN)
         {
-            // Show warning if no valid config is present in EEPROM.
-            nxt.sendCmd("tStartup.txt=sNoConfig.txt");
-            nxt.sendCmd("tStartup.font=0");
-
-            EEPROMSettings::setMIDIPrograms();
+            // Show warning that a newer version has been found.
+            nxt->sendCmd("tStartup.font=0");
+            nxt->sendCmd("tStartup.txt=\"  Warning! EEPROM contains incompatible\\r"
+                                        "  data (v%i).\\r"
+                                        "  Check the online wiki for details.\"", EEPROMSettings::version);
         }
-        nxt.setVal("TC_Settings.maxCoilCount", COIL_COUNT);
-        nxt.setVal("Env_Settings.maxSteps", MIDIProgram::DATA_POINTS);
+        else if (cfgStatus == EEPROMSettings::NO_CFG)
+        {
+            // Show warning that only default values have been loaded.
+            nxt->sendCmd("tStartup.font=0");
+            nxt->sendCmd("tStartup.txt=\"  Warning! EEPROM contains no data.\\r"
+                                        "  Default values loaded.\\r"
+                                        "  Check the online wiki for details.\"");
+        }
+        else if (cfgStatus == EEPROMSettings::CFG_UPGRADED)
+        {
+            nxt->sendCmd("tStartup.font=0");
+            nxt->sendCmd("tStartup.txt=\"Warning! EEPROM format will be\\r"
+                                        "upgraded. Check all values before\\r"
+                                        "upgrading with Settings->Save.\"");
+        }
 
         // Display Tiva firmware versions
-        nxt.setTxt("tTivaFWVersion", TIVA_FW_VERSION);
+        nxt->setTxt("tTivaFWVersion", TIVA_FW_VERSION);
 
         // Initialization completed.
-        nxt.sendCmd("click comOk,1");
+        nxt->sendCmd("click comOk,1");
     }
 }
 
@@ -207,18 +195,18 @@ void GUI::setError(const char* err)
 
 void GUI::showError()
 {
-    nxt.setPage("Error");
-    nxt.setTxt("tInfo", errorTxt);
+    nxt->setPage("Error");
+    nxt->setTxt("tInfo", errorTxt);
 }
 
-bool GUI::checkValue(uint32_t val)
+bool GUI::checkValue(int32_t val)
 {
-    if (val == nxt.receiveErrorVal)
+    if (val == nxt->receiveErrorVal)
     {
         setError("Wert unplausibel");
         return false;
     }
-    if (val == nxt.receiveTimeoutVal)
+    if (val == nxt->receiveTimeoutVal)
     {
         setError("Zeitüberschreitung");
         return false;
@@ -238,25 +226,25 @@ uint32_t GUI::update()
     uint32_t time = 0;
 
     // receive and store command
-    if (nxt.charsAvail())
+    if (nxt->charsAvail())
     {
-        command = nxt.getChar();
+        command = nxt->getChar();
         time = System::getSystemTimeUS();
         switch (command)
         {
             case 'm':
             {
-                while (nxt.charsAvail() < 2)
+                while (nxt->charsAvail() < 2)
                 {
-                    if (System::getSystemTimeUS() - time > nxtTimeoutUS)
+                    if (System::getSystemTimeUS() - time > Nextion::defaultTimeoutUS)
                     {
                         setError("Data timeout");
                         showError();
                         System::error();
                     }
                 }
-                char modeByte0 = nxt.getChar();
-                char modeByte1 = nxt.getChar();
+                char modeByte0 = nxt->getChar();
+                char modeByte1 = nxt->getChar();
                 if (modeByte0 == 'e' && modeByte1 == 'x')
                 {
                     if (mode == Mode::simple)
@@ -304,10 +292,18 @@ uint32_t GUI::update()
                 {
                     for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
                     {
-                        coils[coil].midi.setVolSettings(0.0f, 0.0f);
-                        coils[coil].simple.setOntimeUS(0.0f, true);
-                        coils[coil].lightsaber.setOntimeUS(0.0f);
+                        Coil::allCoils[coil].midi.setVolSettings(0.0f, 0.0f);
+                        Coil::allCoils[coil].simple.setOntimeUS(0.0f, true);
+                        Coil::allCoils[coil].lightsaber.setOntimeUS(0.0f);
                     }
+                }
+                else if (modeByte0 == 'a' && modeByte1 == 'd')
+                {
+                    acceptsData = true;
+                }
+                else if (modeByte0 == 'd' && modeByte1 == 'd')
+                {
+                    acceptsData = false;
                 }
                 else
                 {
@@ -320,12 +316,12 @@ uint32_t GUI::update()
                 uint32_t i = 0;
                 while (i < 5)
                 {
-                    if (nxt.charsAvail())
+                    if (nxt->charsAvail())
                     {
-                        commandData[i++] = nxt.getChar();
+                        commandData[i++] = nxt->getChar();
                         time = System::getSystemTimeUS();
                     }
-                    if (System::getSystemTimeUS() - time > nxtTimeoutUS)
+                    if (System::getSystemTimeUS() - time > Nextion::defaultTimeoutUS)
                     {
                         setError("Data timeout");
                         showError();
@@ -339,12 +335,12 @@ uint32_t GUI::update()
                 uint32_t i = 0;
                 while (i < 3)
                 {
-                    if (nxt.charsAvail())
+                    if (nxt->charsAvail())
                     {
-                        commandData[i++] = nxt.getChar();
+                        commandData[i++] = nxt->getChar();
                         time = System::getSystemTimeUS();
                     }
-                    if (System::getSystemTimeUS() - time > nxtTimeoutUS)
+                    if (System::getSystemTimeUS() - time > Nextion::defaultTimeoutUS)
                     {
                         setError("Data timeout");
                         showError();
@@ -356,28 +352,28 @@ uint32_t GUI::update()
             case 'u':
             {
                 // We need at least 1 additional byte.
-                while (!nxt.charsAvail())
+                while (!nxt->charsAvail())
                 {
-                    if (System::getSystemTimeUS() - time > nxtTimeoutUS)
+                    if (System::getSystemTimeUS() - time > Nextion::defaultTimeoutUS)
                     {
                         setError("Data timeout");
                         showError();
                         System::error();
                     }
                 }
-                commandData[0] = nxt.getChar();
+                commandData[0] = nxt->getChar();
 
                 // Now we can determine the amount of data that follows and wait for it.
                 uint32_t cmdLength = (commandData[0] & 0b00011111) + 1;
                 uint32_t i = 1;
                 while (i <= cmdLength)
                 {
-                    if (nxt.charsAvail())
+                    if (nxt->charsAvail())
                     {
-                        commandData[i++] = nxt.getChar();
+                        commandData[i++] = nxt->getChar();
                         time = System::getSystemTimeUS();
                     }
-                    if (System::getSystemTimeUS() - time > nxtTimeoutUS)
+                    if (System::getSystemTimeUS() - time > Nextion::defaultTimeoutUS)
                     {
                         setError("Data timeout");
                         showError();
@@ -457,7 +453,6 @@ uint32_t GUI::update()
     default:
         mode = Mode::emergency;
         return false;
-        break;
     }
 
     return true;
@@ -482,8 +477,8 @@ void GUI::simple()
             {
                 uint32_t ontimeUS  = (commandData[2] << 8) + commandData[1];
                 uint32_t frequency = (commandData[4] << 8) + commandData[3];
-                coils[i].simple.setOntimeUS(ontimeUS);
-                coils[i].simple.setFrequency(frequency);
+                Coil::allCoils[i].simple.setOntimeUS(ontimeUS);
+                Coil::allCoils[i].simple.setFrequency(frequency);
             }
         }
         // Data applied; clear command byte.
@@ -502,7 +497,7 @@ void GUI::midiLive()
         {
             // Legacy
             uint32_t channels = (commandData[2] << 8) + commandData[1];
-            coils[coil].midi.setChannels(channels);
+            Coil::allCoils[coil].midi.setChannels(channels);
         }
         else
         {
@@ -515,7 +510,7 @@ void GUI::midiLive()
                 EEI = 0;
                 for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
                 {
-                    coils[coil].midi.setChannels(0xffff);
+                    Coil::allCoils[coil].midi.setChannels(0xffff);
                 }
             }
         }
@@ -559,9 +554,18 @@ void GUI::midiLive()
                     if (mode == 0)
                     {
                         uint32_t channels = (commandData[2] << 8) + commandData[1];
-                        coils[coil].midi.setChannels(channels);
-                        coils[coil].midi.setPanReach(commandData[3]);
-                        coils[coil].midi.setPan(commandData[4]);
+                        Coil::allCoils[coil].midi.setChannels(channels);
+                        if (commandData[3] & 0b10000000)
+                        {
+                            Coil::allCoils[coil].midi.setPanConstVol(true);
+                            commandData[3] &= 0b01111111;
+                        }
+                        else
+                        {
+                            Coil::allCoils[coil].midi.setPanConstVol(false);
+                        }
+                        Coil::allCoils[coil].midi.setPanReach(commandData[3] / 127.0f);
+                        Coil::allCoils[coil].midi.setPan(commandData[4] / 127.0f);
                     }
                     else if (mode == 1)
                     {
@@ -572,7 +576,7 @@ void GUI::midiLive()
                     {
                         uint32_t ontimeUS = (commandData[2] << 8) + commandData[1];
                         uint32_t dutyPerm = (commandData[4] << 8) + commandData[3];
-                        coils[coil].midi.setVolSettings(ontimeUS, dutyPerm);
+                        Coil::allCoils[coil].midi.setVolSettingsPerm(ontimeUS, dutyPerm);
                     }
                 }
             }
@@ -613,8 +617,8 @@ void GUI::lightsaber()
             {
                 if (targetCoils & (1 << coil))
                 {
-                    coils[coil].lightsaber.setActiveLightsabers(data1);
-                    coils[coil].lightsaber.setOntimeUS(data2);
+                    Coil::allCoils[coil].lightsaber.setActiveLightsabers(data1);
+                    Coil::allCoils[coil].lightsaber.setOntimeUS(data2);
                 }
             }
         }
@@ -645,21 +649,34 @@ void GUI::settings()
             {
                 // Coil limits. Number ranges from 1-6 instead of 0-5.
                 number--;
-                EEPROMSettings::coilSettings[number] = data;
-                coils[number].setMaxVoices(EEPROMSettings::getCoilsMaxVoices(number));
-                coils[number].setMinOfftimeUS(EEPROMSettings::getCoilsMinOffUS(number));
-                coils[number].setMaxDutyPerm(EEPROMSettings::getCoilsMaxDutyPerm(number));
-                coils[number].setMaxOntimeUS(EEPROMSettings::getCoilsMaxOntimeUS(number));
+                EEPROMSettings::CoilData& coilData = EEPROMSettings::coilData[number];
+
+                coilData.maxDutyPerm   =  (data & 0xff800000) >> 23;
+                coilData.minOfftimeUS  = ((data & 0x007f0000) >> 16) * 10;
+                coilData.midiMaxVoices = ((data & 0x0000f000) >> 12) +  1;
+                coilData.maxOntimeUS   =  (data & 0x00000fff)        * 10;
             }
             else if (settings == 0 && number < 3)
             {
                 // User limits.
-                EEPROMSettings::userSettings[number] = data;
+                EEPROMSettings::userData[number].maxDutyPerm = (data & 0xff800000) >> 23;
+                EEPROMSettings::userData[number].maxBPS      = ((data & 0x007ff000) >> 12) * 10;
+                EEPROMSettings::userData[number].maxOntimeUS = (data & 0x00000fff) * 10;
             }
             else if (settings == 2 && number < 10)
             {
                 // Other (general) settings
-                EEPROMSettings::otherSettings[number] = data;
+                if (number == 0)
+                {
+                    EEPROMSettings::deviceData.uiButtonHoldTime =  data        & 0xffff;
+                    EEPROMSettings::deviceData.uiSleepDelay     = (data >> 16) & 0xffff;
+                }
+                else if (number == 1)
+                {
+                    EEPROMSettings::deviceData.uiBrightness =  data        & 0xff;
+                    //EEPROMSettings::uiData.backOff  = (data >>  8) & 0b1;
+                    EEPROMSettings::deviceData.uiColorMode  = (data >>  9) & 0b1;
+                }
             }
         }
         else
@@ -668,7 +685,7 @@ void GUI::settings()
             if (!number)
             {
                 // Command to store current envelope settings to EEPROM
-                EEPROMSettings::setMIDIPrograms();
+                // TODO EEPROMSettings::setMIDIPrograms();
             }
             else if (number < MIDI::MAX_PROGRAMS)
             {
@@ -721,18 +738,18 @@ void GUI::settings()
             // Data contains user password
             for (uint32_t i = 0; i < length; i++)
             {
-                EEPROMSettings::userPwds[user][i] = commandData[i + 1];
+                EEPROMSettings::userData[user].password[i] = commandData[i + 1];
             }
-            EEPROMSettings::userPwds[user][length] = '\0';
+            EEPROMSettings::userData[user].password[length] = '\0';
         }
         else
         {
             // Data contains user name
             for (uint32_t i = 0; i < length; i++)
             {
-                EEPROMSettings::userNames[user][i] = commandData[i + 1];
+                EEPROMSettings::userData[user].name[i] = commandData[i + 1];
             }
-            EEPROMSettings::userNames[user][length] = '\0';
+            EEPROMSettings::userData[user].name[length] = '\0';
         }
         // Data applied; clear command byte.
         command = 0;

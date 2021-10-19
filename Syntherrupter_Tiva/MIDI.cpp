@@ -8,17 +8,20 @@
 #include <MIDI.h>
 
 
-UART                  MIDI::usbUart;
-UART                  MIDI::midiUart;
-ByteBuffer            MIDI::otherBuffer;
-constexpr ByteBuffer* MIDI::BUFFER_LIST[];
-Channel               MIDI::channels[];
-NoteList              MIDI::notelist;
-uint32_t              MIDI::notesCount = 0;
-bool                  MIDI::playing = false;
-float                 MIDI::freqTable[128];
-MIDIProgram           MIDI::programs[MAX_PROGRAMS];
-constexpr float       MIDI::ADSR_LEGACY_PROGRAMS[MIDI::ADSR_PROGRAM_COUNT + 1][8];
+UART                       MIDI::usbUart;
+UART                       MIDI::midiUart;
+Buffer<uint8_t, 512>            MIDI::otherBuffer;
+constexpr Buffer<uint8_t, 512>* MIDI::BUFFER_LIST[];
+Channel                    MIDI::channels[];
+NoteList                   MIDI::notelist;
+uint32_t                   MIDI::notesCount = 0;
+uint8_t*                   MIDI::sysexDeviceID;
+SysexMsg                   MIDI::sysexMsg;
+bool                       MIDI::modeRunning = false;
+float                      MIDI::freqTable[128];
+MIDIProgram                MIDI::programs[MAX_PROGRAMS];
+float*                     MIDI::lfoFreq;
+float*                     MIDI::lfoDepth;
 
 
 MIDI::MIDI()
@@ -32,44 +35,23 @@ MIDI::~MIDI()
     // TODO Auto-generated destructor stub
 }
 
-void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPort, uint32_t midiUartRx, uint32_t midiUartTx, void(*midiISR)(void))
+void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void),
+                uint32_t midiUartPort, uint32_t midiUartRx,
+                uint32_t midiUartTx, void(*midiISR)(void))
 {
+    // Static init. This stuff only needs to be done once (NOT for every instance).
+
     // Enable MIDI receiving over the USB UART (selectable baud rate) and a separate MIDI UART (31250 fixed baud rate).
     usbUart.init(0, usbBaudRate, usbISR, 0b00100000);
     midiUart.init(midiUartPort, midiUartRx, midiUartTx, 31250, midiISR, 0b01100000);
-    otherBuffer.init(128);
+    usbUart.enable();
+    midiUart.enable();
 
     MIDIProgram::setResolutionUS(effectResolutionUS);
-
-    // Copy legacy ADSR table to new MIDIProgram class.
-    for (uint32_t prog = 1; prog < ADSR_PROGRAM_COUNT + 1; prog++)
+    for (uint32_t prog = 0; prog < MAX_PROGRAMS; prog++)
     {
-        programs[prog].setMode(MIDIProgram::Mode::lin);
-        programs[prog+10].setMode(MIDIProgram::Mode::exp);
-        for (uint32_t i = 0; i < 4; i++)
-        {
-            uint32_t dataPnt = i;
-            uint32_t nextPnt = dataPnt + 1;
-            if (dataPnt == 2)
-            {
-                nextPnt = dataPnt;
-            }
-            if (dataPnt == 3)
-            {
-                dataPnt = MIDIProgram::DATA_POINTS - 1;
-                nextPnt = dataPnt;
-            }
-            programs[prog   ].setDataPoint(dataPnt, ADSR_LEGACY_PROGRAMS[prog][i*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][i*2+1], 0.0f, nextPnt);
-            programs[prog+10].setDataPoint(dataPnt, ADSR_LEGACY_PROGRAMS[prog][i*2], 1.0f / ADSR_LEGACY_PROGRAMS[prog][i*2+1], 3.0f, nextPnt);
-        }
+        programs[prog].init();
     }
-
-    // The "new" piano envelope
-    programs[10].setDataPoint(0,                            2.0f,   15e3f, 2.0f, 1);
-    programs[10].setDataPoint(1,                            1.0f,  100e3f, 2.0f, 2);
-    programs[10].setDataPoint(2,                            0.0f, 8000e3f, 7.0f, 2);
-    programs[10].setDataPoint(MIDIProgram::DATA_POINTS - 1, 0.0f,  200e3f, 4.0f, MIDIProgram::DATA_POINTS - 1);
-
 
     for (uint32_t note = 0; note < 128; note++)
     {
@@ -83,12 +65,29 @@ void MIDI::init(uint32_t usbBaudRate, void (*usbISR)(void), uint32_t midiUartPor
     }
 }
 
+void MIDI::init(uint32_t num, ToneList* tonelist)
+{
+    // Non-static init. This needs to be done for every instance of the class.
+
+    this->tonelist = tonelist;
+    this->coilNum  = num;
+    this->coilBit  = 1 << num;
+
+    // Correctly apply the settings already loaded by EEPROMSettings
+    setMaxVoices(*coilMaxVoices);
+}
+
+
 bool MIDI::processBuffer(uint32_t b)
 {
     /*
      * Minimum MIDI data processing.
-     * Returns if valid data has been found.
+     *
+     * Returns if the parsed data requires immediate processing or not.
+     * If so, the serial buffers shouldn't be processed any further until
+     * all of the data parsed so far has indeed been used.
      */
+    bool urgentData = false;
 
     /*
      * It would probably be better to have a child class of the ByteBuffer
@@ -107,7 +106,7 @@ bool MIDI::processBuffer(uint32_t b)
     uint32_t& channel    = channelAll[b];
     uint8_t&  c1         = c1All[b];
 
-    ByteBuffer* buffer = BUFFER_LIST[b];
+    auto* buffer = BUFFER_LIST[b];
 
     c1 = buffer->read();
 
@@ -130,7 +129,6 @@ bool MIDI::processBuffer(uint32_t b)
     else
     {
         dataBytes++;
-
     }
 
     switch ((midiStatus) & 0xf0)
@@ -163,13 +161,13 @@ bool MIDI::processBuffer(uint32_t b)
             if (dataBytes == 1)
             {
                 number = c1;
-                note = channels[channel].getNote(c1);
             }
             else if (dataBytes == 2)
             {
                 // End of command, reset dataBytes counter
                 dataBytes = 0;
 
+                note = channels[channel].getNote(number);
                 if (c1) // Note has a velocity
                 {
                     if (!note)
@@ -177,14 +175,19 @@ bool MIDI::processBuffer(uint32_t b)
                         note = notelist.addNote();
                         note->afterTouch     = 0;
                         note->rawVolume      = 0.0f;
-                        note->EnvelopeVolume = 0.0f;
+                        note->envelopeVolume = 0.0f;
+                        note->finishedVolume = 0.0f;
+                        note->panChanged = (1 << COIL_COUNT) - 1;
                         channels[channel].addNote(note);
                     }
-
+                    else
+                    {
+                        notelist.moveToEnd(note);
+                    }
                     note->number         = number;
                     note->velocity       = c1;
-                    note->EnvelopeStep   = 0;
-                    note->EnvelopeTimeUS = 0.0f;
+                    note->envelopeStep   = 0;
+                    note->envelopeTimeUS = 0.0f;
                     note->changed        = true;
                     channels[channel].notesChanged = true;
                 }
@@ -234,23 +237,23 @@ bool MIDI::processBuffer(uint32_t b)
                     default:
                         break;
                     case 0x01: // Modulation Wheel
-                        channels[channel].modulation = c1 / 128.0f;
+                        channels[channel].modulation = c1 / 127.0f;
                         channels[channel].controllersChanged = true;
                         break;
                     case 0x02: // Breath Controller
 
                         break;
                     case 0x07: // Channel Volume
-                        channels[channel].volume = c1 / 128.0f;
-                        channels[channel].controllersChanged = true;
+                        channels[channel].volume = c1 / 127.0f;
+                        // channels[channel].controllersChanged = true;
                         break;
                     case 0x0A: // Pan
-                        channels[channel].pan = c1 / 128.0f;
+                        channels[channel].pan = c1 / 127.0f;
                         channels[channel].controllersChanged = true;
                         break;
                     case 0x0B: // Expression coarse
-                        channels[channel].expression = c1 / 128.0f;
-                        channels[channel].controllersChanged = true;
+                        channels[channel].expression = c1 / 127.0f;
+                        // channels[channel].controllersChanged = true;
                         break;
                     case 0x40: // Sustain Pedal
                         if (c1 >= 64)
@@ -260,6 +263,9 @@ bool MIDI::processBuffer(uint32_t b)
                         else
                         {
                             channels[channel].sustainPedal = false;
+                            // Pedal lifts can be very short but must be
+                            // caught under all circumstances
+                            urgentData = true;
                         }
                         channels[channel].controllersChanged = true;
                         break;
@@ -338,7 +344,7 @@ bool MIDI::processBuffer(uint32_t b)
                         }
                         else if (channels[channel].NRPN == (42 << 8) + 2) // Note pan mode - target range upper limit
                         {
-                            channels[channel].notePanTargetRangeHigh = c1 / 128.0f;
+                            channels[channel].notePanTargetRangeHigh = c1 / 127.0f;
                         }
                         else
                         {
@@ -374,16 +380,6 @@ bool MIDI::processBuffer(uint32_t b)
                         else if (channels[channel].NRPN == (42 << 8) + 0) // Note pan mode - enable/disable
                         {
                             channels[channel].notePanMode = c1;
-                            /*if (c1 == 2)
-                            {
-                                // Omni Mode (Note plays everywhere)
-                                channels[channel].notePanOmniMode = true;
-                            }
-                            else
-                            {
-                                channels[channel].notePanOmniMode = false;
-                                channels[channel].notePanEnabled = c1;
-                            }*/
                         }
                         else if (channels[channel].NRPN == (42 << 8) + 1) // Note pan mode - source range lower limit
                         {
@@ -391,7 +387,7 @@ bool MIDI::processBuffer(uint32_t b)
                         }
                         else if (channels[channel].NRPN == (42 << 8) + 2) // Note pan mode - target range lower limit
                         {
-                            channels[channel].notePanTargetRangeLow = c1 / 128.0f;
+                            channels[channel].notePanTargetRangeLow = c1 / 127.0f;
                         }
                         else
                         {
@@ -418,7 +414,7 @@ bool MIDI::processBuffer(uint32_t b)
                         Note* note = channels[channel].firstNote;
                         while (note != 0)
                         {
-                            note->EnvelopeStep = MIDIProgram::DATA_POINTS - 1;
+                            note->envelopeStep = MIDIProgram::DATA_POINTS - 1;
                             note = note->nextChnNote;
                         }
                         break;
@@ -475,37 +471,206 @@ bool MIDI::processBuffer(uint32_t b)
             }
             break;
         }
+        case 0xF0: // F0: SysEx start, F7: SysEx end, F[other]: idgaf
+        {
+            /*
+             * System messages are not channel specific. As written in the
+             * comment above the lower bits encode the type of system message.
+             * Hence the channel variable has a different meaning in this
+             * case.
+             */
+            uint32_t& type = channel;
+
+            static constexpr uint32_t SYSEX_START = 0;
+            static constexpr uint32_t SYSEX_END = 7;
+
+            static uint8_t  sysexDataAll[BUFFER_COUNT][SYSEX_MAX_SIZE]{0};
+            static uint32_t sysexDataIndexAll[BUFFER_COUNT]{0};
+            static bool sysexUsableAll[BUFFER_COUNT]{false};
+            static uint8_t  sysexVersionAll[BUFFER_COUNT]{0};
+
+            uint8_t (&sysexData)[SYSEX_MAX_SIZE] = sysexDataAll[b];
+            uint32_t &sysexDataIndex = sysexDataIndexAll[b];
+            bool &sysexUsable = sysexUsableAll[b];
+            uint8_t &sysexVersion = sysexVersionAll[b];
+
+            if (dataBytes == 1)
+            {
+                // new sysex command, reset usable state and data index.
+                sysexUsable = true;
+                sysexDataIndex = 0;
+            }
+            else if (sysexUsable)
+            {
+                if (type == SYSEX_START)
+                {
+                    switch (dataBytes)
+                    {
+                        case 1: // Vendor ID. Only 2 byte IDs are accepted by syntherrupter
+                            if (c1 != 0)
+                            {
+                                // 1-byte ID, nothing we can support.
+                                sysexUsable = false;
+                            }
+                            break;
+                        case 2: // [Assuming a 2 byte ID] MSB of the DMID
+                            /*
+                             * Only Syntherrupter messages are supported, meaning the DMID must equal 0x2605
+                             */
+                            if (c1 != 0x26)
+                            {
+                                sysexUsable = false;
+                            }
+                            break;
+                        case 3: // LSB of the DMID
+                            if (c1 != 0x05)
+                            {
+                                sysexUsable = false;
+                            }
+                            break;
+                        case 4: // Message Protocol Version
+                            sysexVersion = c1;
+                            if (sysexVersion != SYSEX_PROTOCOL_VERSION)
+                            {
+                                sysexUsable = false;
+                            }
+                            break;
+                        case 5: // Device ID
+                            if (c1 != *sysexDeviceID && c1 != 127)
+                            {
+                                // Only reply to messages directed to this
+                                // device. 127 = broadcast.
+                                sysexUsable = false;
+                            }
+                            break;
+                        default: // in all other cases it are data bytes
+                            if (sysexDataIndex < SYSEX_MAX_SIZE)
+                            {
+                                sysexData[sysexDataIndex++] = c1;
+                            }
+                            break;
+                    }
+                }
+                else if (type == SYSEX_END)
+                {
+
+                    /*
+                     * Sysex message completed, process data bytes.
+                     * Basic format: n address bytes, m data bytes.
+                     * n, m determined based on message length l:
+                     *  l | n |   m
+                     * ---+---+-----
+                     *   2| 1 |   1
+                     *   3| 1 |   2
+                     *   4| 2 |   2
+                     *   5| 1 |   4
+                     *   6| 2 |   4
+                     *   7| 2 |   5
+                     *   8| 4 |   4
+                     *   9| 4 |   5
+                     *
+                     * Data is transmitted LSB first.
+                     *
+                     * Currently no support for strings or message lengths outside
+                     * [2,9].
+                     */
+                    static constexpr uint32_t BYTE_COUNT[10][2] = {
+                        {0, 0}, // garbage
+                        {0, 0}, // garbage
+                        {1, 1},
+                        {1, 2},
+                        {2, 2},
+                        {1, 4},
+                        {2, 4},
+                        {2, 5},
+                        {4, 4},
+                        {4, 5},
+                    };
+
+                    if (sysexDataIndex >= 2 && sysexDataIndex <= 9)
+                    {
+                        uint32_t number = 0;
+                        uint32_t targetLSB = 0;
+                        uint32_t targetMSB = 0;
+                        int32_t sysexVal = 0;
+
+                        switch (BYTE_COUNT[sysexDataIndex][0])
+                        {
+                            case 4:
+                                targetMSB = sysexData[3];
+                            case 3:
+                                targetLSB = sysexData[2];
+                            case 2:
+                                number += sysexData[1] << 8;
+                            case 1:
+                                number += sysexData[0];
+                                break;
+                        }
+
+                        for (uint32_t i = 0; i < BYTE_COUNT[sysexDataIndex][1]; i++)
+                        {
+                            sysexVal += sysexData[BYTE_COUNT[sysexDataIndex][0] + i] << (7 * i);
+                        }
+
+                        sysexMsg.version   = sysexVersion;
+                        sysexMsg.number    = number;
+                        sysexMsg.targetLSB = targetLSB;
+                        sysexMsg.targetMSB = targetMSB;
+                        sysexMsg.value.i32 = sysexVal;
+                        sysexMsg.newMsg    = 2;
+
+                        // This is not nice, I know.
+                        if (buffer == &midiUart.rxBuffer)
+                        {
+                            sysexMsg.origin = &midiUart;
+                        }
+                        else
+                        {
+                            // Use the USB UART as default
+                            sysexMsg.origin = &usbUart;
+                        }
+
+                        // Make sure the SysEx Message will be processed before
+                        // it'll be overwritten by a new one.
+                        urgentData = true;
+                    }
+                }
+            }
+        }
     }
 
-    return true;
+    return urgentData;
 }
 
-void MIDI::start()
+void MIDI::setRunning(bool run)
 {
-    if (!playing)
+    if (run != modeRunning)
     {
-        playing = true;
-        usbUart.enable();
-        midiUart.enable();
-        for (uint32_t channel = 0; channel < 16; channel++)
+        modeRunning = run;
+        if (modeRunning)
         {
-            channels[channel].resetControllers();
+            for (uint32_t channel = 0; channel < 16; channel++)
+            {
+                channels[channel].resetControllers();
+            }
+        }
+        else
+        {
+            modeRunning = false;
+            notelist.removeAllNotes();
         }
     }
 }
 
-void MIDI::stop()
+void MIDI::setVolSettingsPerm(float ontimeUSMax, float dutyPermMax)
 {
-    playing = false;
-    usbUart.disable();
-    midiUart.disable();
-    notelist.removeAllNotes();
+    // duty in promille
+    setVolSettings(ontimeUSMax, dutyPermMax / 1000.0f);
 }
-
-void MIDI::setVolSettings(float ontimeUSMax, float dutyPermMax)
+void MIDI::setVolSettings(float ontimeUSMax, float dutyMax)
 {
     singleNoteMaxOntimeUS = ontimeUSMax;
-    singleNoteMaxDuty     = dutyPermMax / 1000.0f;
+    singleNoteMaxDuty     = dutyMax;
 
     // Prevent divide by 0.
     if (ontimeUSMax < 1.0f)
@@ -514,7 +679,7 @@ void MIDI::setVolSettings(float ontimeUSMax, float dutyPermMax)
     }
 
     // Determine crossover note at which abs. and rel. mode would have equal frequency.
-    absFreq = dutyPermMax / ontimeUSMax * 1000.0f;
+    absFreq = dutyMax / ontimeUSMax * 1e6f;
 
     coilChange = true;
 }
@@ -537,11 +702,11 @@ void MIDI::setChannels(uint32_t chns)
     coilChange = true;
 }
 
-void MIDI::setPan(uint32_t pan)
+void MIDI::setPan(float pan)
 {
-    if (pan < 128)
+    if (pan >= 0.0f && pan <= 1.0f)
     {
-        coilPan = pan / 128.0f;
+        coilPan = pan;
     }
     else
     {
@@ -550,21 +715,11 @@ void MIDI::setPan(uint32_t pan)
     coilPanChanged = true;
 }
 
-void MIDI::setPanReach(uint32_t reach)
+void MIDI::setPanReach(float reach)
 {
-    if (reach & 0b10000000)
+    if (reach >= 0.0f && reach <= 1.0f)
     {
-        panConstVol = true;
-        reach &= 0b01111111;
-    }
-    else
-    {
-        panConstVol = false;
-    }
-
-    if (reach)
-    {
-        inversPanReach = 128.0f / reach;
+        inversPanReach = 1.0f / reach;
     }
     else
     {
@@ -580,7 +735,7 @@ void MIDI::setMaxVoices(uint32_t maxVoices)
     {
         maxVoices = MAX_VOICES;
     }
-    coilMaxVoices = maxVoices;
+    *coilMaxVoices = maxVoices;
     coilChange = true;
 }
 
@@ -608,20 +763,24 @@ void MIDI::resetNRPs(uint32_t chns)
 
 void MIDI::process()
 {
-    if (playing)
+    // Process all data that's in the buffer.
+    bool newData = false;
+    bool forceUpdate = false;
+    for (uint32_t bufferNum = 0; bufferNum < BUFFER_COUNT; bufferNum++)
     {
-        // Process all data that's in the buffer.
-
-        bool newData = false;
-        for (uint32_t bufferNum = 0; bufferNum < BUFFER_COUNT; bufferNum++)
+        while (BUFFER_LIST[bufferNum]->level() && !forceUpdate)
         {
-            while (BUFFER_LIST[bufferNum]->level())
-            {
-                newData = true;
-                processBuffer(bufferNum);
-            }
+            newData = true;
+            forceUpdate = processBuffer(bufferNum);
         }
+        if (forceUpdate)
+        {
+            break;
+        }
+    }
 
+    if (modeRunning)
+    {
         if (newData)
         {
             for (uint32_t channelNum = 0; channelNum < 16; channelNum++)
@@ -649,17 +808,20 @@ void MIDI::process()
                                 // Determine MIDI volume, including all effects that are not time-dependant.
                                 if (note->velocity)
                                 {
-                                    note->rawVolume = note->velocity / 128.0f;
-                                    if (channel->damperPedal)
-                                    {
-                                        note->rawVolume *= 0.6f;
-                                    }
-                                    note->rawVolume *= channel->volume * channel->expression;
+                                    note->rawVolume = note->velocity / 127.0f;
+                                    /*
+                                     * Branchless version of:
+                                     * if (channel->damperPedal)
+                                     * {
+                                     *     note->rawVolume *= 0.6f;
+                                     * }
+                                     */
+                                    note->rawVolume *= (1 - channel->damperPedal * 0.4f);
                                 }
                             }
                             else if (!channel->sustainPedal)
                             {
-                                note->EnvelopeStep = MIDIProgram::DATA_POINTS - 1;
+                                note->envelopeStep = MIDIProgram::DATA_POINTS - 1;
                             }
                         }
                         note = note->nextChnNote;
@@ -734,18 +896,18 @@ void MIDI::updateEffects(Note* note)
 {
     // Needed for envelopes
     float currentTime = System::getSystemTimeUS();
-    if (note->EnvelopeTimeUS == 0.0f)
+    if (note->envelopeTimeUS == 0.0f)
     {
-        note->EnvelopeTimeUS = currentTime;
+        note->envelopeTimeUS = currentTime;
     }
     else
     {
-        float timeDiffUS = currentTime - note->EnvelopeTimeUS;
+        float timeDiffUS = currentTime - note->envelopeTimeUS;
         if (timeDiffUS > effectResolutionUS)
         {
-            note->EnvelopeTimeUS = currentTime;
+            note->envelopeTimeUS = currentTime;
             MIDIProgram* program = &(programs[note->channel->program]);
-            if (!program->setEnvelopeAmp(&(note->EnvelopeStep), &(note->EnvelopeVolume)))
+            if (!program->setEnvelopeAmp(&(note->envelopeStep), &(note->envelopeVolume)))
             {
                 // Note ended.
                 note->number = 128;
@@ -756,7 +918,9 @@ void MIDI::updateEffects(Note* note)
 
                 // After calculation of envelope, add other effects like modulation
                 float finishedVolume =   note->rawVolume
-                                       * note->EnvelopeVolume
+                                       * note->channel->volume
+                                       * note->channel->expression
+                                       * note->envelopeVolume
                                        * (1.0f - getLFOVal(note->channel));
                 if (finishedVolume != note->finishedVolume)
                 {
@@ -768,7 +932,7 @@ void MIDI::updateEffects(Note* note)
         if (timeDiffUS < 0.0f)
         {
             // Time overflowed
-            note->EnvelopeTimeUS = currentTime;
+            note->envelopeTimeUS = currentTime;
         }
     }
 }
@@ -776,12 +940,16 @@ void MIDI::updateEffects(Note* note)
 void MIDI::updateToneList()
 {
     Tone* lastTone = (Tone*) 1;
-    Note* note = notelist.firstNote;
-    uint32_t voicesLeft = coilMaxVoices;
-    while (note != notelist.newNote)
+    Note* note = notelist.newNote->prevNote;
+    int32_t voicesLeft = *coilMaxVoices;
+    int32_t remainingNotes = notelist.activeNotes;
+    while (remainingNotes--)
     {
-        Note* nextNote = note->nextNote;
-        if (note->toneChanged & coilBit || coilChange)
+        // Go backwards from the most recent to the oldest (firstNote)
+        // The next note of the loop needs to be stored at the beginning
+        // since the note might get deleted during the loop.
+        Note* nextNote = note->prevNote;
+        if ((note->toneChanged & coilBit) || coilChange || !voicesLeft)
         {
             note->toneChanged &= ~coilBit;
 
@@ -789,12 +957,16 @@ void MIDI::updateToneList()
 
             if (note->isDead())
             {
-                notelist.removeNote(note); // Removes tone from tonelists, too.
+                // Removes tone from tonelists, too.
+                notelist.removeNote(note);
+                // "undo" decrement at the end of the loop since no voice
+                // will actually be used.
+                voicesLeft++;
             }
-            else if (note->channel->coils & coilBit)
+            else if ((note->channel->coils & coilBit) && voicesLeft)
             {
                 setPanVol(note);
-                if (lastTone && voicesLeft)
+                if (lastTone)
                 {
                     float ontimeUS = note->finishedVolume * note->panVol[coilNum];
                     if (note->frequency >= absFreq)
@@ -822,8 +994,11 @@ void MIDI::updateToneList()
                     }
                     else
                     {
-                        voicesLeft--;
-                        lastTone = tonelist->updateTone(ontimeUS, note->periodUS, this, note, *assignedTone);
+                        lastTone = tonelist->updateTone(ontimeUS,
+                                                        note->periodUS,
+                                                        this,
+                                                        note,
+                                                        *assignedTone);
                         *assignedTone = lastTone;
                     }
                 }
@@ -832,6 +1007,8 @@ void MIDI::updateToneList()
             {
                 // This coil is no more listening to this channel. Remove the
                 // assigned tone if there is one.
+                // Or the voice limit's been reached and the note doesn't fit
+                // into this output anymore.
                 if (*assignedTone)
                 {
                     (*assignedTone)->remove(note);
@@ -841,13 +1018,9 @@ void MIDI::updateToneList()
         }
 
         note = nextNote;
+        // Prevent voicesLeft from going negative.
+        voicesLeft = Branchless::max(0, voicesLeft - 1);
     }
     coilChange     = false;
     coilPanChanged = false;
-}
-
-void MIDI::setCoilNum(uint32_t num)
-{
-    coilNum = num;
-    coilBit = 1 << num;
 }

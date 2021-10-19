@@ -8,7 +8,7 @@
 #include <Simple.h>
 
 
-bool Simple::started = false;
+bool Simple::modeRunning = false;
 
 
 Simple::Simple()
@@ -22,23 +22,21 @@ Simple::~Simple()
     // TODO Auto-generated destructor stub
 }
 
-void Simple::init(ToneList* tonelist, float ontimeFact, float ontimeConst, float freqFact, float freqConst, uint32_t updatePeriodUS)
+void Simple::init(ToneList* tonelist, uint32_t updatePeriodUS)
 {
     this->tonelist = tonelist;
     this->updatePeriodUS = updatePeriodUS;
-    filteredOntimeUS.init(ontimeFact, ontimeConst);
-    filteredFrequency.init(freqFact, freqConst);
 }
 
 void Simple::updateToneList()
 {
-    if (started)
+    if (modeRunning)
     {
         if (System::getSystemTimeUS() - lastUpdateUS > updatePeriodUS)
         {
             float o = filteredOntimeUS.getFiltered();
             float f = filteredFrequency.getFiltered();
-            if (o > 1.0f && f > 1.0f)
+            if (o > 1.0f && f > 0.1f)
             {
                 f = 1e6f / f;
                 tone = tonelist->updateTone(o, f, this, this, tone);

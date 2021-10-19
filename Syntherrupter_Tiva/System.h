@@ -20,15 +20,15 @@
 #include "driverlib/interrupt.h"
 #include "driverlib/fpu.h"
 #include "driverlib/gpio.h"
+#include "InterrupterConfig.h"
 
 class System
 {
 public:
     System();
     virtual ~System();
-    static void init(void (*ISR)(void));
+    static void init();
     static void error();
-    static void setSystemTimeResUS(uint32_t us);
     static uint32_t getClockFreq()
     {
         return CLOCK_FREQ;
@@ -45,24 +45,26 @@ public:
     {
         return timeUS;
     };
-    static uint32_t getSystemTimeResUS()
-    {
-        return SYS_TICK_RES_US;
-    }
     static void delayUS(uint32_t us)
     {
-        SysCtlDelay((clockTicksUS * us) / 3);
+        SysCtlDelay((CLOCK_TICKS_US * us) / 3);
     };
     static uint32_t rand(uint32_t lower, uint32_t upper)
     {
         return ((timeUS + SysTickValueGet()) % (upper - lower) + lower);
     };
+    static uint32_t getFWVersionNum()
+    {
+        return fwVersionNum;
+    }
 private:
+    static uint32_t fwVersionToInt();
     static constexpr uint32_t CLOCK_FREQ = 120000000;
-    static constexpr uint32_t clockTicksUS = CLOCK_FREQ / 1000000;
+    static constexpr uint32_t CLOCK_TICKS_US = CLOCK_FREQ / 1000000;
     static constexpr uint32_t PIOSCFreq = 16000000;
+    static constexpr uint32_t SYS_TICK_RES_US = 500;
     static volatile uint32_t timeUS;
-    static volatile uint32_t SYS_TICK_RES_US;
+    static uint32_t fwVersionNum;
 
     // Peripherals that should be turned off in case of an error
     static constexpr uint32_t PERIPH_COUNT = 43;

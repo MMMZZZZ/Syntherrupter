@@ -15,6 +15,7 @@ From this page you can access all Settings. Except for a few (marked) exceptions
 	* [Nextion<->USB](#nextion-usb)
 	* [ESP<->USB](#esp-usb)
 	* [Save/Return to Main Menu](#savereturn-to-main-menu)
+* [Sysex Commands](#sysex-commands)
 
 ## What you see
 
@@ -49,3 +50,7 @@ Enters [ESP8266<->USB Passthrough Mode](Nextion-USB.md#readme). This allows dire
 ### Save/Return to Main Menu
 
 Instead of the usual *Return* label, the button is labeled with *Save* even though it brings you back to the [main menu](Menu.md#readme). The reason is that only when pressing this button Syntherrupter will actually write the new Settings to the EEPROM. In case you did anything wrong and don't want to save them, just power cycle and your changes will be gone. 
+
+## Sysex Commands
+
+Saving the current settings to EEPROM manually or automatically can be configured over sysex using the [EEPROM Commands](/Documentation/Wiki/Custom%20MIDI%20Commands.md#0x200-0x21f-eeprom-and-other-control-commands).

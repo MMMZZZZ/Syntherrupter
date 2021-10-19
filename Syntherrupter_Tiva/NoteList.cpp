@@ -28,11 +28,26 @@ Note* NoteList::addNote()
 {
     Note* targetNote = newNote;
     newNote          = newNote->nextNote;
-    if (++activeNotes > maxVoices)
+    if (++activeNotes > MAX_NOTES)
     {
         removeNote(firstNote);
     }
     return targetNote;
+}
+
+void NoteList::moveToEnd(Note* note)
+{
+    if (note == newNote->prevNote)
+    {
+        // Note is already at the end. This case must be caught first!
+        return;
+    }
+    if (note == firstNote)
+    {
+        // Adjust pointer to firstNote.
+        firstNote = note->nextNote;
+    }
+    moveBefore(note, newNote);
 }
 
 void NoteList::removeNote(Note* note)
@@ -63,12 +78,7 @@ void NoteList::removeNote(Note* note)
         }
         else
         {
-            note->prevNote->nextNote = note->nextNote;
-            note->nextNote->prevNote = note->prevNote;
-            note->nextNote           = firstNote;
-            note->prevNote           = firstNote->prevNote;
-            note->prevNote->nextNote = note;
-            note->nextNote->prevNote = note;
+            moveBefore(note, firstNote);
         }
     }
 }
@@ -117,4 +127,14 @@ Note* NoteList::getNote(uint32_t channel, uint32_t noteNum)
     }
     return 0;
 };
+
+void NoteList::moveBefore(Note* noteToMove, Note* noteToInsertBefore)
+{
+    noteToMove->prevNote->nextNote = noteToMove->nextNote;
+    noteToMove->nextNote->prevNote = noteToMove->prevNote;
+    noteToMove->nextNote           = noteToInsertBefore;
+    noteToMove->prevNote           = noteToInsertBefore->prevNote;
+    noteToMove->prevNote->nextNote = noteToMove;
+    noteToMove->nextNote->prevNote = noteToMove;
+}
 
