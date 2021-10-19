@@ -353,6 +353,16 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32, time in microseconds since startup. 
+* `0x204`: [RO] Firmware Version
+	* Target MSB: Reserved.
+	* Target LSB: Microcontroller (MCU).
+		* 0: Tiva
+		* 1: Nextion
+	* Value: bf32, containing the main version number, sub number, bugfix number and beta version number. Example: 4.2.0-beta.26 becomes {26, 0, 2, 4}. Note: for non-beta versions the beta part is fixed to 255. This assures that later (stable) releases always have higher version numbers than preceding (beta) versions. Note: for the time being it is safe to interprete this value as i32. Issues would only arise if the main version became higher than 127 - which is unlikely to happen in the next decades.
+		* [0-7]: ui8, beta version or 255 for non-beta versions
+		* [8-15]: ui8, bugfix version
+		* [14-23]: ui8, sub version
+		* [24-31]: ui8, main version
 
 #### `0x220-0x23f`: UI settings
 

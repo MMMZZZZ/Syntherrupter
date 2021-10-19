@@ -99,6 +99,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0201:
         case 0x0202:
         case 0x0203:
+        case 0x0204:
         case 0x0220:
         case 0x0221:
         case 0x0222:
@@ -212,6 +213,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0201:
         case 0x0202:
         case 0x0203:
+        case 0x0204:
         case 0x0220:
         case 0x0221:
         case 0x0222:
@@ -1205,6 +1207,15 @@ void Sysex::processSysex()
                 {
                     msg.value.ui32 = System::getSystemTimeUS();
                 }
+                txMsg.data.targetLSB = 0;
+                txMsg.data.targetMSB = 0;
+                sendSysex();
+            }
+            break;
+        case 0x0204: // () (), ui32 firmware version, read only.
+            if (reading)
+            {
+                msg.value.ui32 = System::getFWVersionNum();
                 txMsg.data.targetLSB = 0;
                 txMsg.data.targetMSB = 0;
                 sendSysex();

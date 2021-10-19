@@ -20,6 +20,7 @@
 #include "driverlib/interrupt.h"
 #include "driverlib/fpu.h"
 #include "driverlib/gpio.h"
+#include "InterrupterConfig.h"
 
 class System
 {
@@ -52,12 +53,18 @@ public:
     {
         return ((timeUS + SysTickValueGet()) % (upper - lower) + lower);
     };
+    static uint32_t getFWVersionNum()
+    {
+        return fwVersionNum;
+    }
 private:
+    static uint32_t fwVersionToInt();
     static constexpr uint32_t CLOCK_FREQ = 120000000;
     static constexpr uint32_t CLOCK_TICKS_US = CLOCK_FREQ / 1000000;
     static constexpr uint32_t PIOSCFreq = 16000000;
     static constexpr uint32_t SYS_TICK_RES_US = 500;
     static volatile uint32_t timeUS;
+    static uint32_t fwVersionNum;
 
     // Peripherals that should be turned off in case of an error
     static constexpr uint32_t PERIPH_COUNT = 43;
