@@ -52,24 +52,13 @@ uint32_t EEPROMSettings::init()
             result = CFG_UNKNOWN;
         }
     }
-    else
-    {
-        //uint32_t error = EEPROMMassErase();
-        //if (error)
-        {
-            System::error();
-        }
-    }
+    // else: NO_CFG, which is the default case.
 
     // If no valid config could be found, initialize everything to
     // default values.
     if (result != CFG_OK && result != CFG_UPGRADED)
     {
         eeprom.data = defaultSettings;
-        if (result == NO_CFG)
-        {
-            result = CFG_OK;
-        }
     }
 
     /*
