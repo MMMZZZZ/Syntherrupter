@@ -139,7 +139,7 @@ Text tNxtFWVersion
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : v4.2.0-beta.7
+        Text               : v4.2.0       
         Max. Text Size     : 20
     
     Events
