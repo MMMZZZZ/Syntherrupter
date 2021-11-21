@@ -7,6 +7,19 @@ Program.s
     if(bauds!=115200)
     {
       bauds=115200
+      if(bauds!=115200)
+      {
+        // bauds will always return 9600 in the Nextion Editor/Debugger. Hence we enter this
+        // section only if we are running within the debugger.
+        // The debugger does not send the startup messages that Nextion devices send.
+        // Since the Tiva firmware relies on them, we do it manually here.
+        //
+        // Power Up
+        printh 00 00 00 ff ff ff
+        //
+        // Ready
+        printh 88 ff ff ff
+      }
     }
     //
     // Allow wake up on touch and on serial command (f.ex. reset command) in case it is not already allowed.
