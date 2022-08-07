@@ -37,7 +37,7 @@ public:
     uint8_t number           = 0;
     uint8_t velocity         = 0;
     uint8_t afterTouch       = 0;
-    float envelopeTimeUS     = 0.0f;
+    float effectTimeUS       = 0.0f;
     float rawVolume          = 0.0f;
     float envelopeVolume     = 0.0f;
     float finishedVolume     = 0.0f;
