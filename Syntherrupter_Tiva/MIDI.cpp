@@ -316,6 +316,14 @@ bool MIDI::processBuffer(uint32_t b)
                         // Registered Parameter
                         if (channels[channel].RPN == 0) // Pitch bend range
                         {
+                            /*
+                             * Pitch bend range is a 7+7bit value, where the upper 7 bit correspond to
+                             * 0..127 semitones, whereas the lower 7bit correspond to 0..127 cents.
+                             *
+                             * For efficiency purposes, the scaling factor for the pitch bend command
+                             * (+/-8192 => +/-1) is also included. As such only one division has to
+                             * occur here, instead of one division for every pitch bend change.
+                             */
                             channels[channel].pitchBendRangeCoarse = c1;
                             channels[channel].pitchBendRange  =   channels[channel].pitchBendRangeCoarse
                                                                  + channels[channel].pitchBendRangeFine / 100.0f;
@@ -367,6 +375,14 @@ bool MIDI::processBuffer(uint32_t b)
 
                         if (channels[channel].RPN == 0) // Pitch bend range
                         {
+                            /*
+                             * Pitch bend range is a 7+7bit value, where the upper 7 bit correspond to
+                             * 0..127 semitones, whereas the lower 7bit correspond to 0..127 cents.
+                             *
+                             * For efficiency purposes, the scaling factor for the pitch bend command
+                             * (+/-8192 => +/-1) is also included. As such only one division has to
+                             * occur here, instead of one division for every pitch bend change.
+                             */
                             channels[channel].pitchBendRangeFine = c1;
                             channels[channel].pitchBendRange  =   channels[channel].pitchBendRangeCoarse
                                                                  + channels[channel].pitchBendRangeFine / 100.0f;
