@@ -323,18 +323,26 @@ bool MIDI::processBuffer(uint32_t b)
                         }
                         else if (channels[channel].RPN == 1) // Fine tuning
                         {
+                            /*
+                             * Fine tuning is a 14 bit value (0..16383) mapped to -1.0f..1.0f semitones
+                             * Coarse tuning is a 7 bit value (0..127) shifted to -64..63 semitones
+                             */
                             channels[channel].fineTuningCoarse = c1;
-                            channels[channel].tuning = ((channels[channel].fineTuningCoarse << 8)
+                            channels[channel].tuning = ((channels[channel].fineTuningCoarse << 7)
                                                         + channels[channel].fineTuningFine) - 8192.0f;
-                            channels[channel].tuning /= 4096.0f;
+                            channels[channel].tuning /= 8192.0f;
                             channels[channel].tuning += channels[channel].coarseTuning;
                         }
                         else if (channels[channel].RPN == 2) // Coarse tuning
                         {
-                            channels[channel].coarseTuning = c1;
-                            channels[channel].tuning = ((channels[channel].fineTuningCoarse << 8)
+                            /*
+                             * Fine tuning is a 14 bit value (0..16383) mapped to -1.0f..1.0f semitones
+                             * Coarse tuning is a 7 bit value (0..127) shifted to -64..63 semitones
+                             */
+                            channels[channel].coarseTuning = c1 - 64.0f;
+                            channels[channel].tuning = ((channels[channel].fineTuningCoarse << 7)
                                                         + channels[channel].fineTuningFine) - 8192.0f;
-                            channels[channel].tuning /= 4096.0f;
+                            channels[channel].tuning /= 8192.0f;
                             channels[channel].tuning += channels[channel].coarseTuning;
                         }
                         // Non-Registered Parameter
@@ -367,13 +375,13 @@ bool MIDI::processBuffer(uint32_t b)
                         else if (channels[channel].RPN == 1) // Fine tuning
                         {
                             /*
-                             * Fine tuning mapping is similar to pitch bend. A 14 bit value (0..16383) is mapped to -2.0f..2.0f
-                             * Coarse tuning is unmapped.
+                             * Fine tuning is a 14 bit value (0..16383) mapped to -1.0f..1.0f semitones
+                             * Coarse tuning is a 7 bit value (0..127) shifted to -64..63 semitones
                              */
                             channels[channel].fineTuningFine = c1;
-                            channels[channel].tuning = ((channels[channel].fineTuningCoarse << 8)
+                            channels[channel].tuning = ((channels[channel].fineTuningCoarse << 7)
                                                         + channels[channel].fineTuningFine) - 8192.0f;
-                            channels[channel].tuning /= 4096.0f;
+                            channels[channel].tuning /= 8192.0f;
                             channels[channel].tuning += channels[channel].coarseTuning;
                         }
                         // Non-Registered Parameter

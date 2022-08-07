@@ -41,7 +41,7 @@ public:
     uint8_t fineTuningCoarse     = 0;
     uint16_t RPN                 = 0x7f7f;
     uint16_t NRPN                = 0x7f7f;
-    uint32_t coarseTuning        = 0;
+    float coarseTuning           = 0;
     float pitchBend              = 0.0f;
     float volume                 = 1.0f;
     float expression             = 1.0f;
