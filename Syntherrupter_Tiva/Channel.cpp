@@ -29,12 +29,15 @@ void Channel::resetControllers()
     pan                          = 0.5f;
     tuning                       = 0.0f;
     pitchBendRange               = 2.0f / 8192.0f; // Unit: Semitones / 8192 - since the pitchbend value ranges from -8192 to 8192. Taking that factor in the range reduces the amount of calcs.
+    vibrato                      = 0.0f;
     sustainPedal                 = false;
     damperPedal                  = false;
     pitchBendRangeFine           = 0;
     pitchBendRangeCoarse         = 0;
     fineTuningFine               = 0;
     fineTuningCoarse             = 0;
+    vibratoFine                  = 0;
+    vibratoCoarse                = 0;
     coarseTuning                 = 0;
     RPN                          = 0x7f7f;
     NRPN                         = 0x7f7f;

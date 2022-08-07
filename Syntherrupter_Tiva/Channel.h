@@ -39,6 +39,8 @@ public:
     uint8_t pitchBendRangeCoarse = 0;
     uint8_t fineTuningFine       = 0;
     uint8_t fineTuningCoarse     = 0;
+    uint8_t vibratoFine          = 0;
+    uint8_t vibratoCoarse        = 0;
     uint16_t RPN                 = 0x7f7f;
     uint16_t NRPN                = 0x7f7f;
     float coarseTuning           = 0;
@@ -49,6 +51,7 @@ public:
     float pan                    = 0.0f;
     float pitchBendRange         = 2.0f / 8192.0f; // Unit: Semitones / 8192 - since the pitchbend value ranges from -8192 to 8192. Taking that factor in the range reduces the amount of calcs.
     float tuning                 = 0.0f;
+    float vibrato                = 0.0f;
     float notePan                = 0.0f;
     float notePanSourceRangeLow  = 0.0f;
     float notePanSourceRangeHigh = 1.0f;

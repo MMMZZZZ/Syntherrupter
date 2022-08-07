@@ -1025,11 +1025,11 @@ void Sysex::processSysex()
             {
                 if (readFloat)
                 {
-                    msg.value.f32 = EEPROMSettings::deviceData.midiLfoDepth;
+                    msg.value.f32 = EEPROMSettings::deviceData.midiModulationDepth;
                 }
                 else
                 {
-                    msg.value.ui32 = EEPROMSettings::deviceData.midiLfoDepth * 127.0f;
+                    msg.value.ui32 = EEPROMSettings::deviceData.midiModulationDepth * 127.0f;
                 }
                 txMsg.data.targetLSB = 0;
                 txMsg.data.targetMSB = MODE_MIDI_LIVE;
@@ -1043,7 +1043,7 @@ void Sysex::processSysex()
                 }
                 if (msg.value.f32 >= 0.0f)
                 {
-                    EEPROMSettings::deviceData.midiLfoDepth = msg.value.f32;
+                    EEPROMSettings::deviceData.midiModulationDepth = msg.value.f32;
                 }
             }
             break;

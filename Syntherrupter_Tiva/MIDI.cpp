@@ -21,7 +21,7 @@ bool                       MIDI::modeRunning = false;
 float                      MIDI::freqTable[128];
 MIDIProgram                MIDI::programs[MAX_PROGRAMS];
 float*                     MIDI::lfoFreq;
-float*                     MIDI::lfoDepth;
+float*                     MIDI::modulationDepth;
 
 
 MIDI::MIDI()
@@ -354,6 +354,19 @@ bool MIDI::processBuffer(uint32_t b)
                         {
                             channels[channel].notePanTargetRangeHigh = c1 / 127.0f;
                         }
+                        else if (channels[channel].NRPN == (43 << 8) + 0) // Vibrato (same unit and range as pitch bend)
+                        {
+                            /* Range is -8192 - +8191. Negative values cause a 180deg phase shift
+                             * but behave otherwise the same as positive values. Meaning, if one
+                             * channel has a vibrato of +400 and another one has a vibrato of -400,
+                             * both will oscillate to the same extend but in opposite directions.
+                             */
+                            channels[channel].vibratoCoarse = c1;
+                            channels[channel].vibrato  =  (channels[channel].vibratoCoarse << 7)
+                                                         + channels[channel].vibratoFine;
+                            channels[channel].vibrato -= 8192.0f;
+                            channels[channel].vibrato *= channels[channel].pitchBendRange;
+                        }
                         else
                         {
                             channels[channel].controllersChanged = previousState;
@@ -396,6 +409,19 @@ bool MIDI::processBuffer(uint32_t b)
                         else if (channels[channel].NRPN == (42 << 8) + 2) // Note pan mode - target range lower limit
                         {
                             channels[channel].notePanTargetRangeLow = c1 / 127.0f;
+                        }
+                        else if (channels[channel].NRPN == (43 << 8) + 0) // Vibrato (same unit and range as pitch bend)
+                        {
+                            /* Range is -8192 - +8191. Negative values cause a 180deg phase shift
+                             * but behave otherwise the same as positive values. Meaning, if one
+                             * channel has a vibrato of +400 and another one has a vibrato of -400,
+                             * both will oscillate to the same extend but in opposite directions.
+                             */
+                            channels[channel].vibratoFine = c1;
+                            channels[channel].vibrato  =  (channels[channel].vibratoCoarse << 7)
+                                                         + channels[channel].vibratoFine;
+                            channels[channel].vibrato -= 8192.0f;
+                            channels[channel].vibrato *= channels[channel].pitchBendRange;
                         }
                         else
                         {
@@ -810,8 +836,7 @@ void MIDI::process()
                                 note->pitch =   float(note->number)
                                               + channel->pitchBend * channel->pitchBendRange
                                               + channel->tuning;
-                                note->frequency = getFreq(note->pitch);
-                                note->periodUS = 1e6f / note->frequency;
+                                // Actual frequency and period are set in the updateEffects method.
 
                                 // Determine MIDI volume, including all effects that are not time-dependant.
                                 if (note->velocity)
@@ -913,7 +938,23 @@ void MIDI::updateEffects(Note* note)
         float timeDiffUS = currentTime - note->effectTimeUS;
         if (timeDiffUS >= effectResolutionUS)
         {
-            note->envelopeTimeUS = currentTime;
+            note->effectTimeUS = currentTime;
+
+            Channel* channel = note->channel;
+            float lfoVal = getLFOVal();
+
+            // Vibrato effect
+            float vibratoPitch = lfoVal * channel->vibrato * channel->pitchBendRange;
+            vibratoPitch += note->pitch;
+            if (vibratoPitch != note->finishedPitch)
+            {
+                note->finishedPitch = vibratoPitch;
+                note->frequency = getFreq(vibratoPitch);
+                note->periodUS = 1e6f / note->frequency;
+                note->toneChanged = (1 << COIL_COUNT) - 1;
+            }
+
+            // Envelope and Volume effects
             MIDIProgram* program = &(programs[note->channel->program]);
             if (!program->setEnvelopeAmp(&(note->envelopeStep), &(note->envelopeVolume)))
             {
@@ -925,11 +966,22 @@ void MIDI::updateEffects(Note* note)
             {
 
                 // After calculation of envelope, add other effects like modulation
+                float modulationVol = 1.0f;
+                if (note->channel->modulation)
+                {
+                    // Map sinewave from -1..1 to 0..1
+                    modulationVol = (lfoVal + 1) / 2.0f;
+                    // Map to proper amplitude
+                    modulationVol *= note->channel->modulation * (*modulationDepth);
+                    // Modulation actually indicates the deviation from 100% volume
+                    modulationVol = 1.0f - modulationVol;
+                }
+
                 float finishedVolume =   note->rawVolume
                                        * note->channel->volume
                                        * note->channel->expression
                                        * note->envelopeVolume
-                                       * (1.0f - getLFOVal(note->channel));
+                                       * modulationVol;
                 if (finishedVolume != note->finishedVolume)
                 {
                     note->toneChanged = (1 << COIL_COUNT) - 1;

@@ -139,26 +139,12 @@ private:
         float panDisabled = (coilPan < 0.0f || note->channel->notePanMode == Channel::NOTE_PAN_OMNI);
         note->panVol[coilNum] = Branchless::max(note->panVol[coilNum], panDisabled);
     };
-    static float getLFOVal(Channel* channel)
+    static float getLFOVal()
     {
-        if (channel->modulation)
-        {
-            /*
-             * LFO_SINE = sin( 2 * Pi * f * t[us] * 1e-6 )
-             *
-             *       1   /  LFO_SINE + 1       ModWheelValue    \
-             * val = - * | --------------- * ------------------ |
-             *       2   \        2           MaxModWheelValue  /
-             *
-             * sine wave between 0 and 1 mapped to the desired modulation depth (50% max).
-             */
-            return (sinf(6.283185307179586e-6f * float(System::getSystemTimeUS()) * (*lfoFreq)) + 1) / 2.0f
-                    * channel->modulation * (*lfoDepth);
-        }
-        else
-        {
-            return 0.0f;
-        }
+        /*
+         * Sine wave between -1 and 1 with a frequency of lfoFreq.
+         */
+        return sinf(6.283185307179586e-6f * float(System::getSystemTimeUS()) * (*lfoFreq));
     };
     static void removeDeadNotes();
     static float getFreq(float pitch)
@@ -210,7 +196,7 @@ private:
 
     static bool modeRunning;
     static float* lfoFreq;
-    static float* lfoDepth;
+    static float* modulationDepth;
 
     friend class EEPROMSettings;
 };

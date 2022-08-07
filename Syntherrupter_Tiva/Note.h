@@ -42,6 +42,7 @@ public:
     float envelopeVolume     = 0.0f;
     float finishedVolume     = 0.0f;
     float pitch              = 0.0f;
+    float finishedPitch      = 0.0f;
     float frequency          = 0.0f;
     float periodUS           = 0.0f;
     float pan                = 0.5f;

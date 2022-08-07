@@ -77,9 +77,9 @@ uint32_t EEPROMSettings::init()
             MIDI::programs[prog].steps = &(eeprom.data.envelopes[eepromProg++]);
         }
     }
-    MIDI::sysexDeviceID = &(deviceData.deviceID);
-    MIDI::lfoFreq       = &(deviceData.midiLfoFreq);
-    MIDI::lfoDepth      = &(deviceData.midiLfoDepth);
+    MIDI::sysexDeviceID   = &(deviceData.deviceID);
+    MIDI::lfoFreq         = &(deviceData.midiLfoFreq);
+    MIDI::modulationDepth = &(deviceData.midiModulationDepth);
     for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
     {
         Coil::allCoils[coil].maxDutyPerm   = &(coilData[coil].maxDutyPerm);
@@ -419,16 +419,16 @@ void EEPROMSettings::initDefault()
     /*
      * Default Device Settings
      */
-    defaultSettings.deviceData.deviceID         = 0;
-    defaultSettings.deviceData.eepromUpdateMode = 0; // Manual
-    defaultSettings.deviceData.uiBackOff        = true;
-    defaultSettings.deviceData.uiBrightness     = 100;
-    defaultSettings.deviceData.uiButtonHoldTime = 250;
-    defaultSettings.deviceData.uiColorMode      = 1; // Dark mode
-    defaultSettings.deviceData.uiSleepDelay     = 0; // No sleep
-    defaultSettings.deviceData.midiLfoFreq      = 5.0f;
-    defaultSettings.deviceData.midiLfoDepth     = 0.5f;
-    defaultSettings.deviceData.bufferTimeUS     = 5000;
+    defaultSettings.deviceData.deviceID            = 0;
+    defaultSettings.deviceData.eepromUpdateMode    = 0; // Manual
+    defaultSettings.deviceData.uiBackOff           = true;
+    defaultSettings.deviceData.uiBrightness        = 100;
+    defaultSettings.deviceData.uiButtonHoldTime    = 250;
+    defaultSettings.deviceData.uiColorMode         = 1; // Dark mode
+    defaultSettings.deviceData.uiSleepDelay        = 0; // No sleep
+    defaultSettings.deviceData.midiLfoFreq         = 5.0f;
+    defaultSettings.deviceData.midiModulationDepth = 0.5f;
+    defaultSettings.deviceData.bufferTimeUS        = 5000;
 
     /*
      * Default Envelopes

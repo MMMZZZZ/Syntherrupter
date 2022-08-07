@@ -44,9 +44,11 @@ After finishing the modification of NRPs, the NRP number should be reset to 0x7f
 Currently Syntherrupter has support for the following NRPs (all values are decimal, not hex):
 |Parameter|NC|NF|DC|DF|
 |-|-|-|-|-|
-|Stereo Mapping, Control|42|0|X (Don't care)|Stereo Mapping Mode (see below)|
+|Stereo Mapping, Control|42|0|X (Don't care)|[Stereo Mapping Mode](#stereo-mapping-modes)|
 |Stereo Mapping, Input Range|42|1|0-127: upper end|0-127: lower end|
 |Stereo Mapping, Output Range|42|2|0-127: upper end|0-127: lower end|
+| | | | | |
+|[Vibrato](#vibrato)|43|0|0-127: upper 7bit of value|0-127: lower 7bit of value|
 
 #### Stereo Mapping Modes
 
@@ -59,6 +61,12 @@ Syntherrupter allows you to map notes to stereo positions based on different par
 	* Mode 4: "Highest". All notes of the channel get mapped based on the current highest pitch.
 	* Mode 5: "Average". All notes of the channel get mapped based on the current average pitch.
 	* Mode 6: "Loudest". All notes of the channel get mapped based on the pitch of the note with the highest velocity. If multiple notes have the same velocity, the pitch of the most recent one is taken.
+
+#### Vibrato
+
+Vibrato adds an [oscillation to the note pitch](https://en.wikipedia.org/wiki/Vibrato#Vibrato_and_tremolo) (like modulation does for its volume). This NRPN controls the "pitch amplitude" which has the same unit as the pitch bend command (meaning, it's controlled by the pitch bend range parameter). The pitch bend value ranges from 0 to 16383, which is interpreted as -8192 to 8191, which in turns is mapped according to the configured pitch bend range (by default +/-2 semitones). So +4096 = +1 semitones, -4096 = -1 semitones. Similarly, a vibrato amplitude of 4096 would result in a vibrato effect ranging from -1 to +1 semitones.
+
+Since this parameter controls the vibrato _amplitude_, which is by definition positive, a negative value doesn't make sense at first. However, due to how it's implemented, it causes a 180° phase shift. Meaning, by having two channels, one with positive vibrato amplitude, one with negative vibrato amplitude, the pitch of the first one would go up while the pitch of the second one would go down and vice-versa. I don't know whether or not this is useful but I figured it wouldn't hurt and it's more effort to _not_ have this feature. 
 
 ## System Exclusive Messages (SysEx)
 
@@ -300,7 +308,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
 	* Value: int32
 		* bf16: channels whose NRPs shall be reset to default.
-* `0x67`: [EE] LFO Modulation Depth
+* `0x67`: [EE] Modulation Depth
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.
 	* Value: int32

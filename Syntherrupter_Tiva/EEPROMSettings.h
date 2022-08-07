@@ -57,7 +57,7 @@ public:
         uint16_t uiSleepDelay;
         bool     uiBackOff;
         float    midiLfoFreq;
-        float    midiLfoDepth;
+        float    midiModulationDepth;
         uint32_t bufferTimeUS;
     };
 
