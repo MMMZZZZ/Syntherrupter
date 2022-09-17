@@ -929,7 +929,7 @@ void MIDI::updateEffects(Note* note)
         float timeDiffUS = currentTime - note->effectTimeUS;
         if (timeDiffUS >= effectResolutionUS)
         {
-            note->envelopeTimeUS = currentTime;
+            note->effectTimeUS = currentTime;
             MIDIProgram* program = &(programs[note->channel->program]);
             if (!program->setEnvelopeAmp(&(note->envelopeStep), &(note->envelopeVolume)))
             {
