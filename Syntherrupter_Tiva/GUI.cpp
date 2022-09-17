@@ -649,12 +649,16 @@ void GUI::settings()
             {
                 // Coil limits. Number ranges from 1-6 instead of 0-5.
                 number--;
-                EEPROMSettings::CoilData& coilData = EEPROMSettings::coilData[number];
 
-                coilData.maxDutyPerm   =  (data & 0xff800000) >> 23;
-                coilData.minOfftimeUS  = ((data & 0x007f0000) >> 16) * 10;
-                coilData.midiMaxVoices = ((data & 0x0000f000) >> 12) +  1;
-                coilData.maxOntimeUS   =  (data & 0x00000fff)        * 10;
+                uint32_t maxDutyPerm   =  (data & 0xff800000) >> 23;
+                uint32_t minOfftimeUS  = ((data & 0x007f0000) >> 16) * 10;
+                uint32_t midiMaxVoices = ((data & 0x0000f000) >> 12) +  1;
+                uint32_t maxOntimeUS   =  (data & 0x00000fff)        * 10;
+
+                Coil::allCoils[number].setMaxDutyPerm(maxDutyPerm);
+                Coil::allCoils[number].setMaxOntimeUS(maxOntimeUS);
+                Coil::allCoils[number].setMinOfftimeUS(minOfftimeUS);
+                Coil::allCoils[number].midi.setMaxVoices(midiMaxVoices);
             }
             else if (settings == 0 && number < 3)
             {
