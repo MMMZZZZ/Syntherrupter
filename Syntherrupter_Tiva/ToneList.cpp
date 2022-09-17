@@ -56,6 +56,7 @@ Tone* ToneList::updateTone(uint32_t ontimeUS, uint32_t periodUS, void* owner, vo
     ontimeUS = Branchless::min(ontimeUS, (uint32_t)maxOntimeUS);
     if (ontimeUS != targetTone->ontimeUS)
     {
+        newDuty = true;
         targetTone->ontimeUS = ontimeUS;
         targetTone->limitedOntimeUS = ontimeUS;
     }
