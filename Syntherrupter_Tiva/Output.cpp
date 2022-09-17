@@ -68,6 +68,11 @@ void Output::addPulse(Pulse& pulse)
         pulse.timeUS += pulse.ontimeUS;
         pulse.ontimeUS = 0;
     }
+    else if (pulse.ontimeUS > maxOntimeUS)
+    {
+        pulse.timeUS += pulse.ontimeUS - maxOntimeUS;
+        pulse.ontimeUS = maxOntimeUS;
+    }
     if (pulse.timeUS)
     {
         signal.load  = Branchless::max(pulse.timeUS, MIN_TIME_US);

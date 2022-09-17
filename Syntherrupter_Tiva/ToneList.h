@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "InterrupterConfig.h"
+#include "Branchless.h"
 #include "System.h"
 #include "Tone.h"
 #include "Pulse.h"
@@ -26,7 +27,7 @@ public:
     void deleteTone(Tone* tone);
     void limit();
     void applyTimeOffsetUS(uint32_t offsetUS);
-    void setMaxOntimeUS(float ontimeUSLimit)
+    void setMaxOntimeUS(float maxOntimeUS)
     {
         this->maxOntimeUS = maxOntimeUS;
     };
