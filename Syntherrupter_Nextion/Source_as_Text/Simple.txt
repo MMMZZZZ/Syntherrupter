@@ -446,6 +446,12 @@ Variable (int32) sBPSOld
         Scope: local
         Value: 0
     
+Variable (int32) temp2
+    Attributes
+        ID   : 95
+        Scope: local
+        Value: 0
+    
 Number nOn
     Attributes
         ID                 : 6
@@ -1315,23 +1321,32 @@ Slider sOn
                 }
                 fSlider.val/=sys0
                 fSlider.val*=sys0
-                sys1=nBPS.val*fSlider.val/1000 // resulting duty cycle
-                if(sys1<=userDutyLimit.val)
+                temp.val=fSlider.val
+                temp2.val=nBPS.val*temp.val/1000 // resulting duty cycle
+                if(temp2.val>userDutyLimit.val)
                 {
-                    if(nOn.val!=fSlider.val)
+                    // Reduce ontime to highest possible value within the limits
+                    temp.val=userDutyLimit.val*1000/nBPS.val
+                    // Get and apply corresponding slider position
+                    // Do this only on release. While moving applyingMode is negative
+                    // (see below and Touch Move Event)
+                    if(Settings.applyingMode.val>=1)
                     {
-                        nOn.val=fSlider.val
-                        nDuty.val=sys1
-                        fSliderInput.val=sDuty.maxval
-                        fSliderOutput.val=userDutyLimit.val
-                        fSlider.val=nDuty.val
+                        fSlider.val=temp.val
                         click fSlider,0
-                        // Round to multiple of five
-                        fSlider.val/=5
-                        fSlider.val*=5
-                        sDuty.val=fSlider.val
-                        newData.val=1
+                        sOn.val=fSlider.val
                     }
+                }
+                if(nOn.val!=temp.val)
+                {
+                    nOn.val=temp.val
+                    nDuty.val=temp2.val
+                    fSliderInput.val=sDuty.maxval
+                    fSliderOutput.val=userDutyLimit.val
+                    fSlider.val=nDuty.val
+                    click fSlider,0
+                    sDuty.val=fSlider.val
+                    newData.val=1
                 }
                 // to understand the following lines have a look at the Touch Move code.
                 // what you would actually wanna do is put the code above in touch move and perform a click event on touch move here (because your can press/release a slider, changing its value without moving it).
@@ -1406,33 +1421,55 @@ Slider sBPS
                 // Depending on whether ontime or duty was set, calculate the resulting value for the other one and check if it's legal.
                 if(keepOntime.val>0)
                 {
-                    sys1=nOn.val*temp.val/1000 // resulting duty cycle
-                    if(sys1<=userDutyLimit.val)
+                    temp2.val=nOn.val*temp.val/1000 // resulting duty cycle
+                    if(temp2.val>userDutyLimit.val)
                     {
-                        nDuty.val=sys1
+                        temp2.val=userDutyLimit.val
+                        temp.val=userDutyLimit.val*1000/nOn.val
+                        // Get and apply corresponding slider position
+                        // Do this only on release. While moving applyingMode is negative
+                        // (see below and Touch Move Event)
+                        if(Settings.applyingMode.val>=1)
+                        {
+                            fSlider.val=temp.val
+                            click fSlider,0
+                            sBPS.val=fSlider.val
+                        }
+                    }
+                    if(nDuty.val!=temp2.val)
+                    {
+                        nDuty.val=temp2.val
+                        fSlider.val=temp2.val
                         fSliderInput.val=sDuty.maxval
                         fSliderOutput.val=userDutyLimit.val
-                        fSlider.val=nDuty.val
                         click fSlider,0
                         sDuty.val=fSlider.val
-                    }else
-                    {
-                        temp.val=nBPS.val
                     }
                 }else
                 {
-                    sys1=nDuty.val*1000/temp.val // Resulting Ontime
-                    if(sys1<=userOnLimit.val)
+                    temp2.val=nDuty.val*1000/temp.val // Resulting Ontime
+                    if(temp2.val>userOnLimit.val)
                     {
-                        nOn.val=sys1
+                        temp2.val=userOnLimit.val
+                        temp.val=nDuty.val*1000/userOnLimit.val
+                        // Get and apply corresponding slider position
+                        // Do this only on release. While moving applyingMode is negative
+                        // (see below and Touch Move Event)
+                        if(Settings.applyingMode.val>=1)
+                        {
+                            fSlider.val=temp.val
+                            click fSlider,0
+                            sBPS.val=fSlider.val
+                        }
+                    }
+                    if(nOn.val!=temp2.val)
+                    {
+                        nOn.val=temp2.val
                         fSliderInput.val=sOn.maxval
                         fSliderOutput.val=userOnLimit.val
                         fSlider.val=nOn.val
                         click fSlider,0
                         sOn.val=fSlider.val
-                    }else
-                    {
-                        temp.val=nBPS.val
                     }
                 }
                 if(nBPS.val!=temp.val)
@@ -1448,7 +1485,7 @@ Slider sBPS
                     click fApply,0
                 }
                 // Store slider position in case of a "help touch"
-                sOnOld.val=sOn.val
+                sBPSOld.val=sBPS.val
             }else
             {
                 // Show Help
@@ -1487,23 +1524,32 @@ Slider sDuty
                 fSliderOutput.val=userDutyLimit.val
                 fSlider.val=sDuty.val
                 click fSlider,1
-                sys1=fSlider.val*1000/nBPS.val // Resulting Ontime
-                if(sys1<=userOnLimit.val)
+                temp2.val=fSlider.val*1000/nBPS.val // Resulting Ontime
+                temp.val=fSlider.val
+                if(temp2.val>userOnLimit.val)
                 {
-                    if(sDuty.val!=fSlider.val)
+                    temp2.val=userOnLimit.val
+                    temp.val=userOnLimit.val*nBPS.val/1000
+                    // Get and apply corresponding slider position
+                    // Do this only on release. While moving applyingMode is negative
+                    // (see below and Touch Move Event)
+                    if(Settings.applyingMode.val>=1)
                     {
-                        newData.val=1
-                        nDuty.val=fSlider.val
-                        nOn.val=sys1
-                        fSliderInput.val=sOn.maxval
-                        fSliderOutput.val=userOnLimit.val
-                        fSlider.val=nOn.val
+                        fSlider.val=temp.val
                         click fSlider,0
-                        // Round to multiple of five
-                        fSlider.val/=5
-                        fSlider.val*=5
-                        sOn.val=fSlider.val
+                        sDuty.val=fSlider.val
                     }
+                }
+                if(nDuty.val!=temp.val)
+                {
+                    newData.val=1
+                    nDuty.val=temp.val
+                    nOn.val=temp2.val
+                    fSliderInput.val=sOn.maxval
+                    fSliderOutput.val=userOnLimit.val
+                    fSlider.val=nOn.val
+                    click fSlider,0
+                    sOn.val=fSlider.val
                 }
                 // to understand the following lines have a look at the Touch Move code.
                 // what you would actually wanna do is put the code above in touch move and perform a click event on touch move here (because your can press/release a slider, changing its value without moving it).
@@ -1844,70 +1890,6 @@ Hotspot fApply
         Send Component ID: disabled
     
     Events
-        Touch Press Event
-            // Changes all page components according to the current color set.
-            // Note: This component has to be the last component of the page.
-            //
-            // sys0: component id
-            // sys1: component type
-            // sys2: picture id offset for current color mode
-            sys2=Settings.colorMode.val*Settings.picCount.val
-            for(sys0=0;sys0<fLoadColors.id;sys0++)
-            {
-                // More convenient for typing
-                sys1=b[sys0].type
-                if(sys1==121)
-                {
-                    // Types that have bco
-                    // page
-                    if(b[sys0].bco!=Settings.backCol2.val)
-                    {
-                        b[sys0].bco=Settings.backCol.val
-                    }
-                }else if(sys1==54||sys1==59||sys1==116||sys1==55)
-                {
-                    // Types that have bco, pco, and sta:
-                    // number, float, text, scroll text
-                    if(b[sys0].sta==1)
-                    {
-                        if(b[sys0].bco!=Settings.backCol2.val)
-                        {
-                            b[sys0].bco=Settings.backCol.val
-                            b[sys0].pco=Settings.frontCol.val
-                        }else
-                        {
-                            b[sys0].pco=Settings.frontCol2.val
-                        }
-                    }
-                }else if(sys1==98||sys1==53)
-                {
-                    // Types that have pco, pic, pco2, pic2, sta:
-                    // button, dual-state button
-                    if(b[sys0].sta==2)
-                    {
-                        b[sys0].pco=Settings.frontCol.val
-                        b[sys0].pco2=Settings.backCol.val
-                        b[sys0].pic=b[sys0].pic%Settings.picCount.val
-                        b[sys0].pic+=sys2
-                        b[sys0].pic2=b[sys0].pic+1
-                    }
-                }else if(sys1==58)
-                {
-                    // Types that have bco, pco
-                    // QR Code
-                    b[sys0].bco=Settings.backCol.val
-                    b[sys0].pco=Settings.qrFrontCol.val
-                }else if(sys1==1)
-                {
-                    // Types that have pic, pic2:
-                    // slider
-                    b[sys0].pic=b[sys0].pic%Settings.picCount.val
-                    b[sys0].pic+=sys2
-                    b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
-                    b[sys0].pic2+=sys2
-                }
-            }
-        
         Touch Release Event
             // Return format: 'd', data byte 1, 2, 3, 4, 5
             // Data byte 1: Bits 0-5: coils to which settings apply.
@@ -1921,105 +1903,189 @@ Hotspot fApply
                 // Update Info below coil buttons
                 if(btCoil1.val==1)
                 {
-                    if(nOn.val>TC_Settings.coil1On.val)
+                    nOn1.val=nOn.val
+                    nDuty1.val=nDuty.val
+                    nBPS1.val=nBPS.val
+                    if(keepOntime.val>0)
                     {
-                        nOn1.val=TC_Settings.coil1On.val
-                        nDuty1.val=nOn.val*nBPS.val/1000
-                    }else if(nDuty.val>TC_Settings.coil1Duty.val)
-                    {
-                        nDuty1.val=TC_Settings.coil1Duty.val
-                        nOn1.val=nDuty.val*1000/nBPS.val
+                        if(nOn1.val>TC_Settings.coil1On.val)
+                        {
+                            nOn1.val=TC_Settings.coil1On.val
+                            nDuty1.val=nOn1.val*nBPS1.val/1000
+                        }
+                        if(nDuty1.val>TC_Settings.coil1Duty.val)
+                        {
+                            nDuty1.val=TC_Settings.coil1Duty.val
+                            nOn1.val=nDuty1.val*1000/nBPS1.val
+                        }
                     }else
                     {
-                        nOn1.val=nOn.val
-                        nDuty1.val=nDuty.val
+                        if(nDuty1.val>TC_Settings.coil1Duty.val)
+                        {
+                            nDuty1.val=TC_Settings.coil1Duty.val
+                            nOn1.val=nDuty1.val*1000/nBPS1.val
+                        }
+                        if(nOn1.val>TC_Settings.coil1On.val)
+                        {
+                            nOn1.val=TC_Settings.coil1On.val
+                            nDuty1.val=nOn1.val*nBPS1.val/1000
+                        }
                     }
-                    nBPS1.val=nBPS.val
                 }
                 if(btCoil2.val==1)
                 {
-                    if(nOn.val>TC_Settings.coil2On.val)
+                    nOn2.val=nOn.val
+                    nDuty2.val=nDuty.val
+                    nBPS2.val=nBPS.val
+                    if(keepOntime.val>0)
                     {
-                        nOn2.val=TC_Settings.coil2On.val
-                        nDuty2.val=nOn.val*nBPS.val/1000
-                    }else if(nDuty.val>TC_Settings.coil2Duty.val)
-                    {
-                        nDuty2.val=TC_Settings.coil2Duty.val
-                        nOn2.val=nDuty.val*1000/nBPS.val
+                        if(nOn2.val>TC_Settings.coil2On.val)
+                        {
+                            nOn2.val=TC_Settings.coil2On.val
+                            nDuty2.val=nOn2.val*nBPS2.val/1000
+                        }
+                        if(nDuty2.val>TC_Settings.coil2Duty.val)
+                        {
+                            nDuty2.val=TC_Settings.coil2Duty.val
+                            nOn2.val=nDuty2.val*1000/nBPS2.val
+                        }
                     }else
                     {
-                        nOn2.val=nOn.val
-                        nDuty2.val=nDuty.val
+                        if(nDuty2.val>TC_Settings.coil2Duty.val)
+                        {
+                            nDuty2.val=TC_Settings.coil2Duty.val
+                            nOn2.val=nDuty2.val*1000/nBPS2.val
+                        }
+                        if(nOn2.val>TC_Settings.coil2On.val)
+                        {
+                            nOn2.val=TC_Settings.coil2On.val
+                            nDuty2.val=nOn2.val*nBPS2.val/1000
+                        }
                     }
-                    nBPS2.val=nBPS.val
                 }
                 if(btCoil3.val==1)
                 {
-                    if(nOn.val>TC_Settings.coil3On.val)
+                    nOn3.val=nOn.val
+                    nDuty3.val=nDuty.val
+                    nBPS3.val=nBPS.val
+                    if(keepOntime.val>0)
                     {
-                        nOn3.val=TC_Settings.coil3On.val
-                        nDuty3.val=nOn.val*nBPS.val/1000
-                    }else if(nDuty.val>TC_Settings.coil3Duty.val)
-                    {
-                        nDuty3.val=TC_Settings.coil3Duty.val
-                        nOn3.val=nDuty.val*1000/nBPS.val
+                        if(nOn3.val>TC_Settings.coil3On.val)
+                        {
+                            nOn3.val=TC_Settings.coil3On.val
+                            nDuty3.val=nOn3.val*nBPS3.val/1000
+                        }
+                        if(nDuty3.val>TC_Settings.coil3Duty.val)
+                        {
+                            nDuty3.val=TC_Settings.coil3Duty.val
+                            nOn3.val=nDuty3.val*1000/nBPS3.val
+                        }
                     }else
                     {
-                        nOn3.val=nOn.val
-                        nDuty3.val=nDuty.val
+                        if(nDuty3.val>TC_Settings.coil3Duty.val)
+                        {
+                            nDuty3.val=TC_Settings.coil3Duty.val
+                            nOn3.val=nDuty3.val*1000/nBPS3.val
+                        }
+                        if(nOn3.val>TC_Settings.coil3On.val)
+                        {
+                            nOn3.val=TC_Settings.coil3On.val
+                            nDuty3.val=nOn3.val*nBPS3.val/1000
+                        }
                     }
-                    nBPS3.val=nBPS.val
                 }
                 if(btCoil4.val==1)
                 {
-                    if(nOn.val>TC_Settings.coil4On.val)
+                    nOn4.val=nOn.val
+                    nDuty4.val=nDuty.val
+                    nBPS4.val=nBPS.val
+                    if(keepOntime.val>0)
                     {
-                        nOn4.val=TC_Settings.coil4On.val
-                        nDuty4.val=nOn.val*nBPS.val/1000
-                    }else if(nDuty.val>TC_Settings.coil4Duty.val)
-                    {
-                        nDuty4.val=TC_Settings.coil4Duty.val
-                        nOn4.val=nDuty.val*1000/nBPS.val
+                        if(nOn4.val>TC_Settings.coil4On.val)
+                        {
+                            nOn4.val=TC_Settings.coil4On.val
+                            nDuty4.val=nOn4.val*nBPS4.val/1000
+                        }
+                        if(nDuty4.val>TC_Settings.coil4Duty.val)
+                        {
+                            nDuty4.val=TC_Settings.coil4Duty.val
+                            nOn4.val=nDuty4.val*1000/nBPS4.val
+                        }
                     }else
                     {
-                        nOn4.val=nOn.val
-                        nDuty4.val=nDuty.val
+                        if(nDuty4.val>TC_Settings.coil4Duty.val)
+                        {
+                            nDuty4.val=TC_Settings.coil4Duty.val
+                            nOn4.val=nDuty4.val*1000/nBPS4.val
+                        }
+                        if(nOn4.val>TC_Settings.coil4On.val)
+                        {
+                            nOn4.val=TC_Settings.coil4On.val
+                            nDuty4.val=nOn4.val*nBPS4.val/1000
+                        }
                     }
-                    nBPS4.val=nBPS.val
                 }
                 if(btCoil5.val==1)
                 {
-                    if(nOn.val>TC_Settings.coil5On.val)
+                    nOn5.val=nOn.val
+                    nDuty5.val=nDuty.val
+                    nBPS5.val=nBPS.val
+                    if(keepOntime.val>0)
                     {
-                        nOn5.val=TC_Settings.coil5On.val
-                        nDuty5.val=nOn.val*nBPS.val/1000
-                    }else if(nDuty.val>TC_Settings.coil5Duty.val)
-                    {
-                        nDuty5.val=TC_Settings.coil5Duty.val
-                        nOn5.val=nDuty.val*1000/nBPS.val
+                        if(nOn5.val>TC_Settings.coil5On.val)
+                        {
+                            nOn5.val=TC_Settings.coil5On.val
+                            nDuty5.val=nOn5.val*nBPS5.val/1000
+                        }
+                        if(nDuty5.val>TC_Settings.coil5Duty.val)
+                        {
+                            nDuty5.val=TC_Settings.coil5Duty.val
+                            nOn5.val=nDuty5.val*1000/nBPS5.val
+                        }
                     }else
                     {
-                        nOn5.val=nOn.val
-                        nDuty5.val=nDuty.val
+                        if(nDuty5.val>TC_Settings.coil5Duty.val)
+                        {
+                            nDuty5.val=TC_Settings.coil5Duty.val
+                            nOn5.val=nDuty5.val*1000/nBPS5.val
+                        }
+                        if(nOn5.val>TC_Settings.coil5On.val)
+                        {
+                            nOn5.val=TC_Settings.coil5On.val
+                            nDuty5.val=nOn5.val*nBPS5.val/1000
+                        }
                     }
-                    nBPS5.val=nBPS.val
                 }
                 if(btCoil6.val==1)
                 {
-                    if(nOn.val>TC_Settings.coil6On.val)
+                    nOn6.val=nOn.val
+                    nDuty6.val=nDuty.val
+                    nBPS6.val=nBPS.val
+                    if(keepOntime.val>0)
                     {
-                        nOn6.val=TC_Settings.coil6On.val
-                        nDuty6.val=nOn.val*nBPS.val/1000
-                    }else if(nDuty.val>TC_Settings.coil6Duty.val)
-                    {
-                        nDuty6.val=TC_Settings.coil6Duty.val
-                        nOn6.val=nDuty.val*1000/nBPS.val
+                        if(nOn6.val>TC_Settings.coil6On.val)
+                        {
+                            nOn6.val=TC_Settings.coil6On.val
+                            nDuty6.val=nOn6.val*nBPS6.val/1000
+                        }
+                        if(nDuty6.val>TC_Settings.coil6Duty.val)
+                        {
+                            nDuty6.val=TC_Settings.coil6Duty.val
+                            nOn6.val=nDuty6.val*1000/nBPS6.val
+                        }
                     }else
                     {
-                        nOn6.val=nOn.val
-                        nDuty6.val=nDuty.val
+                        if(nDuty6.val>TC_Settings.coil6Duty.val)
+                        {
+                            nDuty6.val=TC_Settings.coil6Duty.val
+                            nOn6.val=nDuty6.val*1000/nBPS6.val
+                        }
+                        if(nOn6.val>TC_Settings.coil6On.val)
+                        {
+                            nOn6.val=TC_Settings.coil6On.val
+                            nDuty6.val=nOn6.val*nBPS6.val/1000
+                        }
                     }
-                    nBPS6.val=nBPS.val
                 }
                 prints "d",0
                 prints TC_Settings.activeCoils.val,1
