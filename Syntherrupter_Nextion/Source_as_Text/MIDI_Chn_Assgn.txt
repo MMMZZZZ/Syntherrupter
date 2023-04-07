@@ -1,0 +1,1786 @@
+Page MIDI_Chn_Assgn
+    Attributes
+        ID               : 0
+        Scope            : local
+        Send Component ID: disabled
+        Locked           : no
+    
+    Events
+        Preinitialize Event
+            // Prevent page refreshs until postinit
+            ref_stop
+            //
+            // Load colors
+            click fLoadColors,1
+            click fLoadModes,1
+            //
+            // Display username
+            if(User_Settings.userNum.val==0)
+            {
+                tUser.txt=" "+User_Settings.u0Name.txt
+            }else if(User_Settings.userNum.val==1)
+            {
+                tUser.txt=" "+User_Settings.u1Name.txt
+            }else if(User_Settings.userNum.val==2)
+            {
+                tUser.txt=" "+User_Settings.u2Name.txt
+            }
+            //
+            // functions shall not be visible
+            vis fConvBtnState,0
+            vis fStore,0
+            vis fLoadModes,0
+            vis fLoadColors,0
+            vis fResetBtns,0
+            //
+            // Load Help Mode
+            if(Help_Info.helpMode.val==0)
+            {
+                vis qrHelp,0
+            }else
+            {
+                tempStr.txt=tTitle.txt
+                showHelp.val=1
+                click 0,1
+            }
+            //
+            // Enable page refreshs again
+            ref_star
+        
+        Postinitialize Event
+            // Lines between channels, coils, actions, descriptions
+            sys0=tCoils.x
+            sys1=bNoneCoils.x+bNoneCoils.w
+            sys2=bNone.y+bNone.h+bNoneCoils.y
+            sys2/=2
+            line sys0,sys2,sys1,sys2,tCoils.pco
+            sys2=bNoneCoils.y+bNoneCoils.h+btShow.y
+            sys2/=2
+            line sys0,sys2,sys1,sys2,tCoils.pco
+            sys2=btShow.y+btShow.h+tChnInfo2.y
+            sys2/=2
+            line sys0,sys2,sys1,sys2,tCoils.pco
+            //
+            // Assign meaningful initial value to lastShowed.val to avoid invalid variable errors
+            lastShown.val=btCoil1.id
+            //
+            // Load button hold times
+            tmButtonHold.tim=Other_Settings.nHoldTime.val
+            //
+            // On startup all channels are assigned to all coils. To make this more obvious
+            // all buttons are highlighted in that case.
+            sys0=0xffff
+        
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(Other_Settings.nBackOff.val!=0)
+                {
+                    // Default "stop" action.
+                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                    prints "mes",3
+                    // Set all ontime and duty settings of all pages to 0.
+                    // First come the global variables then the local variables.
+                    Simple.ontime.val=0
+                    Simple.duty.val=0
+                    Simple.set1.val=Simple.set1.val&0x0000ffff
+                    Simple.set2.val=Simple.set2.val&0x0000ffff
+                    Simple.set3.val=Simple.set3.val&0x0000ffff
+                    Simple.set4.val=Simple.set4.val&0x0000ffff
+                    Simple.set5.val=Simple.set5.val&0x0000ffff
+                    Simple.set6.val=Simple.set6.val&0x0000ffff
+                    MIDI_Live.ontime.val=0
+                    MIDI_Live.duty.val=0
+                    MIDI_Live.set1.val=0
+                    MIDI_Live.set2.val=0
+                    MIDI_Live.set3.val=0
+                    MIDI_Live.set4.val=0
+                    MIDI_Live.set5.val=0
+                    MIDI_Live.set6.val=0
+                    Lightsaber.ontime.val=0
+                    Lightsaber.ontimes12.val=0
+                    Lightsaber.ontimes34.val=0
+                    Lightsaber.ontimes56.val=0
+                }
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgP"
+                click qrHelp,0
+            }
+        
+Variable (string) sTitleStart
+    Attributes
+        ID            : 25
+        Scope         : local
+        Text          : MIDI Channel Assignment
+        Max. Text Size: 30
+    
+Variable (int32) showHelp
+    Attributes
+        ID   : 34
+        Scope: local
+        Value: 0
+    
+Variable (string) tempStr
+    Attributes
+        ID            : 51
+        Scope         : local
+        Text          : MIDI Channel Assignment
+        Max. Text Size: 30
+    
+Variable (int32) lastShown
+    Attributes
+        ID   : 52
+        Scope: local
+        Value: 0
+    
+Number fConvBtnState
+    Attributes
+        ID                 : 28
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 0
+    
+    Events
+        Touch Press Event
+            // Store button state in variable. Bit n corresponds to channel n.
+            // sys0 only used because shorter, meaning better readable.
+            sys0=0
+            sys0+=btChn15.val
+            sys0=sys0<<1
+            sys0+=btChn14.val
+            sys0=sys0<<1
+            sys0+=btChn13.val
+            sys0=sys0<<1
+            sys0+=btChn12.val
+            sys0=sys0<<1
+            sys0+=btChn11.val
+            sys0=sys0<<1
+            sys0+=btChn10.val
+            sys0=sys0<<1
+            sys0+=btChn9.val
+            sys0=sys0<<1
+            sys0+=btChn8.val
+            sys0=sys0<<1
+            sys0+=btChn7.val
+            sys0=sys0<<1
+            sys0+=btChn6.val
+            sys0=sys0<<1
+            sys0+=btChn5.val
+            sys0=sys0<<1
+            sys0+=btChn4.val
+            sys0=sys0<<1
+            sys0+=btChn3.val
+            sys0=sys0<<1
+            sys0+=btChn2.val
+            sys0=sys0<<1
+            sys0+=btChn1.val
+            sys0=sys0<<1
+            sys0+=btChn0.val
+            fConvBtnState.val=sys0
+        
+        Touch Release Event
+            // Load button state from variable. Bit n corresponds to channel n.
+            btChn0.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn1.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn2.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn3.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn4.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn5.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn6.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn7.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn8.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn9.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn10.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn11.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn12.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn13.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn14.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn15.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+        
+Number fStore
+    Attributes
+        ID                 : 29
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 0
+    
+    Events
+        Touch Press Event
+            // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
+            // Data byte 1:
+            // Data byte 1:
+            //   Bits 0-5: coils to which settings apply.
+            //   Bits 6-7: Mode
+            //     0b00 = MIDI TC Settings Change
+            //     Other values = Not used here.
+            // Data byte 2: Bit 0-7 correspond to channel 0-7
+            // Data byte 3: Bit 0-7 correspond to channel 8-15
+            // Data byte 4:
+            //   Bit 0-6 contain the Pan value (0-127)
+            //   Bit 7: 0: Pan enabled, 1: Pan disabled
+            // Data Byte 5:
+            //   Bit 0-6: Pan reach, ranging from 0-127. Notes within this range (abs(coilPanPos - notePanPos) <= panReach) will play on this coil.
+            //   Bit 7:
+            //     0 = linear mode. The volume of the note decreases linearly with the distance from the coil. At distance 0 the volume is equal to the notes volume. At the limit of the range the volume drops to 0.
+            //     1 = constant mode. All notes within the range will play at their nominal volume.
+            //
+            //
+            // Convert button state to bit array
+            //click fConvBtnState,1
+            //
+            // Add Pan data to sys0
+            //sys0=1-btPanDis.val
+            //sys0=sys0<<7
+            //sys0+=sPan.val
+            // Add pan reach data to sys0
+            //sys0=sys0<<1
+            //if(bLinConst.txt==sConst.txt)
+            //{
+            //  sys0+=1
+            //}
+            //sys0=sys0<<7
+            //sys0+=sReach.val
+            //sys0=sys0<<16
+            //
+            // Add button state bit array to sys0 and send the data
+            //sys0+=fConvBtnState.val
+            //
+            // sys1: coil bit. Note that coilNum ranges from 1-6 instead of 0-5
+            //sys1=1<<coilNum.val
+            //sys1=sys1>>1
+            //prints "d",1
+            //prints sys1,1
+            //prints sys0,4
+            // Store settings in coil variable
+            //if(coilNum.val==1)
+            //{
+            //  TC_Settings.coil1Chn.val=sys0
+            //}else if(coilNum.val==2)
+            //{
+            //  TC_Settings.coil2Chn.val=sys0
+            //}else if(coilNum.val==3)
+            //{
+            //  TC_Settings.coil3Chn.val=sys0
+            //}else if(coilNum.val==4)
+            //{
+            //  TC_Settings.coil4Chn.val=sys0
+            //}else if(coilNum.val==5)
+            //{
+            //  TC_Settings.coil5Chn.val=sys0
+            //}else if(coilNum.val==6)
+            //{
+            //  TC_Settings.coil6Chn.val=sys0
+            //}
+        
+Text tChnInfo1
+    Attributes
+        ID                 : 2
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Connect:\r\nDisconnect:\r\nShow:\r\nShortcut:
+        Max. Text Size     : 400
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tChnInfo2
+    Attributes
+        ID                 : 3
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : All the channels you selected will play on all the coils you selected.\r\nSelected channels are unlinked from all coils, selected coils stop playing all channels.\r\nEnable first, then select any channel (resp. coil) to see where (resp. what) it plays.\r\nLong press of the (Dis)Connect button (un)assigns all channels to (from) all coils.
+        Max. Text Size     : 400
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tTitle
+    Attributes
+        ID                 : 5
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : MIDI Channel Assignments
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHideBack
+    Attributes
+        ID                 : 6
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text tChan
+    Attributes
+        ID                 : 24
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : MIDI\r\nChannels
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tUser
+    Attributes
+        ID                 : 30
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  Guest
+        Max. Text Size     : 32
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMSI
+    Attributes
+        ID                 : 31
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Simple
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMML
+    Attributes
+        ID                 : 32
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : MIDI Live
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMLS
+    Attributes
+        ID                 : 33
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Lightsaber
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tCoils
+    Attributes
+        ID                 : 37
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Coils
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHideBack2
+    Attributes
+        ID                 : 38
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text tAction
+    Attributes
+        ID                 : 53
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Action
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+QR Code qrHelp
+    Attributes
+        ID               : 36
+        Scope            : local
+        Send Component ID: disabled
+        Text             : git.io/JkvOK
+        Max. Text Size   : 16
+    
+    Events
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                showHelp.val=1
+                tempStr.txt=tTitle.txt
+                tTitle.txt="Get Help/Link for..."
+                // keep QR code on top
+                ref qrHelp
+                // Show modified title before stopping screen refreshs.
+                doevents
+                ref_stop
+            }else
+            {
+                showHelp.val=0
+                tTitle.txt=tempStr.txt
+                // keep QR code on top
+                ref qrHelp
+                ref_star
+            }
+        
+Button bReturn
+    Attributes
+        ID               : 23
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : â†
+        Max. Text Size   : 3
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Since this code is also executed by the previous/next buttons, it can't be here, otherwise you would see a Touch Press Event on this button, too.
+                click fStore,1
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgQ"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Go back to origin page.
+                page MIDI_Live
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bNone
+    Attributes
+        ID               : 26
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : None
+        Max. Text Size   : 6
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(btShow.val==0)
+                {
+                    btChn0.val=0
+                    btChn1.val=0
+                    btChn2.val=0
+                    btChn3.val=0
+                    btChn4.val=0
+                    btChn5.val=0
+                    btChn6.val=0
+                    btChn7.val=0
+                    btChn8.val=0
+                    btChn9.val=0
+                    btChn10.val=0
+                    btChn11.val=0
+                    btChn12.val=0
+                    btChn13.val=0
+                    btChn14.val=0
+                    btChn15.val=0
+                }
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bAll
+    Attributes
+        ID               : 27
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : All
+        Max. Text Size   : 6
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(btShow.val==0)
+                {
+                    btChn0.val=1
+                    btChn1.val=1
+                    btChn2.val=1
+                    btChn3.val=1
+                    btChn4.val=1
+                    btChn5.val=1
+                    btChn6.val=1
+                    btChn7.val=1
+                    btChn8.val=1
+                    btChn9.val=1
+                    btChn10.val=1
+                    btChn11.val=1
+                    btChn12.val=1
+                    btChn13.val=1
+                    btChn14.val=1
+                    btChn15.val=1
+                }
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bAllCoils
+    Attributes
+        ID               : 45
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : All
+        Max. Text Size   : 6
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(btShow.val==0)
+                {
+                    btCoil1.val=1
+                    btCoil2.val=1
+                    btCoil3.val=1
+                    btCoil4.val=1
+                    btCoil5.val=1
+                    btCoil6.val=1
+                }
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bNoneCoils
+    Attributes
+        ID               : 46
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : None
+        Max. Text Size   : 6
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(btShow.val==0)
+                {
+                    btCoil1.val=0
+                    btCoil2.val=0
+                    btCoil3.val=0
+                    btCoil4.val=0
+                    btCoil5.val=0
+                    btCoil6.val=0
+                }
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bDisconnect
+    Attributes
+        ID               : 47
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Disconnect
+        Max. Text Size   : 10
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                tmButtonHold.en=1
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgQ"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                tmButtonHold.en=0
+                if(btShow.val==0)
+                {
+                    // Any channel selected is removed from all coils, Any coil selected won't play any channels anymore.
+                    for(sys0=0;sys0<TC_Settings.maxCoilCount.val;sys0++)
+                    {
+                        if(b[btCoil1.id+sys0].val!=0)
+                        {
+                            // id of related coil settings variable
+                            sys1=TC_Settings.coil1Chn.id+sys0
+                            TC_Settings.b[sys1].val=0
+                        }
+                    }
+                    click fConvBtnState,1
+                    // We want to remove said channels (bits) from the coil variables.
+                    // Bitwise removing b from a is a &= ~b. But ~ is not supported by Nextion.
+                    fConvBtnState.val^=0xffffffff
+                    for(sys0=TC_Settings.coil1Chn.id;sys0<=TC_Settings.coil6Chn.id;sys0++)
+                    {
+                        TC_Settings.b[sys1].val&=fConvBtnState.val
+                    }
+                    click fResetBtns,0
+                    click fSysex,1
+                }else
+                {
+                    click fResetBtns,0
+                    btShow.val=0
+                }
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bConnect
+    Attributes
+        ID               : 48
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Connect
+        Max. Text Size   : 10
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                tmButtonHold.en=1
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgQ"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                tmButtonHold.en=0
+                if(btShow.val==0)
+                {
+                    click fConvBtnState,1
+                    for(sys0=0;sys0<TC_Settings.maxCoilCount.val;sys0++)
+                    {
+                        sys1=btCoil1.id+sys0
+                        if(b[sys1].val!=0)
+                        {
+                            // id of related coil settings variable
+                            sys1=TC_Settings.coil1Chn.id+sys0
+                            TC_Settings.b[sys1].val|=fConvBtnState.val
+                        }
+                    }
+                    click fResetBtns,0
+                    click fSysex,1
+                }else
+                {
+                    click fResetBtns,0
+                    btShow.val=0
+                }
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn0
+    Attributes
+        ID               : 7
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 1
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn1
+    Attributes
+        ID               : 8
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 2
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn2
+    Attributes
+        ID               : 9
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 3
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn3
+    Attributes
+        ID               : 10
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 4
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn4
+    Attributes
+        ID               : 11
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 5
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn5
+    Attributes
+        ID               : 12
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 6
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn6
+    Attributes
+        ID               : 13
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 7
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn7
+    Attributes
+        ID               : 14
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 8
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn8
+    Attributes
+        ID               : 15
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 9
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn9
+    Attributes
+        ID               : 16
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 10
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn10
+    Attributes
+        ID               : 17
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 11
+        Max. Text Size   : 3
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn11
+    Attributes
+        ID               : 18
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 12
+        Max. Text Size   : 3
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn12
+    Attributes
+        ID               : 19
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 13
+        Max. Text Size   : 3
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn13
+    Attributes
+        ID               : 20
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 14
+        Max. Text Size   : 3
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn14
+    Attributes
+        ID               : 21
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 15
+        Max. Text Size   : 3
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operationl
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn15
+    Attributes
+        ID               : 22
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 16
+        Max. Text Size   : 3
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btCoil1
+    Attributes
+        ID               : 39
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 1
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btCoil2
+    Attributes
+        ID               : 40
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 2
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btCoil3
+    Attributes
+        ID               : 41
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 3
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btCoil4
+    Attributes
+        ID               : 42
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 4
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operationl
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btCoil5
+    Attributes
+        ID               : 43
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 5
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btCoil6
+    Attributes
+        ID               : 44
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 6
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btShow
+    Attributes
+        ID               : 50
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Show
+        Max. Text Size   : 10
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Both when entereing and exiting show mode the button states are reset.
+                // Set all DS buttons to 0 since only one shall be clickable at the same time
+                click fResetBtns,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Hotspot fSysex
+    Attributes
+        ID               : 1
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Sends a Syntherrupter Sysex command that updates Syntherrupter with whatever
+            // has been changed on this page.
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            for(sys0=0;sys0<TC_Settings.maxCoilCount.val;sys0++)
+            {
+                // SYSEX_START DMID VERSION DEVICE
+                printh f0 00 26 05 01 7f
+                // PN_LSB PN_MSB
+                printh 60 00 // set channels for coil
+                // TG_LSB
+                prints sys0,1// coil
+                // TG_MSB
+                printh 00
+                // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                // ID of variable with the channel data of our coil
+                sys1=TC_Settings.coil1Chn.id+sys0
+                // Note: here we only care about 16 bit so we can hardcode the rest.
+                sys1=TC_Settings.b[sys1].val&0xffff
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                // remaining 2 VAL bytes, SYSEX_END
+                printh 00 00 f7
+            }
+        
+Hotspot fResetBtns
+    Attributes
+        ID               : 4
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Release Event
+            // Reset all channel and coil buttons to 0 (unpresesd)
+            // Note: This could be done using a loop, but the loop overhead is significant (increment, check jump).
+            // Therefore this is just hardcoded, script-generated code. as so often with Nextion...
+            btCoil1.val=0
+            btCoil2.val=0
+            btCoil3.val=0
+            btCoil4.val=0
+            btCoil5.val=0
+            btCoil6.val=0
+            btChn0.val=0
+            btChn1.val=0
+            btChn2.val=0
+            btChn3.val=0
+            btChn4.val=0
+            btChn5.val=0
+            btChn6.val=0
+            btChn7.val=0
+            btChn8.val=0
+            btChn9.val=0
+            btChn10.val=0
+            btChn11.val=0
+            btChn12.val=0
+            btChn13.val=0
+            btChn14.val=0
+            btChn15.val=0
+        
+Hotspot fLoadModes
+    Attributes
+        ID               : 35
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Load active modes
+            sys0=Settings.activeModes.val&4
+            if(sys0!=0)
+            {
+                // Lightsaber Mode is active
+                tMLS.bco=Settings.backSelectCol2.val
+            }
+            //
+            // Display all active modes
+            sys0=Settings.activeModes.val&1
+            if(sys0!=0)
+            {
+                // Simple Mode is active
+                tMSI.bco=Settings.backSelectCol2.val
+            }
+            sys0=Settings.activeModes.val&2
+            if(sys0!=0)
+            {
+                // MIDI Live Mode is active
+                tMML.bco=Settings.backSelectCol2.val
+            }
+        
+Hotspot fLoadColors
+    Attributes
+        ID               : 55
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Changes all page components according to the current color set.
+            // Note: This component has to be the last component of the page.
+            //
+            // sys0: component id
+            // sys1: component type
+            // sys2: picture id offset for current color mode
+            sys2=Settings.colorMode.val*Settings.picCount.val
+            for(sys0=0;sys0<fLoadColors.id;sys0++)
+            {
+                // More convenient for typing
+                sys1=b[sys0].type
+                if(sys1==121)
+                {
+                    // Types that have bco
+                    // page
+                    if(b[sys0].bco==Settings.backCol2Deflt.val)
+                    {
+                        b[sys0].bco=Settings.backCol2.val
+                    }else
+                    {
+                        b[sys0].bco=Settings.backCol.val
+                    }
+                }else if(sys1==54||sys1==59||sys1==116||sys1==55)
+                {
+                    // Types that have bco, pco, and sta:
+                    // number, float, text, scroll text
+                    if(b[sys0].sta==1)
+                    {
+                        if(b[sys0].bco==Settings.backCol2Deflt.val)
+                        {
+                            b[sys0].bco=Settings.backCol2.val
+                            b[sys0].pco=Settings.frontCol2.val
+                        }else
+                        {
+                            b[sys0].bco=Settings.backCol.val
+                            b[sys0].pco=Settings.frontCol.val
+                        }
+                    }
+                }else if(sys1==98||sys1==53)
+                {
+                    // Types that have pco, pic, pco2, pic2, sta:
+                    // button, dual-state button
+                    if(b[sys0].sta==2)
+                    {
+                        b[sys0].pco=Settings.frontCol.val
+                        b[sys0].pco2=Settings.backCol.val
+                        b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                        b[sys0].pic+=sys2
+                        b[sys0].pic2=b[sys0].pic+1
+                    }
+                }else if(sys1==58)
+                {
+                    // Types that have bco, pco
+                    // QR Code
+                    b[sys0].bco=Settings.backCol.val
+                    b[sys0].pco=Settings.qrFrontCol.val
+                }else if(sys1==1)
+                {
+                    // Types that have pic, pic1, pic2:
+                    // slider
+                    b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                    b[sys0].pic+=sys2
+                    b[sys0].pic1=b[sys0].pic
+                    b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
+                    b[sys0].pic2+=sys2
+                }
+            }
+        
+Timer tmButtonHold
+    Attributes
+        ID         : 54
+        Scope      : local
+        Period (ms): 250
+        Enabled    : no
+    
+    Events
+        Timer Event
+            click bAll,0
+            click bAllCoils,0
+        
+TouchCap touchCap
+    Attributes
+        ID   : 49
+        Scope: local
+        Value: 0
+    
+    Events
+        Touch Press Event
+            if(btShow.val==1)
+            {
+                // Act only if one of the channel or one of the coil buttons has been pressed.
+                // Since complex comparisons are required, which Nextion doesn't support,
+                // here's some preprocessing.
+                // sys1: current touchCap value. 1: coil button, -1: channel button, 0: something else.
+                sys1=0
+                if(touchCap.val>=btCoil1.id&&touchCap.val<=btCoil6.id)
+                {
+                    sys1=1
+                }else if(touchCap.val>=btChn0.id&&touchCap.val<=btChn15.id)
+                {
+                    sys1=-1
+                }
+                if(sys1!=0)
+                {
+                    // Reset click states
+                    btCoil1.val=0
+                    btCoil2.val=0
+                    btCoil3.val=0
+                    btCoil4.val=0
+                    btCoil5.val=0
+                    btCoil6.val=0
+                    btChn0.val=0
+                    btChn1.val=0
+                    btChn2.val=0
+                    btChn3.val=0
+                    btChn4.val=0
+                    btChn5.val=0
+                    btChn6.val=0
+                    btChn7.val=0
+                    btChn8.val=0
+                    btChn9.val=0
+                    btChn10.val=0
+                    btChn11.val=0
+                    btChn12.val=0
+                    btChn13.val=0
+                    btChn14.val=0
+                    btChn15.val=0
+                }
+            }
+        
+        Touch Release Event
+            if(btShow.val==1)
+            {
+                if(touchCap.val>=btCoil1.id&&touchCap.val<=btCoil6.id)
+                {
+                    // Coil Number
+                    sys0=touchCap.val-btCoil1.id
+                    // Resulting variable id
+                    sys0+=TC_Settings.coil1Chn.id
+                    fConvBtnState.val=TC_Settings.b[sys0].val
+                    // Show assigned channels for selected coil.
+                    click fConvBtnState,0
+                }else if(touchCap.val>=btChn0.id&&touchCap.val<=btChn15.id)
+                {
+                    // Need to convert from channels per coil to coils per channel
+                    // Selected channel number
+                    sys1=touchCap.val-btChn0.id
+                    // Corresponding bit
+                    sys1=1<<sys1
+                    for(sys0=0;sys0<TC_Settings.maxCoilCount.val;sys0++)
+                    {
+                        // Determine variable id with settings
+                        sys2=TC_Settings.coil1Chn.id+sys0
+                        // Check if this coil has the bit for the selected channel set.
+                        sys2=TC_Settings.b[sys2].val&sys1
+                        // Normalize values > 1 (f.ex 0x10) to 1
+                        if(sys2>0)
+                        {
+                            sys2=1
+                        }
+                        // Apply state to button.
+                        b[btCoil1.id+sys0].val=sys2
+                    }
+                }
+            }
+        

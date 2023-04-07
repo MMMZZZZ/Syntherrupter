@@ -595,8 +595,8 @@ Text fCheck
             if(b[newValTargetId.val].type==59)
             {
                 // If selected component has a decimal point.
-                bL.txt="«"
-                bR.txt="»"
+                bL.txt="Ã¯Â¿Â½"
+                bR.txt="Ã¯Â¿Â½"
             }else
             {
                 bL.txt="-1"
@@ -1503,7 +1503,7 @@ Button b10
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : ±
+        Text             : Â±
         Max. Text Size   : 1
     
     Events
@@ -1535,7 +1535,7 @@ Button bL
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : «
+        Text             : Â«
         Max. Text Size   : 2
     
     Events
@@ -1576,7 +1576,7 @@ Button bR
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : »
+        Text             : Â»
         Max. Text Size   : 2
     
     Events

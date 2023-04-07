@@ -7,11 +7,17 @@ Page Startup
     
     Events
         Preinitialize Event
+            // Prevent page refreshs until postinit
+            ref_stop
+            //
             // Show a black screen until the initialization from the MCU is done.
             Startup.bco=0
             vis 255,0
             //
             // Actual init code is in the comOk press event that is called by the uC after initialization.
+            //
+            // Enable page refreshs again
+            ref_star
         
         Touch Press Event
             if(Other_Settings.nBackOff.val!=0)
@@ -62,6 +68,11 @@ Number comOk
         Touch Press Event
             ref_stop
             //
+            // Init from uC is done. Stop the watchdog timer and show UI to the user.
+            tmConnTimeout.en=0
+            vis 255,1
+            vis comOk,0
+            //
             // Load colors
             if(Settings.colorMode.val==0)
             {
@@ -80,11 +91,6 @@ Number comOk
                 Settings.frontCol2.val=40476
                 Settings.qrFrontCol.val=40476
             }
-            click fLoadColors,1
-            //
-            // Init done
-            vis 255,1
-            vis comOk,0
             ref 0
             // Enable page refreshs again
             ref_star
@@ -179,7 +185,7 @@ Text tTivaFWVersion
         
 Hotspot fLoadColors
     Attributes
-        ID               : 8
+        ID               : 9
         Scope            : local
         Send Component ID: disabled
     
@@ -252,4 +258,29 @@ Hotspot fLoadColors
                     b[sys0].pic2+=sys2
                 }
             }
+        
+Timer tmConnTimeout
+    Attributes
+        ID         : 8
+        Scope      : local
+        Period (ms): 5000
+        Enabled    : yes
+    
+    Events
+        Timer Event
+            ref_stop
+            // Looks like something went wrong in the communication between the uC and Nextion.
+            tStartup.font=0
+            tStartup.xcen=1
+            tStartup.ycen=1
+            tStartup.txt="Timeout while waiting for initial data \rfrom the Tiva microcontroller"
+            // Show text but disable the touch event(s)
+            vis 255,1
+            vis fLoadColors,0
+            vis comOk,0
+            tsw tStartup,0
+            //
+            // Load default colors
+            click fLoadColors,1
+            ref_star
         

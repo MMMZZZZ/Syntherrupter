@@ -1156,7 +1156,7 @@ Button bUE
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : �
+        Text             : ü
         Max. Text Size   : 10
     
     Events
@@ -1176,7 +1176,7 @@ Button bOE
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : �
+        Text             : ö
         Max. Text Size   : 10
     
     Events
@@ -1196,7 +1196,7 @@ Button bAE
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : �
+        Text             : ä
         Max. Text Size   : 10
     
     Events
@@ -1293,7 +1293,7 @@ Dual-state Button btShift
                 bZ.txt="Z"
                 b1.txt="!"
                 b2.txt="\""
-                b3.txt="�"
+                b3.txt="ï¿½"
                 b4.txt="$"
                 b5.txt="%"
                 b6.txt="&"
@@ -1301,9 +1301,9 @@ Dual-state Button btShift
                 b8.txt="("
                 b9.txt=")"
                 b0.txt="="
-                bOE.txt="�"
-                bUE.txt="�"
-                bAE.txt="�"
+                bOE.txt="ï¿½"
+                bUE.txt="ï¿½"
+                bAE.txt="ï¿½"
                 bCom.txt=";"
                 bDot.txt=":"
                 bBar.txt="_"
@@ -1349,9 +1349,9 @@ Dual-state Button btShift
                 b8.txt="8"
                 b9.txt="9"
                 b0.txt="0"
-                bUE.txt="�"
-                bOE.txt="�"
-                bAE.txt="�"
+                bUE.txt="ï¿½"
+                bOE.txt="ï¿½"
+                bAE.txt="ï¿½"
                 bCom.txt=","
                 bDot.txt="."
                 bBar.txt="-"

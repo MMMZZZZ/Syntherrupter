@@ -46,9 +46,6 @@ Page Simple
                 vis nOn6,0
                 vis nBPS6,0
                 vis nDuty6,0
-                vis tus6,0
-                vis tHz6,0
-                vis tPerc6,0
             }
             if(TC_Settings.maxCoilCount.val<5)
             {
@@ -56,9 +53,6 @@ Page Simple
                 vis nOn5,0
                 vis nBPS5,0
                 vis nDuty5,0
-                vis tus5,0
-                vis tHz5,0
-                vis tPerc5,0
             }
             if(TC_Settings.maxCoilCount.val<4)
             {
@@ -66,9 +60,6 @@ Page Simple
                 vis nOn4,0
                 vis nBPS4,0
                 vis nDuty4,0
-                vis tus4,0
-                vis tHz4,0
-                vis tPerc4,0
             }
             if(TC_Settings.maxCoilCount.val<3)
             {
@@ -76,9 +67,6 @@ Page Simple
                 vis nOn3,0
                 vis nBPS3,0
                 vis nDuty3,0
-                vis tus3,0
-                vis tHz3,0
-                vis tPerc3,0
             }
             if(TC_Settings.maxCoilCount.val<2)
             {
@@ -87,16 +75,10 @@ Page Simple
                 vis nOn2,0
                 vis nBPS2,0
                 vis nDuty2,0
-                vis tus2,0
-                vis tHz2,0
-                vis tPerc2,0
                 vis btCoil1,0
                 vis nOn1,0
                 vis nBPS1,0
                 vis nDuty1,0
-                vis tus1,0
-                vis tHz1,0
-                vis tPerc1,0
                 vis tCoil,0
                 // Make sure that the coil is active.
                 btCoil1.val=1
@@ -231,6 +213,33 @@ Page Simple
             ref_star
         
         Postinitialize Event
+            // Draw grid lines
+            // sys0: start, sys1: end, sys2: vertical position
+            if(TC_Settings.maxCoilCount.val>=2)
+            {
+                sys0=tus1.x
+                if(TC_Settings.maxCoilCount.val>=6)
+                {
+                    sys1=nOn6.x+nOn6.w
+                }else if(TC_Settings.maxCoilCount.val>=5)
+                {
+                    sys1=nOn5.x+nOn5.w
+                }else if(TC_Settings.maxCoilCount.val>=4)
+                {
+                    sys1=nOn4.x+nOn4.w
+                }else if(TC_Settings.maxCoilCount.val>=3)
+                {
+                    sys1=nOn3.x+nOn3.w
+                }else // if(TC_Settings.maxCoilCount.val>=2)
+                {
+                    sys1=nOn2.x+nOn2.w
+                }
+                sys2=tus1.y+tus1.h
+                line sys0,sys2,sys1,sys2,tus1.pco
+                sys2=tHz1.y+tHz1.h
+                line sys0,sys2,sys1,sys2,tus1.pco
+            }
+            //
             vis bMode,1
         
         Touch Press Event
@@ -339,116 +348,116 @@ Variable (int32) duty
     
 Variable (int32) fSliderInput
     Attributes
-        ID   : 67
+        ID   : 52
         Scope: local
         Value: 0
     
 Variable (int32) fSliderOutput
     Attributes
-        ID   : 68
+        ID   : 53
         Scope: local
         Value: 0
     
 Variable (int32) userOnLimit
     Attributes
-        ID   : 69
+        ID   : 54
         Scope: local
         Value: 0
     
 Variable (int32) userDutyLimit
     Attributes
-        ID   : 70
+        ID   : 55
         Scope: local
         Value: 0
     
 Variable (int32) userBPSLimit
     Attributes
-        ID   : 71
+        ID   : 56
         Scope: local
         Value: 0
     
 Variable (int32) keepOntime
     Attributes
-        ID   : 72
+        ID   : 57
         Scope: local
         Value: 1
     
 Variable (int32) temp
     Attributes
-        ID   : 73
+        ID   : 58
         Scope: local
         Value: 0
     
 Variable (int32) set1
     Attributes
-        ID   : 76
+        ID   : 61
         Scope: global
         Value: 0
     
 Variable (int32) set2
     Attributes
-        ID   : 77
+        ID   : 62
         Scope: global
         Value: 0
     
 Variable (int32) set3
     Attributes
-        ID   : 78
+        ID   : 63
         Scope: global
         Value: 0
     
 Variable (int32) set4
     Attributes
-        ID   : 79
+        ID   : 64
         Scope: global
         Value: 0
     
 Variable (int32) set5
     Attributes
-        ID   : 80
+        ID   : 65
         Scope: global
         Value: 0
     
 Variable (int32) set6
     Attributes
-        ID   : 81
+        ID   : 66
         Scope: global
         Value: 0
     
 Variable (string) tempStr
     Attributes
-        ID            : 86
+        ID            : 71
         Scope         : local
         Text          : 
         Max. Text Size: 32
     
 Variable (int32) showHelp
     Attributes
-        ID   : 87
+        ID   : 72
         Scope: local
         Value: 0
     
 Variable (int32) sOnOld
     Attributes
-        ID   : 89
+        ID   : 74
         Scope: local
         Value: 0
     
 Variable (int32) sDutyOld
     Attributes
-        ID   : 90
+        ID   : 75
         Scope: local
         Value: 0
     
 Variable (int32) sBPSOld
     Attributes
-        ID   : 91
+        ID   : 76
         Scope: local
         Value: 0
     
 Variable (int32) temp2
     Attributes
-        ID   : 95
+        ID   : 80
         Scope: local
         Value: 0
     
@@ -557,7 +566,7 @@ Number nOn2
         
 Number nBPS2
     Attributes
-        ID                 : 36
+        ID                 : 35
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -570,7 +579,7 @@ Number nBPS2
         
 Number nOn3
     Attributes
-        ID                 : 37
+        ID                 : 36
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -583,7 +592,7 @@ Number nOn3
         
 Number nBPS3
     Attributes
-        ID                 : 39
+        ID                 : 37
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -596,7 +605,7 @@ Number nBPS3
         
 Number nOn4
     Attributes
-        ID                 : 40
+        ID                 : 38
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -609,7 +618,7 @@ Number nOn4
         
 Number nBPS4
     Attributes
-        ID                 : 42
+        ID                 : 39
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -622,7 +631,7 @@ Number nBPS4
         
 Number nOn5
     Attributes
-        ID                 : 43
+        ID                 : 40
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -635,7 +644,7 @@ Number nOn5
         
 Number nBPS5
     Attributes
-        ID                 : 45
+        ID                 : 41
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -648,7 +657,7 @@ Number nBPS5
         
 Number nOn6
     Attributes
-        ID                 : 46
+        ID                 : 42
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -661,7 +670,7 @@ Number nOn6
         
 Number nBPS6
     Attributes
-        ID                 : 48
+        ID                 : 43
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -674,7 +683,7 @@ Number nBPS6
         
 Number fSlider
     Attributes
-        ID                 : 74
+        ID                 : 59
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -731,7 +740,7 @@ XFloat nDuty
         
 XFloat nDuty1
     Attributes
-        ID                 : 61
+        ID                 : 46
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -744,7 +753,7 @@ XFloat nDuty1
         
 XFloat nDuty2
     Attributes
-        ID                 : 62
+        ID                 : 47
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -757,7 +766,7 @@ XFloat nDuty2
         
 XFloat nDuty3
     Attributes
-        ID                 : 63
+        ID                 : 48
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -770,7 +779,7 @@ XFloat nDuty3
         
 XFloat nDuty4
     Attributes
-        ID                 : 64
+        ID                 : 49
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -783,7 +792,7 @@ XFloat nDuty4
         
 XFloat nDuty5
     Attributes
-        ID                 : 65
+        ID                 : 50
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -796,7 +805,7 @@ XFloat nDuty5
         
 XFloat nDuty6
     Attributes
-        ID                 : 66
+        ID                 : 51
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -807,22 +816,9 @@ XFloat nDuty6
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
-Text tHideBack
-    Attributes
-        ID                 : 2
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               :  
-        Max. Text Size     : 1
-    
-    Events
-        Touch Press Event
-            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
-        
 Text tTitle
     Attributes
-        ID                 : 3
+        ID                 : 1
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -833,6 +829,19 @@ Text tTitle
         Touch Press Event
             // Make this object "transparent" for clicks and click background.
             click 0,1
+        
+Text tHideBack
+    Attributes
+        ID                 : 3
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
         
 Text tOn
     Attributes
@@ -924,7 +933,7 @@ Text tus
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : µs
+        Text               : ¬µs
         Max. Text Size     : 2
     
     Events
@@ -938,91 +947,7 @@ Text tus1
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : µs
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tus2
-    Attributes
-        ID                 : 35
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : µs
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tus3
-    Attributes
-        ID                 : 38
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : µs
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tus4
-    Attributes
-        ID                 : 41
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : µs
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tus5
-    Attributes
-        ID                 : 44
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : µs
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tus6
-    Attributes
-        ID                 : 47
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : µs
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tPerc6
-    Attributes
-        ID                 : 49
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : %
+        Text               : ¬µs
         Max. Text Size     : 2
     
     Events
@@ -1032,81 +957,11 @@ Text tPerc6
         
 Text tPerc1
     Attributes
-        ID                 : 50
+        ID                 : 44
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
         Text               : %
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tPerc2
-    Attributes
-        ID                 : 51
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : %
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tPerc3
-    Attributes
-        ID                 : 52
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : %
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tPerc5
-    Attributes
-        ID                 : 53
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : %
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tPerc4
-    Attributes
-        ID                 : 54
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : %
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tHz6
-    Attributes
-        ID                 : 55
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Hz
         Max. Text Size     : 2
     
     Events
@@ -1116,63 +971,7 @@ Text tHz6
         
 Text tHz1
     Attributes
-        ID                 : 56
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Hz
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tHz2
-    Attributes
-        ID                 : 57
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Hz
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tHz3
-    Attributes
-        ID                 : 58
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Hz
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tHz5
-    Attributes
-        ID                 : 59
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Hz
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tHz4
-    Attributes
-        ID                 : 60
+        ID                 : 45
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1186,7 +985,7 @@ Text tHz4
         
 Text tUser
     Attributes
-        ID                 : 82
+        ID                 : 67
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1200,7 +999,7 @@ Text tUser
         
 Text tMSI
     Attributes
-        ID                 : 83
+        ID                 : 68
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1214,7 +1013,7 @@ Text tMSI
         
 Text tMML
     Attributes
-        ID                 : 84
+        ID                 : 69
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1228,7 +1027,7 @@ Text tMML
         
 Text tMLS
     Attributes
-        ID                 : 85
+        ID                 : 70
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1242,7 +1041,7 @@ Text tMLS
         
 QR Code qrHelp
     Attributes
-        ID               : 93
+        ID               : 78
         Scope            : local
         Send Component ID: disabled
         Text             : git.io/JkvOK
@@ -1570,7 +1369,7 @@ Slider sDuty
         
 Button bApply
     Attributes
-        ID               : 1
+        ID               : 2
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1604,8 +1403,8 @@ Button bReturn
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : Return
-        Max. Text Size   : 10
+        Text             : √¢‚Ä†¬ê
+        Max. Text Size   : 3
     
     Events
         Touch Press Event
@@ -1885,7 +1684,7 @@ Dual-state Button btCoil6
         
 Hotspot fApply
     Attributes
-        ID               : 88
+        ID               : 73
         Scope            : local
         Send Component ID: disabled
     
@@ -2096,7 +1895,7 @@ Hotspot fApply
         
 Hotspot fLoadModes
     Attributes
-        ID               : 92
+        ID               : 77
         Scope            : local
         Send Component ID: disabled
     
@@ -2126,7 +1925,7 @@ Hotspot fLoadModes
         
 Hotspot fLoadColors
     Attributes
-        ID               : 94
+        ID               : 79
         Scope            : local
         Send Component ID: disabled
     
@@ -2202,7 +2001,7 @@ Hotspot fLoadColors
         
 Timer tmReturn
     Attributes
-        ID         : 75
+        ID         : 60
         Scope      : local
         Period (ms): 250
         Enabled    : no

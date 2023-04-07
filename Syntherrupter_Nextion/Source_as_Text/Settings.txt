@@ -101,43 +101,43 @@ Variable (int32) backCol
     Attributes
         ID   : 2
         Scope: global
-        Value: 65535
+        Value: 8484
     
 Variable (int32) backCol2
     Attributes
         ID   : 3
         Scope: global
-        Value: 4589
+        Value: 2145
     
 Variable (int32) frontCol
     Attributes
         ID   : 16
         Scope: global
-        Value: 6900
+        Value: 40476
     
 Variable (int32) frontCol2
     Attributes
         ID   : 17
         Scope: global
-        Value: 65535
+        Value: 40476
     
 Variable (int32) picCount
     Attributes
         ID   : 18
         Scope: global
-        Value: 31
+        Value: 43
     
 Variable (int32) colorMode
     Attributes
         ID   : 19
         Scope: global
-        Value: 0
+        Value: 1
     
 Variable (int32) qrFrontCol
     Attributes
         ID   : 20
         Scope: global
-        Value: 6900
+        Value: 40476
     
 Variable (string) tempStr
     Attributes
@@ -168,7 +168,7 @@ Variable (int32) backSelectCol2
     Attributes
         ID   : 25
         Scope: global
-        Value: 6900
+        Value: 16904
     
 Text tTitle
     Attributes

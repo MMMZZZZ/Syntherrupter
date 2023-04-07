@@ -403,7 +403,7 @@ Text tTitle
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : Settings for Tesla Coil 42
+        Text               : Settings for Tesla Coil 0
         Max. Text Size     : 30
     
     Events

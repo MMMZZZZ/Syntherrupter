@@ -44,41 +44,29 @@ Page Lightsaber
             {
                 vis btCoil6,0
                 vis nOn6,0
-                vis tus6,0
-                vis tLS6,0
             }
             if(TC_Settings.maxCoilCount.val<5)
             {
                 vis btCoil5,0
                 vis nOn5,0
-                vis tus5,0
-                vis tLS5,0
             }
             if(TC_Settings.maxCoilCount.val<4)
             {
                 vis btCoil4,0
                 vis nOn4,0
-                vis tus4,0
-                vis tLS4,0
             }
             if(TC_Settings.maxCoilCount.val<3)
             {
                 vis btCoil3,0
                 vis nOn3,0
-                vis tus3,0
-                vis tLS3,0
             }
             if(TC_Settings.maxCoilCount.val<2)
             {
                 // Single Coil Mode. No need to show a select option.
                 vis btCoil2,0
                 vis nOn2,0
-                vis tus2,0
-                vis tLS2,0
                 vis btCoil1,0
                 vis nOn1,0
-                vis tus1,0
-                vis tLS1,0
                 vis tCoil,0
                 // Make sure that the coil is active.
                 btCoil1.val=1
@@ -155,12 +143,6 @@ Page Lightsaber
             lightsabers.val=lightsabers.val>>1
             ls4.val=lightsabers.val&1
             lightsabers.val=lightsabers.val>>1
-            tLS1.txt=sLS1.txt
-            tLS2.txt=sLS2.txt
-            tLS3.txt=sLS3.txt
-            tLS4.txt=sLS4.txt
-            tLS5.txt=sLS5.txt
-            tLS6.txt=sLS6.txt
             // Restore slider positions
             fSliderInput.val=sOn.maxval
             fSliderOutput.val=userOnLimit.val
@@ -195,6 +177,31 @@ Page Lightsaber
             ref_star
         
         Postinitialize Event
+            // Draw grid lines
+            // sys0: start, sys1: end, sys2: vertical position
+            sys0=tus1.x
+            if(TC_Settings.maxCoilCount.val>=6)
+            {
+                sys1=nOn6.x+nOn6.w
+            }else if(TC_Settings.maxCoilCount.val>=5)
+            {
+                sys1=nOn5.x+nOn5.w
+            }else if(TC_Settings.maxCoilCount.val>=4)
+            {
+                sys1=nOn4.x+nOn4.w
+            }else if(TC_Settings.maxCoilCount.val>=3)
+            {
+                sys1=nOn3.x+nOn3.w
+            }else if(TC_Settings.maxCoilCount.val>=2)
+            {
+                sys1=nOn2.x+nOn2.w
+            }else if(TC_Settings.maxCoilCount.val>=1)
+            {
+                sys1=nOn1.x+nOn1.w
+            }
+            sys2=tus1.y+tus1.h
+            line sys0,sys2,sys1,sys2,tus1.pco
+            //
             vis bMode,1
         
         Touch Press Event
@@ -368,48 +375,48 @@ Variable (int32) userDutyLimit
     
 Variable (string) tempString
     Attributes
-        ID            : 56
+        ID            : 51
         Scope         : local
         Text          : 
         Max. Text Size: 4
     
 Variable (string) sLS4
     Attributes
-        ID            : 63
+        ID            : 58
         Scope         : global
         Text          : 1234
         Max. Text Size: 4
     
 Variable (string) sLS5
     Attributes
-        ID            : 64
+        ID            : 59
         Scope         : global
         Text          : 1234
         Max. Text Size: 4
     
 Variable (string) sLS6
     Attributes
-        ID            : 65
+        ID            : 60
         Scope         : global
         Text          : 1234
         Max. Text Size: 4
     
 Variable (string) tempStr
     Attributes
-        ID            : 66
+        ID            : 61
         Scope         : local
         Text          : 
         Max. Text Size: 32
     
 Variable (int32) showHelp
     Attributes
-        ID   : 67
+        ID   : 62
         Scope: local
         Value: 0
     
 Variable (int32) sOnOld
     Attributes
-        ID   : 71
+        ID   : 66
         Scope: local
         Value: 0
     
@@ -536,7 +543,7 @@ Number nOn2
         
 Number nOn3
     Attributes
-        ID                 : 41
+        ID                 : 40
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -549,7 +556,7 @@ Number nOn3
         
 Number nOn4
     Attributes
-        ID                 : 43
+        ID                 : 41
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -562,7 +569,7 @@ Number nOn4
         
 Number nOn5
     Attributes
-        ID                 : 45
+        ID                 : 42
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -575,7 +582,7 @@ Number nOn5
         
 Number nOn6
     Attributes
-        ID                 : 47
+        ID                 : 43
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -634,7 +641,7 @@ Text tus
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : µs
+        Text               : ¬µs
         Max. Text Size     : 2
     
     Events
@@ -690,77 +697,7 @@ Text tus1
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : µs
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tus2
-    Attributes
-        ID                 : 40
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : µs
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tus3
-    Attributes
-        ID                 : 42
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : µs
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tus4
-    Attributes
-        ID                 : 44
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : µs
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tus5
-    Attributes
-        ID                 : 46
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : µs
-        Max. Text Size     : 2
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tus6
-    Attributes
-        ID                 : 48
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : µs
+        Text               : ¬µs
         Max. Text Size     : 2
     
     Events
@@ -770,7 +707,7 @@ Text tus6
         
 Text tLightsabers
     Attributes
-        ID                 : 49
+        ID                 : 44
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -784,7 +721,7 @@ Text tLightsabers
         
 Text tLSInfo
     Attributes
-        ID                 : 54
+        ID                 : 49
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -798,7 +735,7 @@ Text tLSInfo
         
 Text tMLS
     Attributes
-        ID                 : 55
+        ID                 : 50
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -812,7 +749,7 @@ Text tMLS
         
 Text tLS1
     Attributes
-        ID                 : 57
+        ID                 : 52
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -826,7 +763,7 @@ Text tLS1
         
 Text tLS2
     Attributes
-        ID                 : 58
+        ID                 : 53
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -840,7 +777,7 @@ Text tLS2
         
 Text tLS4
     Attributes
-        ID                 : 59
+        ID                 : 54
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -854,7 +791,7 @@ Text tLS4
         
 Text tLS3
     Attributes
-        ID                 : 60
+        ID                 : 55
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -868,7 +805,7 @@ Text tLS3
         
 Text tLS6
     Attributes
-        ID                 : 61
+        ID                 : 56
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -882,7 +819,7 @@ Text tLS6
         
 Text tLS5
     Attributes
-        ID                 : 62
+        ID                 : 57
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -896,7 +833,7 @@ Text tLS5
         
 QR Code qrHelp
     Attributes
-        ID               : 73
+        ID               : 68
         Scope            : local
         Send Component ID: disabled
         Text             : git.io/JkvOK
@@ -1005,8 +942,8 @@ Button bReturn
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : Return
-        Max. Text Size   : 10
+        Text             : √¢‚Ä†¬ê
+        Max. Text Size   : 3
     
     Events
         Touch Press Event
@@ -1039,7 +976,7 @@ Button bReturn
         
 Button bApply
     Attributes
-        ID               : 68
+        ID               : 63
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1069,7 +1006,7 @@ Button bApply
         
 Button bMode
     Attributes
-        ID               : 69
+        ID               : 64
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1310,7 +1247,7 @@ Dual-state Button btCoil6
         
 Dual-state Button ls1
     Attributes
-        ID               : 50
+        ID               : 45
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1348,7 +1285,7 @@ Dual-state Button ls1
         
 Dual-state Button ls2
     Attributes
-        ID               : 51
+        ID               : 46
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1382,7 +1319,7 @@ Dual-state Button ls2
         
 Dual-state Button ls3
     Attributes
-        ID               : 52
+        ID               : 47
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1416,7 +1353,7 @@ Dual-state Button ls3
         
 Dual-state Button ls4
     Attributes
-        ID               : 53
+        ID               : 48
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1450,7 +1387,7 @@ Dual-state Button ls4
         
 Hotspot fApply
     Attributes
-        ID               : 70
+        ID               : 65
         Scope            : local
         Send Component ID: disabled
     
@@ -1611,7 +1548,7 @@ Hotspot fApply
         
 Hotspot fLoadModes
     Attributes
-        ID               : 72
+        ID               : 67
         Scope            : local
         Send Component ID: disabled
     
@@ -1641,7 +1578,7 @@ Hotspot fLoadModes
         
 Hotspot fLoadColors
     Attributes
-        ID               : 74
+        ID               : 69
         Scope            : local
         Send Component ID: disabled
     

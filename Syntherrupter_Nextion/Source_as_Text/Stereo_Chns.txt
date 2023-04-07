@@ -1,0 +1,2371 @@
+Page Stereo_Chns
+    Attributes
+        ID               : 0
+        Scope            : local
+        Send Component ID: disabled
+        Locked           : no
+    
+    Events
+        Preinitialize Event
+            // Prevent page refreshs until postinit
+            bkcmd=0
+            ref_stop
+            //
+            // Load colors
+            click fLoadColors,1
+            click fLoadModes,1
+            //
+            // Display username
+            if(User_Settings.userNum.val==0)
+            {
+                tUser.txt=" "+User_Settings.u0Name.txt
+            }else if(User_Settings.userNum.val==1)
+            {
+                tUser.txt=" "+User_Settings.u1Name.txt
+            }else if(User_Settings.userNum.val==2)
+            {
+                tUser.txt=" "+User_Settings.u2Name.txt
+            }
+            //
+            // functions shall not be visible
+            vis fLoadStoreCfg,0
+            vis fLoadModes,0
+            vis fLoadColors,0
+            vis fConvBtnState,0
+            vis fCheck,0
+            vis fMapping,0
+            vis fNRP,0
+            vis idle,0
+            //
+            // Set newValTargetId to idle
+            newValTargetId.val=idle.id
+            //
+            // Load Help Mode
+            if(Help_Info.helpMode.val==0)
+            {
+                vis qrHelp,0
+            }else
+            {
+                tempStr.txt=tTitle.txt
+                showHelp.val=1
+                click 0,1
+            }
+            //
+            // Enable page refreshs again
+            ref_star
+        
+        Postinitialize Event
+            // Lines between channels, ranges, range preview
+            sys0=tChn.x
+            sys1=bChnRange.x+bChnRange.w
+            sys2=bChnMode.y+bChnMode.h+b1.y
+            sys2/=2
+            line sys0,sys2,sys1,sys2,tTitle.pco
+            sys2=bOK.y+bOK.h+t127.y
+            sys2/=2
+            line sys0,sys2,sys1,sys2,tTitle.pco
+            //
+            // Initialize page state and drawings
+            btChn0.val=1
+            channel.val=0
+            click fLoadStoreCfg,0
+        
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(Other_Settings.nBackOff.val!=0)
+                {
+                    // Default "stop" action.
+                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                    prints "mes",3
+                    // Set all ontime and duty settings of all pages to 0.
+                    // First come the global variables then the local variables.
+                    Simple.ontime.val=0
+                    Simple.duty.val=0
+                    Simple.set1.val=Simple.set1.val&0x0000ffff
+                    Simple.set2.val=Simple.set2.val&0x0000ffff
+                    Simple.set3.val=Simple.set3.val&0x0000ffff
+                    Simple.set4.val=Simple.set4.val&0x0000ffff
+                    Simple.set5.val=Simple.set5.val&0x0000ffff
+                    Simple.set6.val=Simple.set6.val&0x0000ffff
+                    MIDI_Live.ontime.val=0
+                    MIDI_Live.duty.val=0
+                    MIDI_Live.set1.val=0
+                    MIDI_Live.set2.val=0
+                    MIDI_Live.set3.val=0
+                    MIDI_Live.set4.val=0
+                    MIDI_Live.set5.val=0
+                    MIDI_Live.set6.val=0
+                    Lightsaber.ontime.val=0
+                    Lightsaber.ontimes12.val=0
+                    Lightsaber.ontimes34.val=0
+                    Lightsaber.ontimes56.val=0
+                }
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgP"
+                click qrHelp,0
+            }
+        
+Variable (int32) origin
+    Attributes
+        ID   : 1
+        Scope: global
+        Value: 0
+    
+Variable (string) tempStr
+    Attributes
+        ID            : 2
+        Scope         : local
+        Text          : newtxt
+        Max. Text Size: 32
+    
+Variable (int32) showHelp
+    Attributes
+        ID   : 17
+        Scope: local
+        Value: 0
+    
+Variable (int32) mapMode
+    Attributes
+        ID   : 19
+        Scope: local
+        Value: 0
+    
+Variable (int32) newSelect
+    Attributes
+        ID   : 20
+        Scope: local
+        Value: 0
+    
+Variable (int32) newValTargetId
+    Attributes
+        ID   : 21
+        Scope: local
+        Value: 68
+    
+Variable (int32) tmp1
+    Attributes
+        ID   : 22
+        Scope: local
+        Value: 0
+    
+Variable (int32) tmp2
+    Attributes
+        ID   : 23
+        Scope: local
+        Value: 0
+    
+Variable (int32) tmp3
+    Attributes
+        ID   : 24
+        Scope: local
+        Value: 0
+    
+Variable (int32) tmp4
+    Attributes
+        ID   : 25
+        Scope: local
+        Value: 0
+    
+Variable (int32) chnOffset
+    Attributes
+        ID   : 26
+        Scope: local
+        Value: 0
+    
+Variable (int32) channel
+    Attributes
+        ID   : 27
+        Scope: local
+        Value: 0
+    
+Variable (int32) chn0Config
+    Attributes
+        ID   : 72
+        Scope: global
+        Value: 146807050
+    
+Variable (int32) chn1Config
+    Attributes
+        ID   : 73
+        Scope: global
+        Value: 684005642
+    
+Variable (int32) chn2Config
+    Attributes
+        ID   : 74
+        Scope: global
+        Value: 415570186
+    
+Variable (int32) chn3Config
+    Attributes
+        ID   : 75
+        Scope: global
+        Value: 952441098
+    
+Variable (int32) chn4Config
+    Attributes
+        ID   : 76
+        Scope: global
+        Value: 1220876554
+    
+Variable (int32) chn5Config
+    Attributes
+        ID   : 77
+        Scope: global
+        Value: 1489312010
+    
+Variable (int32) chn6Config
+    Attributes
+        ID   : 78
+        Scope: global
+        Value: 1757747466
+    
+Variable (int32) chn7Config
+    Attributes
+        ID   : 79
+        Scope: global
+        Value: 415575326
+    
+Variable (int32) chn8Config
+    Attributes
+        ID   : 80
+        Scope: global
+        Value: 311536926
+    
+Variable (int32) chn9Config
+    Attributes
+        ID   : 81
+        Scope: global
+        Value: 931802398
+    
+Variable (int32) chn10Config
+    Attributes
+        ID   : 82
+        Scope: global
+        Value: 890187038
+    
+Variable (int32) chn11Config
+    Attributes
+        ID   : 83
+        Scope: global
+        Value: 890179418
+    
+Variable (int32) chn12Config
+    Attributes
+        ID   : 84
+        Scope: global
+        Value: 534790016
+    
+Variable (int32) chn13Config
+    Attributes
+        ID   : 85
+        Scope: global
+        Value: 1071660928
+    
+Variable (int32) chn14Config
+    Attributes
+        ID   : 86
+        Scope: global
+        Value: 1340096384
+    
+Variable (int32) chn15Config
+    Attributes
+        ID   : 87
+        Scope: global
+        Value: 1608531840
+    
+Variable (int32) loading
+    Attributes
+        ID   : 88
+        Scope: local
+        Value: 0
+    
+Variable (int32) l1
+    Attributes
+        ID   : 89
+        Scope: local
+        Value: 0
+    
+Variable (int32) l2
+    Attributes
+        ID   : 90
+        Scope: local
+        Value: 0
+    
+Variable (int32) l3
+    Attributes
+        ID   : 91
+        Scope: local
+        Value: 0
+    
+Variable (int32) l4
+    Attributes
+        ID   : 92
+        Scope: local
+        Value: 0
+    
+Number fConvBtnState
+    Attributes
+        ID                 : 12
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 0
+    
+    Events
+        Touch Press Event
+            // Store button state in variable. Bit n corresponds to channel n.
+            // sys0 only used because shorter, meaning better readable.
+            sys0=0
+            //sys0+=btChn15.val
+            //sys0=sys0<<1
+            //sys0+=btChn14.val
+            //sys0=sys0<<1
+            //sys0+=btChn13.val
+            //sys0=sys0<<1
+            //sys0+=btChn12.val
+            //sys0=sys0<<1
+            //sys0+=btChn11.val
+            //sys0=sys0<<1
+            //sys0+=btChn10.val
+            //sys0=sys0<<1
+            //sys0+=btChn9.val
+            //sys0=sys0<<1
+            //sys0+=btChn8.val
+            //sys0=sys0<<1
+            sys0+=btChn7.val
+            sys0=sys0<<1
+            sys0+=btChn6.val
+            sys0=sys0<<1
+            sys0+=btChn5.val
+            sys0=sys0<<1
+            sys0+=btChn4.val
+            sys0=sys0<<1
+            sys0+=btChn3.val
+            sys0=sys0<<1
+            sys0+=btChn2.val
+            sys0=sys0<<1
+            sys0+=btChn1.val
+            sys0=sys0<<1
+            sys0+=btChn0.val
+            fConvBtnState.val=sys0
+        
+        Touch Release Event
+            // Load button state from variable. Bit n corresponds to channel n.
+            btChn0.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn1.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn2.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn3.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn4.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn5.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn6.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            btChn7.val=fConvBtnState.val&1
+            fConvBtnState.val>>=1
+            //btChn8.val=fConvBtnState.val&1
+            //fConvBtnState.val>>=1
+            //btChn9.val=fConvBtnState.val&1
+            //fConvBtnState.val>>=1
+            //btChn10.val=fConvBtnState.val&1
+            //fConvBtnState.val>>=1
+            //btChn11.val=fConvBtnState.val&1
+            //fConvBtnState.val>>=1
+            //btChn12.val=fConvBtnState.val&1
+            //fConvBtnState.val>>=1
+            //btChn13.val=fConvBtnState.val&1
+            //fConvBtnState.val>>=1
+            //btChn14.val=fConvBtnState.val&1
+            //fConvBtnState.val>>=1
+            //btChn15.val=fConvBtnState.val&1
+            //fConvBtnState.val>>=1
+        
+Number mapInL
+    Attributes
+        ID                 : 45
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 40
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Reset push state of last selected value
+                b[newValTargetId.val].bco=tTitle.bco
+                b[newValTargetId.val].pco=tTitle.pco
+                // Mark this field as pushed
+                newValTargetId.val='&id&'
+                b[newValTargetId.val].bco=tTitle.pco
+                b[newValTargetId.val].pco=tTitle.bco
+                // A new value has been selected
+                newSelect.val=1
+                // Check values
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSX"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Number mapInH
+    Attributes
+        ID                 : 46
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 80
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Reset push state of last selected value
+                b[newValTargetId.val].bco=tTitle.bco
+                b[newValTargetId.val].pco=tTitle.pco
+                // Mark this field as pushed
+                newValTargetId.val='&id&'
+                b[newValTargetId.val].bco=tTitle.pco
+                b[newValTargetId.val].pco=tTitle.bco
+                // A new value has been selected
+                newSelect.val=1
+                // Check values
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSX"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Number mapOutL
+    Attributes
+        ID                 : 49
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 20
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Reset push state of last selected value
+                b[newValTargetId.val].bco=tTitle.bco
+                b[newValTargetId.val].pco=tTitle.pco
+                // Mark this field as pushed
+                newValTargetId.val='&id&'
+                b[newValTargetId.val].bco=tTitle.pco
+                b[newValTargetId.val].pco=tTitle.bco
+                // A new value has been selected
+                newSelect.val=1
+                // Check values
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSX"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Number mapOutH
+    Attributes
+        ID                 : 50
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 70
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Reset push state of last selected value
+                b[newValTargetId.val].bco=tTitle.bco
+                b[newValTargetId.val].pco=tTitle.pco
+                // Mark this field as pushed
+                newValTargetId.val='&id&'
+                b[newValTargetId.val].bco=tTitle.pco
+                b[newValTargetId.val].pco=tTitle.bco
+                // A new value has been selected
+                newSelect.val=1
+                // Check values
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSX"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Text tHideBack3
+    Attributes
+        ID                 : 4
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text tHideBack2
+    Attributes
+        ID                 : 5
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text tHideBack
+    Attributes
+        ID                 : 6
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text idle
+    Attributes
+        ID                 : 7
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : i
+        Max. Text Size     : 1
+    
+Text fCheck
+    Attributes
+        ID                 : 8
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 10
+    
+    Events
+        Touch Release Event
+            // Settings must stay in certain ranges. this function checks and fixes them.
+            //
+            if(mapInL.val<0)
+            {
+                mapInL.val=0
+            }else if(mapInL.val>127)
+            {
+                mapInL.val=127
+            }
+            if(mapInH.val<0)
+            {
+                mapInH.val=0
+            }else if(mapInH.val>127)
+            {
+                mapInH.val=127
+            }
+            if(mapOutL.val<0)
+            {
+                mapOutL.val=0
+            }else if(mapOutL.val>127)
+            {
+                mapOutL.val=127
+            }
+            if(mapOutH.val<0)
+            {
+                mapOutH.val=0
+            }else if(mapOutH.val>127)
+            {
+                mapOutH.val=127
+            }
+            click fMapping,1
+        
+Text tTitle
+    Attributes
+        ID                 : 10
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Stereo Settings: Channels
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tUser
+    Attributes
+        ID                 : 13
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  Guest
+        Max. Text Size     : 32
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMSI
+    Attributes
+        ID                 : 14
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Simple
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMML
+    Attributes
+        ID                 : 15
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : MIDI Live
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMLS
+    Attributes
+        ID                 : 16
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Lightsaber
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tChn
+    Attributes
+        ID                 : 30
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : MIDI Channel
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tChnMode
+    Attributes
+        ID                 : 31
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Channel Mode
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tNoteRange
+    Attributes
+        ID                 : 43
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Note Range
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tTo
+    Attributes
+        ID                 : 44
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : to
+        Max. Text Size     : 3
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tStereo
+    Attributes
+        ID                 : 47
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Stereo Range
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tTo2
+    Attributes
+        ID                 : 48
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : to
+        Max. Text Size     : 3
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tL
+    Attributes
+        ID                 : 63
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : L
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tR
+    Attributes
+        ID                 : 64
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : R
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text t0
+    Attributes
+        ID                 : 66
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : 0
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text t127
+    Attributes
+        ID                 : 67
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : 127
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tNotePos
+    Attributes
+        ID                 : 69
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Note Number
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tStereoPos
+    Attributes
+        ID                 : 70
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Stereo Position
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+QR Code qrHelp
+    Attributes
+        ID               : 71
+        Scope            : local
+        Send Component ID: disabled
+        Text             : git.io/JkvOK
+        Max. Text Size   : 16
+    
+    Events
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                showHelp.val=1
+                tempStr.txt=tTitle.txt
+                tTitle.txt="Get Help/Link for..."
+                // keep QR code on top
+                ref qrHelp
+                // Show modified title before stopping screen refreshs.
+                doevents
+                ref_stop
+            }else
+            {
+                showHelp.val=0
+                tTitle.txt=tempStr.txt
+                // keep QR code on top
+                ref qrHelp
+                ref_star
+            }
+        
+Progress Bar lStereoRange
+    Attributes
+        ID               : 65
+        Scope            : local
+        Send Component ID: disabled
+        Value            : 100
+    
+Progress Bar lNoteRange
+    Attributes
+        ID               : 68
+        Scope            : local
+        Send Component ID: disabled
+        Value            : 100
+    
+Button bReturn
+    Attributes
+        ID               : 11
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : â†
+        Max. Text Size   : 3
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                page origin.val
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgQ"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bChnMode
+    Attributes
+        ID               : 32
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Mapping
+        Max. Text Size   : 10
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Here only the mode number is adjusted. This is such that other functions can adjust the
+                // value as well and call the touch release event without triggering another change of the
+                // value.
+                if(mapMode.val==0)
+                {
+                    mapMode.val=2
+                }else if(mapMode.val==2)
+                {
+                    mapMode.val=1
+                }else if(mapMode.val>=1&&mapMode.val<=6) // 2 is already excluded
+                {
+                    mapMode.val=0
+                }
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg9"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // See touch press event as well.
+                if(mapMode.val==0)
+                {
+                    '&txt&'="Normal"
+                    tNotePos.txt="Chn. pan gives"
+                }else if(mapMode.val==2)
+                {
+                    '&txt&'="Omni"
+                    tNotePos.txt="Note Number"
+                }else if(mapMode.val>=1&&mapMode.val<=6) // 2 is already excluded
+                {
+                    '&txt&'="Mapping"
+                    tNotePos.txt="Note Number"
+                }
+                click bMapMode,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bMapMode
+    Attributes
+        ID               : 33
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Individual
+        Max. Text Size   : 10
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Here only the mode number is adjusted. This is such that other functions can adjust the
+                // value as well and call the touch release event without triggering another change of the
+                // value.
+                if(mapMode.val==1)
+                {
+                    mapMode.val=3
+                }else if(mapMode.val==3)
+                {
+                    mapMode.val=4
+                }else if(mapMode.val==4)
+                {
+                    mapMode.val=5
+                }else if(mapMode.val==5)
+                {
+                    mapMode.val=6
+                }else if(mapMode.val==6)
+                {
+                    mapMode.val=1
+                }
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg9"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // See touch press event as well.
+                if(mapMode.val==1)
+                {
+                    '&txt&'="Individual"
+                }else if(mapMode.val==3)
+                {
+                    '&txt&'="Lowest"
+                }else if(mapMode.val==4)
+                {
+                    '&txt&'="Highest"
+                }else if(mapMode.val==5)
+                {
+                    '&txt&'="Average"
+                }else if(mapMode.val==6)
+                {
+                    '&txt&'="Loudest"
+                }
+                click fMapping,1
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bChnRange
+    Attributes
+        ID               : 42
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 9-16
+        Max. Text Size   : 6
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg9"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                if(chnOffset.val==0)
+                {
+                    '&txt&'="1-8"
+                    chnOffset.val=8
+                    btChn0.txt="9"
+                    btChn1.txt="10"
+                    btChn2.txt="11"
+                    btChn3.txt="12"
+                    btChn4.txt="13"
+                    btChn5.txt="14"
+                    btChn6.txt="15"
+                    btChn7.txt="16"
+                    if(channel.val>=8)
+                    {
+                        // Make sure the button is still lit if switching back and forth between channel ranges.
+                        sys0=btChn0.id+channel.val-8
+                        b[sys0].val=1
+                    }
+                }else
+                {
+                    '&txt&'="9-16"
+                    chnOffset.val=0
+                    btChn0.txt="1"
+                    btChn1.txt="2"
+                    btChn2.txt="3"
+                    btChn3.txt="4"
+                    btChn4.txt="5"
+                    btChn5.txt="6"
+                    btChn6.txt="7"
+                    btChn7.txt="8"
+                    if(channel.val<8)
+                    {
+                        // Make sure the button is still lit if switching back and forth between channel ranges.
+                        sys0=btChn0.id+channel.val
+                        b[sys0].val=1
+                    }
+                }
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b0
+    Attributes
+        ID               : 51
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 0
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfgj"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b1
+    Attributes
+        ID               : 52
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 1
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfgj"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                b[newValTargetId.val].val+=1
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b2
+    Attributes
+        ID               : 53
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 2
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfgj"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                b[newValTargetId.val].val+=2
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b3
+    Attributes
+        ID               : 54
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 3
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfgj"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                b[newValTargetId.val].val+=3
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b4
+    Attributes
+        ID               : 55
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 4
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfgj"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                b[newValTargetId.val].val+=4
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b5
+    Attributes
+        ID               : 56
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 5
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfgj"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                b[newValTargetId.val].val+=5
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b6
+    Attributes
+        ID               : 57
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 6
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfgj"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                b[newValTargetId.val].val+=6
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b7
+    Attributes
+        ID               : 58
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 7
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfgj"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                b[newValTargetId.val].val+=7
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b8
+    Attributes
+        ID               : 59
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 8
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfgj"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                b[newValTargetId.val].val+=8
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button b9
+    Attributes
+        ID               : 60
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 9
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfgj"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(newSelect.val!=0)
+                {
+                    newSelect.val=0
+                    b[newValTargetId.val].val=0
+                }else
+                {
+                    b[newValTargetId.val].val*=10
+                }
+                b[newValTargetId.val].val+=9
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bClear
+    Attributes
+        ID               : 61
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : X
+        Max. Text Size   : 1
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfgj"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                b[newValTargetId.val].val=0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bOK
+    Attributes
+        ID               : 62
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : ok
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfgj"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                b[newValTargetId.val].bco=tTitle.bco
+                b[newValTargetId.val].pco=tTitle.pco
+                newValTargetId.val=tTitle.id
+                click fCheck,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bReset
+    Attributes
+        ID               : 93
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Reset
+        Max. Text Size   : 10
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg9"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                mapMode.val=0
+                mapInL.val=0
+                mapInH.val=127
+                mapOutL.val=0
+                mapOutH.val=127
+                click bChnMode,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn0
+    Attributes
+        ID               : 34
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 1
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn1
+    Attributes
+        ID               : 35
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 2
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn2
+    Attributes
+        ID               : 36
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 3
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn3
+    Attributes
+        ID               : 37
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 4
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn4
+    Attributes
+        ID               : 38
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 5
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn5
+    Attributes
+        ID               : 39
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 6
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn6
+    Attributes
+        ID               : 40
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 7
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btChn7
+    Attributes
+        ID               : 41
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 8
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Hotspot fLoadStoreCfg
+    Attributes
+        ID               : 3
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Store the new values in the corresponding global variables
+            sys0=mapMode.val&0x0f
+            sys0<<=7
+            sys0|=mapOutH.val
+            sys0<<=7
+            sys0|=mapOutL.val
+            sys0<<=7
+            sys0|=mapInH.val
+            sys0<<=7
+            sys0|=mapInL.val
+            sys1=chn0Config.id+channel.val
+            b[sys1].val=sys0
+            loading.val=0
+            click fNRP,1
+        
+        Touch Release Event
+            // Load the config from the global variables
+            sys1=chn0Config.id+channel.val
+            sys0=b[sys1].val
+            mapInL.val=sys0&0x7f
+            sys0>>=7
+            mapInH.val=sys0&0x7f
+            sys0>>=7
+            mapOutL.val=sys0&0x7f
+            sys0>>=7
+            mapOutH.val=sys0&0x7f
+            sys0>>=7
+            mapMode.val=sys0&0x0f
+            loading.val=1
+            click bChnMode,0
+        
+Hotspot fMapping
+    Attributes
+        ID               : 9
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Clear previous drawings IN THIS AREA
+            ref tHideBack3
+            // Bring back the lines
+            ref lStereoRange
+            ref lNoteRange
+            doevents
+            // Show/Hide elements
+            if(mapMode.val==0||mapMode.val==2)
+            {
+                vis bMapMode,0
+                vis tNoteRange,0
+                vis mapInL,0
+                vis mapInH,0
+                vis tStereo,0
+                vis mapOutL,0
+                vis mapOutH,0
+                vis tTo,0
+                vis tTo2,0
+                vis b1,0
+                vis b2,0
+                vis b3,0
+                vis b4,0
+                vis b5,0
+                vis b6,0
+                vis b7,0
+                vis b8,0
+                vis b9,0
+                vis b0,0
+                vis bClear,0
+                vis bOK,0
+                vis t0,0
+                vis t127,0
+                vis lNoteRange,0
+                if(mapMode.val==0)
+                {
+                    vis tNotePos,1
+                }else
+                {
+                    vis tNotePos,0
+                }
+            }else
+            {
+                vis bMapMode,1
+                vis tNoteRange,1
+                vis mapInL,1
+                vis mapInH,1
+                vis tStereo,1
+                vis mapOutL,1
+                vis mapOutH,1
+                vis tTo,1
+                vis tTo2,1
+                vis b1,1
+                vis b2,1
+                vis b3,1
+                vis b4,1
+                vis b5,1
+                vis b6,1
+                vis b7,1
+                vis b8,1
+                vis b9,1
+                vis b0,1
+                vis bClear,1
+                vis bOK,1
+                vis t0,1
+                vis t127,1
+                vis lNoteRange,1
+                vis tNotePos,1
+            }
+            //
+            // Draw mapping ranges
+            y0=lNoteRange.y+1
+            y1=lStereoRange.y+1
+            x0=mapInL.val*lNoteRange.w/127
+            x0+=lNoteRange.x
+            // We'll still need this later
+            tmp1.val=x0
+            x1=mapOutL.val*lStereoRange.w/127
+            x1+=lStereoRange.x
+            // We'll still need this later
+            tmp3.val=x1
+            sys0=mapOutL.val-mapInL.val
+            if(mapMode.val>=1&&mapMode.val!=2&&mapMode.val<=6)
+            {
+                fill x0-1,y0-8,2,16,lNoteRange.pco
+                //line x0,y0,x1,y1,lNoteRange.pco
+                fill x1,y1-8,2,16,lNoteRange.pco
+            }
+            //
+            x0=mapInH.val*lNoteRange.w/127
+            x0+=lNoteRange.x
+            // We'll still need this later
+            tmp2.val=x0
+            x1=mapOutH.val*lStereoRange.w/127
+            x1+=lStereoRange.x
+            // We'll still need this later
+            tmp4.val=x1
+            sys0=mapOutH.val-mapInH.val
+            if(mapMode.val>=1&&mapMode.val!=2&&mapMode.val<=6)
+            {
+                fill x0-1,y0-12,2,24,lNoteRange.pco
+                //line x0,y0,x1,y1,lNoteRange.pco
+                fill x1,y1-12,2,24,lNoteRange.pco
+                //  line x0-1,y0,x1-1,y1,lNoteRange.pco
+                //  line x0,y0,x1,y1,lNoteRange.pco
+                //  line x0+1,y0,x1+1,y1,lNoteRange.pco
+            }
+            //
+            // Draw example in- and output notes
+            // Notes are placed at 1/12, 4/12, 9 /12, 10/12 of the range
+            if(mapMode.val>=1&&mapMode.val!=2&&mapMode.val<=6)
+            {
+                sys0=tmp2.val-tmp1.val
+                sys0/=12
+                sys1=sys0*1
+                sys1+=tmp1.val
+                l1.val=sys1
+                cirs sys1,y0,lNoteRange.h+1,lNoteRange.pco
+                sys1=sys0*4
+                sys1+=tmp1.val
+                l2.val=sys1
+                cirs sys1,y0,lNoteRange.h+3,lNoteRange.pco
+                sys1=sys0*9
+                sys1+=tmp1.val
+                l3.val=sys1
+                cirs sys1,y0,lNoteRange.h+2,lNoteRange.pco
+                sys1=sys0*10
+                sys1+=tmp1.val
+                l4.val=sys1
+                cirs sys1,y0,lNoteRange.h,lNoteRange.pco
+            }
+            // Resulting stereo positions
+            // Map Modes: 1: Individual, 3: Lowest, 4: Highest, 5: Average, 6: Loudest
+            sys0=tmp4.val-tmp3.val
+            sys0/=12
+            // Depending on whether the map boundaries are flipped, this is either
+            // the lowest or the highest note. (map modes 3 and 4)
+            sys2=0
+            if(mapMode.val==1)
+            {
+                sys2=1
+            }
+            if(tmp1.val<tmp2.val&&mapMode.val==3)
+            {
+                sys2=1
+            }else if(tmp1.val>tmp2.val&&mapMode.val==4)
+            {
+                sys2=1
+            }
+            if(sys2!=0)
+            {
+                sys1=sys0*1
+                sys1+=tmp3.val
+                // Dot size. If multiple notes are merged, make it larger.
+                sys2=lStereoRange.h+1
+                if(mapMode.val!=1)
+                {
+                    sys2=lStereoRange.h+5
+                    line l1.val,y0,sys1,y1,lNoteRange.pco
+                    line l2.val,y0,sys1,y1,lNoteRange.pco
+                    line l3.val,y0,sys1,y1,lNoteRange.pco
+                    line l4.val,y0,sys1,y1,lNoteRange.pco
+                }else
+                {
+                    line l1.val,y0,sys1,y1,lNoteRange.pco
+                }
+                cirs sys1,y1,sys2,lNoteRange.pco
+            }
+            // With no mapping, show that the note is "somewhere"
+            if(mapMode.val==0||mapMode.val==1||mapMode.val==6)
+            {
+                sys1=sys0*4
+                sys1+=tmp3.val
+                // Dot size. If multiple notes are merged, make it larger.
+                sys2=lStereoRange.h+3
+                if(mapMode.val!=1)
+                {
+                    sys2=lStereoRange.h+5
+                    if(mapMode.val!=0)
+                    {
+                        line l1.val,y0,sys1,y1,lNoteRange.pco
+                        line l2.val,y0,sys1,y1,lNoteRange.pco
+                        line l3.val,y0,sys1,y1,lNoteRange.pco
+                        line l4.val,y0,sys1,y1,lNoteRange.pco
+                    }
+                }else
+                {
+                    line l2.val,y0,sys1,y1,lNoteRange.pco
+                }
+                cirs sys1,y1,sys2,lNoteRange.pco
+            }
+            if(mapMode.val==1)
+            {
+                sys1=sys0*9
+                sys1+=tmp3.val
+                line l3.val,y0,sys1,y1,lNoteRange.pco
+                cirs sys1,y1,lStereoRange.h+2,lNoteRange.pco
+            }
+            // Depending on whether the map boundaries are flipped, this is either
+            // the lowest or the highest note. (map modes 3 and 4)
+            sys2=0
+            if(mapMode.val==1)
+            {
+                sys2=1
+            }
+            if(tmp1.val<tmp2.val&&mapMode.val==4)
+            {
+                sys2=1
+            }else if(tmp1.val>tmp2.val&&mapMode.val==3)
+            {
+                sys2=1
+            }
+            if(sys2!=0)
+            {
+                sys1=sys0*10
+                sys1+=tmp3.val
+                // Dot size. If multiple notes are merged, make it larger.
+                sys2=lStereoRange.h
+                if(mapMode.val!=1)
+                {
+                    sys2=lStereoRange.h+5
+                    line l1.val,y0,sys1,y1,lNoteRange.pco
+                    line l2.val,y0,sys1,y1,lNoteRange.pco
+                    line l3.val,y0,sys1,y1,lNoteRange.pco
+                    line l4.val,y0,sys1,y1,lNoteRange.pco
+                }else
+                {
+                    line l4.val,y0,sys1,y1,lNoteRange.pco
+                }
+                cirs sys1,y1,sys2,lNoteRange.pco
+            }
+            if(mapMode.val==5)
+            {
+                sys1=sys0*6
+                sys1+=tmp3.val
+                // Dot size. If multiple notes are merged, make it larger.
+                sys2=lStereoRange.h+2
+                if(mapMode.val!=1)
+                {
+                    sys2=lStereoRange.h+5
+                    line l1.val,y0,sys1,y1,lNoteRange.pco
+                    line l2.val,y0,sys1,y1,lNoteRange.pco
+                    line l3.val,y0,sys1,y1,lNoteRange.pco
+                    line l4.val,y0,sys1,y1,lNoteRange.pco
+                }
+                cirs sys1,y1,sys2,lNoteRange.pco
+            }
+            if(mapMode.val==2)
+            {
+                sys2=lStereoRange.x+lStereoRange.w
+                for(sys1=lStereoRange.x;sys1<sys2;sys1+=10)
+                {
+                    cirs sys1,y1,lStereoRange.h+2,lNoteRange.pco
+                }
+            }
+            //
+            // Store and send the new config
+            if(loading.val!=1)
+            {
+                click fLoadStoreCfg,0
+            }
+        
+Hotspot fLoadModes
+    Attributes
+        ID               : 18
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Load active modes
+            sys0=Settings.activeModes.val&4
+            if(sys0!=0)
+            {
+                // Lightsaber Mode is active
+                tMLS.bco=Settings.backSelectCol2.val
+            }
+            //
+            // Display all active modes
+            sys0=Settings.activeModes.val&1
+            if(sys0!=0)
+            {
+                // Simple Mode is active
+                tMSI.bco=Settings.backSelectCol2.val
+            }
+            sys0=Settings.activeModes.val&2
+            if(sys0!=0)
+            {
+                // MIDI Live Mode is active
+                tMML.bco=Settings.backSelectCol2.val
+            }
+        
+Hotspot fNRP
+    Attributes
+        ID               : 29
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Sends a Syntherrupter Non-Registered Parameter Channel Message
+            // that updates Syntherrupter with whatever has been changed on this page.
+            // Package format (See Syntherrupter Custom MIDI Messages documentation)
+            // Bx 63 NRP_NC 62 NRP_NF 06 DC 26 DF
+            // Bx: Channel Control Message for channel x. Using rolling status, this can be omitted in subsequent messages.
+            // Subsequent messages can omit NRP_NC or NRP_NF if that value has not changed.
+            //
+            sys0=0xB0|channel.val
+            prints sys0,1
+            // All NRPs here use NC=42dec=0x2a
+            printh 63 2a 62 00 06 00 26
+            prints mapMode.val,1
+            printh 62 01 06
+            prints mapInH.val,1
+            printh 26
+            prints mapInL.val,1
+            printh 62 02 06
+            prints mapOutH.val,1
+            printh 26
+            prints mapOutL.val,1
+        
+Hotspot fLoadColors
+    Attributes
+        ID               : 94
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Changes all page components according to the current color set.
+            // Note: This component has to be the last component of the page.
+            //
+            // sys0: component id
+            // sys1: component type
+            // sys2: picture id offset for current color mode
+            sys2=Settings.colorMode.val*Settings.picCount.val
+            for(sys0=0;sys0<fLoadColors.id;sys0++)
+            {
+                // More convenient for typing
+                sys1=b[sys0].type
+                if(sys1==121)
+                {
+                    // Types that have bco
+                    // page
+                    if(b[sys0].bco==Settings.backCol2Deflt.val)
+                    {
+                        b[sys0].bco=Settings.backCol2.val
+                    }else
+                    {
+                        b[sys0].bco=Settings.backCol.val
+                    }
+                }else if(sys1==54||sys1==59||sys1==116||sys1==55)
+                {
+                    // Types that have bco, pco, and sta:
+                    // number, float, text, scroll text
+                    if(b[sys0].sta==1)
+                    {
+                        if(b[sys0].bco==Settings.backCol2Deflt.val)
+                        {
+                            b[sys0].bco=Settings.backCol2.val
+                            b[sys0].pco=Settings.frontCol2.val
+                        }else
+                        {
+                            b[sys0].bco=Settings.backCol.val
+                            b[sys0].pco=Settings.frontCol.val
+                        }
+                    }
+                }else if(sys1==106)
+                {
+                    // Types that have pco, bco, sta (different)
+                    // progress bar
+                    if(b[sys0].sta==0)
+                    {
+                        if(b[sys0].bco==Settings.backCol2Deflt.val)
+                        {
+                            b[sys0].bco=Settings.backCol2.val
+                            b[sys0].pco=Settings.frontCol2.val
+                        }else
+                        {
+                            b[sys0].bco=Settings.backCol.val
+                            b[sys0].pco=Settings.frontCol.val
+                        }
+                    }
+                }else if(sys1==98||sys1==53)
+                {
+                    // Types that have pco, pic, pco2, pic2, sta:
+                    // button, dual-state button
+                    if(b[sys0].sta==2)
+                    {
+                        b[sys0].pco=Settings.frontCol.val
+                        b[sys0].pco2=Settings.backCol.val
+                        b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                        b[sys0].pic+=sys2
+                        b[sys0].pic2=b[sys0].pic+1
+                    }
+                }else if(sys1==58)
+                {
+                    // Types that have bco, pco
+                    // QR Code
+                    b[sys0].bco=Settings.backCol.val
+                    b[sys0].pco=Settings.qrFrontCol.val
+                }else if(sys1==1)
+                {
+                    // Types that have pic, pic1, pic2:
+                    // slider
+                    b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                    b[sys0].pic+=sys2
+                    b[sys0].pic1=b[sys0].pic
+                    b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
+                    b[sys0].pic2+=sys2
+                }
+            }
+        
+TouchCap touchCap
+    Attributes
+        ID   : 28
+        Scope: local
+        Value: 0
+    
+    Events
+        Touch Press Event
+            if('&val&'>=btChn0.id&&'&val&'<=bChnRange.id)
+            {
+                // The part below shall also happen when clicking bChnRange, but not the following.
+                if('&val&'<=btChn7.id)
+                {
+                    // Changing channels, send data of the current one.
+                    click fLoadStoreCfg,1
+                }
+                // Unpress all buttons except the current one
+                // Note: Since this event happens before the button event, the current button
+                // has not yet switched to 1 and thus must not be toggled here.
+                btChn0.val=0
+                btChn1.val=0
+                btChn2.val=0
+                btChn3.val=0
+                btChn4.val=0
+                btChn5.val=0
+                btChn6.val=0
+                btChn7.val=0
+            }
+        
+        Touch Release Event
+            if('&val&'>=btChn0.id&&'&val&'<=btChn7.id)
+            {
+                // Set current channel and load corresponding settings
+                channel.val='&val&'-btChn0.id+chnOffset.val
+                click fLoadStoreCfg,0
+            }
+        

@@ -1446,7 +1446,7 @@ Text tMaxOn
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : max. Ontime [µs]
+        Text               : max. Ontime [Âµs]
         Max. Text Size     : 16
     
     Events
@@ -1460,7 +1460,7 @@ Text tMinOff
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : min. Offtime [µs]
+        Text               : min. Offtime [Âµs]
         Max. Text Size     : 17
     
     Events
