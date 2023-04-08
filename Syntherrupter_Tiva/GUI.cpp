@@ -382,6 +382,68 @@ uint32_t GUI::update()
                 }
                 break;
             }
+            case 0xB0:
+            case 0xB1:
+            case 0xB2:
+            case 0xB3:
+            case 0xB4:
+            case 0xB5:
+            case 0xB6:
+            case 0xB7:
+            case 0xB8:
+            case 0xB9:
+            case 0xBA:
+            case 0xBB:
+            case 0xBC:
+            case 0xBD:
+            case 0xBE:
+            case 0xBF:
+            {
+                // ^ That is ugly a.f. but good enough for a temporary (yeah sure) solution.
+                // MIDI CC message. Notably going to be a bunch of NRP changes.
+                // The particular implementation on the Nextion side transmits a total of
+                // 21 bytes using running status (1 status + 20 data bytes)
+                MIDI::otherBuffer.add(command);
+                uint32_t i = 1;
+                while (i < 21)
+                {
+                    if (nxt->charsAvail())
+                    {
+                        command = nxt->getChar();
+                        MIDI::otherBuffer.add(command);
+                        i++;
+                    }
+                    if (System::getSystemTimeUS() - time > Nextion::defaultTimeoutUS)
+                    {
+                        setError("Data timeout");
+                        showError();
+                        System::error();
+                    }
+                }
+                break;
+            }
+            case 0xF0:
+            {
+                // MIDI Sysex command. Hand it over to the MIDI class.
+                // We'll need a couple more bytes. Usually 16 but we'll
+                // only know for sure once we receive the Sysex End Marker (0xF7)
+                MIDI::otherBuffer.add(command);
+                while (command != 0xF7)
+                {
+                    if (nxt->charsAvail())
+                    {
+                        command = nxt->getChar();
+                        MIDI::otherBuffer.add(command);
+                    }
+                    if (System::getSystemTimeUS() - time > Nextion::defaultTimeoutUS)
+                    {
+                        setError("Data timeout");
+                        showError();
+                        System::error();
+                    }
+                }
+                break;
+            }
             default:
             {
                 command = 0;
