@@ -72,6 +72,7 @@ Number comOk
             tmConnTimeout.en=0
             vis 255,1
             vis comOk,0
+            vis fLoadColors,0
             //
             // Load colors
             if(Settings.colorMode.val==0)
@@ -91,7 +92,7 @@ Number comOk
                 Settings.frontCol2.val=40476
                 Settings.qrFrontCol.val=40476
             }
-            ref 0
+            click fLoadColors,1
             // Enable page refreshs again
             ref_star
         

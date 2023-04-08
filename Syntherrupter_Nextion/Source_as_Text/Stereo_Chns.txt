@@ -646,7 +646,7 @@ Text tTitle
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : Stereo Settings: Channels
+        Text               : Channel Stereo Settings
         Max. Text Size     : 30
     
     Events
@@ -993,7 +993,7 @@ Button bChnMode
                 if(mapMode.val==0)
                 {
                     '&txt&'="Normal"
-                    tNotePos.txt="Chn. pan gives"
+                    tNotePos.txt="MIDI pan gives"
                 }else if(mapMode.val==2)
                 {
                     '&txt&'="Omni"
@@ -1925,7 +1925,6 @@ Hotspot fMapping
             // Bring back the lines
             ref lStereoRange
             ref lNoteRange
-            doevents
             // Show/Hide elements
             if(mapMode.val==0||mapMode.val==2)
             {
@@ -1988,6 +1987,8 @@ Hotspot fMapping
                 vis lNoteRange,1
                 vis tNotePos,1
             }
+            // Force a refresh, otherwise the drawings won't appear on screen. Reasons.
+            doevents
             //
             // Draw mapping ranges
             y0=lNoteRange.y+1

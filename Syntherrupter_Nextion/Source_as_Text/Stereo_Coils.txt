@@ -1,0 +1,1446 @@
+Page Stereo_Coils
+    Attributes
+        ID               : 0
+        Scope            : local
+        Send Component ID: disabled
+        Locked           : no
+    
+    Events
+        Preinitialize Event
+            // Prevent page refreshs until postinit
+            ref_stop
+            //
+            // Load colors
+            click fLoadColors,1
+            click fLoadModes,1
+            //
+            // Display username
+            if(User_Settings.userNum.val==0)
+            {
+                tUser.txt=" "+User_Settings.u0Name.txt
+            }else if(User_Settings.userNum.val==1)
+            {
+                tUser.txt=" "+User_Settings.u1Name.txt
+            }else if(User_Settings.userNum.val==2)
+            {
+                tUser.txt=" "+User_Settings.u2Name.txt
+            }
+            //
+            // Hide Functions
+            vis fLoadModes,0
+            vis fLoadColors,0
+            vis fLoadStoreCfg,0
+            vis fDraw,0
+            vis fSysex,0
+            // Display correct number of coil buttons
+            if(TC_Settings.maxCoilCount.val<6)
+            {
+                vis btCoil6,0
+                if(TC_Settings.maxCoilCount.val<5)
+                {
+                    vis btCoil5,0
+                    if(TC_Settings.maxCoilCount.val<4)
+                    {
+                        vis btCoil4,0
+                        if(TC_Settings.maxCoilCount.val<3)
+                        {
+                            vis btCoil3,0
+                            if(TC_Settings.maxCoilCount.val<2)
+                            {
+                                vis btCoil2,0
+                                vis btShowAll,0
+                                vis bAuto,0
+                            }
+                        }
+                    }
+                }
+            }
+            //
+            // Set slider step sizes
+            // Snap slider to "nice" positions.
+            // Nice positions = equally spread to the borders + equally spread with distance to the borders.
+            //                         = nCoils + nCoils - 1
+            // num segments = nice positions - 1 = 2 * (nCoils - 1)
+            sliderSegments.val=TC_Settings.maxCoilCount.val-1
+            sliderSegments.val*=2
+            //
+            // Load Help Mode
+            if(Help_Info.helpMode.val==0)
+            {
+                vis qrHelp,0
+            }else
+            {
+                tempStr.txt=tTitle.txt
+                showHelp.val=1
+                click 0,1
+            }
+            //
+            // Enable page refreshs again
+            ref_star
+        
+        Postinitialize Event
+            // Lines between coils, sliders, preview
+            sys0=tCoils.x
+            sys1=tR2.x+tR2.w
+            sys2=bAuto.y+bAuto.h+sPan.y
+            sys2/=2
+            line sys0,sys2,sys1,sys2,tTitle.pco
+            sys2=sRange.y+sRange.h+tStereo.y
+            sys2/=2
+            line sys0,sys2,sys1,sys2,tTitle.pco
+            //
+            // Initialize page state and drawings
+            btCoil1.val=1
+            coilNum.val=0
+            click btPanEn,0
+            click fDraw,1
+        
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(Other_Settings.nBackOff.val!=0)
+                {
+                    // Default "stop" action.
+                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
+                    prints "mes",3
+                    // Set all ontime and duty settings of all pages to 0.
+                    // First come the global variables then the local variables.
+                    Simple.ontime.val=0
+                    Simple.duty.val=0
+                    Simple.set1.val=Simple.set1.val&0x0000ffff
+                    Simple.set2.val=Simple.set2.val&0x0000ffff
+                    Simple.set3.val=Simple.set3.val&0x0000ffff
+                    Simple.set4.val=Simple.set4.val&0x0000ffff
+                    Simple.set5.val=Simple.set5.val&0x0000ffff
+                    Simple.set6.val=Simple.set6.val&0x0000ffff
+                    MIDI_Live.ontime.val=0
+                    MIDI_Live.duty.val=0
+                    MIDI_Live.set1.val=0
+                    MIDI_Live.set2.val=0
+                    MIDI_Live.set3.val=0
+                    MIDI_Live.set4.val=0
+                    MIDI_Live.set5.val=0
+                    MIDI_Live.set6.val=0
+                    Lightsaber.ontime.val=0
+                    Lightsaber.ontimes12.val=0
+                    Lightsaber.ontimes34.val=0
+                    Lightsaber.ontimes56.val=0
+                }
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgP"
+                click qrHelp,0
+            }
+        
+Variable (int32) origin
+    Attributes
+        ID   : 3
+        Scope: global
+        Value: 0
+    
+Variable (string) tempStr
+    Attributes
+        ID            : 4
+        Scope         : local
+        Text          : 
+        Max. Text Size: 32
+    
+Variable (int32) showHelp
+    Attributes
+        ID   : 5
+        Scope: local
+        Value: 0
+    
+Variable (int32) coilNum
+    Attributes
+        ID   : 6
+        Scope: local
+        Value: 0
+    
+Variable (int32) panMode
+    Attributes
+        ID   : 40
+        Scope: local
+        Value: 0
+    
+Variable (int32) cfgCoil1
+    Attributes
+        ID   : 41
+        Scope: global
+        Value: 16416
+    
+Variable (int32) cfgCoil2
+    Attributes
+        ID   : 42
+        Scope: global
+        Value: 16416
+    
+Variable (int32) cfgCoil3
+    Attributes
+        ID   : 43
+        Scope: global
+        Value: 16416
+    
+Variable (int32) cfgCoil4
+    Attributes
+        ID   : 44
+        Scope: global
+        Value: 16416
+    
+Variable (int32) cfgCoil5
+    Attributes
+        ID   : 45
+        Scope: global
+        Value: 16416
+    
+Variable (int32) cfgCoil6
+    Attributes
+        ID   : 46
+        Scope: global
+        Value: 16416
+    
+Variable (int32) sliderSegments
+    Attributes
+        ID   : 49
+        Scope: local
+        Value: 0
+    
+Variable (int32) coilNumTmp
+    Attributes
+        ID   : 50
+        Scope: local
+        Value: 0
+    
+Variable (int32) autoPlaceDist
+    Attributes
+        ID   : 51
+        Scope: local
+        Value: 0
+    
+Variable (int32) lWidth
+    Attributes
+        ID   : 52
+        Scope: local
+        Value: 0
+    
+Text tHideBack3
+    Attributes
+        ID                 : 1
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text tTitle
+    Attributes
+        ID                 : 7
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Coil Stereo Settings
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tUser
+    Attributes
+        ID                 : 9
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  Guest
+        Max. Text Size     : 32
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMSI
+    Attributes
+        ID                 : 10
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Simple
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMML
+    Attributes
+        ID                 : 11
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : MIDI Live
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMLS
+    Attributes
+        ID                 : 12
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Lightsaber
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tCoils
+    Attributes
+        ID                 : 15
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Coils
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHideBack2
+    Attributes
+        ID                 : 16
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text tMode
+    Attributes
+        ID                 : 25
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Stereo Mode
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHideBack1
+    Attributes
+        ID                 : 27
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text tPan
+    Attributes
+        ID                 : 29
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Stereo Position
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tL2
+    Attributes
+        ID                 : 30
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : L
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tR2
+    Attributes
+        ID                 : 31
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : R
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tPanReach
+    Attributes
+        ID                 : 32
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Listening Range
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tStereo
+    Attributes
+        ID                 : 34
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Volume vs\r\nNote Position
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tL
+    Attributes
+        ID                 : 35
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : L
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tR
+    Attributes
+        ID                 : 36
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : R
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+QR Code qrHelp
+    Attributes
+        ID               : 14
+        Scope            : local
+        Send Component ID: disabled
+        Text             : git.io/JkvOK
+        Max. Text Size   : 16
+    
+    Events
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                showHelp.val=1
+                tempStr.txt=tTitle.txt
+                tTitle.txt="Get Help/Link for..."
+                // keep QR code on top
+                ref qrHelp
+                // Show modified title before stopping screen refreshs.
+                doevents
+                ref_stop
+            }else
+            {
+                showHelp.val=0
+                tTitle.txt=tempStr.txt
+                // keep QR code on top
+                ref qrHelp
+                ref_star
+            }
+        
+Progress Bar lStereoPos
+    Attributes
+        ID               : 37
+        Scope            : local
+        Send Component ID: disabled
+        Value            : 100
+    
+Slider sPan
+    Attributes
+        ID               : 28
+        Scope            : local
+        Send Component ID: disabled
+        Position         : 64
+        Upper range limit: 127
+        Lower range limit: 0
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgS"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Snap to "nice" positions (see page preinint)
+                // Calculate step number (rounding to nearest: q=round(i/p) => q = (i + p/2)/p)
+                sys2='&val&'*sliderSegments.val
+                sys2+=64 //p/2 = 127/2
+                sys2/=127
+                // Now convert that step number back to a - now nice - slider position.
+                // Correct for rounding errors at the top end of the range
+                if(sys2>=sliderSegments.val)
+                {
+                    '&val&'=127
+                }else
+                {
+                    // Map and round to nearest
+                    sys0=sys2*127
+                    sys1=sliderSegments.val/2
+                    sys0+=sys1
+                    '&val&'=sys0/sliderSegments.val
+                }
+                click fLoadStoreCfg,1
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Slider sRange
+    Attributes
+        ID               : 33
+        Scope            : local
+        Send Component ID: disabled
+        Position         : 64
+        Upper range limit: 127
+        Lower range limit: 0
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg9"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Snap to "nice" positions (see page preinint)
+                // Calculate step number (rounding to nearest: q=round(i/p) => q = (i + p/2)/p)
+                sys2='&val&'*sliderSegments.val
+                sys2+=64 //p/2 = 127/2
+                sys2/=127
+                // Now convert that step number back to a - now nice - slider position.
+                // Correct for rounding errors at the top end of the range
+                if(sys2>=sliderSegments.val)
+                {
+                    '&val&'=127
+                }else
+                {
+                    // Map and round to nearest
+                    sys0=sys2*127
+                    sys1=sliderSegments.val/2
+                    sys0+=sys1
+                    '&val&'=sys0/sliderSegments.val
+                }
+                click fLoadStoreCfg,1
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bReturn
+    Attributes
+        ID               : 8
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : â†
+        Max. Text Size   : 3
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgQ"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                page origin.val
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bLinConst
+    Attributes
+        ID               : 24
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Linear
+        Max. Text Size   : 6
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(panMode.val==1)
+                {
+                    panMode.val=2
+                }else
+                {
+                    panMode.val=1
+                }
+                click fLoadStoreCfg,1
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg9"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(panMode.val==1)
+                {
+                    '&txt&'="Const"
+                }else if(panMode.val==2)
+                {
+                    '&txt&'="Linear"
+                }
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bAuto
+    Attributes
+        ID               : 26
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Auto Place
+        Max. Text Size   : 12
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfg9"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                //
+                // n coils are separated by n-1 segments.
+                //
+                autoPlaceDist.val=TC_Settings.maxCoilCount.val-1
+                autoPlaceDist.val=sPan.maxval/autoPlaceDist.val
+                // In Const mode, range is half the distance (no overlap),
+                // In lin mode it is full distance (equalling constant volume overall)
+                sRange.val=autoPlaceDist.val
+                if(panMode.val==1)
+                {
+                    sRange.val/=2
+                }
+                coilNumTmp.val=coilNum.val
+                for(coilNum.val=0;coilNum.val<TC_Settings.maxCoilCount.val;coilNum.val++)
+                {
+                    sPan.val=autoPlaceDist.val*coilNum.val
+                    //
+                    // Store, draw and send config
+                    click fLoadStoreCfg,1
+                    // The first drawing should be a "clean" start, only afterwards do we want
+                    // to keep previous drawings.
+                    btShowAll.val=1
+                    // Enable the matching btCoil button as well
+                    sys0=btCoil1.id+coilNum.val
+                    b[sys0].val=1
+                }
+                coilNum.val=coilNumTmp.val
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btCoil1
+    Attributes
+        ID               : 17
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 1
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btCoil2
+    Attributes
+        ID               : 18
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 2
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btCoil3
+    Attributes
+        ID               : 19
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 3
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btCoil4
+    Attributes
+        ID               : 20
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 4
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operationl
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btCoil5
+    Attributes
+        ID               : 21
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 5
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btCoil6
+    Attributes
+        ID               : 22
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 6
+        Max. Text Size   : 2
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgD"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btPanEn
+    Attributes
+        ID               : 23
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Disabled
+        Max. Text Size   : 8
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if('&val&'==0)
+                {
+                    panMode.val=0
+                }else
+                {
+                    panMode.val=1
+                }
+                click fLoadStoreCfg,1
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfgy"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(panMode.val==0)
+                {
+                    '&txt&'="Disabled"
+                    '&val&'=0
+                    vis bLinConst,0
+                    vis bAuto,0
+                    vis tPan,0
+                    vis tL2,0
+                    vis sPan,0
+                    vis tR2,0
+                    vis tPanReach,0
+                    vis sRange,0
+                }else
+                {
+                    '&txt&'="Enabled"
+                    '&val&'=1
+                    vis bLinConst,1
+                    vis bAuto,1
+                    vis tPan,1
+                    vis tL2,1
+                    vis sPan,1
+                    vis tR2,1
+                    vis tPanReach,1
+                    vis sRange,1
+                }
+                click bLinConst,0
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Dual-state Button btShowAll
+    Attributes
+        ID               : 47
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Show All
+        Max. Text Size   : 10
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if('&val&'!=0)
+                {
+                    coilNumTmp.val=coilNum.val
+                    for(coilNum.val=0;coilNum.val<TC_Settings.maxCoilCount.val;coilNum.val++)
+                    {
+                        sys0=btCoil1.id+coilNum.val
+                        b[sys0].val=1
+                        // Load settings of the current coil and show them
+                        click fLoadStoreCfg,0
+                        click fDraw,1
+                    }
+                    coilNum.val=coilNumTmp.val
+                }else
+                {
+                    btCoil1.val=0
+                    btCoil2.val=0
+                    btCoil3.val=0
+                    btCoil4.val=0
+                    btCoil5.val=0
+                    btCoil6.val=0
+                    sys0=btCoil1.id+coilNum.val
+                    b[sys0].val=1
+                    // Load settings of the current coil and show them
+                    click fLoadStoreCfg,0
+                    click fDraw,1
+                }
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkfgy"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Hotspot fLoadModes
+    Attributes
+        ID               : 13
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Load active modes
+            sys0=Settings.activeModes.val&4
+            if(sys0!=0)
+            {
+                // Lightsaber Mode is active
+                tMLS.bco=Settings.backSelectCol2.val
+            }
+            //
+            // Display all active modes
+            sys0=Settings.activeModes.val&1
+            if(sys0!=0)
+            {
+                // Simple Mode is active
+                tMSI.bco=Settings.backSelectCol2.val
+            }
+            sys0=Settings.activeModes.val&2
+            if(sys0!=0)
+            {
+                // MIDI Live Mode is active
+                tMML.bco=Settings.backSelectCol2.val
+            }
+        
+Hotspot fDraw
+    Attributes
+        ID               : 38
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Mark coil position
+            //
+            // Clear previous drawings except if all of them shall be shown.
+            if(btShowAll.val==0)
+            {
+                ref tHideBack3
+                ref lStereoPos
+                doevents
+            }
+            // If Stereo is disabled, volume is just constant 100% over the entire range.
+            // Most of the code stays the same though for making life easier (haha.)
+            //
+            // Convert position
+            // Map and round to nearest
+            // Position ranges from 1 to n-1 because the line is +/-1 px thicker
+            sys0=lStereoPos.w-2
+            sys0*=sPan.val
+            sys1=sPan.maxval/2
+            sys0+=sys1
+            sys0/=sPan.maxval
+            // Same for range
+            x0=sys0+lStereoPos.x+1
+            y0=lStereoPos.y
+            x1=lStereoPos.h
+            y1=20
+            y0-=y1
+            sys2=x1/2
+            x0-=sys2
+            if(panMode.val!=0)
+            {
+                fill x0,y0,x1,y1,lStereoPos.pco
+            }
+            // x0,y0: Volume curve start point
+            x0+=sys2
+            // Volume range endpoints
+            sys0=lStereoPos.w-1
+            sys0*=sRange.val
+            sys1=sRange.maxval-1
+            sys0+=sys1
+            sys0/=sRange.maxval
+            sys1=x0-sys0
+            if(sys1<lStereoPos.x||panMode.val==0)
+            {
+                sys1=lStereoPos.x
+            }
+            fill sys1,y0,1,y1,lStereoPos.pco
+            sys1=x0+sys0
+            sys2=lStereoPos.x+lStereoPos.w-1
+            if(sys1>sys2||panMode.val==0)
+            {
+                sys1=sys2
+            }
+            fill sys1,y0,1,y1,lStereoPos.pco
+            if(panMode.val==2)
+            {
+                y1=lStereoPos.y
+            }else
+            {
+                // Covers both cases: disabled and constant.
+                y1=lStereoPos.y-y1
+            }
+            x1=x0-sys0
+            // Volume curve
+            if(panMode.val==0)
+            {
+                fill lStereoPos.x,y0,lStereoPos.w-1,1,lStereoPos.pco
+            }else
+            {
+                // cut off excessively long lines which requires
+                // recomputing the end points
+                if(x1<lStereoPos.x)
+                {
+                    if(panMode.val==2)
+                    {
+                        sys1=y1-y0
+                        sys2=lStereoPos.x-x1
+                        sys1*=sys2
+                        sys2=x0-x1
+                        sys1/=sys2
+                        sys1=lStereoPos.y-sys1
+                        line x0,y0,lStereoPos.x,sys1,lStereoPos.pco
+                    }else
+                    {
+                        line x0,y0,lStereoPos.x,y1,lStereoPos.pco
+                    }
+                }else
+                {
+                    line x0,y0,x1,y1,lStereoPos.pco
+                }
+                x1=x0+sys0
+                sys0=lStereoPos.x+lStereoPos.w
+                if(x1>sys0)
+                {
+                    if(panMode.val==2)
+                    {
+                        sys1=y1-y0
+                        sys2=x1-sys0
+                        sys1*=sys2
+                        sys2=x1-x0
+                        sys1/=sys2
+                        sys1=lStereoPos.y-sys1
+                        line x0,y0,lStereoPos.x+lStereoPos.w-1,sys1,lStereoPos.pco
+                    }else
+                    {
+                        line x0,y0,lStereoPos.x+lStereoPos.w-1,y1,lStereoPos.pco
+                    }
+                }else
+                {
+                    line x0,y0,x1,y1,lStereoPos.pco
+                }
+            }
+        
+Hotspot fLoadStoreCfg
+    Attributes
+        ID               : 39
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Store coil config to matching global variable
+            sys0=panMode.val
+            sys0<<=8
+            sys0+=sPan.val
+            sys0<<=8
+            sys0+=sRange.val
+            sys1=cfgCoil1.id+coilNum.val
+            b[sys1].val=sys0
+            click fSysex,1
+            click fDraw,1
+        
+        Touch Release Event
+            // Load coil config from matching global variable
+            ref_stop
+            sys1=cfgCoil1.id+coilNum.val
+            sys0=b[sys1].val
+            sRange.val=sys0&0xff
+            sys0>>=8
+            sPan.val=sys0&0xff
+            sys0>>=8
+            panMode.val=sys0&0xff
+            click btPanEn,0
+            ref_star
+        
+Hotspot fLoadColors
+    Attributes
+        ID               : 48
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Changes all page components according to the current color set.
+            // Note: This component has to be the last component of the page.
+            //
+            // sys0: component id
+            // sys1: component type
+            // sys2: picture id offset for current color mode
+            sys2=Settings.colorMode.val*Settings.picCount.val
+            for(sys0=0;sys0<fLoadColors.id;sys0++)
+            {
+                // More convenient for typing
+                sys1=b[sys0].type
+                if(sys1==121)
+                {
+                    // Types that have bco
+                    // page
+                    if(b[sys0].bco==Settings.backCol2Deflt.val)
+                    {
+                        b[sys0].bco=Settings.backCol2.val
+                    }else
+                    {
+                        b[sys0].bco=Settings.backCol.val
+                    }
+                }else if(sys1==54||sys1==59||sys1==116||sys1==55)
+                {
+                    // Types that have bco, pco, and sta:
+                    // number, float, text, scroll text
+                    if(b[sys0].sta==1)
+                    {
+                        if(b[sys0].bco==Settings.backCol2Deflt.val)
+                        {
+                            b[sys0].bco=Settings.backCol2.val
+                            b[sys0].pco=Settings.frontCol2.val
+                        }else
+                        {
+                            b[sys0].bco=Settings.backCol.val
+                            b[sys0].pco=Settings.frontCol.val
+                        }
+                    }
+                }else if(sys1==106)
+                {
+                    // Types that have pco, bco, sta (different)
+                    // progress bar
+                    if(b[sys0].sta==0)
+                    {
+                        if(b[sys0].bco==Settings.backCol2Deflt.val)
+                        {
+                            b[sys0].bco=Settings.backCol2.val
+                            b[sys0].pco=Settings.frontCol2.val
+                        }else
+                        {
+                            b[sys0].bco=Settings.backCol.val
+                            b[sys0].pco=Settings.frontCol.val
+                        }
+                    }
+                }else if(sys1==98||sys1==53)
+                {
+                    // Types that have pco, pic, pco2, pic2, sta:
+                    // button, dual-state button
+                    if(b[sys0].sta==2)
+                    {
+                        b[sys0].pco=Settings.frontCol.val
+                        b[sys0].pco2=Settings.backCol.val
+                        b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                        b[sys0].pic+=sys2
+                        b[sys0].pic2=b[sys0].pic+1
+                    }
+                }else if(sys1==58)
+                {
+                    // Types that have bco, pco
+                    // QR Code
+                    b[sys0].bco=Settings.backCol.val
+                    b[sys0].pco=Settings.qrFrontCol.val
+                }else if(sys1==1)
+                {
+                    // Types that have pic, pic1, pic2:
+                    // slider
+                    b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                    b[sys0].pic+=sys2
+                    b[sys0].pic1=b[sys0].pic
+                    b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
+                    b[sys0].pic2+=sys2
+                }
+            }
+        
+Hotspot fSysex
+    Attributes
+        ID               : 53
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Sends a Syntherrupter Sysex command that updates Syntherrupter with whatever
+            // has been changed on this page.
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            // To send: pan config, pan pos, pan range
+            //
+            if(panMode.val!=0)
+            {
+                // Pan Config
+                sys0=panMode.val-1
+                // SYSEX_START DMID VERSION DEVICE
+                printh f0 00 26 05 01 7f
+                // PN_LSB PN_MSB
+                printh 62 00 // set pan config
+                // TG_LSB
+                prints coilNum.val,1// coil
+                // TG_MSB
+                printh 00 // reserved
+                // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                // ID of variable with the channel data of our coil
+                sys1=TC_Settings.coil1Chn.id+sys0
+                // Note: here we only care about less than 7 bit so we can hardcode the rest.
+                prints sys0,1
+                // remaining 4 VAL bytes, SYSEX_END
+                printh 00 00 00 00 f7
+                //
+                // Pan Range
+                // SYSEX_START DMID VERSION DEVICE
+                printh f0 00 26 05 01 7f
+                // PN_LSB PN_MSB
+                printh 64 00 // set pan range
+                // TG_LSB
+                prints coilNum.val,1// coil
+                // TG_MSB
+                printh 00 // reserved
+                // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                // ID of variable with the channel data of our coil
+                sys1=TC_Settings.coil1Chn.id+sys0
+                // Note: here we only care about 7 bit so we can hardcode the rest.
+                prints sRange.val,1
+                // remaining 4 VAL bytes, SYSEX_END
+                printh 00 00 00 00 f7
+            }
+            //
+            // Pan Position
+            // To disable pan mapping, set pan position to > 127
+            sys0=sPan.val
+            if(panMode.val==0)
+            {
+                sys0=128
+            }
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 63 00 // set pan position
+            // TG_LSB
+            prints coilNum.val,1// coil
+            // TG_MSB
+            printh 00 // reserved
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // ID of variable with the channel data of our coil
+            sys1=TC_Settings.coil1Chn.id+sys0
+            // Note: here we only care about 8 bit so we can hardcode the rest.
+            sys1=sys0
+            sys2=sys1&0x7f
+            prints sys2,1
+            sys1>>=7
+            sys2=sys1&0x7f
+            prints sys2,1
+            // remaining 3 VAL bytes, SYSEX_END
+            printh 00 00 00 f7
+        
+TouchCap touchCap
+    Attributes
+        ID   : 2
+        Scope: local
+        Value: 0
+    
+    Events
+        Touch Press Event
+            // Unclick the Show All button if required
+            if(btShowAll.val==1&&'&val&'!=btShowAll.id)
+            {
+                //btShowAll.val=0
+                click btShowAll,1
+            }
+            //
+            sys0=0
+            if('&val&'>=btCoil1.id&&'&val&'<=btCoil6.id)
+            {
+                sys0=1
+            }else if('&val&'==btPanEn.val||'&val&'==bLinConst.val)
+            {
+                sys0=2
+            }
+            if(sys0>0)
+            {
+                // Unpress all buttons except the current one
+                // Note: Since this event happens before the button event, the current button
+                // has not yet switched to 1 and thus must not be toggled here.
+                if(sys0==1)
+                {
+                    // This must only happen if one of the coil buttons has been pressed, not if the coil mode
+                    // has been switched.
+                    btCoil1.val=0
+                    btCoil2.val=0
+                    btCoil3.val=0
+                    btCoil4.val=0
+                    btCoil5.val=0
+                    btCoil6.val=0
+                }
+            }
+        
+        Touch Release Event
+            sys0=0
+            if('&val&'>=btCoil1.id&&'&val&'<=btCoil6.id)
+            {
+                sys0=1
+                //}else if('&val&'==btPanEn.val||'&val&'==bLinConst.val)
+                //{
+                //  sys0=2
+            }
+            if(sys0!=0)
+            {
+                // Set current coil and load corresponding settings
+                coilNum.val='&val&'-btCoil1.id
+                click fLoadStoreCfg,0
+                click fDraw,1
+            }
+        
