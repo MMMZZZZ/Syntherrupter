@@ -68,8 +68,11 @@ Page Other_Settings
                 if(Other_Settings.nBackOff.val!=0)
                 {
                     // Default "stop" action.
-                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                    prints "mes",3
+                    // Set ontime and duty to 0 for all modes. See fSysex for details
+                    // Disable all modes as well.
+                    printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                     // Set all ontime and duty settings of all pages to 0.
                     // First come the global variables then the local variables.
                     Simple.ontime.val=0
@@ -411,6 +414,7 @@ Text fCheckNApply
                 nSleepS.val=59
             }
             thsp=nSleepMin.val*60+nSleepS.val
+            click fSysex,1
         
 Text tSleep
     Attributes
@@ -638,37 +642,6 @@ Button bReturn
             {
                 // Normal Operation
                 click bOK,0
-                // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
-                // Data byte 1:
-                //    Bit 6-7: 2 = Other Settings
-                //    Bit 0-5: Settings page (a.k.a. meaning of the following bytes). Ranges from 0-10
-                // Settings page 0
-                //   Data byte 2: Button hold time LSB
-                //   Data byte 3: Button hold time MSB
-                //   Data byte 4: Delay until sleep in seconds LSB
-                //   Data byte 5: Delay until sleep in seconds MSB
-                // Settings page 1
-                //   Data byte 2: Brightness
-                //   Data byte 3:
-                //     Bit 0: Background shutdown
-                //     Bit 1: Dark Mode
-                //
-                // sys0 contains data byte 1
-                sys0=0
-                sys0=2<<6
-                prints "d",1
-                prints sys0,1
-                prints nHoldTime.val,2
-                prints thsp,2
-                sys0+=1
-                prints "d",1
-                prints sys0,1
-                prints dim,1
-                sys0=Settings.colorMode.val
-                sys0=sys0<<1
-                sys0+=nBackOff.val
-                prints sys0,1
-                prints 0,2
             }else
             {
                 // Show Help
@@ -1223,9 +1196,126 @@ Hotspot fLoadModes
                 tMML.bco=Settings.backSelectCol2.val
             }
         
-Hotspot fLoadColors
+Hotspot fSysex
     Attributes
         ID               : 43
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Sends a Syntherrupter Sysex command that updates Syntherrupter with whatever
+            // has been changed on this page.
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            //
+            // Display Brightness
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 20 02 // Display Brightness
+            // TG_LSB
+            printh 00 // Reserved
+            // TG_MSB
+            printh 00 // Reserved
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // Brightness: 0-100
+            prints dim,0
+            // Brightness uses less than 7 bits, hardcode remaining bytes.
+            printh 00 00 00 00
+            // SYSEX_END
+            printh f7
+            //
+            // Standby
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 21 02 // Standby
+            // TG_LSB
+            printh 00 // Reserved
+            // TG_MSB
+            printh 00 // Reserved
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // Seconds til standby, 1-3600
+            sys0=thsp
+            sys2=sys0
+            sys2&=0x7f
+            prints sys2,1
+            sys0>>=7
+            sys2=sys0
+            sys2&=0x7f
+            prints sys2,1
+            // Standby uses less than 14 bits, hardcode remaining bytes.
+            printh 00 00 00
+            // SYSEX_END
+            printh f7
+            //
+            // Button Hold Time
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 22 02 // Button Hold Time
+            // TG_LSB
+            printh 00 // Reserved
+            // TG_MSB
+            printh 00 // Reserved
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // Time in ms, 50-9999
+            sys0=nHoldTime.val
+            sys2=sys0
+            sys2&=0x7f
+            prints sys2,1
+            sys0>>=7
+            sys2=sys0
+            sys2&=0x7f
+            prints sys2,1
+            // Standby uses less than 14 bits, hardcode remaining bytes.
+            printh 00 00 00
+            // SYSEX_END
+            printh f7
+            //
+            // Background Shutdown
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 23 02 // Background Shutdown
+            // TG_LSB
+            printh 00 // Reserved
+            // TG_MSB
+            printh 00 // Reserved
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // Bitfield. Bit 0: enable/disable background shutdown
+            prints nBackOff.val,1
+            // Bitfield uses less than 7 bits, hardcode remaining bytes.
+            printh 00 00 00 00
+            // SYSEX_END
+            printh f7
+            //
+            // Dark Mode
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 24 02 // Background Shutdown
+            // TG_LSB
+            printh 00 // Reserved
+            // TG_MSB
+            printh 00 // Reserved
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // 0: light mode, 1: dark mode
+            prints btDark.val,1
+            // Value uses less than 7 bits, hardcode remaining bytes.
+            printh 00 00 00 00
+            // SYSEX_END
+            printh f7
+        
+Hotspot fLoadColors
+    Attributes
+        ID               : 44
         Scope            : local
         Send Component ID: disabled
     

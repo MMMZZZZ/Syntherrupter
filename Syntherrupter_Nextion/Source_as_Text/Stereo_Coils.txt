@@ -102,8 +102,11 @@ Page Stereo_Coils
                 if(Other_Settings.nBackOff.val!=0)
                 {
                     // Default "stop" action.
-                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                    prints "mes",3
+                    // Set ontime and duty to 0 for all modes. See fSysex for details
+                    // Disable all modes as well.
+                    printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                     // Set all ontime and duty settings of all pages to 0.
                     // First come the global variables then the local variables.
                     Simple.ontime.val=0

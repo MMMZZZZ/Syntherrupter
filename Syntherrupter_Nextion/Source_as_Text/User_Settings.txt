@@ -113,34 +113,42 @@ Page User_Settings
             ref_star
         
         Postinitialize Event
+            // In case we return from the keyboard page, transmit the corresponding field.
+            click fSysex,1
+            //
             // Draw table grid
             //
             // Right border of the table
             sys0=0
             if(User_Settings.userNum.val==0)
             {
-                sys0=362
+                sys0=tus0.x+tus0.w
             }else if(User_Settings.userNum.val==1)
             {
-                sys0=577
+                sys0=tus1.x+tus1.w
             }else if(User_Settings.userNum.val==2)
             {
-                sys0=785
+                sys0=tus2.x+tus2.w
             }
             // Horizontal grid lines
-            for(sys2=0;sys2<4;sys2++)
+            for(sys1=tU0Name.y+tU0Name.h+2;sys1<user0Duty.y;sys1+=tU0Name.h+5)
             {
-                sys1=sys2*31
-                sys1+=116
-                line 15,sys1,sys0,sys1,tUserName.pco
+                line tUserName.x,sys1,sys0,sys1,tUserName.pco
             }
+            //for(sys2=0;sys2<4;sys2++)
+            //{
+            //  sys1=sys2*31
+            //  sys1+=116
+            //  line 15,sys1,sys0,sys1,tUserName.pco
+            //}
             //
             // Table height
-            sys1+=31
+            //sys1+=31
             // Vertical grid lines
-            for(sys2=148;sys2<sys0;sys2+=215)
+            //for(sys2=tU0Name.y+tU0Name.h+3;sys2<user0Duty.y;sys2+=tU0Name.h+5)
+            for(sys2=tUserName.x+tUserName.w+15;sys2<sys0;sys2+=tU0Name.w+15)
             {
-                line sys2,90,sys2,sys1,tUserName.pco
+                line sys2,tUserName.y,sys2,sys1,tUserName.pco
             }
         
         Touch Press Event
@@ -150,8 +158,11 @@ Page User_Settings
                 if(Other_Settings.nBackOff.val!=0)
                 {
                     // Default "stop" action.
-                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                    prints "mes",3
+                    // Set ontime and duty to 0 for all modes. See fSysex for details
+                    // Disable all modes as well.
+                    printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                     // Set all ontime and duty settings of all pages to 0.
                     // First come the global variables then the local variables.
                     Simple.ontime.val=0
@@ -200,194 +211,162 @@ Page User_Settings
             u2BPS.val=user2BPS.val
             u2Duty.val=user2Duty.val
         
-Variable (string) tAutoCode
-    Attributes
-        ID            : 14
-        Scope         : global
-        Text          : 0
-        Max. Text Size: 1
-    
 Variable (string) u0Name
     Attributes
-        ID            : 35
+        ID            : 1
         Scope         : global
         Text          : Padawan
         Max. Text Size: 16
     
 Variable (string) u0Code
     Attributes
-        ID            : 36
+        ID            : 2
         Scope         : global
         Text          : 1234
         Max. Text Size: 16
     
 Variable (int32) u0Ontime
     Attributes
-        ID   : 37
+        ID   : 3
         Scope: global
         Value: 100
     
 Variable (int32) u0BPS
     Attributes
-        ID   : 38
+        ID   : 4
         Scope: global
         Value: 1000
     
 Variable (int32) u0Duty
     Attributes
-        ID   : 39
+        ID   : 5
         Scope: global
         Value: 60
     
 Variable (string) u1Name
     Attributes
-        ID            : 40
+        ID            : 6
         Scope         : global
         Text          : Jedi Knight
         Max. Text Size: 16
     
 Variable (string) u1Code
     Attributes
-        ID            : 41
+        ID            : 7
         Scope         : global
         Text          : 8079
         Max. Text Size: 16
     
 Variable (int32) u1Ontime
     Attributes
-        ID   : 42
+        ID   : 8
         Scope: global
         Value: 150
     
 Variable (int32) u1BPS
     Attributes
-        ID   : 43
+        ID   : 9
         Scope: global
         Value: 1000
     
 Variable (int32) u1Duty
     Attributes
-        ID   : 44
+        ID   : 10
         Scope: global
         Value: 80
     
 Variable (string) u2Name
     Attributes
-        ID            : 45
+        ID            : 11
         Scope         : global
         Text          : Master Yoda
         Max. Text Size: 16
     
 Variable (string) u2Code
     Attributes
-        ID            : 46
+        ID            : 12
         Scope         : global
         Text          : 0
         Max. Text Size: 16
     
 Variable (int32) u2Ontime
     Attributes
-        ID   : 47
+        ID   : 13
         Scope: global
         Value: 200
     
 Variable (int32) u2BPS
     Attributes
-        ID   : 48
+        ID   : 14
         Scope: global
         Value: 1000
     
 Variable (int32) u2Duty
     Attributes
-        ID   : 49
+        ID   : 15
         Scope: global
         Value: 100
     
+Variable (string) tAutoCode
+    Attributes
+        ID            : 16
+        Scope         : global
+        Text          : 0
+        Max. Text Size: 1
+    
 Variable (int32) newValTargetId
     Attributes
-        ID   : 51
+        ID   : 36
         Scope: local
         Value: 64
     
 Variable (int32) newSelect
     Attributes
-        ID   : 52
+        ID   : 37
         Scope: local
         Value: 0
     
 Variable (int32) userNum
     Attributes
-        ID   : 54
+        ID   : 39
         Scope: global
         Value: 0
     
 Variable (string) tempStr
     Attributes
-        ID            : 60
+        ID            : 45
         Scope         : local
         Text          : 
         Max. Text Size: 32
     
 Variable (int32) showHelp
     Attributes
-        ID   : 61
+        ID   : 46
         Scope: local
         Value: 0
     
-Number user0BPS
+Variable (string) asciiTemp
     Attributes
-        ID                 : 17
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Value              : 1000
+        ID            : 78
+        Scope         : local
+        Text          : a
+        Max. Text Size: 97
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                // Check if values are legal
-                click fCheck,0
-                if(User_Settings.userNum.val!=0)
-                {
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    user0BPS.bco=idle.pco
-                    user0BPS.pco=idle.bco
-                    newValTargetId.val=user0BPS.id
-                    // A new value has been selected
-                    newSelect.val=1
-                }
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JLxSo"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                // Code for using the Keyboard page
-                //if(tUser.txt!=u0Name.txt)
-                //{
-                //  Keyboard.origin.val=dp
-                //  Keyboard.target.val=u0BPS.id
-                //  Keyboard.sComp.txt="User 0 BPS"
-                //  page Keyboard
-                //}
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
+Variable (int32) asciiCode
+    Attributes
+        ID   : 79
+        Scope: local
+        Value: 0
+    
+Variable (int32) temp
+    Attributes
+        ID   : 80
+        Scope: local
+        Value: 0
+    
 Number user0Ontime
     Attributes
-        ID                 : 19
+        ID                 : 68
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -436,60 +415,9 @@ Number user0Ontime
                 click qrHelp,0
             }
         
-Number user1BPS
-    Attributes
-        ID                 : 20
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Value              : 1000
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                // Check if values are legal
-                click fCheck,0
-                if(User_Settings.userNum.val==2)
-                {
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    user1BPS.bco=idle.pco
-                    user1BPS.pco=idle.bco
-                    newValTargetId.val=user1BPS.id
-                    // A new value has been selected
-                    newSelect.val=1
-                }
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JLxSo"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                // Code for using the Keyboard page
-                //if(tUser.txt==u2Name.txt)
-                //{
-                //  Keyboard.origin.val=dp
-                //  Keyboard.target.val=u1BPS.id
-                //  Keyboard.sComp.txt="User 1 BPS"
-                //  page Keyboard
-                //}
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Number user1Ontime
     Attributes
-        ID                 : 22
+        ID                 : 69
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -538,59 +466,9 @@ Number user1Ontime
                 click qrHelp,0
             }
         
-Number user2BPS
-    Attributes
-        ID                 : 23
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Value              : 1000
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                // Check if values are legal
-                click fCheck,0
-                if(userNum.val==2)
-                {
-                    // Reset push state of last selected value
-                    b[newValTargetId.val].bco=idle.bco
-                    b[newValTargetId.val].pco=idle.pco
-                    // Mark this field as pushed
-                    user2BPS.bco=idle.pco
-                    user2BPS.pco=idle.bco
-                    newValTargetId.val=user2BPS.id
-                    // A new value has been selected
-                    newSelect.val=1
-                }
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JLxSo"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                //if(tUser.txt==u2Name.txt)
-                //{
-                //  Keyboard.origin.val=dp
-                //  Keyboard.target.val=u2BPS.id
-                //  Keyboard.sComp.txt="User 2 BPS"
-                //  page Keyboard
-                //}
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Number user2Ontime
     Attributes
-        ID                 : 25
+        ID                 : 70
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -639,9 +517,169 @@ Number user2Ontime
                 click qrHelp,0
             }
         
+Number user0BPS
+    Attributes
+        ID                 : 71
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 1000
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Check if values are legal
+                click fCheck,0
+                if(User_Settings.userNum.val!=0)
+                {
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    user0BPS.bco=idle.pco
+                    user0BPS.pco=idle.bco
+                    newValTargetId.val=user0BPS.id
+                    // A new value has been selected
+                    newSelect.val=1
+                }
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSo"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Code for using the Keyboard page
+                //if(tUser.txt!=u0Name.txt)
+                //{
+                //  Keyboard.origin.val=dp
+                //  Keyboard.target.val=u0BPS.id
+                //  Keyboard.sComp.txt="User 0 BPS"
+                //  page Keyboard
+                //}
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Number user1BPS
+    Attributes
+        ID                 : 72
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 1000
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Check if values are legal
+                click fCheck,0
+                if(User_Settings.userNum.val==2)
+                {
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    user1BPS.bco=idle.pco
+                    user1BPS.pco=idle.bco
+                    newValTargetId.val=user1BPS.id
+                    // A new value has been selected
+                    newSelect.val=1
+                }
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSo"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Code for using the Keyboard page
+                //if(tUser.txt==u2Name.txt)
+                //{
+                //  Keyboard.origin.val=dp
+                //  Keyboard.target.val=u1BPS.id
+                //  Keyboard.sComp.txt="User 1 BPS"
+                //  page Keyboard
+                //}
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Number user2BPS
+    Attributes
+        ID                 : 73
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 1000
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Check if values are legal
+                click fCheck,0
+                if(userNum.val==2)
+                {
+                    // Reset push state of last selected value
+                    b[newValTargetId.val].bco=idle.bco
+                    b[newValTargetId.val].pco=idle.pco
+                    // Mark this field as pushed
+                    user2BPS.bco=idle.pco
+                    user2BPS.pco=idle.bco
+                    newValTargetId.val=user2BPS.id
+                    // A new value has been selected
+                    newSelect.val=1
+                }
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSo"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                //if(tUser.txt==u2Name.txt)
+                //{
+                //  Keyboard.origin.val=dp
+                //  Keyboard.target.val=u2BPS.id
+                //  Keyboard.sComp.txt="User 2 BPS"
+                //  page Keyboard
+                //}
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+XFloat idle
+    Attributes
+        ID                 : 38
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 0
+    
 XFloat user0Duty
     Attributes
-        ID                 : 18
+        ID                 : 74
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -693,7 +731,7 @@ XFloat user0Duty
         
 XFloat user1Duty
     Attributes
-        ID                 : 21
+        ID                 : 75
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -744,7 +782,7 @@ XFloat user1Duty
         
 XFloat user2Duty
     Attributes
-        ID                 : 24
+        ID                 : 76
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -794,17 +832,9 @@ XFloat user2Duty
                 click qrHelp,0
             }
         
-XFloat idle
-    Attributes
-        ID                 : 53
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Value              : 0
-    
 Text tHideBack2
     Attributes
-        ID                 : 1
+        ID                 : 17
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -817,7 +847,7 @@ Text tHideBack2
         
 Text tHideBack
     Attributes
-        ID                 : 2
+        ID                 : 18
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -830,7 +860,7 @@ Text tHideBack
         
 Text tTitle
     Attributes
-        ID                 : 3
+        ID                 : 19
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -842,85 +872,9 @@ Text tTitle
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
-Text tU0Name
-    Attributes
-        ID                 : 5
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Padawan
-        Max. Text Size     : 16
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JLxSw"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                if(userNum.val!=0)
-                {
-                    Keyboard.origin.val=dp
-                    Keyboard.target.val=u0Name.id
-                    Keyboard.sComp.txt="User 0 Name"
-                    page Keyboard
-                }
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Text tU0Code
-    Attributes
-        ID                 : 6
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : 1234
-        Max. Text Size     : 16
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                tU0Code.pw=0
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JLxSr"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                tU0Code.pw=1
-                if(userNum.val!=0)
-                {
-                    Keyboard.origin.val=dp
-                    Keyboard.target.val=u0Code.id
-                    Keyboard.sComp.txt="User 0 Code"
-                    page Keyboard
-                }
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Text tUserCode
     Attributes
-        ID                 : 7
+        ID                 : 21
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -932,85 +886,9 @@ Text tUserCode
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
-Text tU1Name
-    Attributes
-        ID                 : 8
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Jedi Knight
-        Max. Text Size     : 16
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JLxSw"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                if(userNum.val!=0)
-                {
-                    Keyboard.origin.val=dp
-                    Keyboard.target.val=u1Name.id
-                    Keyboard.sComp.txt="User 1 Name"
-                    page Keyboard
-                }
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Text tU1Code
-    Attributes
-        ID                 : 9
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : 2345
-        Max. Text Size     : 16
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                tU1Code.pw=0
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JLxSr"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                tU1Code.pw=1
-                if(userNum.val!=0)
-                {
-                    Keyboard.origin.val=dp
-                    Keyboard.target.val=u1Code.id
-                    Keyboard.sComp.txt="User 1 Code"
-                    page Keyboard
-                }
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Text tUserOntime
     Attributes
-        ID                 : 10
+        ID                 : 22
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1024,7 +902,7 @@ Text tUserOntime
         
 Text tUserName
     Attributes
-        ID                 : 11
+        ID                 : 23
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1036,85 +914,9 @@ Text tUserName
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
-Text tU2Name
-    Attributes
-        ID                 : 12
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Master Yoda
-        Max. Text Size     : 16
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JLxSw"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                if(userNum.val==2)
-                {
-                    Keyboard.origin.val=dp
-                    Keyboard.target.val=u2Name.id
-                    Keyboard.sComp.txt="User 2 Name"
-                    page Keyboard
-                }
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Text tU2Code
-    Attributes
-        ID                 : 13
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : 0
-        Max. Text Size     : 16
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                tU2Code.pw=0
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JLxSr"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                tU2Code.pw=1
-                if(userNum.val==2)
-                {
-                    Keyboard.origin.val=dp
-                    Keyboard.target.val=u2Code.id
-                    Keyboard.sComp.txt="User 2 Code"
-                    page Keyboard
-                }
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Text tUserDuty
     Attributes
-        ID                 : 15
+        ID                 : 24
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1128,7 +930,7 @@ Text tUserDuty
         
 Text tUserBPS
     Attributes
-        ID                 : 16
+        ID                 : 25
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1147,7 +949,7 @@ Text tus0
         Send Component ID  : disabled
         Associated Keyboard: none
         Text               : µs
-        Max. Text Size     : 2
+        Max. Text Size     : 3
     
 Text tHz0
     Attributes
@@ -1174,7 +976,7 @@ Text tus1
         Send Component ID  : disabled
         Associated Keyboard: none
         Text               : µs
-        Max. Text Size     : 2
+        Max. Text Size     : 3
     
 Text tHz1
     Attributes
@@ -1201,7 +1003,7 @@ Text tus2
         Send Component ID  : disabled
         Associated Keyboard: none
         Text               : µs
-        Max. Text Size     : 2
+        Max. Text Size     : 3
     
 Text tHz2
     Attributes
@@ -1223,7 +1025,7 @@ Text tPerc2
     
 Text tSelToMod
     Attributes
-        ID                 : 50
+        ID                 : 35
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1237,7 +1039,7 @@ Text tSelToMod
         
 Text fCheck
     Attributes
-        ID                 : 55
+        ID                 : 40
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1314,10 +1116,12 @@ Text fCheck
                 // Duty [in 1/1000] must be smaller than 512 (9 bits)
                 user2Duty.val=511
             }
+            //
+            click fSysex,1
         
 Text tUser
     Attributes
-        ID                 : 56
+        ID                 : 41
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1331,7 +1135,7 @@ Text tUser
         
 Text tMSI
     Attributes
-        ID                 : 57
+        ID                 : 42
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1345,7 +1149,7 @@ Text tMSI
         
 Text tMML
     Attributes
-        ID                 : 58
+        ID                 : 43
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1359,7 +1163,7 @@ Text tMML
         
 Text tMLS
     Attributes
-        ID                 : 59
+        ID                 : 44
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1371,9 +1175,237 @@ Text tMLS
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
+Text tU0Name
+    Attributes
+        ID                 : 62
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Padawan
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSw"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(userNum.val!=0)
+                {
+                    Keyboard.origin.val=dp
+                    Keyboard.target.val=u0Name.id
+                    Keyboard.sComp.txt="User 0 Name"
+                    page Keyboard
+                }
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Text tU1Name
+    Attributes
+        ID                 : 63
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Jedi Knight
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSw"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(userNum.val!=0)
+                {
+                    Keyboard.origin.val=dp
+                    Keyboard.target.val=u1Name.id
+                    Keyboard.sComp.txt="User 1 Name"
+                    page Keyboard
+                }
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Text tU2Name
+    Attributes
+        ID                 : 64
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Master Yoda
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSw"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                if(userNum.val==2)
+                {
+                    Keyboard.origin.val=dp
+                    Keyboard.target.val=u2Name.id
+                    Keyboard.sComp.txt="User 2 Name"
+                    page Keyboard
+                }
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Text tU0Code
+    Attributes
+        ID                 : 65
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : 1234
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                tU0Code.pw=0
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSr"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                tU0Code.pw=1
+                if(userNum.val!=0)
+                {
+                    Keyboard.origin.val=dp
+                    Keyboard.target.val=u0Code.id
+                    Keyboard.sComp.txt="User 0 Code"
+                    page Keyboard
+                }
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Text tU1Code
+    Attributes
+        ID                 : 66
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : 2345
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                tU1Code.pw=0
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSr"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                tU1Code.pw=1
+                if(userNum.val!=0)
+                {
+                    Keyboard.origin.val=dp
+                    Keyboard.target.val=u1Code.id
+                    Keyboard.sComp.txt="User 1 Code"
+                    page Keyboard
+                }
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Text tU2Code
+    Attributes
+        ID                 : 67
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : 0
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                tU2Code.pw=0
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JLxSr"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                tU2Code.pw=1
+                if(userNum.val==2)
+                {
+                    Keyboard.origin.val=dp
+                    Keyboard.target.val=u2Code.id
+                    Keyboard.sComp.txt="User 2 Code"
+                    page Keyboard
+                }
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
 QR Code qrHelp
     Attributes
-        ID               : 75
+        ID               : 60
         Scope            : local
         Send Component ID: disabled
         Text             : git.io/JkvOK
@@ -1402,7 +1434,7 @@ QR Code qrHelp
         
 Button bReturn
     Attributes
-        ID               : 4
+        ID               : 20
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1561,7 +1593,7 @@ Button bReturn
         
 Button b1
     Attributes
-        ID               : 62
+        ID               : 47
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1600,7 +1632,7 @@ Button b1
         
 Button b2
     Attributes
-        ID               : 63
+        ID               : 48
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1639,7 +1671,7 @@ Button b2
         
 Button b3
     Attributes
-        ID               : 64
+        ID               : 49
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1678,7 +1710,7 @@ Button b3
         
 Button b4
     Attributes
-        ID               : 65
+        ID               : 50
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1717,7 +1749,7 @@ Button b4
         
 Button b5
     Attributes
-        ID               : 66
+        ID               : 51
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1756,7 +1788,7 @@ Button b5
         
 Button b6
     Attributes
-        ID               : 67
+        ID               : 52
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1795,7 +1827,7 @@ Button b6
         
 Button bClear
     Attributes
-        ID               : 68
+        ID               : 53
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1826,7 +1858,7 @@ Button bClear
         
 Button b0
     Attributes
-        ID               : 69
+        ID               : 54
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1864,7 +1896,7 @@ Button b0
         
 Button b9
     Attributes
-        ID               : 70
+        ID               : 55
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1903,7 +1935,7 @@ Button b9
         
 Button b8
     Attributes
-        ID               : 71
+        ID               : 56
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1942,7 +1974,7 @@ Button b8
         
 Button b7
     Attributes
-        ID               : 72
+        ID               : 57
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1981,7 +2013,7 @@ Button b7
         
 Button bOK
     Attributes
-        ID               : 73
+        ID               : 58
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -2015,7 +2047,7 @@ Button bOK
         
 Hotspot fLoadModes
     Attributes
-        ID               : 74
+        ID               : 59
         Scope            : local
         Send Component ID: disabled
     
@@ -2043,9 +2075,188 @@ Hotspot fLoadModes
                 tMML.bco=Settings.backSelectCol2.val
             }
         
+Hotspot fSysex
+    Attributes
+        ID               : 61
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Sends a Syntherrupter Sysex command that updates Syntherrupter with whatever
+            // has been changed on this page.
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            // To send:
+            //
+            if(Keyboard.target.val>=u0Name.id&&Keyboard.target.val<=u2Duty.id)
+            {
+                sys1=Keyboard.target.val
+            }else if(newValTargetId.val!=idle.id)
+            {
+                sys1=newValTargetId.val
+            }else
+            {
+                // Nothing to do! But there's no "return" statement.
+                sys1=-1
+            }
+            if(sys1>=0)
+            {
+                //
+                // PN_LSB PN_MSB TG_LSB can all be determined by the component ID
+                // In the case of integer commands, TG_MSB can also be included since it's 0x00
+                if(sys1==tU0Name.id)
+                {
+                    temp.val=0x000240
+                }else if(sys1==tU1Name.id)
+                {
+                    temp.val=0x010240
+                }else if(sys1==tU2Name.id)
+                {
+                    temp.val=0x020240
+                }else if(sys1==tU0Code.id)
+                {
+                    temp.val=0x000241
+                }else if(sys1==tU1Code.id)
+                {
+                    temp.val=0x010241
+                }else if(sys1==tU2Code.id)
+                {
+                    temp.val=0x020241
+                }else if(sys1==user0Ontime.id)
+                {
+                    temp.val=0x000242
+                }else if(sys1==user1Ontime.id)
+                {
+                    temp.val=0x010242
+                }else if(sys1==user2Ontime.id)
+                {
+                    temp.val=0x020242
+                }else if(sys1==user0BPS.id)
+                {
+                    temp.val=0x000243
+                }else if(sys1==user1BPS.id)
+                {
+                    temp.val=0x010243
+                }else if(sys1==user2BPS.id)
+                {
+                    temp.val=0x020243
+                }else if(sys1==user0Duty.id)
+                {
+                    temp.val=0x000244
+                }else if(sys1==user1Duty.id)
+                {
+                    temp.val=0x010244
+                }else if(sys1==user2Duty.id)
+                {
+                    temp.val=0x020244
+                }
+                //
+                // Distinguish between string and integer data
+                sys0=temp.val&0xff
+                if(sys0>=0x42)
+                {
+                    // Integer settings
+                    // SYSEX_START DMID VERSION DEVICE
+                    printh f0 00 26 05 01 7f
+                    // PN_LSB PN_MSB TG_LSB TG_MSB
+                    prints temp.val,4
+                    // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                    // Integer; meaning depends on selection
+                    sys1=b[sys1].val
+                    sys2=sys1
+                    sys2&=0x7f
+                    prints sys2,1
+                    sys1>>=7
+                    sys2=sys1&0x7f
+                    prints sys2,1
+                    sys1>>=7
+                    sys2=sys1&0x7f
+                    prints sys2,1
+                    sys1>>=7
+                    sys2=sys1&0x7f
+                    prints sys2,1
+                    sys1>>=7
+                    sys2=sys1&0x7f
+                    prints sys2,1
+                    // SYSEX_END
+                    printh f7
+                }else
+                {
+                    for(sys0=0;sys0<16;sys0+=4)
+                    {
+                        sys1=0
+                        for(sys2=sys0+3;sys2>=sys0;sys2--)
+                        {
+                            substr b[Keyboard.target.val].txt,asciiTemp.txt,sys2,1
+                            click charToInt,1
+                            sys1<<=8
+                            sys1|=asciiCode.val
+                        }
+                        // No need to transmit empty strings except if it's the first part of the string.
+                        if(sys0==0||sys1!=0)
+                        {
+                            // SYSEX_START DMID VERSION DEVICE
+                            printh f0 00 26 05 01 7f
+                            // PN_LSB PN_MSB TG_LSB
+                            prints temp.val,3
+                            // TG_MSB
+                            sys2=sys0/4
+                            prints sys2,1 // Char Group
+                            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                            sys2=sys1
+                            sys2&=0x7f
+                            prints sys2,1
+                            sys1>>=7
+                            sys2=sys1&0x7f
+                            prints sys2,1
+                            sys1>>=7
+                            sys2=sys1&0x7f
+                            prints sys2,1
+                            sys1>>=7
+                            sys2=sys1&0x7f
+                            prints sys2,1
+                            sys1>>=7
+                            sys2=sys1&0x7f
+                            prints sys2,1
+                            // SYSEX_END
+                            printh f7
+                        }
+                    }
+                }
+                // Value no longer useful; reset.
+                Keyboard.target.val=-1
+            }
+        
+Hotspot charToInt
+    Attributes
+        ID               : 77
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // The fact that this is necessary is is utterly ridiculous.
+            // asciiTemp is used as input as well as as intermediary variable.
+            spstr " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~PLACEHOLDER",asciiTemp.txt,asciiTemp.txt,0
+            strlen asciiTemp.txt,asciiCode.val
+            // If input is empty, spstr will return the full string. Return 0 instead.
+            if(asciiCode.val>=96)
+            {
+                asciiCode.val=0
+            }else
+            {
+                asciiCode.val+=32
+            }
+        
 Hotspot fLoadColors
     Attributes
-        ID               : 76
+        ID               : 81
         Scope            : local
         Send Component ID: disabled
     

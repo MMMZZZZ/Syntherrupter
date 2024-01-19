@@ -28,8 +28,29 @@ Page USB_ESP_Pass
             ref_star
         
         Postinitialize Event
-            // Tell the microcontroller: Mode Esp USB
-            prints "meu",0
+            // Sends a Syntherrupter Sysex command that updates Syntherrupter with whatever
+            // has been changed on this page.
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            // To send: Serial config -> passthrough
+            //
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 05 02 // Serial config
+            // TG_LSB
+            printh 03 // Serial port B: ESP
+            // TG_MSB
+            printh 01 // Serial port A: USB
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // unused, hardcoded to 0
+            // SYSEX_END
+            printh 00 00 00 00 00 f7
         
         Touch Press Event
             if(showHelp.val==0)

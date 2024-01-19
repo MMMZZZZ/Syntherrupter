@@ -37,6 +37,9 @@ Page Stereo_Chns
             vis fNRP,0
             vis idle,0
             //
+            // Load button hold time
+            tmResetHold.tim=Other_Settings.nHoldTime.val
+            //
             // Set newValTargetId to idle
             newValTargetId.val=idle.id
             //
@@ -77,8 +80,11 @@ Page Stereo_Chns
                 if(Other_Settings.nBackOff.val!=0)
                 {
                     // Default "stop" action.
-                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                    prints "mes",3
+                    // Set ontime and duty to 0 for all modes. See fSysex for details
+                    // Disable all modes as well.
+                    printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                     // Set all ontime and duty settings of all pages to 0.
                     // First come the global variables then the local variables.
                     Simple.ontime.val=0
@@ -1611,6 +1617,7 @@ Button bReset
             if(showHelp.val==0)
             {
                 // Normal Operation
+                tmResetHold.en=1
             }else
             {
                 // Show Help
@@ -1621,12 +1628,20 @@ Button bReset
             if(showHelp.val==0)
             {
                 // Normal Operation
+                tmResetHold.en=0
                 mapMode.val=0
                 mapInL.val=0
                 mapInH.val=127
                 mapOutL.val=0
                 mapOutH.val=127
+                // Reduce recursion depth. First change and send the values, then refesh the scren.
+                // This could be done in a single call going through all the steps, but that causes issues
+                // since it's too many nested calls.
+                click fLoadStoreCfg,1
+                // Now show the new values - without storing/transmitting them again.
+                loading.val=1
                 click bChnMode,0
+                loading.val=0
             }else
             {
                 // Show Help
@@ -2179,7 +2194,7 @@ Hotspot fMapping
             // Store and send the new config
             if(loading.val!=1)
             {
-                click fLoadStoreCfg,0
+                click fLoadStoreCfg,1
             }
         
 Hotspot fLoadModes
@@ -2331,6 +2346,22 @@ Hotspot fLoadColors
                     b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
                     b[sys0].pic2+=sys2
                 }
+            }
+        
+Timer tmResetHold
+    Attributes
+        ID         : 95
+        Scope      : local
+        Period (ms): 400
+        Enabled    : no
+    
+    Events
+        Timer Event
+            // Repeat reset for all channels
+            '&en&'=0
+            for(channel.val=0;channel.val<16;channel.val++)
+            {
+                click bReset,0
             }
         
 TouchCap touchCap

@@ -38,6 +38,9 @@ Page MIDI_Live
             vis fSlider,0
             vis fLoadColors,0
             vis fApply,0
+            vis fSysex,0
+            // Overview page isn't done
+            vis bStereoOverv,0
             // Hide buttons for unavailable tesla coils
             if(TC_Settings.maxCoilCount.val<6)
             {
@@ -174,8 +177,21 @@ Page MIDI_Live
             //
             // Make sure the microcontroller is up-to-date
             click fApply,0
-            // Tell the microcontroller: Mode: Midi Live
-            prints "mml",3
+            //
+            // Enable MIDI Live Mode (see fSysex)
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 20 00 // Mode Enable
+            // TG_LSB
+            printh 00 // Reserved
+            // TG_MSB
+            printh 02 // MIDI Live Mode
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // 1: Enable
+            printh 01 00 00 00 00
+            // SYSEX_END
+            printh f7
             //
             // Load Help Mode
             if(Help_Info.helpMode.val==0)
@@ -242,8 +258,11 @@ Page MIDI_Live
                 if(Other_Settings.nBackOff.val!=0)
                 {
                     // Default "stop" action.
-                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                    prints "mes",3
+                    // Set ontime and duty to 0 for all modes. See fSysex for details
+                    // Disable all modes as well.
+                    printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                     // Set all ontime and duty settings of all pages to 0.
                     // First come the global variables then the local variables.
                     Simple.ontime.val=0
@@ -309,123 +328,123 @@ Page MIDI_Live
         
 Variable (string) sCoil
     Attributes
-        ID            : 18
+        ID            : 19
         Scope         : local
         Text          : 0
         Max. Text Size: 3
     
 Variable (int32) newData
     Attributes
-        ID   : 19
+        ID   : 20
         Scope: local
         Value: 0
     
 Variable (int32) ontime
     Attributes
-        ID   : 20
+        ID   : 21
         Scope: global
         Value: 0
     
 Variable (int32) duty
     Attributes
-        ID   : 21
+        ID   : 22
         Scope: global
         Value: 0
     
 Variable (int32) openEE
     Attributes
-        ID   : 23
+        ID   : 24
         Scope: local
         Value: 0
     
 Variable (int32) set1
     Attributes
-        ID   : 24
+        ID   : 25
         Scope: global
         Value: 0
     
 Variable (int32) set2
     Attributes
-        ID   : 25
+        ID   : 26
         Scope: global
         Value: 0
     
 Variable (int32) set3
     Attributes
-        ID   : 26
+        ID   : 27
         Scope: global
         Value: 0
     
 Variable (int32) set4
     Attributes
-        ID   : 27
+        ID   : 28
         Scope: global
         Value: 0
     
 Variable (int32) set5
     Attributes
-        ID   : 28
+        ID   : 29
         Scope: global
         Value: 0
     
 Variable (int32) set6
     Attributes
-        ID   : 29
+        ID   : 30
         Scope: global
         Value: 0
     
 Variable (int32) fSliderInput
     Attributes
-        ID   : 31
+        ID   : 32
         Scope: local
         Value: 0
     
 Variable (int32) fSliderOutput
     Attributes
-        ID   : 32
+        ID   : 33
         Scope: local
         Value: 0
     
 Variable (int32) userOnLimit
     Attributes
-        ID   : 33
+        ID   : 34
         Scope: local
         Value: 0
     
 Variable (int32) userDutyLimit
     Attributes
-        ID   : 34
+        ID   : 35
         Scope: local
         Value: 0
     
 Variable (string) tempStr
     Attributes
-        ID            : 54
+        ID            : 55
         Scope         : local
         Text          : 
         Max. Text Size: 32
     
 Variable (int32) showHelp
     Attributes
-        ID   : 55
+        ID   : 56
         Scope: local
         Value: 0
     
 Variable (int32) sOnOld
     Attributes
-        ID   : 58
+        ID   : 59
         Scope: local
         Value: 0
     
 Variable (int32) sDutyOld
     Attributes
-        ID   : 59
+        ID   : 60
         Scope: local
         Value: 0
     
 Number nOn
     Attributes
-        ID                 : 5
+        ID                 : 6
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -438,7 +457,7 @@ Number nOn
         
 Number fSlider
     Attributes
-        ID                 : 30
+        ID                 : 31
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -482,7 +501,7 @@ Number fSlider
         
 Number fSqrt
     Attributes
-        ID                 : 35
+        ID                 : 36
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -520,7 +539,7 @@ Number fSqrt
         
 Number nOn1
     Attributes
-        ID                 : 42
+        ID                 : 43
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -533,7 +552,7 @@ Number nOn1
         
 Number nOn2
     Attributes
-        ID                 : 43
+        ID                 : 44
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -546,7 +565,7 @@ Number nOn2
         
 Number nOn3
     Attributes
-        ID                 : 44
+        ID                 : 45
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -559,7 +578,7 @@ Number nOn3
         
 Number nOn4
     Attributes
-        ID                 : 45
+        ID                 : 46
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -572,7 +591,7 @@ Number nOn4
         
 Number nOn5
     Attributes
-        ID                 : 46
+        ID                 : 47
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -585,7 +604,7 @@ Number nOn5
         
 Number nOn6
     Attributes
-        ID                 : 47
+        ID                 : 48
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -598,7 +617,7 @@ Number nOn6
         
 XFloat nDuty
     Attributes
-        ID                 : 8
+        ID                 : 9
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -611,7 +630,7 @@ XFloat nDuty
         
 XFloat nDuty1
     Attributes
-        ID                 : 48
+        ID                 : 49
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -624,7 +643,7 @@ XFloat nDuty1
         
 XFloat nDuty2
     Attributes
-        ID                 : 49
+        ID                 : 50
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -637,7 +656,7 @@ XFloat nDuty2
         
 XFloat nDuty3
     Attributes
-        ID                 : 50
+        ID                 : 51
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -650,7 +669,7 @@ XFloat nDuty3
         
 XFloat nDuty4
     Attributes
-        ID                 : 51
+        ID                 : 52
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -663,7 +682,7 @@ XFloat nDuty4
         
 XFloat nDuty5
     Attributes
-        ID                 : 52
+        ID                 : 53
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -676,7 +695,7 @@ XFloat nDuty5
         
 XFloat nDuty6
     Attributes
-        ID                 : 53
+        ID                 : 54
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -687,9 +706,23 @@ XFloat nDuty6
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
-Text tHideBack1
+Text tTitle
     Attributes
         ID                 : 1
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : MIDI Live Mode
+        Max. Text Size     : 22
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHideBack1
+    Attributes
+        ID                 : 2
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -702,7 +735,7 @@ Text tHideBack1
         
 Text tCoil
     Attributes
-        ID                 : 2
+        ID                 : 3
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -716,7 +749,7 @@ Text tCoil
         
 Text tHideBack
     Attributes
-        ID                 : 3
+        ID                 : 4
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -729,7 +762,7 @@ Text tHideBack
         
 Text tDuty
     Attributes
-        ID                 : 7
+        ID                 : 8
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -743,7 +776,7 @@ Text tDuty
         
 Text tPerc
     Attributes
-        ID                 : 9
+        ID                 : 10
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -757,12 +790,12 @@ Text tPerc
         
 Text tus
     Attributes
-        ID                 : 11
+        ID                 : 12
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : µs
-        Max. Text Size     : 2
+        Text               : Âµs
+        Max. Text Size     : 3
     
     Events
         Touch Press Event
@@ -771,7 +804,7 @@ Text tus
         
 Text tOn
     Attributes
-        ID                 : 36
+        ID                 : 37
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -785,7 +818,7 @@ Text tOn
         
 Text tUser
     Attributes
-        ID                 : 38
+        ID                 : 39
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -799,7 +832,7 @@ Text tUser
         
 Text tMSI
     Attributes
-        ID                 : 39
+        ID                 : 40
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -813,7 +846,7 @@ Text tMSI
         
 Text tMML
     Attributes
-        ID                 : 40
+        ID                 : 41
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -827,7 +860,7 @@ Text tMML
         
 Text tMLS
     Attributes
-        ID                 : 41
+        ID                 : 42
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -867,23 +900,9 @@ Text tPerc1
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
-Text tTitle
-    Attributes
-        ID                 : 65
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : MIDI Live Mode
-        Max. Text Size     : 22
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
 QR Code qrHelp
     Attributes
-        ID               : 61
+        ID               : 72
         Scope            : local
         Send Component ID: disabled
         Text             : git.io/JkvOK
@@ -912,7 +931,7 @@ QR Code qrHelp
         
 Slider sOn
     Attributes
-        ID               : 4
+        ID               : 5
         Scope            : local
         Send Component ID: disabled
         Position         : 0
@@ -988,7 +1007,7 @@ Slider sOn
         
 Slider sDuty
     Attributes
-        ID               : 6
+        ID               : 7
         Scope            : local
         Send Component ID: disabled
         Position         : 0
@@ -1038,7 +1057,7 @@ Slider sDuty
         
 Button bApply
     Attributes
-        ID               : 10
+        ID               : 11
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1069,7 +1088,7 @@ Button bApply
         
 Button bMode
     Attributes
-        ID               : 57
+        ID               : 58
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1141,8 +1160,22 @@ Button bReturn
                 tmReturn.en=0
                 // Leaving MIDI Live Mode. Mode is now inactive
                 Settings.activeModes.val=Settings.activeModes.val^2
-                // Mode: EXit.
-                prints "mex",0
+                //
+                // Disable MIDI Live Mode  (see fSysex)
+                // SYSEX_START DMID VERSION DEVICE
+                printh f0 00 26 05 01 7f
+                // PN_LSB PN_MSB
+                printh 20 00 // Mode Enable
+                // TG_LSB
+                printh 00 // Reserved
+                // TG_MSB
+                printh 02 // MIDI Live Mode
+                // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                // 0: Disable
+                printh 00 00 00 00 00
+                // SYSEX_END
+                printh f7
+                //
                 page Menu
             }else
             {
@@ -1152,7 +1185,7 @@ Button bReturn
         
 Button bNRPReset
     Attributes
-        ID               : 67
+        ID               : 66
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1173,12 +1206,27 @@ Button bNRPReset
         Touch Release Event
             if(showHelp.val==0)
             {
-                // See Stereo_Chns.fNRP
-                for(sys0=0xb0;sys0<0xbf;sys0++)
-                {
-                    prints sys0,1
-                    printh 63 2a 62 00 06 00 26 00 62 01 06 127 26 00 62 02 06 127 26 00
-                }
+                // Sends a Syntherrupter Sysex command that resets all NRPs for all channels
+                // Package format:
+                // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+                // DMID DMID = 26 05
+                // VERSION = 01
+                // DEVICE = 7f (wildcard)
+                // PN, TG, VAL: see syntherrupter sysex documentation
+                //
+                // SYSEX_START DMID VERSION DEVICE
+                printh f0 00 26 05 01 7f
+                // PN_LSB PN_MSB
+                printh 66 00 // Mode Enable
+                // TG_LSB
+                printh 00 // Reserved
+                // TG_MSB
+                printh 00 // Reserved
+                // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                // 0xffff: all 16 channels
+                printh 7f 7f 03 00 00
+                // SYSEX_END
+                printh f7
             }else
             {
                 // Show Help
@@ -1187,7 +1235,7 @@ Button bNRPReset
         
 Button bChnAssign
     Attributes
-        ID               : 68
+        ID               : 67
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1218,7 +1266,7 @@ Button bChnAssign
         
 Button bChnStereo
     Attributes
-        ID               : 69
+        ID               : 68
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1252,7 +1300,7 @@ Button bChnStereo
         
 Button bCoilStereo
     Attributes
-        ID               : 70
+        ID               : 69
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1285,7 +1333,7 @@ Button bCoilStereo
         
 Button bStereoOverv
     Attributes
-        ID               : 71
+        ID               : 70
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1307,7 +1355,7 @@ Button bStereoOverv
             if(showHelp.val==0)
             {
                 // Normal operation
-                page MIDI_Chn_Assgn
+                page Stereo_Overv
             }else
             {
                 // Show Help
@@ -1316,7 +1364,7 @@ Button bStereoOverv
         
 Dual-state Button btCoil1
     Attributes
-        ID               : 12
+        ID               : 13
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1358,7 +1406,7 @@ Dual-state Button btCoil1
         
 Dual-state Button btCoil2
     Attributes
-        ID               : 13
+        ID               : 14
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1390,7 +1438,7 @@ Dual-state Button btCoil2
         
 Dual-state Button btCoil3
     Attributes
-        ID               : 14
+        ID               : 15
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1422,7 +1470,7 @@ Dual-state Button btCoil3
         
 Dual-state Button btCoil4
     Attributes
-        ID               : 15
+        ID               : 16
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1454,7 +1502,7 @@ Dual-state Button btCoil4
         
 Dual-state Button btCoil5
     Attributes
-        ID               : 16
+        ID               : 17
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1486,7 +1534,7 @@ Dual-state Button btCoil5
         
 Dual-state Button btCoil6
     Attributes
-        ID               : 17
+        ID               : 18
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1518,133 +1566,56 @@ Dual-state Button btCoil6
         
 Hotspot fApply
     Attributes
-        ID               : 56
+        ID               : 57
         Scope            : local
         Send Component ID: disabled
     
     Events
-        Touch Press Event
-            // Changes all page components according to the current color set.
-            // Note: This component has to be the last component of the page.
-            //
-            // sys0: component id
-            // sys1: component type
-            // sys2: picture id offset for current color mode
-            sys2=Settings.colorMode.val*Settings.picCount.val
-            for(sys0=0;sys0<fLoadColors.id;sys0++)
-            {
-                // More convenient for typing
-                sys1=b[sys0].type
-                if(sys1==121)
-                {
-                    // Types that have bco
-                    // page
-                    if(b[sys0].bco!=Settings.backCol2.val)
-                    {
-                        b[sys0].bco=Settings.backCol.val
-                    }
-                }else if(sys1==54||sys1==59||sys1==116||sys1==55)
-                {
-                    // Types that have bco, pco, and sta:
-                    // number, float, text, scroll text
-                    if(b[sys0].sta==1)
-                    {
-                        if(b[sys0].bco!=Settings.backCol2.val)
-                        {
-                            b[sys0].bco=Settings.backCol.val
-                            b[sys0].pco=Settings.frontCol.val
-                        }else
-                        {
-                            b[sys0].pco=Settings.frontCol2.val
-                        }
-                    }
-                }else if(sys1==98||sys1==53)
-                {
-                    // Types that have pco, pic, pco2, pic2, sta:
-                    // button, dual-state button
-                    if(b[sys0].sta==2)
-                    {
-                        b[sys0].pco=Settings.frontCol.val
-                        b[sys0].pco2=Settings.backCol.val
-                        b[sys0].pic=b[sys0].pic%Settings.picCount.val
-                        b[sys0].pic+=sys2
-                        b[sys0].pic2=b[sys0].pic+1
-                    }
-                }else if(sys1==58)
-                {
-                    // Types that have bco, pco
-                    // QR Code
-                    b[sys0].bco=Settings.backCol.val
-                    b[sys0].pco=Settings.qrFrontCol.val
-                }else if(sys1==1)
-                {
-                    // Types that have pic, pic2:
-                    // slider
-                    b[sys0].pic=b[sys0].pic%Settings.picCount.val
-                    b[sys0].pic+=sys2
-                    b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
-                    b[sys0].pic2+=sys2
-                }
-            }
-        
         Touch Release Event
-            // Return format: 'd', data byte 1, 2, 3, 4, 5
-            // Data byte 1:
-            //   Bits 0-5: coils to which settings apply.
-            //   Bits 6-7: Mode
-            //     0 = Settings Change (not used here)
-            //     1 = NRP Reset (not used here)
-            //     2 = unused
-            //     3 = Volume change
-            // Data byte 2: ontime[us] lower byte
-            // Data byte 3: ontime[us] upper byte
-            // Data byte 4: duty[1/1000] lower byte
-            // Data byte 5: duty[1/1000] upper byte
-            sys0=newData.val*TC_Settings.activeCoils.val
-            if(sys0>0)
+            if(newData.val!=0&&TC_Settings.activeCoils.val!=0)
             {
                 if(btCoil1.val==1)
                 {
                     nOn1.val=nOn.val
                     nDuty1.val=nDuty.val
+                    sys0=0
+                    click fSysex,1
                 }
                 if(btCoil2.val==1)
                 {
                     nOn2.val=nOn.val
                     nDuty2.val=nDuty.val
+                    sys0=1
+                    click fSysex,1
                 }
                 if(btCoil3.val==1)
                 {
                     nOn3.val=nOn.val
                     nDuty3.val=nDuty.val
+                    sys0=2
+                    click fSysex,1
                 }
                 if(btCoil4.val==1)
                 {
                     nOn4.val=nOn.val
                     nDuty4.val=nDuty.val
+                    sys0=3
+                    click fSysex,1
                 }
                 if(btCoil5.val==1)
                 {
                     nOn5.val=nOn.val
                     nDuty5.val=nDuty.val
+                    sys0=4
+                    click fSysex,1
                 }
                 if(btCoil6.val==1)
                 {
                     nOn6.val=nOn.val
                     nDuty6.val=nDuty.val
+                    sys0=5
+                    click fSysex,1
                 }
-                // shift bits for volume mode
-                sys1=3<<6
-                // Add which coils are affected
-                sys1+=TC_Settings.activeCoils.val
-                // sys2 contains ontime and duty data.
-                sys2=0
-                sys2=nDuty.val
-                sys2=sys2<<16
-                sys2+=nOn.val
-                prints "d",0
-                prints sys1,1
-                prints sys2,4
                 newData.val=0
             }
             //
@@ -1654,13 +1625,12 @@ Hotspot fApply
                 openEE.val=0
                 // Important date! (DDMMYYYY)
                 sys0=11102161
-                prints "c",0
-                prints sys0,3
+                click fSysex,1
             }
         
 Hotspot fLoadModes
     Attributes
-        ID               : 60
+        ID               : 61
         Scope            : local
         Send Component ID: disabled
     
@@ -1688,9 +1658,132 @@ Hotspot fLoadModes
                 tMML.bco=Settings.backSelectCol2.val
             }
         
+Hotspot fSysex
+    Attributes
+        ID               : 71
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Sends a Syntherrupter Sysex command that updates Syntherrupter with whatever
+            // has been changed on this page.
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            // To send: Mode Enable, Ontime/duty, BPS.
+            //
+            //
+            if(sys0==11102161)
+            {
+                // Important date! Time to celebrate!
+                // SYSEX_START DMID VERSION DEVICE
+                printh f0 00 26 05 01 7f
+                // PN_LSB PN_MSB
+                printh 7f 00 // Celebrate
+                // TG_LSB
+                printh 00 // Reserved
+                // TG_MSB
+                printh 00 // Reserved
+                // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                sys1=sys0
+                sys2=sys1
+                sys2&=0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                // SYSEX_END
+                printh f7
+            }else
+            {
+                // For the given coil sys0...  (see fApply)
+                // If coil is selected...
+                sys1=btCoil1.id+sys0
+                if(b[sys1].val>0)
+                {
+                    // Ontime
+                    // SYSEX_START DMID VERSION DEVICE
+                    printh f0 00 26 05 01 7f
+                    // PN_LSB PN_MSB
+                    printh 21 00 // Ontime
+                    // TG_LSB
+                    prints sys0,1// Coil
+                    // TG_MSB
+                    printh 02 // MIDI Live Mode
+                    // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                    // Ontime in us
+                    // Use ontime.val as temp variable (its only relevant on page exit and page load
+                    ontime.val=nOn.val
+                    sys2=ontime.val
+                    sys2&=0x7f
+                    prints sys2,1
+                    ontime.val>>=7
+                    sys2=ontime.val
+                    sys2&=0x7f
+                    prints sys2,1
+                    ontime.val>>=7
+                    sys2=ontime.val
+                    sys2&=0x7f
+                    prints sys2,1
+                    ontime.val>>=7
+                    sys2=ontime.val
+                    sys2&=0x7f
+                    prints sys2,1
+                    ontime.val>>=7
+                    sys2=ontime.val
+                    sys2&=0x7f
+                    prints sys2,1
+                    // SYSEX_END
+                    printh f7
+                    // Duty
+                    // SYSEX_START DMID VERSION DEVICE
+                    printh f0 00 26 05 01 7f
+                    // PN_LSB PN_MSB
+                    printh 22 00 // Duty
+                    // TG_LSB
+                    prints sys0,1// Coil
+                    // TG_MSB
+                    printh 02 // MIDI Live Mode
+                    // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                    // Duty cycle in 0.1%
+                    sys1=nDuty.val
+                    sys2=sys1
+                    sys2&=0x7f
+                    prints sys2,1
+                    sys1>>=7
+                    sys2=sys1&0x7f
+                    prints sys2,1
+                    sys1>>=7
+                    sys2=sys1&0x7f
+                    prints sys2,1
+                    sys1>>=7
+                    sys2=sys1&0x7f
+                    prints sys2,1
+                    sys1>>=7
+                    sys2=sys1&0x7f
+                    prints sys2,1
+                    // SYSEX_END
+                    printh f7
+                }
+            }
+        
 Hotspot fLoadColors
     Attributes
-        ID               : 72
+        ID               : 73
         Scope            : local
         Send Component ID: disabled
     
@@ -1766,7 +1859,7 @@ Hotspot fLoadColors
         
 Timer tmEE
     Attributes
-        ID         : 22
+        ID         : 23
         Scope      : local
         Period (ms): 6000
         Enabled    : no
@@ -1777,7 +1870,7 @@ Timer tmEE
         
 Timer tmReturn
     Attributes
-        ID         : 37
+        ID         : 38
         Scope      : local
         Period (ms): 250
         Enabled    : no
@@ -1790,7 +1883,7 @@ Timer tmReturn
         
 Timer tmBlink
     Attributes
-        ID         : 66
+        ID         : 65
         Scope      : local
         Period (ms): 500
         Enabled    : no

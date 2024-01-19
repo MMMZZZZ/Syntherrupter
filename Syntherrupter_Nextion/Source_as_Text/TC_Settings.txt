@@ -199,8 +199,11 @@ Page TC_Settings
                 if(Other_Settings.nBackOff.val!=0)
                 {
                     // Default "stop" action.
-                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                    prints "mes",3
+                    // Set ontime and duty to 0 for all modes. See fSysex for details
+                    // Disable all modes as well.
+                    printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                     // Set all ontime and duty settings of all pages to 0.
                     // First come the global variables then the local variables.
                     Simple.ontime.val=0
@@ -233,169 +236,169 @@ Page TC_Settings
         
 Variable (int32) coil1Chn
     Attributes
-        ID   : 5
+        ID   : 29
         Scope: global
         Value: 3208642559
     
 Variable (int32) coil2Chn
     Attributes
-        ID   : 6
+        ID   : 30
         Scope: global
         Value: 3208642559
     
 Variable (int32) coil3Chn
     Attributes
-        ID   : 7
+        ID   : 31
         Scope: global
         Value: 3208642559
     
 Variable (int32) coil4Chn
     Attributes
-        ID   : 8
+        ID   : 32
         Scope: global
         Value: 3208642559
     
 Variable (int32) coil5Chn
     Attributes
-        ID   : 9
+        ID   : 33
         Scope: global
         Value: 3208642559
     
 Variable (int32) coil6Chn
     Attributes
-        ID   : 10
+        ID   : 34
         Scope: global
         Value: 3208642559
     
 Variable (int32) activeCoils
     Attributes
-        ID   : 11
+        ID   : 35
         Scope: global
         Value: 63
     
 Variable (int32) maxCoilCount
     Attributes
-        ID   : 22
+        ID   : 45
         Scope: global
         Value: 6
     
 Variable (int32) newValTargetId
     Attributes
-        ID   : 42
+        ID   : 48
         Scope: local
         Value: 68
     
 Variable (int32) newSelect
     Attributes
-        ID   : 43
+        ID   : 49
         Scope: local
         Value: 0
     
 Variable (int32) coil1On
     Attributes
-        ID   : 45
+        ID   : 51
         Scope: global
         Value: 0
     
 Variable (int32) coil1OffVoics
     Attributes
-        ID   : 46
+        ID   : 52
         Scope: global
         Value: 786432
     
 Variable (int32) coil1Duty
     Attributes
-        ID   : 47
+        ID   : 53
         Scope: global
         Value: 0
     
 Variable (int32) coil2On
     Attributes
-        ID   : 48
+        ID   : 54
         Scope: global
         Value: 0
     
 Variable (int32) coil2OffVoics
     Attributes
-        ID   : 49
+        ID   : 55
         Scope: global
         Value: 786432
     
 Variable (int32) coil2Duty
     Attributes
-        ID   : 50
+        ID   : 56
         Scope: global
         Value: 0
     
 Variable (int32) coil3On
     Attributes
-        ID   : 51
+        ID   : 57
         Scope: global
         Value: 0
     
 Variable (int32) coil3OffVoics
     Attributes
-        ID   : 52
+        ID   : 58
         Scope: global
         Value: 786432
     
 Variable (int32) coil3Duty
     Attributes
-        ID   : 53
+        ID   : 59
         Scope: global
         Value: 0
     
 Variable (int32) coil4On
     Attributes
-        ID   : 54
+        ID   : 60
         Scope: global
         Value: 0
     
 Variable (int32) coil4OffVoics
     Attributes
-        ID   : 55
+        ID   : 61
         Scope: global
         Value: 786432
     
 Variable (int32) coil4Duty
     Attributes
-        ID   : 56
+        ID   : 62
         Scope: global
         Value: 0
     
 Variable (int32) coil5On
     Attributes
-        ID   : 57
+        ID   : 63
         Scope: global
         Value: 0
     
 Variable (int32) coil5OffVoics
     Attributes
-        ID   : 58
+        ID   : 64
         Scope: global
         Value: 786432
     
 Variable (int32) coil5Duty
     Attributes
-        ID   : 59
+        ID   : 65
         Scope: global
         Value: 0
     
 Variable (int32) coil6On
     Attributes
-        ID   : 60
+        ID   : 66
         Scope: global
         Value: 0
     
 Variable (int32) coil6OffVoics
     Attributes
-        ID   : 61
+        ID   : 67
         Scope: global
         Value: 786432
     
 Variable (int32) coil6Duty
     Attributes
-        ID   : 62
+        ID   : 68
         Scope: global
         Value: 0
     
@@ -420,7 +423,7 @@ Variable (int32) showHelp
     
 Number nCoil1On
     Attributes
-        ID                 : 13
+        ID                 : 2
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -458,49 +461,9 @@ Number nCoil1On
                 click qrHelp,0
             }
         
-Number nCoil1MinOff
-    Attributes
-        ID                 : 23
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Value              : 101
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                // Check if values are legal
-                click fCheck,0
-                // Reset push state of last selected value
-                b[newValTargetId.val].bco=idle.bco
-                b[newValTargetId.val].pco=idle.pco
-                // Mark this field as pushed
-                nCoil1MinOff.bco=idle.pco
-                nCoil1MinOff.pco=idle.bco
-                newValTargetId.val=nCoil1MinOff.id
-                // A new value has been selected
-                newSelect.val=1
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgK"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Number nCoil2On
     Attributes
-        ID                 : 25
+        ID                 : 3
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -538,49 +501,9 @@ Number nCoil2On
                 click qrHelp,0
             }
         
-Number nCoil2MinOff
-    Attributes
-        ID                 : 26
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Value              : 102
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                // Check if values are legal
-                click fCheck,0
-                // Reset push state of last selected value
-                b[newValTargetId.val].bco=idle.bco
-                b[newValTargetId.val].pco=idle.pco
-                // Mark this field as pushed
-                nCoil2MinOff.bco=idle.pco
-                nCoil2MinOff.pco=idle.bco
-                newValTargetId.val=nCoil2MinOff.id
-                // A new value has been selected
-                newSelect.val=1
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgK"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Number nCoil3On
     Attributes
-        ID                 : 28
+        ID                 : 4
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -618,49 +541,9 @@ Number nCoil3On
                 click qrHelp,0
             }
         
-Number nCoil3MinOff
-    Attributes
-        ID                 : 29
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Value              : 103
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                // Check if values are legal
-                click fCheck,0
-                // Reset push state of last selected value
-                b[newValTargetId.val].bco=idle.bco
-                b[newValTargetId.val].pco=idle.pco
-                // Mark this field as pushed
-                nCoil3MinOff.bco=idle.pco
-                nCoil3MinOff.pco=idle.bco
-                newValTargetId.val=nCoil3MinOff.id
-                // A new value has been selected
-                newSelect.val=1
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgK"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Number nCoil4On
     Attributes
-        ID                 : 31
+        ID                 : 5
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -698,49 +581,9 @@ Number nCoil4On
                 click qrHelp,0
             }
         
-Number nCoil4MinOff
-    Attributes
-        ID                 : 32
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Value              : 104
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                // Check if values are legal
-                click fCheck,0
-                // Reset push state of last selected value
-                b[newValTargetId.val].bco=idle.bco
-                b[newValTargetId.val].pco=idle.pco
-                // Mark this field as pushed
-                nCoil4MinOff.bco=idle.pco
-                nCoil4MinOff.pco=idle.bco
-                newValTargetId.val=nCoil4MinOff.id
-                // A new value has been selected
-                newSelect.val=1
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgK"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Number nCoil5On
     Attributes
-        ID                 : 34
+        ID                 : 6
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -778,49 +621,9 @@ Number nCoil5On
                 click qrHelp,0
             }
         
-Number nCoil5MinOff
-    Attributes
-        ID                 : 35
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Value              : 105
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                // Check if values are legal
-                click fCheck,0
-                // Reset push state of last selected value
-                b[newValTargetId.val].bco=idle.bco
-                b[newValTargetId.val].pco=idle.pco
-                // Mark this field as pushed
-                nCoil5MinOff.bco=idle.pco
-                nCoil5MinOff.pco=idle.bco
-                newValTargetId.val=nCoil5MinOff.id
-                // A new value has been selected
-                newSelect.val=1
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgK"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Number nCoil6On
     Attributes
-        ID                 : 37
+        ID                 : 7
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -858,9 +661,209 @@ Number nCoil6On
                 click qrHelp,0
             }
         
+Number nCoil1MinOff
+    Attributes
+        ID                 : 8
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 101
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Check if values are legal
+                click fCheck,0
+                // Reset push state of last selected value
+                b[newValTargetId.val].bco=idle.bco
+                b[newValTargetId.val].pco=idle.pco
+                // Mark this field as pushed
+                nCoil1MinOff.bco=idle.pco
+                nCoil1MinOff.pco=idle.bco
+                newValTargetId.val=nCoil1MinOff.id
+                // A new value has been selected
+                newSelect.val=1
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgK"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Number nCoil2MinOff
+    Attributes
+        ID                 : 9
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 102
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Check if values are legal
+                click fCheck,0
+                // Reset push state of last selected value
+                b[newValTargetId.val].bco=idle.bco
+                b[newValTargetId.val].pco=idle.pco
+                // Mark this field as pushed
+                nCoil2MinOff.bco=idle.pco
+                nCoil2MinOff.pco=idle.bco
+                newValTargetId.val=nCoil2MinOff.id
+                // A new value has been selected
+                newSelect.val=1
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgK"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Number nCoil3MinOff
+    Attributes
+        ID                 : 10
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 103
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Check if values are legal
+                click fCheck,0
+                // Reset push state of last selected value
+                b[newValTargetId.val].bco=idle.bco
+                b[newValTargetId.val].pco=idle.pco
+                // Mark this field as pushed
+                nCoil3MinOff.bco=idle.pco
+                nCoil3MinOff.pco=idle.bco
+                newValTargetId.val=nCoil3MinOff.id
+                // A new value has been selected
+                newSelect.val=1
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgK"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Number nCoil4MinOff
+    Attributes
+        ID                 : 11
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 104
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Check if values are legal
+                click fCheck,0
+                // Reset push state of last selected value
+                b[newValTargetId.val].bco=idle.bco
+                b[newValTargetId.val].pco=idle.pco
+                // Mark this field as pushed
+                nCoil4MinOff.bco=idle.pco
+                nCoil4MinOff.pco=idle.bco
+                newValTargetId.val=nCoil4MinOff.id
+                // A new value has been selected
+                newSelect.val=1
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgK"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Number nCoil5MinOff
+    Attributes
+        ID                 : 12
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Value              : 105
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                // Check if values are legal
+                click fCheck,0
+                // Reset push state of last selected value
+                b[newValTargetId.val].bco=idle.bco
+                b[newValTargetId.val].pco=idle.pco
+                // Mark this field as pushed
+                nCoil5MinOff.bco=idle.pco
+                nCoil5MinOff.pco=idle.bco
+                newValTargetId.val=nCoil5MinOff.id
+                // A new value has been selected
+                newSelect.val=1
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/JkfgK"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
 Number nCoil6MinOff
     Attributes
-        ID                 : 38
+        ID                 : 13
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -900,7 +903,7 @@ Number nCoil6MinOff
         
 Number nCoil1Voices
     Attributes
-        ID                 : 65
+        ID                 : 20
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -940,7 +943,7 @@ Number nCoil1Voices
         
 Number nCoil2Voices
     Attributes
-        ID                 : 66
+        ID                 : 21
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -980,7 +983,7 @@ Number nCoil2Voices
         
 Number nCoil3Voices
     Attributes
-        ID                 : 67
+        ID                 : 22
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1020,7 +1023,7 @@ Number nCoil3Voices
         
 Number nCoil4Voices
     Attributes
-        ID                 : 68
+        ID                 : 23
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1060,7 +1063,7 @@ Number nCoil4Voices
         
 Number nCoil5Voices
     Attributes
-        ID                 : 69
+        ID                 : 24
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1100,7 +1103,7 @@ Number nCoil5Voices
         
 Number nCoil6Voices
     Attributes
-        ID                 : 70
+        ID                 : 25
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1140,7 +1143,7 @@ Number nCoil6Voices
         
 XFloat nCoil1Duty
     Attributes
-        ID                 : 24
+        ID                 : 14
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1180,7 +1183,7 @@ XFloat nCoil1Duty
         
 XFloat nCoil2Duty
     Attributes
-        ID                 : 27
+        ID                 : 15
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1220,7 +1223,7 @@ XFloat nCoil2Duty
         
 XFloat nCoil3Duty
     Attributes
-        ID                 : 30
+        ID                 : 16
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1260,7 +1263,7 @@ XFloat nCoil3Duty
         
 XFloat nCoil4Duty
     Attributes
-        ID                 : 33
+        ID                 : 17
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1300,7 +1303,7 @@ XFloat nCoil4Duty
         
 XFloat nCoil5Duty
     Attributes
-        ID                 : 36
+        ID                 : 18
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1340,7 +1343,7 @@ XFloat nCoil5Duty
         
 XFloat nCoil6Duty
     Attributes
-        ID                 : 39
+        ID                 : 19
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1380,13 +1383,13 @@ XFloat nCoil6Duty
         
 XFloat idle
     Attributes
-        ID                 : 41
+        ID                 : 47
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
         Value              : 0
     
-Text tHideBack2
+Text tHideBack
     Attributes
         ID                 : 1
         Scope              : local
@@ -1399,9 +1402,9 @@ Text tHideBack2
         Touch Press Event
             // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
         
-Text tHideBack
+Text tHideBack2
     Attributes
-        ID                 : 2
+        ID                 : 26
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1414,7 +1417,7 @@ Text tHideBack
         
 Text tTitle
     Attributes
-        ID                 : 3
+        ID                 : 27
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1428,7 +1431,7 @@ Text tTitle
         
 Text tCoil1
     Attributes
-        ID                 : 12
+        ID                 : 36
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1442,7 +1445,7 @@ Text tCoil1
         
 Text tMaxOn
     Attributes
-        ID                 : 14
+        ID                 : 37
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1456,7 +1459,7 @@ Text tMaxOn
         
 Text tMinOff
     Attributes
-        ID                 : 15
+        ID                 : 38
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1470,7 +1473,7 @@ Text tMinOff
         
 Text tMaxDuty
     Attributes
-        ID                 : 16
+        ID                 : 39
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1484,7 +1487,7 @@ Text tMaxDuty
         
 Text tCoil2
     Attributes
-        ID                 : 17
+        ID                 : 40
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1498,7 +1501,7 @@ Text tCoil2
         
 Text tCoil3
     Attributes
-        ID                 : 18
+        ID                 : 41
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1512,7 +1515,7 @@ Text tCoil3
         
 Text tCoil4
     Attributes
-        ID                 : 19
+        ID                 : 42
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1526,7 +1529,7 @@ Text tCoil4
         
 Text tCoil5
     Attributes
-        ID                 : 20
+        ID                 : 43
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1540,7 +1543,7 @@ Text tCoil5
         
 Text tCoil6
     Attributes
-        ID                 : 21
+        ID                 : 44
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1554,7 +1557,7 @@ Text tCoil6
         
 Text tSelToMod
     Attributes
-        ID                 : 44
+        ID                 : 50
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1568,7 +1571,7 @@ Text tSelToMod
         
 Text fCheck
     Attributes
-        ID                 : 63
+        ID                 : 69
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1578,210 +1581,32 @@ Text fCheck
     Events
         Touch Release Event
             // Settings must stay in certain ranges. this function checks and fixes them.
-            // Code order: check all coil 1 settings, then repeat for coils 2-6.
-            //
-            sys0=nCoil1On.val/10
-            if(sys0>4095)
+            if(newValTargetId.val<=nCoil6MinOff.id)
             {
-                // Ontime / 10 must be smaller than 4096 (12 bits)
-                sys0=4095
-            }
-            // Floor ontime to multiple of 10
-            nCoil1On.val=sys0*10
-            //
-            sys0=nCoil1MinOff.val+9
-            sys0/=10
-            if(sys0>127)
+                if(b[newValTargetId.val].val>65535)
+                {
+                    b[newValTargetId.val].val=65535
+                }
+            }else if(newValTargetId.val<=nCoil6Duty.id)
             {
-                sys0=127
-            }
-            // Ceil min offtime to multiple of 10
-            nCoil1MinOff.val=sys0*10
-            //
-            if(nCoil1Duty.val>511)
+                if(b[newValTargetId.val].val>1000)
+                {
+                    b[newValTargetId.val].val=1000
+                }
+            }else if(newValTargetId.val<=nCoil6Voices.id)
             {
-                nCoil1Duty.val=511
+                if(b[newValTargetId.val].val>16)
+                {
+                    b[newValTargetId.val].val=16
+                }else if(b[newValTargetId.val].val<=0)
+                {
+                    b[newValTargetId.val].val=1
+                }
             }
-            //
-            if(nCoil1Voices.val==0)
-            {
-                nCoil1Voices.val=1
-            }
-            if(nCoil1Voices.val>maxVoices.val)
-            {
-                nCoil1Voices.val=maxVoices.val
-            }
-            //
-            //
-            sys0=nCoil2On.val/10
-            if(sys0>4095)
-            {
-                // Ontime / 10 must be smaller than 4096 (12 bits)
-                sys0=4095
-            }
-            // Floor ontime to multiple of 10
-            nCoil2On.val=sys0*10
-            //
-            sys0=nCoil2MinOff.val+9
-            sys0/=10
-            if(sys0>127)
-            {
-                sys0=127
-            }
-            // Ceil min offtime to multiple of 10
-            nCoil2MinOff.val=sys0*10
-            //
-            if(nCoil2Duty.val>511)
-            {
-                nCoil2Duty.val=511
-            }
-            //
-            if(nCoil2Voices.val==0)
-            {
-                nCoil2Voices.val=1
-            }
-            if(nCoil2Voices.val>maxVoices.val)
-            {
-                nCoil2Voices.val=maxVoices.val
-            }
-            //
-            //
-            sys0=nCoil3On.val/10
-            if(sys0>4095)
-            {
-                // Ontime / 10 must be smaller than 4096 (12 bits)
-                sys0=4095
-            }
-            // Floor ontime to multiple of 10
-            nCoil3On.val=sys0*10
-            //
-            sys0=nCoil3MinOff.val+9
-            sys0/=10
-            if(sys0>127)
-            {
-                sys0=127
-            }
-            // Ceil min offtime to multiple of 10
-            nCoil3MinOff.val=sys0*10
-            //
-            if(nCoil3Duty.val>511)
-            {
-                nCoil3Duty.val=511
-            }
-            //
-            if(nCoil3Voices.val==0)
-            {
-                nCoil3Voices.val=1
-            }
-            if(nCoil3Voices.val>maxVoices.val)
-            {
-                nCoil3Voices.val=maxVoices.val
-            }
-            //
-            //
-            sys0=nCoil4On.val/10
-            if(sys0>4095)
-            {
-                // Ontime / 10 must be smaller than 4096 (12 bits)
-                sys0=4095
-            }
-            // Floor ontime to multiple of 10
-            nCoil4On.val=sys0*10
-            //
-            sys0=nCoil4MinOff.val+9
-            sys0/=10
-            if(sys0>127)
-            {
-                sys0=127
-            }
-            // Ceil min offtime to multiple of 10
-            nCoil4MinOff.val=sys0*10
-            //
-            if(nCoil4Duty.val>511)
-            {
-                nCoil4Duty.val=511
-            }
-            //
-            if(nCoil4Voices.val==0)
-            {
-                nCoil4Voices.val=1
-            }
-            if(nCoil4Voices.val>maxVoices.val)
-            {
-                nCoil4Voices.val=maxVoices.val
-            }
-            //
-            //
-            sys0=nCoil5On.val/10
-            if(sys0>4095)
-            {
-                // Ontime / 10 must be smaller than 4096 (12 bits)
-                sys0=4095
-            }
-            // Floor ontime to multiple of 10
-            nCoil5On.val=sys0*10
-            //
-            sys0=nCoil5MinOff.val+9
-            sys0/=10
-            if(sys0>127)
-            {
-                sys0=127
-            }
-            // Ceil min offtime to multiple of 10
-            nCoil5MinOff.val=sys0*10
-            //
-            if(nCoil5Duty.val>511)
-            {
-                nCoil5Duty.val=511
-            }
-            //
-            if(nCoil5Voices.val==0)
-            {
-                nCoil5Voices.val=1
-            }
-            if(nCoil5Voices.val>maxVoices.val)
-            {
-                nCoil5Voices.val=maxVoices.val
-            }
-            //
-            //
-            sys0=nCoil6On.val/10
-            if(sys0>4095)
-            {
-                // Ontime / 10 must be smaller than 4096 (12 bits)
-                sys0=4095
-            }
-            // Floor ontime to multiple of 10
-            nCoil6On.val=sys0*10
-            //
-            sys0=nCoil6MinOff.val+9
-            sys0/=10
-            if(sys0>127)
-            {
-                sys0=127
-            }
-            // Ceil min offtime to multiple of 10
-            nCoil6MinOff.val=sys0*10
-            //
-            if(nCoil6Duty.val>511)
-            {
-                nCoil6Duty.val=511
-            }
-            //
-            if(nCoil6Voices.val==0)
-            {
-                nCoil6Voices.val=1
-            }
-            if(nCoil6Voices.val>maxVoices.val)
-            {
-                nCoil6Voices.val=maxVoices.val
-            }
-            //
-            //
         
 Text tMaxVoices
     Attributes
-        ID                 : 64
+        ID                 : 70
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1880,7 +1705,7 @@ QR Code qrHelp
         
 Button bReturn
     Attributes
-        ID               : 4
+        ID               : 28
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1992,139 +1817,6 @@ Button bReturn
                 }
                 User_Settings.u2Ontime.val=sys0
                 User_Settings.u2Duty.val=sys1
-                // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
-                // Data byte 1:
-                //    Bit 6-7: 1 = Coil settings.
-                //    Bit 0-5:Tesla Coil whose limits are being set (1, 2, 3, 4, 5 or 6)
-                // Data byte 2-5: Bit field with settings
-                //    Bit  0-11: Maximum allowed ontime [10us]
-                //    Bit 12-15: Maximum number of simultaneous voices in MIDI playback minus one.
-                //    Bit 16-22: Minimum offtime after each ontime [10us]
-                //    Bit 23-31: Maximum allowed duty [1/1000]
-                //
-                // sys0 will contain the bit field (a.k.a. the data bytes 2-5)
-                // sys1 is used as temp variable
-                // sys2 is data byte 1
-                if(maxCoilCount.val>=1)
-                {
-                    sys0=coil1On.val/10
-                    sys1=coil1OffVoics.val>>16
-                    sys1=sys1&0x0000ffff
-                    sys1-=1
-                    sys1=sys1<<12
-                    sys0+=sys1
-                    sys1=coil1OffVoics.val&0x0000ffff
-                    sys1/=10
-                    sys1=sys1<<16
-                    sys0+=sys1
-                    sys1=coil1Duty.val<<23
-                    sys0+=sys1
-                    sys2=1<<6
-                    sys2+=1
-                    prints "d",1
-                    prints sys2,1
-                    prints sys0,4
-                }
-                if(maxCoilCount.val>=2)
-                {
-                    sys0=coil2On.val/10
-                    sys1=coil2OffVoics.val>>16
-                    sys1=sys1&0x0000ffff
-                    sys1-=1
-                    sys1=sys1<<12
-                    sys0+=sys1
-                    sys1=coil2OffVoics.val&0x0000ffff
-                    sys1/=10
-                    sys1=sys1<<16
-                    sys0+=sys1
-                    sys1=coil2Duty.val<<23
-                    sys0+=sys1
-                    sys2=1<<6
-                    sys2+=2
-                    prints "d",1
-                    prints sys2,1
-                    prints sys0,4
-                }
-                if(maxCoilCount.val>=3)
-                {
-                    sys0=coil3On.val/10
-                    sys1=coil3OffVoics.val>>16
-                    sys1=sys1&0x0000ffff
-                    sys1-=1
-                    sys1=sys1<<12
-                    sys0+=sys1
-                    sys1=coil3OffVoics.val&0x0000ffff
-                    sys1/=10
-                    sys1=sys1<<16
-                    sys0+=sys1
-                    sys1=coil3Duty.val<<23
-                    sys0+=sys1
-                    prints "d",1
-                    sys2=1<<6
-                    sys2+=3
-                    prints sys2,1
-                    prints sys0,4
-                }
-                if(maxCoilCount.val>=4)
-                {
-                    sys0=coil4On.val/10
-                    sys1=coil4OffVoics.val>>16
-                    sys1=sys1&0x0000ffff
-                    sys1-=1
-                    sys1=sys1<<12
-                    sys0+=sys1
-                    sys1=coil4OffVoics.val&0x0000ffff
-                    sys1/=10
-                    sys1=sys1<<16
-                    sys0+=sys1
-                    sys1=coil4Duty.val<<23
-                    sys0+=sys1
-                    sys2=1<<6
-                    sys2+=4
-                    prints "d",1
-                    prints sys2,1
-                    prints sys0,4
-                }
-                if(maxCoilCount.val>=5)
-                {
-                    sys0=coil5On.val/10
-                    sys1=coil5OffVoics.val>>16
-                    sys1=sys1&0x0000ffff
-                    sys1-=1
-                    sys1=sys1<<12
-                    sys0+=sys1
-                    sys1=coil5OffVoics.val&0x0000ffff
-                    sys1/=10
-                    sys1=sys1<<16
-                    sys0+=sys1
-                    sys1=coil5Duty.val<<23
-                    sys0+=sys1
-                    sys2=1<<6
-                    sys2+=5
-                    prints "d",1
-                    prints sys2,1
-                    prints sys0,4
-                }
-                if(maxCoilCount.val>=6)
-                {
-                    sys0=coil6On.val/10
-                    sys1=coil6OffVoics.val>>16
-                    sys1=sys1&0x0000ffff
-                    sys1-=1
-                    sys1=sys1<<12
-                    sys0+=sys1
-                    sys1=coil6OffVoics.val&0x0000ffff
-                    sys1/=10
-                    sys1=sys1<<16
-                    sys0+=sys1
-                    sys1=coil6Duty.val<<23
-                    sys0+=sys1
-                    sys2=1<<6
-                    sys2+=6
-                    prints "d",1
-                    prints sys2,1
-                    prints sys0,4
-                }
             }else
             {
                 // Show Help
@@ -2144,7 +1836,7 @@ Button bReturn
         
 Button bOK
     Attributes
-        ID               : 40
+        ID               : 46
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -2170,6 +1862,8 @@ Button bOK
                 b[newValTargetId.val].pco=idle.pco
                 newValTargetId.val=idle.id
                 click fCheck,0
+                // Send new values
+                click fSysex,1
             }else
             {
                 // Show Help
@@ -2435,6 +2129,7 @@ Button bClear
             {
                 // Normal Operation
                 b[newValTargetId.val].val=0
+                click fCheck,0
             }else
             {
                 // Show Help
@@ -2626,9 +2321,78 @@ Hotspot fLoadModes
                 tMML.bco=Settings.backSelectCol2.val
             }
         
-Hotspot fLoadColors
+Hotspot fSysex
     Attributes
         ID               : 91
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Sends a Syntherrupter Sysex command that updates Syntherrupter with whatever
+            // has been changed on this page.
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            // To send:
+            //
+            if(newValTargetId.val>=nCoil1On.id&&newValTargetId.val<=nCoil6Voices.id)
+            {
+                //
+                // Integer settings
+                // SYSEX_START DMID VERSION DEVICE
+                printh f0 00 26 05 01 7f
+                // PN_LSB PN_MSB
+                if(newValTargetId.val<=nCoil6On.id)
+                {
+                    printh 60 02 // Coil Max Ontime
+                    sys0=newValTargetId.val-nCoil1On.id
+                }else if(newValTargetId.val<=nCoil6MinOff.id)
+                {
+                    printh 62 02 // Coil Min Offtime
+                    sys0=newValTargetId.val-nCoil1MinOff.id
+                }else if(newValTargetId.val<=nCoil6Duty.id)
+                {
+                    printh 63 02 // Coil Max Duty
+                    sys0=newValTargetId.val-nCoil1Duty.id
+                }else
+                {
+                    printh 64 02 // Coil Max MIDI Voices
+                    sys0=newValTargetId.val-nCoil1Voices.id
+                }
+                // TG_LSB
+                prints sys0,1 // Coil number
+                // TG_MSB
+                prints 0,1 // reserved
+                // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                // Integer; meaning depends on selection
+                sys1=b[newValTargetId.val].val
+                sys2=sys1
+                sys2&=0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                // SYSEX_END
+                printh f7
+            }
+        
+Hotspot fLoadColors
+    Attributes
+        ID               : 92
         Scope            : local
         Send Component ID: disabled
     

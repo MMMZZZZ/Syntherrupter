@@ -41,8 +41,6 @@ Page Env_Settings
             // First step is step 0, which cant be release
             vis tRelease1,0
             vis tRelease2,0
-            // Currently no dedicated EEPROM button needs to be displayed
-            vis bSaveEEPROM,0
             //
             // Load Help Mode
             if(Help_Info.helpMode.val==0)
@@ -65,8 +63,11 @@ Page Env_Settings
                 if(Other_Settings.nBackOff.val!=0)
                 {
                     // Default "stop" action.
-                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                    prints "mes",3
+                    // Set ontime and duty to 0 for all modes. See fSysex for details
+                    // Disable all modes as well.
+                    printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                     // Set all ontime and duty settings of all pages to 0.
                     // First come the global variables then the local variables.
                     Simple.ontime.val=0
@@ -115,22 +116,22 @@ Variable (int32) maxSteps
         Scope: global
         Value: 8
     
-Variable (int32) changedValues
-    Attributes
-        ID   : 46
-        Scope: local
-        Value: 0
-    
 Variable (string) tempStr
     Attributes
-        ID            : 50
+        ID            : 48
         Scope         : local
         Text          : 
         Max. Text Size: 32
     
 Variable (int32) showHelp
     Attributes
-        ID   : 51
+        ID   : 49
+        Scope: local
+        Value: 0
+    
+Variable (int32) changedValues
+    Attributes
+        ID   : 53
         Scope: local
         Value: 0
     
@@ -278,7 +279,7 @@ Number nNext
         
 Number nProg
     Attributes
-        ID                 : 44
+        ID                 : 43
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -318,7 +319,7 @@ Number nProg
         
 Number nMaxSteps2
     Attributes
-        ID                 : 47
+        ID                 : 45
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -595,8 +596,8 @@ Text fCheck
             if(b[newValTargetId.val].type==59)
             {
                 // If selected component has a decimal point.
-                bL.txt="ï¿½"
-                bR.txt="ï¿½"
+                bL.txt="Â«"
+                bR.txt="Â»"
             }else
             {
                 bL.txt="-1"
@@ -675,28 +676,25 @@ Text fCheck
             {
                 //
                 // Mark field as modified
-                sys0=0
                 if(newValTargetId.val==nProg.id)
                 {
-                    sys0=0x1f
-                }
-                if(newValTargetId.val==nStep.id)
+                    changedValues.val|=0x0f
+                }else if(newValTargetId.val==nStep.id)
                 {
-                    sys0=1
+                    changedValues.val|=0x0f
                 }else if(newValTargetId.val==nNext.id)
                 {
-                    sys0=1<<1
+                    changedValues.val|=0x01
                 }else if(newValTargetId.val==nAmp.id)
                 {
-                    sys0=1<<2
+                    changedValues.val|=0x02
                 }else if(newValTargetId.val==nDur.id)
                 {
-                    sys0=1<<3
+                    changedValues.val|=0x04
                 }else if(newValTargetId.val==nNTau.id)
                 {
-                    sys0=1<<4
+                    changedValues.val|=0x08
                 }
-                changedValues.val|=sys0
             }
         
 Text tRelease1
@@ -743,7 +741,7 @@ Text tNextStep
         
 Text tProg
     Attributes
-        ID                 : 43
+        ID                 : 42
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -757,7 +755,7 @@ Text tProg
         
 Text tSlash2
     Attributes
-        ID                 : 48
+        ID                 : 46
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -771,7 +769,7 @@ Text tSlash2
         
 Text tRelease2
     Attributes
-        ID                 : 49
+        ID                 : 47
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -785,7 +783,7 @@ Text tRelease2
         
 QR Code qrHelp
     Attributes
-        ID               : 53
+        ID               : 51
         Scope            : local
         Send Component ID: disabled
         Text             : git.io/JkvOK
@@ -1329,136 +1327,8 @@ Button bSet
                 // Normal Operation
                 click bOK,0
                 //
-                // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
-                // Data byte 1:
-                //    Bit 6-7: 3 = ADSR settings.
-                //    Bit 0-5: 0: Update EEPROM. 1-63: ADSR Program which will be modified.
-                // Data byte 2: Parameter that is set.
-                //    0: Set current step (byte 3 ignored, should be 0) (Like NRP number)
-                //    1: Set next step (byte 3 ignored, should be 0)
-                //    2: Set amplitude
-                //    3: Set duration in milliseconds
-                //    4: Set n-tau.
-                // Data Byte 3:
-                //   Bit 0-6: Power of 10 by which the value (bytes 4-5) is divided.
-                //   Bit 7: 0: Value is positive. 1: Value is negative.
-                // Data Byte 4: Value, LSB
-                // Data Byte 5: Value, MSB
-                //
                 // Send all changes
-                changedValues.val=0x1f
-                sys1=0
-                while(sys1>=0)
-                {
-                    // sys1 contains Data Byte 2
-                    // See fCheck to see how changedValues is set.
-                    sys1=1
-                    sys1=sys1&changedValues.val
-                    if(sys1>0)
-                    {
-                        changedValues.val-=sys1
-                        sys1=0
-                    }else
-                    {
-                        sys1=1<<1
-                        sys1=sys1&changedValues.val
-                        if(sys1>0)
-                        {
-                            changedValues.val-=sys1
-                            sys1=1
-                        }else
-                        {
-                            sys1=1<<2
-                            sys1=sys1&changedValues.val
-                            if(sys1>0)
-                            {
-                                changedValues.val-=sys1
-                                sys1=2
-                            }else
-                            {
-                                sys1=1<<3
-                                sys1=sys1&changedValues.val
-                                if(sys1>0)
-                                {
-                                    changedValues.val-=sys1
-                                    sys1=3
-                                }else
-                                {
-                                    sys1=1<<4
-                                    sys1=sys1&changedValues.val
-                                    if(sys1>0)
-                                    {
-                                        changedValues.val-=sys1
-                                        sys1=4
-                                    }else
-                                    {
-                                        sys1=1<<5
-                                        sys1=sys1&changedValues.val
-                                        if(sys1>0)
-                                        {
-                                            changedValues.val-=sys1
-                                            sys1=5
-                                        }else
-                                        {
-                                            sys1=-1
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if(sys1>=0)
-                    {
-                        // sys2 contains Data Byte 3-5
-                        sys2=0
-                        if(sys1==0)
-                        {
-                            sys2=nStep.val-1
-                            sys0=nStep.id
-                        }else if(sys1==1)
-                        {
-                            sys2=nNext.val-1
-                            sys0=nNext.id
-                        }else if(sys1==2)
-                        {
-                            sys2=nAmp.val
-                            sys0=nAmp.id
-                        }else if(sys1==3)
-                        {
-                            sys2=nDur.val
-                            sys0=nDur.id
-                        }else if(sys1==4)
-                        {
-                            sys2=nNTau.val
-                            sys0=nNTau.id
-                        }
-                        if(sys2<0)
-                        {
-                            // We want the absolute value (same bits for positive and negative value)...
-                            sys2=0-sys2
-                            // ... and indicate the sign with a sign bit only.
-                            sys2=sys2<<1
-                            sys2+=1
-                        }else
-                        {
-                            // Only do the bitshifting (sign bit remains 0)
-                            sys2=sys2<<1
-                        }
-                        sys2=sys2<<7
-                        if(b[sys0].type==59)
-                        {
-                            sys2+=b[sys0].vvs1
-                        }
-                        //
-                        // sys0 contains Data Byte 1
-                        sys0=3<<6
-                        sys0+=nProg.val
-                        prints "d",1
-                        prints sys0,1
-                        prints sys1,1
-                        prints sys2,3
-                    }
-                }
+                click fSysex,1
             }else
             {
                 // Show Help
@@ -1479,7 +1349,6 @@ Button bReturn
             if(showHelp.val==0)
             {
                 // Normal Operation
-                click bSaveEEPROM,0
             }else
             {
                 // Show Help
@@ -1503,8 +1372,8 @@ Button b10
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : ±
-        Max. Text Size   : 1
+        Text             : Â±
+        Max. Text Size   : 2
     
     Events
         Touch Press Event
@@ -1535,7 +1404,7 @@ Button bL
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : «
+        Text             : Â«
         Max. Text Size   : 2
     
     Events
@@ -1576,7 +1445,7 @@ Button bR
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : »
+        Text             : Â»
         Max. Text Size   : 2
     
     Events
@@ -1614,47 +1483,9 @@ Button bR
                 click qrHelp,0
             }
         
-Button bSaveEEPROM
-    Attributes
-        ID               : 42
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : Write EEPROM
-        Max. Text Size   : 30
-    
-    Events
-        Touch Release Event
-            click fCheck,0
-            //
-            // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
-            // Data byte 1:
-            //    Bit 6-7: 3 = ADSR settings.
-            //    Bit 0-5: 0: Update EEPROM. 1-63: ADSR Program which will be modified.
-            // Data byte 2: Parameter that is set.
-            //    0: Set current step (byte 3 ignored, should be 0) (Like NRP number)
-            //    1: Set next step (byte 3 ignored, should be 0)
-            //    2: Set amplitude
-            //    3: Set duration in milliseconds
-            //    4: Set n-tau.
-            // Data Byte 3:
-            //   Bit 0-6: Power of 10 by which the value (bytes 4-5) is divided.
-            //   Bit 7: 0: Value is positive. 1: Value is negative.
-            // Data Byte 4: Value, LSB
-            // Data Byte 5: Value, MSB
-            //
-            // sys0 contains Data Byte 1
-            sys0=3<<6
-            prints "d",1
-            prints sys0,1
-            prints 0,4
-            b[newValTargetId.val].bco=idle.bco
-            b[newValTargetId.val].pco=idle.pco
-            newValTargetId.val=idle.id
-        
 Button bOK
     Attributes
-        ID               : 45
+        ID               : 44
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1688,7 +1519,7 @@ Button bOK
         
 Hotspot fLoadModes
     Attributes
-        ID               : 52
+        ID               : 50
         Scope            : local
         Send Component ID: disabled
     
@@ -1715,6 +1546,142 @@ Hotspot fLoadModes
                 // MIDI Live Mode is active
                 tMML.bco=Settings.backSelectCol2.val
             }
+        
+Hotspot fSysex
+    Attributes
+        ID               : 52
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Sends a Syntherrupter Sysex command that updates Syntherrupter with whatever
+            // has been changed on this page.
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            // To send: Next Step, Step Amp, Step Duration, Step n-tau
+            //
+            sys0=changedValues.val&0x01
+            if(sys0!=0)
+            {
+                // Envelope Next Step
+                // SYSEX_START DMID VERSION DEVICE
+                printh f0 00 26 05 01 7f
+                // PN_LSB PN_MSB
+                printh 00 03 // Next Step
+                // TG_LSB
+                prints nStep.val,1 // Step
+                // TG_MSB
+                prints nProg.val,1 // Program
+                // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                // Next step <= 127 -> hardcode remaining 4 bytes
+                prints nNext.val,1
+                printh 00 00 00 00
+                // SYSEX_END
+                printh f7
+            }
+            sys0=changedValues.val&0x02
+            if(sys0!=0)
+            {
+                // Envelope Step Amplitude
+                // SYSEX_START DMID VERSION DEVICE
+                printh f0 00 26 05 01 7f
+                // PN_LSB PN_MSB
+                printh 01 03 // Step Amp
+                // TG_LSB
+                prints nStep.val,1 // Step
+                // TG_MSB
+                prints nProg.val,1 // Program
+                // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                sys1=nAmp.val
+                sys2=sys1
+                sys2&=0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                // SYSEX_END
+                printh f7
+            }
+            sys0=changedValues.val&0x04
+            if(sys0!=0)
+            {
+                // Envelope Step Duration
+                // SYSEX_START DMID VERSION DEVICE
+                printh f0 00 26 05 01 7f
+                // PN_LSB PN_MSB
+                printh 02 03 // Step Dur
+                // TG_LSB
+                prints nStep.val,1 // Step
+                // TG_MSB
+                prints nProg.val,1 // Program
+                // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                sys1=nDur.val
+                sys2=sys1
+                sys2&=0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                // SYSEX_END
+                printh f7
+            }
+            sys0=changedValues.val&0x08
+            if(sys0!=0)
+            {
+                // Envelope Step n-Tau
+                // SYSEX_START DMID VERSION DEVICE
+                printh f0 00 26 05 01 7f
+                // PN_LSB PN_MSB
+                printh 03 03 // Step n-Tau
+                // TG_LSB
+                prints nStep.val,1 // Step
+                // TG_MSB
+                prints nProg.val,1 // Program
+                // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                sys1=nNTau.val
+                sys2=sys1
+                sys2&=0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                // SYSEX_END
+                printh f7
+            }
+            changedValues.val=0
         
 Hotspot fLoadColors
     Attributes

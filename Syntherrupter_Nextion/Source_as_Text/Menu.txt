@@ -50,7 +50,7 @@ Page Menu
         
         Postinitialize Event
             // Mode Accept Data, tell MCU that Nextion can accept data updates without disturbing anything
-            prints "mad",0
+            // prints "mad",0
         
         Touch Press Event
             if(showHelp.val==0)
@@ -59,8 +59,11 @@ Page Menu
                 if(Other_Settings.nBackOff.val!=0)
                 {
                     // Default "stop" action.
-                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                    prints "mes",3
+                    // Set ontime and duty to 0 for all modes. See fSysex for details
+                    // Disable all modes as well.
+                    printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                     // Set all ontime and duty settings of all pages to 0.
                     // First come the global variables then the local variables.
                     Simple.ontime.val=0
@@ -93,7 +96,7 @@ Page Menu
         
         Page Exit Event
             // Mode Deny Data, tell MCU that Nextion cannot accept data updates without disturbing anything
-            prints "mdd",0
+            // prints "mdd",0
         
 Variable (string) tempStr
     Attributes

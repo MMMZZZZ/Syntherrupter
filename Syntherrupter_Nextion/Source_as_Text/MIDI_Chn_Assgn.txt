@@ -78,8 +78,11 @@ Page MIDI_Chn_Assgn
                 if(Other_Settings.nBackOff.val!=0)
                 {
                     // Default "stop" action.
-                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                    prints "mes",3
+                    // Set ontime and duty to 0 for all modes. See fSysex for details
+                    // Disable all modes as well.
+                    printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                     // Set all ontime and duty settings of all pages to 0.
                     // First come the global variables then the local variables.
                     Simple.ontime.val=0
@@ -742,7 +745,7 @@ Button bDisconnect
                     fConvBtnState.val^=0xffffffff
                     for(sys0=TC_Settings.coil1Chn.id;sys0<=TC_Settings.coil6Chn.id;sys0++)
                     {
-                        TC_Settings.b[sys1].val&=fConvBtnState.val
+                        TC_Settings.b[sys0].val&=fConvBtnState.val
                     }
                     click fResetBtns,0
                     click fSysex,1
@@ -814,7 +817,7 @@ Dual-state Button btChn0
         ID               : 7
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 1
         Max. Text Size   : 2
     
@@ -844,7 +847,7 @@ Dual-state Button btChn1
         ID               : 8
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 2
         Max. Text Size   : 2
     
@@ -874,7 +877,7 @@ Dual-state Button btChn2
         ID               : 9
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 3
         Max. Text Size   : 2
     
@@ -904,7 +907,7 @@ Dual-state Button btChn3
         ID               : 10
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 4
         Max. Text Size   : 2
     
@@ -934,7 +937,7 @@ Dual-state Button btChn4
         ID               : 11
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 5
         Max. Text Size   : 2
     
@@ -964,7 +967,7 @@ Dual-state Button btChn5
         ID               : 12
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 6
         Max. Text Size   : 2
     
@@ -994,7 +997,7 @@ Dual-state Button btChn6
         ID               : 13
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 7
         Max. Text Size   : 2
     
@@ -1024,7 +1027,7 @@ Dual-state Button btChn7
         ID               : 14
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 8
         Max. Text Size   : 2
     
@@ -1054,7 +1057,7 @@ Dual-state Button btChn8
         ID               : 15
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 9
         Max. Text Size   : 2
     
@@ -1084,7 +1087,7 @@ Dual-state Button btChn9
         ID               : 16
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 10
         Max. Text Size   : 2
     
@@ -1114,7 +1117,7 @@ Dual-state Button btChn10
         ID               : 17
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 11
         Max. Text Size   : 3
     
@@ -1144,7 +1147,7 @@ Dual-state Button btChn11
         ID               : 18
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 12
         Max. Text Size   : 3
     
@@ -1174,7 +1177,7 @@ Dual-state Button btChn12
         ID               : 19
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 13
         Max. Text Size   : 3
     
@@ -1204,7 +1207,7 @@ Dual-state Button btChn13
         ID               : 20
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 14
         Max. Text Size   : 3
     
@@ -1234,7 +1237,7 @@ Dual-state Button btChn14
         ID               : 21
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 15
         Max. Text Size   : 3
     
@@ -1264,7 +1267,7 @@ Dual-state Button btChn15
         ID               : 22
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 16
         Max. Text Size   : 3
     
@@ -1294,7 +1297,7 @@ Dual-state Button btCoil1
         ID               : 39
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 1
         Max. Text Size   : 2
     
@@ -1324,7 +1327,7 @@ Dual-state Button btCoil2
         ID               : 40
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 2
         Max. Text Size   : 2
     
@@ -1354,7 +1357,7 @@ Dual-state Button btCoil3
         ID               : 41
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 3
         Max. Text Size   : 2
     
@@ -1384,7 +1387,7 @@ Dual-state Button btCoil4
         ID               : 42
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 4
         Max. Text Size   : 2
     
@@ -1414,7 +1417,7 @@ Dual-state Button btCoil5
         ID               : 43
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 5
         Max. Text Size   : 2
     
@@ -1444,7 +1447,7 @@ Dual-state Button btCoil6
         ID               : 44
         Scope            : local
         Send Component ID: disabled
-        State            : unpressed
+        State            : pressed
         Text             : 6
         Max. Text Size   : 2
     
@@ -1746,6 +1749,9 @@ TouchCap touchCap
                     btChn14.val=0
                     btChn15.val=0
                 }
+                // Also reset the None buttons (see touchCap release code)
+                bNone.val=0
+                bNoneCoils.val=0
             }
         
         Touch Release Event
@@ -1758,10 +1764,19 @@ TouchCap touchCap
                     // Resulting variable id
                     sys0+=TC_Settings.coil1Chn.id
                     fConvBtnState.val=TC_Settings.b[sys0].val
+                    // If no channel is associated with this coil, highlight the "None" button.
+                    if(fConvBtnState.val==0)
+                    {
+                        bNone.val=1
+                    }
                     // Show assigned channels for selected coil.
                     click fConvBtnState,0
                 }else if(touchCap.val>=btChn0.id&&touchCap.val<=btChn15.id)
                 {
+                    // If no coil is associated with this channel, highlight the "None" button.
+                    // In this case, enable it by default and disable it once a coil has been
+                    // found for the given channel (see below).
+                    bNoneCoils.val=1
                     // Need to convert from channels per coil to coils per channel
                     // Selected channel number
                     sys1=touchCap.val-btChn0.id
@@ -1777,6 +1792,7 @@ TouchCap touchCap
                         if(sys2>0)
                         {
                             sys2=1
+                            bNoneCoils.val=0
                         }
                         // Apply state to button.
                         b[btCoil1.id+sys0].val=sys2

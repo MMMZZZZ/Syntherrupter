@@ -159,8 +159,21 @@ Page Lightsaber
             //
             // Make sure the microcontroller is up-to-date
             click fApply,0
-            // Tell the microcontroller: Mode: LightSaber
-            prints "mls",3
+            //
+            // Enable Lightsaber Mode (see fSysex)
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 20 00 // Mode Enable
+            // TG_LSB
+            printh 00 // Reserved
+            // TG_MSB
+            printh 03 // Lightsaber Mode
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // 1: Enable
+            printh 01 00 00 00 00
+            // SYSEX_END
+            printh f7
             //
             // Load Help Mode
             if(Help_Info.helpMode.val==0)
@@ -211,8 +224,11 @@ Page Lightsaber
                 if(Other_Settings.nBackOff.val!=0)
                 {
                     // Default "stop" action.
-                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                    prints "mes",3
+                    // Set ontime and duty to 0 for all modes. See fSysex for details
+                    // Disable all modes as well.
+                    printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                     // Set all ontime and duty settings of all pages to 0.
                     // First come the global variables then the local variables.
                     Simple.ontime.val=0
@@ -641,8 +657,8 @@ Text tus
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : µs
-        Max. Text Size     : 2
+        Text               : Âµs
+        Max. Text Size     : 3
     
     Events
         Touch Press Event
@@ -965,8 +981,22 @@ Button bReturn
                 tmReturn.en=0
                 // Leaving MIDI Live Mode. Mode is now inactive
                 Settings.activeModes.val=Settings.activeModes.val^4
-                // Mode: EXit.
-                prints "mex",0
+                //
+                // Disable Lightsaber Mode  (see fSysex)
+                // SYSEX_START DMID VERSION DEVICE
+                printh f0 00 26 05 01 7f
+                // PN_LSB PN_MSB
+                printh 20 00 // Mode Enable
+                // TG_LSB
+                printh 00 // Reserved
+                // TG_MSB
+                printh 03 // Lightsaber Mode
+                // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                // 0: Disable
+                printh 00 00 00 00 00
+                // SYSEX_END
+                printh f7
+                //
                 page Menu
             }else
             {
@@ -1392,70 +1422,6 @@ Hotspot fApply
         Send Component ID: disabled
     
     Events
-        Touch Press Event
-            // Changes all page components according to the current color set.
-            // Note: This component has to be the last component of the page.
-            //
-            // sys0: component id
-            // sys1: component type
-            // sys2: picture id offset for current color mode
-            sys2=Settings.colorMode.val*Settings.picCount.val
-            for(sys0=0;sys0<fLoadColors.id;sys0++)
-            {
-                // More convenient for typing
-                sys1=b[sys0].type
-                if(sys1==121)
-                {
-                    // Types that have bco
-                    // page
-                    if(b[sys0].bco!=Settings.backCol2.val)
-                    {
-                        b[sys0].bco=Settings.backCol.val
-                    }
-                }else if(sys1==54||sys1==59||sys1==116||sys1==55)
-                {
-                    // Types that have bco, pco, and sta:
-                    // number, float, text, scroll text
-                    if(b[sys0].sta==1)
-                    {
-                        if(b[sys0].bco!=Settings.backCol2.val)
-                        {
-                            b[sys0].bco=Settings.backCol.val
-                            b[sys0].pco=Settings.frontCol.val
-                        }else
-                        {
-                            b[sys0].pco=Settings.frontCol2.val
-                        }
-                    }
-                }else if(sys1==98||sys1==53)
-                {
-                    // Types that have pco, pic, pco2, pic2, sta:
-                    // button, dual-state button
-                    if(b[sys0].sta==2)
-                    {
-                        b[sys0].pco=Settings.frontCol.val
-                        b[sys0].pco2=Settings.backCol.val
-                        b[sys0].pic=b[sys0].pic%Settings.picCount.val
-                        b[sys0].pic+=sys2
-                        b[sys0].pic2=b[sys0].pic+1
-                    }
-                }else if(sys1==58)
-                {
-                    // Types that have bco, pco
-                    // QR Code
-                    b[sys0].bco=Settings.backCol.val
-                    b[sys0].pco=Settings.qrFrontCol.val
-                }else if(sys1==1)
-                {
-                    // Types that have pic, pic2:
-                    // slider
-                    b[sys0].pic=b[sys0].pic%Settings.picCount.val
-                    b[sys0].pic+=sys2
-                    b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
-                    b[sys0].pic2+=sys2
-                }
-            }
-        
         Touch Release Event
             // Return format: 'd', data byte 1, 2, 3, 4, 5
             // Data byte 1:
@@ -1467,8 +1433,7 @@ Hotspot fApply
             // Data byte 4: lower data2 byte
             // Data byte 5: upper data2 byte
             //  Here: data2=ontime [us]
-            sys0=newData.val*TC_Settings.activeCoils.val
-            if(sys0>0)
+            if(newData.val!=0&&TC_Settings.activeCoils.val!=0)
             {
                 // Update Info below coil buttons
                 tempString.txt=""
@@ -1504,31 +1469,43 @@ Hotspot fApply
                 {
                     nOn1.val=nOn.val
                     tLS1.txt=tempString.txt
+                    sys0=0
+                    click fSysex,1
                 }
                 if(btCoil2.val==1)
                 {
                     nOn2.val=nOn.val
                     tLS2.txt=tempString.txt
+                    sys0=1
+                    click fSysex,1
                 }
                 if(btCoil3.val==1)
                 {
                     nOn3.val=nOn.val
                     tLS3.txt=tempString.txt
+                    sys0=2
+                    click fSysex,1
                 }
                 if(btCoil4.val==1)
                 {
                     nOn4.val=nOn.val
                     tLS4.txt=tempString.txt
+                    sys0=3
+                    click fSysex,1
                 }
                 if(btCoil5.val==1)
                 {
                     nOn5.val=nOn.val
                     tLS5.txt=tempString.txt
+                    sys0=4
+                    click fSysex,1
                 }
                 if(btCoil6.val==1)
                 {
                     nOn6.val=nOn.val
                     tLS6.txt=tempString.txt
+                    sys0=5
+                    click fSysex,1
                 }
                 // sys1: active lightsabers
                 sys1=ls4.val
@@ -1576,9 +1553,93 @@ Hotspot fLoadModes
                 tMML.bco=Settings.backSelectCol2.val
             }
         
-Hotspot fLoadColors
+Hotspot fSysex
     Attributes
         ID               : 69
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Sends a Syntherrupter Sysex command that updates Syntherrupter with whatever
+            // has been changed on this page.
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            // To send: Mode Enable, Ontime/duty, BPS.
+            //
+            //
+            // For the given coil sys0...  (see fApply)
+            // If coil is selected...
+            sys1=btCoil1.id+sys0
+            if(b[sys1].val>0)
+            {
+                // Ontime
+                // SYSEX_START DMID VERSION DEVICE
+                printh f0 00 26 05 01 7f
+                // PN_LSB PN_MSB
+                printh 21 00 // Ontime
+                // TG_LSB
+                prints sys0,1// Coil
+                // TG_MSB
+                printh 03 // Lightsaber Mode
+                // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                // Ontime in us
+                sys0=nOn.val
+                sys2=sys0
+                sys2&=0x7f
+                prints sys2,1
+                sys0>>=7
+                sys2=sys0
+                sys2&=0x7f
+                prints sys2,1
+                sys0>>=7
+                sys2=sys0
+                sys2&=0x7f
+                prints sys2,1
+                sys0>>=7
+                sys2=sys0
+                sys2&=0x7f
+                prints sys2,1
+                sys0>>=7
+                sys2=sys0
+                sys2&=0x7f
+                prints sys2,1
+                // SYSEX_END
+                printh f7
+            }
+            //
+            // Lightsabers associated with coil
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 00 01 // Assigned Lightsabers
+            // TG_LSB
+            prints sys0,1// Coil
+            // TG_MSB
+            printh 00 // Reserved.
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // Bits [3:0] correspond to Lightsabers [4:1]
+            sys0=ls4.val
+            sys0<<=1
+            sys0+=ls3.val
+            sys0<<=1
+            sys0+=ls2.val
+            sys0<<=1
+            sys0+=ls1.val
+            prints sys0,1
+            // Less than 7 bits are used, remaining 4 groups can be hardcoded to 0x00
+            printh 00 00 00 00
+            // SYSEX_END
+            printh f7
+        
+Hotspot fLoadColors
+    Attributes
+        ID               : 70
         Scope            : local
         Send Component ID: disabled
     
@@ -1661,17 +1722,6 @@ Timer tmLSButtonHold
     
     Events
         Timer Event
-            // Return format: 'd', data byte 1, 2, 3, 4, 5
-            // Data byte 1:
-            //   Here: unused. .
-            // Data byte 2: Command type.
-            //   Here: type 2: Set ESP8266 ID.
-            // Data byte 3: data1
-            //   Here: ESP8266 ID
-            // Data byte 4: lower data2 byte
-            // Data byte 5: upper data2 byte
-            //  Here: data2 unused.
-            //
             // Stop timer and prevent update
             tmLSButtonHold.en=0
             newData.val=0
@@ -1692,11 +1742,24 @@ Timer tmLSButtonHold
             // Undo origin press.
             p[dp].b[sys0].val=1-p[dp].b[sys0].val
             // Send command
-            prints "d",1
-            prints 0,1
-            prints 1,1
-            prints lsID.val,1
-            prints 0,2
+            //
+            // Set Lightsaber ID (see fSysex for format details)
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 00 01 // Assigned Lightsabers
+            // TG_LSB
+            prints sys0,1// Coil
+            // TG_MSB
+            printh 00 // Reserved.
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // ID ranges from 0-3, lsID is 1-4
+            sys0=lsID.val-1
+            prints sys0,1
+            // Less than 7 bits are used, remaining 4 groups can be hardcoded to 0x00
+            printh 00 00 00 00
+            // SYSEX_END
+            printh f7
         
 Timer tmReturn
     Attributes

@@ -34,9 +34,8 @@ Page Settings
                 vis bCoilSettings,0
                 vis bNXTUpdate,0
                 vis bESPUpdate,0
+                vis bReset,0
             }
-            // Tell the microcontroller: Mode: SEttings
-            prints "mse",0
             //
             // Load Help Mode
             if(Help_Info.helpMode.val==0)
@@ -59,8 +58,11 @@ Page Settings
                 if(Other_Settings.nBackOff.val!=0)
                 {
                     // Default "stop" action.
-                    // Send Mode Emergency Stop which turns all outputs off (but actually keeps the current mode)
-                    prints "mes",3
+                    // Set ontime and duty to 0 for all modes. See fSysex for details
+                    // Disable all modes as well.
+                    printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
+                    printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                     // Set all ontime and duty settings of all pages to 0.
                     // First come the global variables then the local variables.
                     Simple.ontime.val=0
@@ -319,8 +321,29 @@ Button bReturn
             if(showHelp.val==0)
             {
                 // Normal Operation
-                // Mode: EXit.
-                prints "mex",0
+                //
+                // Force EEPROM update
+                // Send a Syntherrupter Sysex command
+                // Package format:
+                // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+                // DMID DMID = 26 05
+                // VERSION = 01
+                // DEVICE = 7f (wildcard)
+                // PN, TG, VAL: see syntherrupter sysex documentation
+                //
+                // EEPROM Update
+                // SYSEX_START DMID VERSION DEVICE
+                printh f0 00 26 05 01 7f
+                // PN_LSB PN_MSB
+                printh 00 02 // EEPROM Update
+                // TG_LSB TG_MSB
+                printh 00 00 // Reserved
+                // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                // Update Mode. 1: Forced update.
+                printh 01 00 00 00 00
+                // SYSEX_END
+                printh f7
+                //
                 page Menu
             }else
             {
@@ -483,6 +506,75 @@ Button bESPUpdate
                 click qrHelp,0
             }
         
+Button bReset
+    Attributes
+        ID               : 28
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Discard / Reset ÂµC
+        Max. Text Size   : 30
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf78"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                //
+                // Reset Tiva
+                // Send a Syntherrupter Sysex command
+                // Package format:
+                // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+                // DMID DMID = 26 05
+                // VERSION = 01
+                // DEVICE = 7f (wildcard)
+                // PN, TG, VAL: see syntherrupter sysex documentation
+                //
+                // Reset
+                // SYSEX_START DMID VERSION DEVICE
+                printh f0 00 26 05 01 7f
+                // PN_LSB PN_MSB
+                printh 01 02 // Reset
+                // TG_LSB TG_MSB
+                printh 00 00 // Reserved
+                // VAL (4 bytes to be packed into 5 groups of 7 bit)
+                // 41153700: key for reset
+                sys1=41153700
+                sys2=sys1
+                sys2&=0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                sys1>>=7
+                sys2=sys1&0x7f
+                prints sys2,1
+                // SYSEX_END
+                printh f7
+                //
+                page Menu
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
 Hotspot fLoadModes
     Attributes
         ID               : 26
@@ -515,7 +607,7 @@ Hotspot fLoadModes
         
 Hotspot fLoadColors
     Attributes
-        ID               : 28
+        ID               : 29
         Scope            : local
         Send Component ID: disabled
     
