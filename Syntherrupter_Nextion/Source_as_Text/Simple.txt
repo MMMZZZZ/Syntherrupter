@@ -128,16 +128,23 @@ Page Simple
                 userOnLimit.val=User_Settings.u2Ontime.val
                 userDutyLimit.val=User_Settings.u2Duty.val
                 userBPSLimit.val=User_Settings.u2BPS.val
-            }else if(User_Settings.userNum.val==1)
-            {
-                userOnLimit.val=User_Settings.u1Ontime.val
-                userDutyLimit.val=User_Settings.u1Duty.val
-                userBPSLimit.val=User_Settings.u1BPS.val
             }else
             {
-                userOnLimit.val=User_Settings.u0Ontime.val
-                userDutyLimit.val=User_Settings.u0Duty.val
-                userBPSLimit.val=User_Settings.u0BPS.val
+                // Shortcuts to settings are only available to u2
+                vis tShortcut,0
+                vis bCoilSettings,0
+                vis bUsers,0
+                if(User_Settings.userNum.val==1)
+                {
+                    userOnLimit.val=User_Settings.u1Ontime.val
+                    userDutyLimit.val=User_Settings.u1Duty.val
+                    userBPSLimit.val=User_Settings.u1BPS.val
+                }else
+                {
+                    userOnLimit.val=User_Settings.u0Ontime.val
+                    userDutyLimit.val=User_Settings.u0Duty.val
+                    userBPSLimit.val=User_Settings.u0BPS.val
+                }
             }
             // Load Ontime, BPS and Duty from variables. Note: variables take much less space than displayed elements and are therefore better as persistent (= global) variables.
             nOn.val=ontime.val
@@ -251,6 +258,13 @@ Page Simple
                 line sys0,sys2,sys1,sys2,tus1.pco
                 sys2=tHz1.y+tHz1.h
                 line sys0,sys2,sys1,sys2,tus1.pco
+                if(User_Settings.userNum.val==2)
+                {
+                    sys0=tShortcut.x
+                    sys1=bMode.x+bMode.w
+                    sys2=bCoilSettings.y-11
+                    line sys0,sys2,sys1,sys2,tus1.pco
+                }
             }
             //
             vis bMode,1
@@ -1055,6 +1069,20 @@ Text tMLS
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
+Text tShortcut
+    Attributes
+        ID                 : 81
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Shortcuts:
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
 QR Code qrHelp
     Attributes
         ID               : 61
@@ -1504,6 +1532,70 @@ Button bMode
                     bMode.txt="Manually"
                     vis bApply,1
                 }
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bCoilSettings
+    Attributes
+        ID               : 82
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Coil Limits
+        Max. Text Size   : 20
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2x"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                TC_Settings.origin.val=dp
+                page TC_Settings
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
+Button bUsers
+    Attributes
+        ID               : 83
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : User Limits
+        Max. Text Size   : 20
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2N"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                User_Settings.origin.val=dp
+                page User_Settings
             }else
             {
                 // Show Help
@@ -2097,7 +2189,7 @@ Hotspot fLoadModes
         
 Hotspot fLoadColors
     Attributes
-        ID               : 81
+        ID               : 84
         Scope            : local
         Send Component ID: disabled
     

@@ -633,7 +633,7 @@ Button bReturn
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : Return
+        Text             : â†
         Max. Text Size   : 10
     
     Events

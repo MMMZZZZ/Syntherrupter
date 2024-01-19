@@ -290,6 +290,7 @@ Button bCoilSettings
             if(showHelp.val==0)
             {
                 // Normal Operation
+                TC_Settings.origin.val=dp
                 page TC_Settings
             }else
             {
@@ -437,6 +438,7 @@ Button bUsers
             if(showHelp.val==0)
             {
                 // Normal Operation
+                User_Settings.origin.val=dp
                 page User_Settings
             }else
             {
@@ -468,6 +470,7 @@ Button bEnvelope
             if(showHelp.val==0)
             {
                 // Normal Operation
+                Env_Settings.origin.val=dp
                 page Env_Settings
             }else
             {

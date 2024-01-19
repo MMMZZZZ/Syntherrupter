@@ -135,6 +135,12 @@ Variable (int32) changedValues
         Scope: local
         Value: 0
     
+Variable (int32) origin
+    Attributes
+        ID   : 54
+        Scope: global
+        Value: 4294967295
+    
 Number nStep
     Attributes
         ID                 : 23
@@ -1341,8 +1347,8 @@ Button bReturn
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : Return
-        Max. Text Size   : 10
+        Text             : â†
+        Max. Text Size   : 3
     
     Events
         Touch Press Event
@@ -1359,7 +1365,7 @@ Button bReturn
             if(showHelp.val==0)
             {
                 // Normal Operation
-                page Settings
+                page origin.val
             }else
             {
                 // Show Help
@@ -1685,7 +1691,7 @@ Hotspot fSysex
         
 Hotspot fLoadColors
     Attributes
-        ID               : 54
+        ID               : 55
         Scope            : local
         Send Component ID: disabled
     

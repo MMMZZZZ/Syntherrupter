@@ -357,7 +357,7 @@ Text tChan
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : MIDI\r\nChannels
+        Text               : MIDI Channels
         Max. Text Size     : 30
     
     Events

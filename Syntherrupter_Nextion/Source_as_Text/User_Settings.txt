@@ -146,7 +146,7 @@ Page User_Settings
             //sys1+=31
             // Vertical grid lines
             //for(sys2=tU0Name.y+tU0Name.h+3;sys2<user0Duty.y;sys2+=tU0Name.h+5)
-            for(sys2=tUserName.x+tUserName.w+15;sys2<sys0;sys2+=tU0Name.w+15)
+            for(sys2=tU0Name.x-8;sys2<sys0;sys2+=tU0Name.w+15)
             {
                 line sys2,tUserName.y,sys2,sys1,tUserName.pco
             }
@@ -363,6 +363,12 @@ Variable (int32) temp
         ID   : 80
         Scope: local
         Value: 0
+    
+Variable (int32) origin
+    Attributes
+        ID   : 81
+        Scope: global
+        Value: 4294967295
     
 Number user0Ontime
     Attributes
@@ -1029,7 +1035,7 @@ Text tSelToMod
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : Select any values to modify.
+        Text               : Select any value to modify.
         Max. Text Size     : 30
     
     Events
@@ -1438,8 +1444,8 @@ Button bReturn
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : Return
-        Max. Text Size   : 10
+        Text             : â†
+        Max. Text Size   : 3
     
     Events
         Touch Press Event
@@ -1584,7 +1590,7 @@ Button bReturn
             if(showHelp.val==0)
             {
                 // Normal Operation
-                page Settings
+                page origin.val
             }else
             {
                 // Show Help
@@ -2256,7 +2262,7 @@ Hotspot charToInt
         
 Hotspot fLoadColors
     Attributes
-        ID               : 81
+        ID               : 82
         Scope            : local
         Send Component ID: disabled
     

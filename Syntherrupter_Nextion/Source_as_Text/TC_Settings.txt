@@ -174,19 +174,19 @@ Page TC_Settings
                 // Determine Table height (a.k.a up to where the lines shall be drawn
                 sys2=maxCoilCount.val
                 sys2*=31
-                sys2+=110
+                sys2+=120
                 // Vertical grid lines
-                line 130,90,130,sys2,idle.pco
-                line 290,90,290,sys2,idle.pco
-                line 445,90,445,sys2,idle.pco
-                line 585,90,585,sys2,idle.pco
+                line 130,100,130,sys2,idle.pco
+                line 290,100,290,sys2,idle.pco
+                line 445,100,445,sys2,idle.pco
+                line 585,100,585,sys2,idle.pco
                 // Horizontal grid lines
-                sys1=116
+                sys1=126
                 for(sys0=0;sys0<6;sys0++)
                 {
                     if(sys1<sys2)
                     {
-                        line 15,sys1,730,sys1,tCoil1.pco
+                        line 10,sys1,730,sys1,tCoil1.pco
                     }
                     sys1+=31
                 }
@@ -420,6 +420,12 @@ Variable (int32) showHelp
         ID   : 77
         Scope: local
         Value: 0
+    
+Variable (int32) origin
+    Attributes
+        ID   : 92
+        Scope: global
+        Value: 4294967295
     
 Number nCoil1On
     Attributes
@@ -1709,8 +1715,8 @@ Button bReturn
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : Return
-        Max. Text Size   : 10
+        Text             : â†
+        Max. Text Size   : 3
     
     Events
         Touch Press Event
@@ -1827,7 +1833,7 @@ Button bReturn
             if(showHelp.val==0)
             {
                 // Normal Operation
-                page Settings
+                page origin.val
             }else
             {
                 // Show Help
@@ -2392,7 +2398,7 @@ Hotspot fSysex
         
 Hotspot fLoadColors
     Attributes
-        ID               : 92
+        ID               : 93
         Scope            : local
         Send Component ID: disabled
     

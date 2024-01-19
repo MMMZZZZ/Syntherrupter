@@ -288,8 +288,8 @@ Button bReturn
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : Return
-        Max. Text Size   : 10
+        Text             : â†
+        Max. Text Size   : 3
     
     Events
         Touch Press Event

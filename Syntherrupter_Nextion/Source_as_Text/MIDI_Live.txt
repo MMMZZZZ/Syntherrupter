@@ -125,14 +125,17 @@ Page MIDI_Live
             {
                 userOnLimit.val=User_Settings.u2Ontime.val
                 userDutyLimit.val=User_Settings.u2Duty.val
-            }else if(User_Settings.userNum.val==1)
-            {
-                userOnLimit.val=User_Settings.u1Ontime.val
-                userDutyLimit.val=User_Settings.u1Duty.val
             }else
             {
-                userOnLimit.val=User_Settings.u0Ontime.val
-                userDutyLimit.val=User_Settings.u0Duty.val
+                if(User_Settings.userNum.val==1)
+                {
+                    userOnLimit.val=User_Settings.u1Ontime.val
+                    userDutyLimit.val=User_Settings.u1Duty.val
+                }else
+                {
+                    userOnLimit.val=User_Settings.u0Ontime.val
+                    userDutyLimit.val=User_Settings.u0Duty.val
+                }
             }
             // Load Ontime and Duty from variables. Note: variables take much less space than displayed elements and are therefore better as persistent (= global) variables.
             nOn.val=ontime.val
@@ -1362,6 +1365,38 @@ Button bStereoOverv
                 click qrHelp,0
             }
         
+Button bEnvelope
+    Attributes
+        ID               : 73
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Envelopes
+        Max. Text Size   : 20
+    
+    Events
+        Touch Press Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+            }else
+            {
+                // Show Help
+                qrHelp.txt="git.io/Jkf2A"
+            }
+        
+        Touch Release Event
+            if(showHelp.val==0)
+            {
+                // Normal Operation
+                Env_Settings.origin.val=dp
+                page Env_Settings
+            }else
+            {
+                // Show Help
+                click qrHelp,0
+            }
+        
 Dual-state Button btCoil1
     Attributes
         ID               : 13
@@ -1783,7 +1818,7 @@ Hotspot fSysex
         
 Hotspot fLoadColors
     Attributes
-        ID               : 73
+        ID               : 74
         Scope            : local
         Send Component ID: disabled
     

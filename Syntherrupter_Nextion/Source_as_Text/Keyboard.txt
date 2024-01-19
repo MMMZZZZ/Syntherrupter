@@ -312,8 +312,8 @@ Button bReturn
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : Return
-        Max. Text Size   : 10
+        Text             : â†
+        Max. Text Size   : 3
     
     Events
         Touch Press Event
@@ -487,7 +487,7 @@ Button b8
         Send Component ID: disabled
         State            : unpressed
         Text             : 8
-        Max. Text Size   : 10
+        Max. Text Size   : 1
     
     Events
         Touch Release Event
@@ -505,7 +505,7 @@ Button b9
         Send Component ID: disabled
         State            : unpressed
         Text             : 9
-        Max. Text Size   : 10
+        Max. Text Size   : 1
     
     Events
         Touch Release Event
@@ -683,7 +683,7 @@ Button bI
         Send Component ID: disabled
         State            : unpressed
         Text             : i
-        Max. Text Size   : 10
+        Max. Text Size   : 1
     
     Events
         Touch Release Event
@@ -703,7 +703,7 @@ Button bO
         Send Component ID: disabled
         State            : unpressed
         Text             : o
-        Max. Text Size   : 10
+        Max. Text Size   : 1
     
     Events
         Touch Release Event
@@ -863,7 +863,7 @@ Button bK
         Send Component ID: disabled
         State            : unpressed
         Text             : k
-        Max. Text Size   : 10
+        Max. Text Size   : 1
     
     Events
         Touch Release Event
@@ -883,7 +883,7 @@ Button bL
         Send Component ID: disabled
         State            : unpressed
         Text             : l
-        Max. Text Size   : 10
+        Max. Text Size   : 1
     
     Events
         Touch Release Event
@@ -1063,7 +1063,7 @@ Button bCom
         Send Component ID: disabled
         State            : unpressed
         Text             : ,
-        Max. Text Size   : 10
+        Max. Text Size   : 1
     
     Events
         Touch Release Event
@@ -1083,7 +1083,7 @@ Button bDot
         Send Component ID: disabled
         State            : unpressed
         Text             : .
-        Max. Text Size   : 10
+        Max. Text Size   : 1
     
     Events
         Touch Release Event
@@ -1102,8 +1102,8 @@ Button bBack
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : <-
-        Max. Text Size   : 2
+        Text             : â†
+        Max. Text Size   : 3
     
     Events
         Touch Release Event
@@ -1159,8 +1159,8 @@ Button bUE
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : ü
-        Max. Text Size   : 10
+        Text             : Ã¼
+        Max. Text Size   : 3
     
     Events
         Touch Release Event
@@ -1179,8 +1179,8 @@ Button bOE
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : ö
-        Max. Text Size   : 10
+        Text             : Ã¶
+        Max. Text Size   : 3
     
     Events
         Touch Release Event
@@ -1199,8 +1199,8 @@ Button bAE
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : ä
-        Max. Text Size   : 10
+        Text             : Ã¤
+        Max. Text Size   : 3
     
     Events
         Touch Release Event
@@ -1220,7 +1220,7 @@ Button bArr
         Send Component ID: disabled
         State            : unpressed
         Text             : <
-        Max. Text Size   : 1
+        Max. Text Size   : 3
     
     Events
         Touch Release Event
@@ -1259,8 +1259,8 @@ Dual-state Button btShift
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : ^
-        Max. Text Size   : 10
+        Text             : â†‘
+        Max. Text Size   : 3
     
     Events
         Touch Release Event
@@ -1369,8 +1369,8 @@ Dual-state Button btShift2
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : ^
-        Max. Text Size   : 10
+        Text             : â†‘
+        Max. Text Size   : 3
     
     Events
         Touch Press Event
