@@ -37,7 +37,6 @@ Page MIDI_Live
             vis fSqrt,0
             vis fSlider,0
             vis fLoadColors,0
-            vis fApply,0
             vis fSysex,0
             // Overview page isn't done
             vis bStereoOverv,0
@@ -179,7 +178,11 @@ Page MIDI_Live
             click bMode,0
             //
             // Make sure the microcontroller is up-to-date
-            click fApply,0
+            click bApply,0
+            //
+            // Help mode is disabled by default
+            vis hHelp,0
+            vis tHelp,0
             //
             // Enable MIDI Live Mode (see fSysex)
             // SYSEX_START DMID VERSION DEVICE
@@ -196,58 +199,16 @@ Page MIDI_Live
             // SYSEX_END
             printh f7
             //
-            // Load Help Mode
-            if(Help_Info.helpMode.val==0)
-            {
-                vis qrHelp,0
-            }else
-            {
-                tempStr.txt=tTitle.txt
-                showHelp.val=1
-                click 0,1
-            }
-            //
             // Enable page refreshs again
             ref_star
         
         Postinitialize Event
-            // Draw grid lines
-            // sys0: start, sys1: end, sys2: vertical position
-            if(TC_Settings.maxCoilCount.val>=2)
-            {
-                sys0=tus1.x
-                if(TC_Settings.maxCoilCount.val>=6)
-                {
-                    sys1=nOn6.x+nOn6.w
-                }else if(TC_Settings.maxCoilCount.val>=5)
-                {
-                    sys1=nOn5.x+nOn5.w
-                }else if(TC_Settings.maxCoilCount.val>=4)
-                {
-                    sys1=nOn4.x+nOn4.w
-                }else if(TC_Settings.maxCoilCount.val>=3)
-                {
-                    sys1=nOn3.x+nOn3.w
-                }else // if(TC_Settings.maxCoilCount.val>=2)
-                {
-                    sys1=nOn2.x+nOn2.w
-                }
-                sys2=tus1.y+tus1.h
-                line sys0,sys2,sys1,sys2,tus1.pco
-            }
-            //
-            // Line above related settings
-            sys0=bChnAssign.x
-            sys1=bApply.x+bApply.w
-            sys2=bChnAssign.y+bApply.y+bApply.h
-            sys2/=2
-            line sys0,sys2,sys1,sys2,tTitle.pco
+            click fDraw,1
             //
             vis bMode,1
             //
             // Check if any channels are enabled, If not, blink the corresponding button to make the user aware.
             sys0=TC_Settings.coil1Chn.val|TC_Settings.coil2Chn.val|TC_Settings.coil3Chn.val|TC_Settings.coil4Chn.val|TC_Settings.coil5Chn.val|TC_Settings.coil6Chn.val
-            prints sys0,0
             sys0&=0xffff
             if(sys0==0)
             {
@@ -255,61 +216,52 @@ Page MIDI_Live
             }
         
         Touch Press Event
-            if(showHelp.val==0)
+            if(Other_Settings.nBackOff.val!=0)
             {
-                // Normal Operation
-                if(Other_Settings.nBackOff.val!=0)
-                {
-                    // Default "stop" action.
-                    // Set ontime and duty to 0 for all modes. See fSysex for details
-                    // Disable all modes as well.
-                    printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
-                    printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
-                    printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
-                    // Set all ontime and duty settings of all pages to 0.
-                    // First come the global variables then the local variables.
-                    Simple.ontime.val=0
-                    Simple.duty.val=0
-                    Simple.set1.val=Simple.set1.val&0x0000ffff
-                    Simple.set2.val=Simple.set2.val&0x0000ffff
-                    Simple.set3.val=Simple.set3.val&0x0000ffff
-                    Simple.set4.val=Simple.set4.val&0x0000ffff
-                    Simple.set5.val=Simple.set5.val&0x0000ffff
-                    Simple.set6.val=Simple.set6.val&0x0000ffff
-                    MIDI_Live.ontime.val=0
-                    MIDI_Live.duty.val=0
-                    MIDI_Live.set1.val=0
-                    MIDI_Live.set2.val=0
-                    MIDI_Live.set3.val=0
-                    MIDI_Live.set4.val=0
-                    MIDI_Live.set5.val=0
-                    MIDI_Live.set6.val=0
-                    Lightsaber.ontime.val=0
-                    Lightsaber.ontimes12.val=0
-                    Lightsaber.ontimes34.val=0
-                    Lightsaber.ontimes56.val=0
-                    nOn.val=0
-                    sOn.val=0
-                    nOn1.val=0
-                    nOn2.val=0
-                    nOn3.val=0
-                    nOn4.val=0
-                    nOn5.val=0
-                    nOn6.val=0
-                    nDuty.val=0
-                    sDuty.val=0
-                    nDuty1.val=0
-                    nDuty2.val=0
-                    nDuty3.val=0
-                    nDuty4.val=0
-                    nDuty5.val=0
-                    nDuty6.val=0
-                }
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf22"
-                click qrHelp,0
+                // Default "stop" action.
+                // Set ontime and duty to 0 for all modes. See fSysex for details
+                // Disable all modes as well.
+                printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
+                // Set all ontime and duty settings of all pages to 0.
+                // First come the global variables then the local variables.
+                Simple.ontime.val=0
+                Simple.duty.val=0
+                Simple.set1.val=Simple.set1.val&0x0000ffff
+                Simple.set2.val=Simple.set2.val&0x0000ffff
+                Simple.set3.val=Simple.set3.val&0x0000ffff
+                Simple.set4.val=Simple.set4.val&0x0000ffff
+                Simple.set5.val=Simple.set5.val&0x0000ffff
+                Simple.set6.val=Simple.set6.val&0x0000ffff
+                MIDI_Live.ontime.val=0
+                MIDI_Live.duty.val=0
+                MIDI_Live.set1.val=0
+                MIDI_Live.set2.val=0
+                MIDI_Live.set3.val=0
+                MIDI_Live.set4.val=0
+                MIDI_Live.set5.val=0
+                MIDI_Live.set6.val=0
+                Lightsaber.ontime.val=0
+                Lightsaber.ontimes12.val=0
+                Lightsaber.ontimes34.val=0
+                Lightsaber.ontimes56.val=0
+                nOn.val=0
+                sOn.val=0
+                nOn1.val=0
+                nOn2.val=0
+                nOn3.val=0
+                nOn4.val=0
+                nOn5.val=0
+                nOn6.val=0
+                nDuty.val=0
+                sDuty.val=0
+                nDuty1.val=0
+                nDuty2.val=0
+                nDuty3.val=0
+                nDuty4.val=0
+                nDuty5.val=0
+                nDuty6.val=0
             }
         
         Page Exit Event
@@ -331,107 +283,107 @@ Page MIDI_Live
         
 Variable (string) sCoil
     Attributes
-        ID            : 19
+        ID            : 20
         Scope         : local
         Text          : 0
         Max. Text Size: 3
     
 Variable (int32) newData
     Attributes
-        ID   : 20
+        ID   : 21
         Scope: local
         Value: 0
     
 Variable (int32) ontime
     Attributes
-        ID   : 21
+        ID   : 22
         Scope: global
         Value: 0
     
 Variable (int32) duty
     Attributes
-        ID   : 22
+        ID   : 23
         Scope: global
         Value: 0
     
 Variable (int32) openEE
     Attributes
-        ID   : 24
+        ID   : 25
         Scope: local
         Value: 0
     
 Variable (int32) set1
     Attributes
-        ID   : 25
+        ID   : 26
         Scope: global
         Value: 0
     
 Variable (int32) set2
     Attributes
-        ID   : 26
+        ID   : 27
         Scope: global
         Value: 0
     
 Variable (int32) set3
     Attributes
-        ID   : 27
+        ID   : 28
         Scope: global
         Value: 0
     
 Variable (int32) set4
     Attributes
-        ID   : 28
+        ID   : 29
         Scope: global
         Value: 0
     
 Variable (int32) set5
     Attributes
-        ID   : 29
+        ID   : 30
         Scope: global
         Value: 0
     
 Variable (int32) set6
     Attributes
-        ID   : 30
+        ID   : 31
         Scope: global
         Value: 0
     
 Variable (int32) fSliderInput
     Attributes
-        ID   : 32
+        ID   : 33
         Scope: local
         Value: 0
     
 Variable (int32) fSliderOutput
     Attributes
-        ID   : 33
+        ID   : 34
         Scope: local
         Value: 0
     
 Variable (int32) userOnLimit
     Attributes
-        ID   : 34
+        ID   : 35
         Scope: local
         Value: 0
     
 Variable (int32) userDutyLimit
     Attributes
-        ID   : 35
+        ID   : 36
         Scope: local
         Value: 0
     
 Variable (string) tempStr
     Attributes
-        ID            : 55
+        ID            : 56
         Scope         : local
         Text          : 
         Max. Text Size: 32
     
-Variable (int32) showHelp
+Variable (int32) currentHelp
     Attributes
-        ID   : 56
+        ID   : 57
         Scope: local
-        Value: 0
+        Value: 4294967295
     
 Variable (int32) sOnOld
     Attributes
@@ -447,7 +399,7 @@ Variable (int32) sDutyOld
     
 Number nOn
     Attributes
-        ID                 : 6
+        ID                 : 7
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -460,7 +412,7 @@ Number nOn
         
 Number fSlider
     Attributes
-        ID                 : 31
+        ID                 : 32
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -504,7 +456,7 @@ Number fSlider
         
 Number fSqrt
     Attributes
-        ID                 : 36
+        ID                 : 37
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -542,7 +494,7 @@ Number fSqrt
         
 Number nOn1
     Attributes
-        ID                 : 43
+        ID                 : 44
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -555,7 +507,7 @@ Number nOn1
         
 Number nOn2
     Attributes
-        ID                 : 44
+        ID                 : 45
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -568,7 +520,7 @@ Number nOn2
         
 Number nOn3
     Attributes
-        ID                 : 45
+        ID                 : 46
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -581,7 +533,7 @@ Number nOn3
         
 Number nOn4
     Attributes
-        ID                 : 46
+        ID                 : 47
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -594,7 +546,7 @@ Number nOn4
         
 Number nOn5
     Attributes
-        ID                 : 47
+        ID                 : 48
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -607,7 +559,7 @@ Number nOn5
         
 Number nOn6
     Attributes
-        ID                 : 48
+        ID                 : 49
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -620,7 +572,7 @@ Number nOn6
         
 XFloat nDuty
     Attributes
-        ID                 : 9
+        ID                 : 10
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -633,7 +585,7 @@ XFloat nDuty
         
 XFloat nDuty1
     Attributes
-        ID                 : 49
+        ID                 : 50
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -646,7 +598,7 @@ XFloat nDuty1
         
 XFloat nDuty2
     Attributes
-        ID                 : 50
+        ID                 : 51
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -659,7 +611,7 @@ XFloat nDuty2
         
 XFloat nDuty3
     Attributes
-        ID                 : 51
+        ID                 : 52
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -672,7 +624,7 @@ XFloat nDuty3
         
 XFloat nDuty4
     Attributes
-        ID                 : 52
+        ID                 : 53
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -685,7 +637,7 @@ XFloat nDuty4
         
 XFloat nDuty5
     Attributes
-        ID                 : 53
+        ID                 : 54
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -698,7 +650,7 @@ XFloat nDuty5
         
 XFloat nDuty6
     Attributes
-        ID                 : 54
+        ID                 : 55
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -709,9 +661,23 @@ XFloat nDuty6
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
-Text tTitle
+Text tHelp
     Attributes
         ID                 : 1
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : 
+        Max. Text Size     : 650
+    
+    Events
+        Touch Press Event
+            // This object is only visible in help mode. No need to be "transparent" to clicks in normal operation.
+            click bReturn,0
+        
+Text tTitle
+    Attributes
+        ID                 : 2
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -725,7 +691,7 @@ Text tTitle
         
 Text tHideBack1
     Attributes
-        ID                 : 2
+        ID                 : 3
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -738,7 +704,7 @@ Text tHideBack1
         
 Text tCoil
     Attributes
-        ID                 : 3
+        ID                 : 4
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -752,7 +718,7 @@ Text tCoil
         
 Text tHideBack
     Attributes
-        ID                 : 4
+        ID                 : 5
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -765,7 +731,7 @@ Text tHideBack
         
 Text tDuty
     Attributes
-        ID                 : 8
+        ID                 : 9
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -779,7 +745,7 @@ Text tDuty
         
 Text tPerc
     Attributes
-        ID                 : 10
+        ID                 : 11
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -793,7 +759,7 @@ Text tPerc
         
 Text tus
     Attributes
-        ID                 : 12
+        ID                 : 13
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -807,7 +773,7 @@ Text tus
         
 Text tOn
     Attributes
-        ID                 : 37
+        ID                 : 38
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -821,7 +787,7 @@ Text tOn
         
 Text tUser
     Attributes
-        ID                 : 39
+        ID                 : 40
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -835,7 +801,7 @@ Text tUser
         
 Text tMSI
     Attributes
-        ID                 : 40
+        ID                 : 41
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -849,7 +815,7 @@ Text tMSI
         
 Text tMML
     Attributes
-        ID                 : 41
+        ID                 : 42
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -863,7 +829,7 @@ Text tMML
         
 Text tMLS
     Attributes
-        ID                 : 42
+        ID                 : 43
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -903,38 +869,9 @@ Text tPerc1
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
-QR Code qrHelp
-    Attributes
-        ID               : 72
-        Scope            : local
-        Send Component ID: disabled
-        Text             : git.io/JkvOK
-        Max. Text Size   : 16
-    
-    Events
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                showHelp.val=1
-                tempStr.txt=tTitle.txt
-                tTitle.txt="Get Help/Link for..."
-                // keep QR code on top
-                ref qrHelp
-                // Show modified title before stopping screen refreshs.
-                doevents
-                ref_stop
-            }else
-            {
-                showHelp.val=0
-                tTitle.txt=tempStr.txt
-                // keep QR code on top
-                ref qrHelp
-                ref_star
-            }
-        
 Slider sOn
     Attributes
-        ID               : 5
+        ID               : 6
         Scope            : local
         Send Component ID: disabled
         Position         : 0
@@ -943,74 +880,56 @@ Slider sOn
     
     Events
         Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                // Slider minval = 0
-                // Slider maxval = SliderWidth - CursorWIdth - 1
-                // => Slider resolution equals slider "pixel" resolution
-                fSliderInput.val=sOn.maxval
-                fSliderOutput.val=userOnLimit.val
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2r"
-            }
+            // Slider minval = 0
+            // Slider maxval = SliderWidth - CursorWIdth - 1
+            // => Slider resolution equals slider "pixel" resolution
+            fSliderInput.val=sOn.maxval
+            fSliderOutput.val=userOnLimit.val
         
         Touch Release Event
-            if(showHelp.val==0)
+            fSlider.val=sOn.val
+            click fSlider,1
+            // Reduce resolution according to slider range for more "consistent" steps.
+            sys0=1
+            if(fSlider.val>=10000)
             {
-                // Normal operation
-                fSlider.val=sOn.val
-                click fSlider,1
-                // Reduce resolution according to slider range for more "consistent" steps.
-                sys0=1
-                if(fSlider.val>=10000)
-                {
-                    sys0=1000
-                }else if(fSlider.val>=5000)
-                {
-                    sys0=500
-                }else if(fSlider.val>=1000)
-                {
-                    sys0=100
-                }else if(fSlider.val>=500)
-                {
-                    sys0=50
-                }else if(fSlider.val>=100)
-                {
-                    sys0=10
-                }else if(fSlider.val>=50)
-                {
-                    sys0=5
-                }
-                fSlider.val/=sys0
-                fSlider.val*=sys0
-                if(nOn.val!=fSlider.val)
-                {
-                    newData.val=1
-                    nOn.val=fSlider.val
-                }
-                // to understand the following lines have a look at the Touch Move code.
-                // what you would actually wanna do is put the code above in touch move and perform a click event on touch move here (because your can press/release a slider, changing its value without moving it).
-                // However "click" can only execute press/release events, so it gets more complicated...
-                if(Settings.applyingMode.val>=1)
-                {
-                    click fApply,0
-                }
-                // Store slider position in case of a "help touch"
-                sOnOld.val=sOn.val
-            }else
+                sys0=1000
+            }else if(fSlider.val>=5000)
             {
-                // Show Help
-                // Restore slider position after a "help touch"
-                sOn.val=sOnOld.val
-                click qrHelp,0
+                sys0=500
+            }else if(fSlider.val>=1000)
+            {
+                sys0=100
+            }else if(fSlider.val>=500)
+            {
+                sys0=50
+            }else if(fSlider.val>=100)
+            {
+                sys0=10
+            }else if(fSlider.val>=50)
+            {
+                sys0=5
             }
+            fSlider.val/=sys0
+            fSlider.val*=sys0
+            if(nOn.val!=fSlider.val)
+            {
+                newData.val=1
+                nOn.val=fSlider.val
+            }
+            // to understand the following lines have a look at the Touch Move code.
+            // what you would actually wanna do is put the code above in touch move and perform a click event on touch move here (because your can press/release a slider, changing its value without moving it).
+            // However "click" can only execute press/release events, so it gets more complicated...
+            if(Settings.applyingMode.val>=1)
+            {
+                click bApply,0
+            }
+            // Store slider position in case of a "help touch"
+            sOnOld.val=sOn.val
         
 Slider sDuty
     Attributes
-        ID               : 7
+        ID               : 8
         Scope            : local
         Send Component ID: disabled
         Position         : 0
@@ -1019,48 +938,30 @@ Slider sDuty
     
     Events
         Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                fSliderInput.val=sDuty.maxval
-                fSliderOutput.val=userDutyLimit.val
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2o"
-            }
+            fSliderInput.val=sDuty.maxval
+            fSliderOutput.val=userDutyLimit.val
         
         Touch Release Event
-            if(showHelp.val==0)
+            fSlider.val=sDuty.val
+            click fSlider,1
+            if(nDuty.val!=fSlider.val)
             {
-                // Normal operation
-                fSlider.val=sDuty.val
-                click fSlider,1
-                if(nDuty.val!=fSlider.val)
-                {
-                    newData.val=1
-                    nDuty.val=fSlider.val
-                }
-                // to understand the following lines have a look at the Touch Move code.
-                // what you would actually wanna do is put the code above in touch move and perform a click event on touch move here (because your can press/release a slider, changing its value without moving it).
-                // However "click" can only execute press/release events, so it gets more complicated...
-                if(Settings.applyingMode.val>=1)
-                {
-                    click fApply,0
-                }
-                // Store slider position in case of a "help touch"
-                sDutyOld.val=sDuty.val
-            }else
-            {
-                // Show Help
-                // Restore slider position after a "help touch"
-                sDuty.val=sDutyOld.val
-                click qrHelp,0
+                newData.val=1
+                nDuty.val=fSlider.val
             }
+            // to understand the following lines have a look at the Touch Move code.
+            // what you would actually wanna do is put the code above in touch move and perform a click event on touch move here (because your can press/release a slider, changing its value without moving it).
+            // However "click" can only execute press/release events, so it gets more complicated...
+            if(Settings.applyingMode.val>=1)
+            {
+                click bApply,0
+            }
+            // Store slider position in case of a "help touch"
+            sDutyOld.val=sDuty.val
         
 Button bApply
     Attributes
-        ID               : 11
+        ID               : 12
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1069,543 +970,8 @@ Button bApply
     
     Events
         Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                tmEE.en=1
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf26"
-            }
+            tmEE.en=1
         
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                click fApply,0
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Button bMode
-    Attributes
-        ID               : 58
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : Manually
-        Max. Text Size   : 15
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfaL"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                Settings.applyingMode.val++
-                if(Settings.applyingMode.val==2)
-                {
-                    bMode.txt="Immediately"
-                    vis bApply,0
-                }else if(Settings.applyingMode.val==1)
-                {
-                    bMode.txt="On Release"
-                    vis bApply,0
-                }else // higher than allowed, jump back to 0
-                {
-                    Settings.applyingMode.val=0
-                    bMode.txt="Manually"
-                    vis bApply,1
-                }
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Button bReturn
-    Attributes
-        ID               : 64
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : â†
-        Max. Text Size   : 3
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                // If button is hold, return without "exiting" MIDI Live mode (keep it running in background.
-                tmReturn.en=1
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2P"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                tmReturn.en=0
-                // Leaving MIDI Live Mode. Mode is now inactive
-                Settings.activeModes.val=Settings.activeModes.val^2
-                //
-                // Disable MIDI Live Mode  (see fSysex)
-                // SYSEX_START DMID VERSION DEVICE
-                printh f0 00 26 05 01 7f
-                // PN_LSB PN_MSB
-                printh 20 00 // Mode Enable
-                // TG_LSB
-                printh 00 // Reserved
-                // TG_MSB
-                printh 02 // MIDI Live Mode
-                // VAL (4 bytes to be packed into 5 groups of 7 bit)
-                // 0: Disable
-                printh 00 00 00 00 00
-                // SYSEX_END
-                printh f7
-                //
-                page Menu
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Button bNRPReset
-    Attributes
-        ID               : 66
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : NRP Reset
-        Max. Text Size   : 10
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2i"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Sends a Syntherrupter Sysex command that resets all NRPs for all channels
-                // Package format:
-                // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
-                // DMID DMID = 26 05
-                // VERSION = 01
-                // DEVICE = 7f (wildcard)
-                // PN, TG, VAL: see syntherrupter sysex documentation
-                //
-                // SYSEX_START DMID VERSION DEVICE
-                printh f0 00 26 05 01 7f
-                // PN_LSB PN_MSB
-                printh 66 00 // Mode Enable
-                // TG_LSB
-                printh 00 // Reserved
-                // TG_MSB
-                printh 00 // Reserved
-                // VAL (4 bytes to be packed into 5 groups of 7 bit)
-                // 0xffff: all 16 channels
-                printh 7f 7f 03 00 00
-                // SYSEX_END
-                printh f7
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Button bChnAssign
-    Attributes
-        ID               : 67
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : Chn. Assign.
-        Max. Text Size   : 20
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2i"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                page MIDI_Chn_Assgn
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Button bChnStereo
-    Attributes
-        ID               : 68
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : Chn. Stereo
-        Max. Text Size   : 26
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                sCoil.txt=btCoil1.txt
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2K"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                // Basically copy paste from tmTCButtonHold
-                Stereo_Chns.origin.val=dp
-                page Stereo_Chns
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Button bCoilStereo
-    Attributes
-        ID               : 69
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : Coil Stereo
-        Max. Text Size   : 26
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                sCoil.txt=btCoil1.txt
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2K"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                Stereo_Coils.origin.val=dp
-                page Stereo_Coils
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Button bStereoOverv
-    Attributes
-        ID               : 70
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : Stereo Overview
-        Max. Text Size   : 20
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2i"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                page Stereo_Overv
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Button bEnvelope
-    Attributes
-        ID               : 73
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : Envelopes
-        Max. Text Size   : 20
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2A"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                Env_Settings.origin.val=dp
-                page Env_Settings
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Dual-state Button btCoil1
-    Attributes
-        ID               : 13
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : 1
-        Max. Text Size   : 3
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                sCoil.txt=btCoil1.txt
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2K"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                // A coil might have been enabled, and thus does not have the currently displayed values.
-                newData.val=1
-                //  Bit 0-5 correspond to the state of the buttons btCoil1-btCoil6
-                sys0=btCoil1.val
-                sys0=btCoil2.val*2+sys0
-                sys0=btCoil3.val*4+sys0
-                sys0=btCoil4.val*8+sys0
-                sys0=btCoil5.val*16+sys0
-                sys0=btCoil6.val*32+sys0
-                // Store settings
-                TC_Settings.activeCoils.val=sys0
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Dual-state Button btCoil2
-    Attributes
-        ID               : 14
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : 2
-        Max. Text Size   : 4
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                sCoil.txt=btCoil2.txt
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2K"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                click btCoil1,0
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Dual-state Button btCoil3
-    Attributes
-        ID               : 15
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : 3
-        Max. Text Size   : 4
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                sCoil.txt=btCoil3.txt
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2K"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                click btCoil1,0
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Dual-state Button btCoil4
-    Attributes
-        ID               : 16
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : 4
-        Max. Text Size   : 4
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                sCoil.txt=btCoil4.txt
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2K"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                click btCoil1,0
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Dual-state Button btCoil5
-    Attributes
-        ID               : 17
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : 5
-        Max. Text Size   : 4
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                sCoil.txt=btCoil5.txt
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2K"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                click btCoil1,0
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Dual-state Button btCoil6
-    Attributes
-        ID               : 18
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : 6
-        Max. Text Size   : 4
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                sCoil.txt=btCoil6.txt
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2K"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal operation
-                click btCoil1,0
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Hotspot fApply
-    Attributes
-        ID               : 57
-        Scope            : local
-        Send Component ID: disabled
-    
-    Events
         Touch Release Event
             if(newData.val!=0&&TC_Settings.activeCoils.val!=0)
             {
@@ -1663,6 +1029,296 @@ Hotspot fApply
                 click fSysex,1
             }
         
+Button bMode
+    Attributes
+        ID               : 58
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Manually
+        Max. Text Size   : 15
+    
+    Events
+        Touch Release Event
+            Settings.applyingMode.val++
+            if(Settings.applyingMode.val==2)
+            {
+                bMode.txt="Immediately"
+                vis bApply,0
+            }else if(Settings.applyingMode.val==1)
+            {
+                bMode.txt="On Release"
+                vis bApply,0
+            }else // higher than allowed, jump back to 0
+            {
+                Settings.applyingMode.val=0
+                bMode.txt="Manually"
+                vis bApply,1
+            }
+        
+Button bReturn
+    Attributes
+        ID               : 64
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : â†
+        Max. Text Size   : 3
+    
+    Events
+        Touch Press Event
+            // If button is hold, return without "exiting" MIDI Live mode (keep it running in background.
+            tmReturn.en=1
+        
+        Touch Release Event
+            tmReturn.en=0
+            // Leaving MIDI Live Mode. Mode is now inactive
+            Settings.activeModes.val=Settings.activeModes.val^2
+            //
+            // Disable MIDI Live Mode  (see fSysex)
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 20 00 // Mode Enable
+            // TG_LSB
+            printh 00 // Reserved
+            // TG_MSB
+            printh 02 // MIDI Live Mode
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // 0: Disable
+            printh 00 00 00 00 00
+            // SYSEX_END
+            printh f7
+            //
+            page Menu
+        
+Button bNRPReset
+    Attributes
+        ID               : 66
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : NRP Reset
+        Max. Text Size   : 10
+    
+    Events
+        Touch Release Event
+            // Sends a Syntherrupter Sysex command that resets all NRPs for all channels
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 66 00 // Mode Enable
+            // TG_LSB
+            printh 00 // Reserved
+            // TG_MSB
+            printh 00 // Reserved
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // 0xffff: all 16 channels
+            printh 7f 7f 03 00 00
+            // SYSEX_END
+            printh f7
+        
+Button bChnAssign
+    Attributes
+        ID               : 67
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Chn. Assign.
+        Max. Text Size   : 20
+    
+    Events
+        Touch Release Event
+            page MIDI_Chn_Assgn
+        
+Button bChnStereo
+    Attributes
+        ID               : 68
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Chn. Stereo
+        Max. Text Size   : 26
+    
+    Events
+        Touch Release Event
+            Stereo_Chns.origin.val=dp
+            page Stereo_Chns
+        
+Button bCoilStereo
+    Attributes
+        ID               : 69
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Coil Stereo
+        Max. Text Size   : 26
+    
+    Events
+        Touch Release Event
+            Stereo_Coils.origin.val=dp
+            page Stereo_Coils
+        
+Button bStereoOverv
+    Attributes
+        ID               : 70
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Stereo Overview
+        Max. Text Size   : 20
+    
+    Events
+        Touch Release Event
+            page Stereo_Overv
+        
+Button bEnvelope
+    Attributes
+        ID               : 71
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Envelopes
+        Max. Text Size   : 20
+    
+    Events
+        Touch Release Event
+            Env_Settings.origin.val=dp
+            page Env_Settings
+        
+Dual-state Button btCoil1
+    Attributes
+        ID               : 14
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 1
+        Max. Text Size   : 3
+    
+    Events
+        Touch Press Event
+            sCoil.txt='&txt&'
+        
+        Touch Release Event
+            // A coil might have been enabled, and thus does not have the currently displayed values.
+            newData.val=1
+            //  Bit 0-5 correspond to the state of the buttons btCoil1-btCoil6
+            sys0=btCoil1.val
+            sys0=btCoil2.val*2+sys0
+            sys0=btCoil3.val*4+sys0
+            sys0=btCoil4.val*8+sys0
+            sys0=btCoil5.val*16+sys0
+            sys0=btCoil6.val*32+sys0
+            // Store settings
+            TC_Settings.activeCoils.val=sys0
+        
+Dual-state Button btCoil2
+    Attributes
+        ID               : 15
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 2
+        Max. Text Size   : 4
+    
+    Events
+        Touch Press Event
+            sCoil.txt='&txt&'
+        
+        Touch Release Event
+            click btCoil1,0
+        
+Dual-state Button btCoil3
+    Attributes
+        ID               : 16
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 3
+        Max. Text Size   : 4
+    
+    Events
+        Touch Press Event
+            sCoil.txt='&txt&'
+        
+        Touch Release Event
+            click btCoil1,0
+        
+Dual-state Button btCoil4
+    Attributes
+        ID               : 17
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 4
+        Max. Text Size   : 4
+    
+    Events
+        Touch Press Event
+            sCoil.txt='&txt&'
+        
+        Touch Release Event
+            click btCoil1,0
+        
+Dual-state Button btCoil5
+    Attributes
+        ID               : 18
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 5
+        Max. Text Size   : 4
+    
+    Events
+        Touch Press Event
+            sCoil.txt='&txt&'
+        
+        Touch Release Event
+            click btCoil1,0
+        
+Dual-state Button btCoil6
+    Attributes
+        ID               : 19
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : 6
+        Max. Text Size   : 4
+    
+    Events
+        Touch Press Event
+            sCoil.txt='&txt&'
+        
+        Touch Release Event
+            click btCoil1,0
+        
+Dual-state Button btHelp
+    Attributes
+        ID               : 72
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : ?
+        Max. Text Size   : 1
+    
+    Events
+        Touch Release Event
+            if(btHelp.val==0)
+            {
+                vis hHelp,0
+                click fDraw,1
+            }else
+            {
+                vis hHelp,1
+            }
+        
 Hotspot fLoadModes
     Attributes
         ID               : 61
@@ -1695,7 +1351,7 @@ Hotspot fLoadModes
         
 Hotspot fSysex
     Attributes
-        ID               : 71
+        ID               : 73
         Scope            : local
         Send Component ID: disabled
     
@@ -1892,9 +1548,238 @@ Hotspot fLoadColors
                 }
             }
         
+Hotspot fDraw
+    Attributes
+        ID               : 75
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Draw grid lines
+            // sys0: start, sys1: end, sys2: vertical position
+            if(TC_Settings.maxCoilCount.val>=2)
+            {
+                sys0=tus1.x
+                if(TC_Settings.maxCoilCount.val>=6)
+                {
+                    sys1=nOn6.x+nOn6.w
+                }else if(TC_Settings.maxCoilCount.val>=5)
+                {
+                    sys1=nOn5.x+nOn5.w
+                }else if(TC_Settings.maxCoilCount.val>=4)
+                {
+                    sys1=nOn4.x+nOn4.w
+                }else if(TC_Settings.maxCoilCount.val>=3)
+                {
+                    sys1=nOn3.x+nOn3.w
+                }else // if(TC_Settings.maxCoilCount.val>=2)
+                {
+                    sys1=nOn2.x+nOn2.w
+                }
+                sys2=tus1.y+tus1.h
+                line sys0,sys2,sys1,sys2,tus1.pco
+            }
+            //
+            // Line above related settings
+            sys0=bChnAssign.x
+            sys1=bApply.x+bApply.w-1
+            sys2=bChnAssign.y+bApply.y+bApply.h
+            sys2/=2
+            line sys0,sys2,sys1,sys2,tTitle.pco
+        
+Hotspot hHelp
+    Attributes
+        ID               : 76
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Determine component/feature that would have been touched.
+            sys1=0
+            for(sys0=fLoadColors.id;sys0>=0;sys0--)
+            {
+                // Ignore hotspots, touchcaps, variables
+                if(b[sys0].type!=5&&b[sys0].type!=51&&b[sys0].type!=52&&b[sys0].type!=109)
+                {
+                    x0=b[sys0].x
+                    y0=b[sys0].y
+                    x1=b[sys0].w
+                    y1=b[sys0].h
+                    x1+=x0
+                    y1+=y0
+                    if(tch0>=x0&&tch0<x1&&tch1>=y0&&tch1<y1)
+                    {
+                        sys1=sys0
+                        // abort loop
+                        sys0=-1
+                    }
+                }
+            }
+            if(currentHelp.val>=0&&sys1==bReturn.id)
+            {
+                // Return button has been pressed while help is being displayed. This means
+                // hide the help text again (see touch release event)
+                bReturn.val=1
+            }else if(sys1==btHelp.id)
+            {
+                // Question mark button has been pressed. Disable help mode (see touch release event).
+                btHelp.val=0
+            }else if(currentHelp.val>=0)
+            {
+                // Help is being displayed and something else has been pressed.
+                // Act as if the page background had been pressed.
+                // Note: this can make other UI elements to "pop up", therefore bring the text back on top
+                // TODO: Prevent flickering!
+                click 0,1
+                doevents
+                ref tHelp
+            }else
+            {
+                // Show help according to what has been touched.
+                // Assume that some new help will be displayed
+                sys0=1
+                tHelp.txt=""
+                if(Settings.firstHelp.val!=0)
+                {
+                    Settings.firstHelp.val=0
+                    tHelp.txt+="Help Mode Enabled \r\r"
+                    tHelp.txt+="You've enabled the on-screen help by pressing the question mark at the top \r"
+                    tHelp.txt+="right corner. As long as it's active, you can press any part of the UI and get a \r"
+                    tHelp.txt+="description of what that button/slider/... does. \r"
+                    tHelp.txt+="Press the X button at the top left to get help on another part of the UI. \r"
+                    tHelp.txt+="Press the question mark at the top right to leave help mode and resume normal\r"
+                    tHelp.txt+="operation. \r"
+                    tHelp.txt+="Press any other part of the screen, including this description, to disable all \r"
+                    tHelp.txt+="outputs. For more information, check the help on the page background.\r"
+                    tHelp.txt+=" \r"
+                    tHelp.txt+="This tip won't reappear until you reset or power cycle Syntherrupter. \r"
+                }else if(sys1==tTitle.id)
+                {
+                    tHelp.txt+="MIDI Live Mode \r\r"
+                    tHelp.txt+="In MIDI Live Mode Syntherrupter listens on its serial ports for MIDI music\r"
+                    tHelp.txt+="and plays it. \r"
+                }else if(sys1==tUser.id)
+                {
+                    tHelp.txt+="Current User \r\r"
+                    tHelp.txt+="The name of the currently active user. This determines the range within \r"
+                    tHelp.txt+="which you can operate Syntherrupter. Go to the main menu to change the \r"
+                    tHelp.txt+="current user. \r"
+                }else if(sys1==tMSI.id||sys1==tMML.id||sys1==tMLS.id)
+                {
+                    tHelp.txt+="Active Modes \r\r"
+                    tHelp.txt+="Modes can stay active even if you leave the corresponding page. Active \r"
+                    tHelp.txt+="modes are highlighted here.  \r"
+                }else if(sys1==0)
+                {
+                    tHelp.txt+="Page background \r\r"
+                    tHelp.txt+="The page background, textboxes and non-interactive elements in general \r"
+                    tHelp.txt+="shut down all outputs if you press them. This allows you to quickly stop \r"
+                    tHelp.txt+="all outputs and all modes if something goes wrong. \r"
+                    tHelp.txt+="Note however, that unplugging is the only actually safe way to ensure a \r"
+                    tHelp.txt+="complete shutdown! \r"
+                    tHelp.txt+="This feature can be temporarily disabled in the general settings. After a \r"
+                    tHelp.txt+="reset or power-cycle it will be enabled again.\r"
+                }else if(sys1==bReturn.id)
+                {
+                    tHelp.txt+="Return Button\r\r"
+                    tHelp.txt+="Nomal press: Stop MIDI Live Mode and return to the menu.\r"
+                    tHelp.txt+="Long press: Keep MIDI Live Mode running and return to the menu. "
+                }else if(sys1==tOn.id||sys1==nOn.id||sys1==tus.id||sys1==sOn.id)
+                {
+                    tHelp.txt+="Note Ontime\r\r"
+                    tHelp.txt+="Ontime of a single note at full volume. If you also specify a note duty cycle, \r"
+                    tHelp.txt+="Syntherrupter uses whichever results in the highest ontime. Effectively, \r"
+                    tHelp.txt+="this means that low notes play at constant duty, high notes at constant ontime."
+                    tHelp.txt+="\r\r"
+                    tHelp.txt+="Note that envelopes can specify volume levels >100%, causing higher ontimes\r"
+                    tHelp.txt+="than what you specify here - within the coil limit settings."
+                }else if(sys1==tDuty.id||sys1==nDuty.id||sys1==tPerc.id||sys1==sDuty.id)
+                {
+                    tHelp.txt+="Note Duty\r\r"
+                    tHelp.txt+="Duty cycle of a single note at full volume. If you also specify a note ontime, \r"
+                    tHelp.txt+="Syntherrupter uses whichever results in the highest ontime. Effectively, \r"
+                    tHelp.txt+="this means that low notes play at constant duty, high notes at constant ontime."
+                    tHelp.txt+="\r\r"
+                    tHelp.txt+="Note that envelopes can specify volume levels >100%, causing higher ontimes\r"
+                    tHelp.txt+="than what you specify here - within the coil limit settings."
+                }else if(sys1==tCoil.id||sys1==btCoil1.id||sys1==btCoil2.id||sys1==btCoil3.id||sys1==btCoil4.id||sys1==btCoil5.id||sys1==btCoil6.id||sys1==nOn1.id||sys1==nOn2.id||sys1==nOn3.id||sys1==nOn4.id||sys1==nOn5.id||sys1==nOn6.id||sys1==nDuty1.id||sys1==nDuty2.id||sys1==nDuty3.id||sys1==nDuty4.id||sys1==nDuty5.id||sys1==nDuty6.id||sys1==tus1.id||sys1==tPerc1.id)
+                {
+                    tHelp.txt+="Output Selection\r\r"
+                    tHelp.txt+="Select which outputs are affected by the note ontime and note duty \r"
+                    tHelp.txt+="changes. \r"
+                    tHelp.txt+="To help you keeping the overview, the currently active settings are \r"
+                    tHelp.txt+="displayed below each coil. \r"
+                }else if(sys1==bMode.id||sys1==bApply.id)
+                {
+                    tHelp.txt+="Applying New Settings\r\r"
+                    tHelp.txt+="The changes you make to the note ontime and duty are by default applied\r"
+                    tHelp.txt+="as soon as you release the sliders. Alternatively, the changes are \r"
+                    tHelp.txt+="applied immediately while moving the sliders. The third option allows you\r"
+                    tHelp.txt+="to manually apply the settings. \r"
+                }else if(sys1==bChnAssign.id)
+                {
+                    tHelp.txt+="MIDI Channel Assignments\r\r"
+                    tHelp.txt+="Select to which channels each coil listens. If no coils listens to \r"
+                    tHelp.txt+="any channels, this button blinks. \r"
+                }else if(sys1==bNRPReset.id)
+                {
+                    tHelp.txt+="NRP Reset\r\r"
+                    tHelp.txt+="Resets all of Syntherrupters non-registered parameters (NRPs). These are \r"
+                    tHelp.txt+="f.ex. used to stereo map MIDI channels. \r"
+                }else if(sys1==bChnStereo.id)
+                {
+                    tHelp.txt+="Channel Stereo Settings\r\r"
+                    tHelp.txt+="Configure where on the stereo range each channel plays. Normally, \r"
+                    tHelp.txt+="each channel plays at the stereo position determined by the MIDI 'pan' \r"
+                    tHelp.txt+="command. However, you can also map each note based on its pitch \r"
+                    tHelp.txt+="or make it play 'everywhere'. \r"
+                }else if(sys1==bCoilStereo.id)
+                {
+                    tHelp.txt+="Coil Stereo Settings \r\r"
+                    tHelp.txt+="Configure where on the stereo range each coil is placed. You can also \r"
+                    tHelp.txt+="Configure how close a note needs to be to play on this coil.\r"
+                    tHelp.txt+="Note that all notes from channels that are not assigned to a given coil \r"
+                    tHelp.txt+="won't play on that coil. See Channel Assignments. \r"
+                }else if(sys1==bEnvelope.id)
+                {
+                    tHelp.txt+="Envelope Settings \r\r"
+                    tHelp.txt+="Envelopes can significantly improve the sound of your tesla coils. I'd\r"
+                    tHelp.txt+="suggest you try it by setting the instrument of your MIDI track(s) to  \r"
+                    tHelp.txt+="'10: Glockenspiel'.  \r"
+                    tHelp.txt+="If you want to modify the characteristics of the envelope you can do it here\r"
+                    tHelp.txt+="in the envelope editor. You should check the documentation first though.  \r"
+                }else
+                {
+                    // Nope, no new help text to be displayed
+                    sys0=0
+                }
+                if(sys0!=0)
+                {
+                    currentHelp.val=sys1
+                    vis tHelp,1
+                    bReturn.txt="âœ•"
+                }
+            }
+        
+        Touch Release Event
+            // Check if help text is being displayed and shall be hidden again
+            if(bReturn.val==1)
+            {
+                bReturn.val=0
+                bReturn.txt="â†"
+                vis tHelp,0
+                click fDraw,1
+                currentHelp.val=-1
+            }else if(sys1==btHelp.id)
+            {
+                click btHelp,0
+            }
+        
 Timer tmEE
     Attributes
-        ID         : 23
+        ID         : 24
         Scope      : local
         Period (ms): 6000
         Enabled    : no
@@ -1905,7 +1790,7 @@ Timer tmEE
         
 Timer tmReturn
     Attributes
-        ID         : 38
+        ID         : 39
         Scope      : local
         Period (ms): 250
         Enabled    : no

@@ -49,8 +49,28 @@ Page Menu
             ref_star
         
         Postinitialize Event
-            // Mode Accept Data, tell MCU that Nextion can accept data updates without disturbing anything
-            // prints "mad",0
+            // Accept data on this page only
+            // Sends a Syntherrupter Sysex command that updates Syntherrupter with whatever
+            // has been changed on this page.
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            //
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 26 02 // GUI Update Mode
+            // TG_LSB TG_MSB
+            printh 00 00 // Reserved
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // 2: Keep UI updated
+            printh 02 00 00 00 00
+            // SYSEX_END
+            printh f7
         
         Touch Press Event
             if(showHelp.val==0)
@@ -95,8 +115,28 @@ Page Menu
             }
         
         Page Exit Event
-            // Mode Deny Data, tell MCU that Nextion cannot accept data updates without disturbing anything
-            // prints "mdd",0
+            // Accept data on this page only
+            // Sends a Syntherrupter Sysex command that updates Syntherrupter with whatever
+            // has been changed on this page.
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            //
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 26 02 // GUI Update Mode
+            // TG_LSB TG_MSB
+            printh 00 00 // Reserved
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // 0: No UI updates
+            printh 00 00 00 00 00
+            // SYSEX_END
+            printh f7
         
 Variable (string) tempStr
     Attributes

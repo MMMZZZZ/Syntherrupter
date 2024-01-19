@@ -172,6 +172,12 @@ Variable (int32) backSelectCol2
         Scope: global
         Value: 16904
     
+Variable (int32) firstHelp
+    Attributes
+        ID   : 30
+        Scope: global
+        Value: 1
+    
 Text tTitle
     Attributes
         ID                 : 5
