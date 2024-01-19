@@ -246,7 +246,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0205:
             if (msg.targetMSB == 1 || msg.targetMSB == 3 || msg.targetMSB == 4)
             {
-                lsbOk = true;
+                msbOk = true;
             }
             break;
 
