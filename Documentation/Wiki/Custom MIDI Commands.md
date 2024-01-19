@@ -126,7 +126,7 @@ In the future this section is going to contain links to past protocol versions (
 
 All conventions are to be read as "unless noted otherwise... ".
 
-* Target value 127 is reserved for broadcasting, meaning it will affect all targets (works for LSB/MSB independently).
+* Target value 127 is reserved for wildcard, meaning it will affect all targets (works for LSB/MSB independently).
 * Reserved target bytes are expected to be 0 or 127.
 * Parameters and parameter options that are currently not supported by Syntherrupter are marked by an [NS].
 * Parameters that stored in EEPROM are marked by an [EE]. Other parameters will be reset to default after a power cycle.
@@ -417,30 +417,30 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 
 * `0x240`: [EE] User Name
 	* Target MSB: uint, char group position within target string. When setting char group 0 the string will be deleted (set to `\x00`). Hence the null-termination does not need to be sent explicitly. 
-		* 0-7.  No broadcasting.
+		* 0-7.  No wildcard.
 	* Target LSB: uint, user
-		* 0-2. No broadcasting.
+		* 0-2. No wildcard.
 	* Value: char[4]
 * `0x241`: [EE] User Password
 	* Target MSB: uint, char group position within target string. When setting char group 0 the string will be deleted (set to `\x00`). Hence the null-termination does not need to be sent explicitly. 
-		* 0-7. No broadcasting.
+		* 0-7. No wildcard.
 	* Target LSB: uint, user
-		* 0-2. No broadcasting.
+		* 0-2. No wildcard.
 	* Value: char[4]
 * `0x242`: [EE] User Max Ontime
 	* Target MSB: Reserved.
 	* Target LSB: uint, user
-		* 0-2. No broadcasting.
+		* 0-2. No wildcard.
 	* Value: int32, ontime in us
 * `0x243`: [EE] User Max Duty
 	* Target MSB: Reserved.
 	* Target LSB: uint, user
-		* 0-2. No broadcasting.
+		* 0-2. No wildcard.
 	* Value: int32, duty in 1/1000
 * `0x244`: [EE] User Max BPS
 	* Target MSB: Reserved.
 	* Target LSB: uint, user
-		* 0-2. No broadcasting.
+		* 0-2. No wildcard.
 	* Value: int32, BPS in Hz
 
 #### `0x260-0x27f`: Coil settings

@@ -530,7 +530,7 @@ bool MIDI::processBuffer(uint32_t b)
                 {
                     switch (dataBytes)
                     {
-                        case 1: // Vendor ID. Only 2 byte IDs are accepted by syntherrupter
+                        case 1: // Vendor ID. Only 2 byte IDs are accepted by Syntherrupter
                             if (c1 != 0)
                             {
                                 // 1-byte ID, nothing we can support.
