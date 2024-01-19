@@ -49,6 +49,8 @@ public:
     };
     bool write(uint8_t* buffer, uint32_t size, bool discard = false);
     void ISR();
+    static void passthrough(uint32_t portA, uint32_t portB);
+
     Buffer<uint8_t, 512> rxBuffer;
     Buffer<uint8_t, 512> txBuffer;
     static constexpr uint32_t DEFAULT_INT_PRIO            = 42424242;

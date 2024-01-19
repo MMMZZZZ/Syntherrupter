@@ -115,6 +115,12 @@ bool Sysex::checkSysex(SysexMsg& msg)
             }
             break;
 
+        case 0x0205:
+            if (msg.targetLSB == 1 || msg.targetLSB == 3 || msg.targetLSB == 4)
+            {
+                lsbOk = true;
+            }
+            break;
         case 0x0240:
         case 0x0241:
         case 0x0242:
@@ -234,6 +240,13 @@ bool Sysex::checkSysex(SysexMsg& msg)
             if (msg.targetMSB == 0 || msg.targetMSB == WILDCARD)
             {
                 msbOk = true;
+            }
+            break;
+
+        case 0x0205:
+            if (msg.targetMSB == 1 || msg.targetMSB == 3 || msg.targetMSB == 4)
+            {
+                lsbOk = true;
             }
             break;
 
@@ -1221,7 +1234,16 @@ void Sysex::processSysex()
                 sendSysex();
             }
             break;
-
+        case 0x0205: // [msb=serial port] (lsb=connected port), serial port baudrate and connection
+            if (reading)
+            {
+                ;
+            }
+            else
+            {
+                UART::passthrough(msg.targetMSB - 1, msg.targetLSB - 1);
+            }
+            break;
         case 0x2220:
             msg.value.ui32 = msg.value.f32 * 100.0f;
         case 0x0220: // ()(), i32 display brightness, 0-100, other=reserved

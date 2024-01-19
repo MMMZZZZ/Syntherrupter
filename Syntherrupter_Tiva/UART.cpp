@@ -150,3 +150,53 @@ void UART::ISR()
         UARTIntDisable(uartBase, UART_INT_TX * (!txEnabled));
     }
 }
+
+void UART::passthrough(uint32_t portANum, uint32_t portBNum)
+{
+    /*
+     * Disable Interrupts and UARTs and pass data between the USB serial port
+     * and the selected serial port.
+     *
+     * This is done via polling to operate independently of the baud rate
+     * Since Syntherrupter does nothing else during this time, this doesn't
+     * cause timing issues.
+     *
+     * Note: To leave this mode you have to power cycle Syntherrupter.
+     */
+
+    IntMasterDisable();
+
+    uint32_t portA      =   UART::UART_MAPPING[portANum][UART::UART_PORT_BASE];
+    uint32_t portARXPin =   UART::UART_MAPPING[portANum][UART::UART_RX_PIN];
+    uint32_t portATXPin =   UART::UART_MAPPING[portANum][UART::UART_TX_PIN];
+    uint32_t portB      =   UART::UART_MAPPING[portBNum][UART::UART_PORT_BASE];
+    uint32_t portBRXPin =   UART::UART_MAPPING[portBNum][UART::UART_RX_PIN];
+    uint32_t portBTXPin =   UART::UART_MAPPING[portBNum][UART::UART_TX_PIN];
+
+    SysCtlPeripheralDisable(UART::UART_MAPPING[portANum][UART::UART_SYSCTL_PERIPH]);
+    SysCtlPeripheralDisable(UART::UART_MAPPING[portBNum][UART::UART_SYSCTL_PERIPH]);
+
+    GPIOPinTypeGPIOInput( portA, portARXPin);
+    GPIOPinTypeGPIOInput( portB, portBRXPin);
+    GPIOPinTypeGPIOOutput(portA, portATXPin);
+    GPIOPinTypeGPIOOutput(portB, portBTXPin);
+    GPIOPadConfigSet(     portA, portARXPin, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+    GPIOPadConfigSet(     portB, portBRXPin, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+
+
+    while (42)
+    {
+        uint8_t portARXState = 0;
+        uint8_t portBRXState = 0;
+
+        // Read Pins
+        // Branchless version of if(ARX): BTX=0xff else: BTX=0
+        // GPIOPinRead(...) & 0xff required since upper 24 bits of the return value are not defined
+        portARXState = ((bool) (GPIOPinRead(portA, portARXPin) & 0xff)) * (uint8_t) 0xff;
+        portBRXState = ((bool) (GPIOPinRead(portB, portBRXPin) & 0xff)) * (uint8_t) 0xff;
+
+        // Pass to other port
+        GPIOPinWrite(portA, portATXPin, portBRXState);
+        GPIOPinWrite(portB, portBTXPin, portARXState);
+    }
+}

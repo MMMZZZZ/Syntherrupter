@@ -362,6 +362,19 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 		* [8-15]: ui8, bugfix version
 		* [14-23]: ui8, sub version
 		* [24-31]: ui8, main version
+* `0x205`: [NF][WO] Serial baudrate and connection
+	* Target MSB: Serial port
+		* 1: USB serial
+		* 3: ESP port
+		* 4: Nextion port
+	* Target LSB: Serial port to connect to MSB port (passthrough or loopback if LSB=MSB). Passthrough and looback mode disable all other functions of Syntherrupter. A hard reset or powercycle is required to exit this mode. 
+		* 0: [NS] Standalone port, no loopback or passthrough. 
+		* 1: USB serial
+		* 3: ESP port
+		* 4: Nextion port
+	* Value: [NS] int32, baudrate of selected serial port(s). Current implementation works with any baudrate up to 512kbaud/s. 
+		* 0: Disable Port
+		* Default: 115200 but depends on port. 
 
 #### `0x220-0x23f`: UI settings
 
