@@ -296,8 +296,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 		* 0-127: Pan reach
 * `0x66`: [WO] Reset Channel NRPs
 	* Target MSB: Reserved.
-	* Target LSB: uint, target coil
-		* 0-5. Limited by your firmware if you flashed a binary for less outputs.
+	* Target LSB: Reserved.
 	* Value: int32
 		* bf16: channels whose NRPs shall be reset to default.
 * `0x67`: [EE] LFO Modulation Depth

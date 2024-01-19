@@ -77,7 +77,6 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0063:
         case 0x0064:
         case 0x0065:
-        case 0x0066:
         case 0x0100:
         case 0x0260:
         case 0x0261:
@@ -90,6 +89,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
             }
             break;
 
+        case 0x0066:
         case 0x0067:
         case 0x0068:
         case 0x0069:
@@ -188,10 +188,6 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0062:
         case 0x0063:
         case 0x0064:
-        case 0x0066:
-        case 0x0067:
-        case 0x0068:
-        case 0x0069:
             if (msg.targetMSB == 0
                     || msg.targetMSB == MODE_MIDI_LIVE
                     || msg.targetMSB == WILDCARD)
@@ -209,6 +205,10 @@ bool Sysex::checkSysex(SysexMsg& msg)
                 msbOk = true;
             }
             break;
+        case 0x0066:
+        case 0x0067:
+        case 0x0068:
+        case 0x0069:
         case 0x0200:
         case 0x0201:
         case 0x0202:
