@@ -372,28 +372,21 @@ Variable (int32) userDutyLimit
         Scope: local
         Value: 0
     
-Variable (string) tempStr
-    Attributes
-        ID            : 56
-        Scope         : local
-        Text          : 
-        Max. Text Size: 32
-    
 Variable (int32) currentHelp
     Attributes
-        ID   : 57
+        ID   : 56
         Scope: local
         Value: 4294967295
     
 Variable (int32) sOnOld
     Attributes
-        ID   : 59
+        ID   : 58
         Scope: local
         Value: 0
     
 Variable (int32) sDutyOld
     Attributes
-        ID   : 60
+        ID   : 59
         Scope: local
         Value: 0
     
@@ -672,8 +665,8 @@ Text tHelp
     
     Events
         Touch Press Event
-            // This object is only visible in help mode. No need to be "transparent" to clicks in normal operation.
-            click bReturn,0
+            // This shouldn't be clickable but just in case it is...
+            click 0,1
         
 Text tTitle
     Attributes
@@ -843,7 +836,7 @@ Text tMLS
         
 Text tus1
     Attributes
-        ID                 : 62
+        ID                 : 61
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -857,7 +850,7 @@ Text tus1
         
 Text tPerc1
     Attributes
-        ID                 : 63
+        ID                 : 62
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1031,7 +1024,7 @@ Button bApply
         
 Button bMode
     Attributes
-        ID               : 58
+        ID               : 57
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1058,7 +1051,7 @@ Button bMode
         
 Button bReturn
     Attributes
-        ID               : 64
+        ID               : 63
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1094,7 +1087,7 @@ Button bReturn
         
 Button bNRPReset
     Attributes
-        ID               : 66
+        ID               : 65
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1127,7 +1120,7 @@ Button bNRPReset
         
 Button bChnAssign
     Attributes
-        ID               : 67
+        ID               : 66
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1140,7 +1133,7 @@ Button bChnAssign
         
 Button bChnStereo
     Attributes
-        ID               : 68
+        ID               : 67
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1154,7 +1147,7 @@ Button bChnStereo
         
 Button bCoilStereo
     Attributes
-        ID               : 69
+        ID               : 68
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1168,7 +1161,7 @@ Button bCoilStereo
         
 Button bStereoOverv
     Attributes
-        ID               : 70
+        ID               : 69
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1181,7 +1174,7 @@ Button bStereoOverv
         
 Button bEnvelope
     Attributes
-        ID               : 71
+        ID               : 70
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1301,7 +1294,7 @@ Dual-state Button btCoil6
         
 Dual-state Button btHelp
     Attributes
-        ID               : 72
+        ID               : 71
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1321,7 +1314,7 @@ Dual-state Button btHelp
         
 Hotspot fLoadModes
     Attributes
-        ID               : 61
+        ID               : 60
         Scope            : local
         Send Component ID: disabled
     
@@ -1351,7 +1344,7 @@ Hotspot fLoadModes
         
 Hotspot fSysex
     Attributes
-        ID               : 73
+        ID               : 72
         Scope            : local
         Send Component ID: disabled
     
@@ -1472,6 +1465,46 @@ Hotspot fSysex
                 }
             }
         
+Hotspot fDraw
+    Attributes
+        ID               : 73
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Draw grid lines
+            // sys0: start, sys1: end, sys2: vertical position
+            if(TC_Settings.maxCoilCount.val>=2)
+            {
+                sys0=tus1.x
+                if(TC_Settings.maxCoilCount.val>=6)
+                {
+                    sys1=nOn6.x+nOn6.w
+                }else if(TC_Settings.maxCoilCount.val>=5)
+                {
+                    sys1=nOn5.x+nOn5.w
+                }else if(TC_Settings.maxCoilCount.val>=4)
+                {
+                    sys1=nOn4.x+nOn4.w
+                }else if(TC_Settings.maxCoilCount.val>=3)
+                {
+                    sys1=nOn3.x+nOn3.w
+                }else // if(TC_Settings.maxCoilCount.val>=2)
+                {
+                    sys1=nOn2.x+nOn2.w
+                }
+                sys2=tus1.y+tus1.h
+                line sys0,sys2,sys1,sys2,tus1.pco
+            }
+            //
+            // Line above related settings
+            sys0=bChnAssign.x
+            sys1=bApply.x+bApply.w-1
+            sys2=bChnAssign.y+bApply.y+bApply.h
+            sys2/=2
+            line sys0,sys2,sys1,sys2,tTitle.pco
+        
 Hotspot fLoadColors
     Attributes
         ID               : 74
@@ -1548,49 +1581,9 @@ Hotspot fLoadColors
                 }
             }
         
-Hotspot fDraw
-    Attributes
-        ID               : 75
-        Scope            : local
-        Send Component ID: disabled
-    
-    Events
-        Touch Press Event
-            // Draw grid lines
-            // sys0: start, sys1: end, sys2: vertical position
-            if(TC_Settings.maxCoilCount.val>=2)
-            {
-                sys0=tus1.x
-                if(TC_Settings.maxCoilCount.val>=6)
-                {
-                    sys1=nOn6.x+nOn6.w
-                }else if(TC_Settings.maxCoilCount.val>=5)
-                {
-                    sys1=nOn5.x+nOn5.w
-                }else if(TC_Settings.maxCoilCount.val>=4)
-                {
-                    sys1=nOn4.x+nOn4.w
-                }else if(TC_Settings.maxCoilCount.val>=3)
-                {
-                    sys1=nOn3.x+nOn3.w
-                }else // if(TC_Settings.maxCoilCount.val>=2)
-                {
-                    sys1=nOn2.x+nOn2.w
-                }
-                sys2=tus1.y+tus1.h
-                line sys0,sys2,sys1,sys2,tus1.pco
-            }
-            //
-            // Line above related settings
-            sys0=bChnAssign.x
-            sys1=bApply.x+bApply.w-1
-            sys2=bChnAssign.y+bApply.y+bApply.h
-            sys2/=2
-            line sys0,sys2,sys1,sys2,tTitle.pco
-        
 Hotspot hHelp
     Attributes
-        ID               : 76
+        ID               : 75
         Scope            : local
         Send Component ID: disabled
     
@@ -1645,111 +1638,106 @@ Hotspot hHelp
                 {
                     Settings.firstHelp.val=0
                     tHelp.txt+="Help Mode Enabled \r\r"
-                    tHelp.txt+="You've enabled the on-screen help by pressing the question mark at the top \r"
-                    tHelp.txt+="right corner. As long as it's active, you can press any part of the UI and get a \r"
-                    tHelp.txt+="description of what that button/slider/... does. \r"
+                    tHelp.txt+="You've enabled the on-screen help by pressing the question mark at the top right \r"
+                    tHelp.txt+="corner. As long as it's active, you can press any part of the UI and get a description \r"
+                    tHelp.txt+="of what that button/slider/... does. \r"
                     tHelp.txt+="Press the X button at the top left to get help on another part of the UI. \r"
                     tHelp.txt+="Press the question mark at the top right to leave help mode and resume normal\r"
                     tHelp.txt+="operation. \r"
-                    tHelp.txt+="Press any other part of the screen, including this description, to disable all \r"
-                    tHelp.txt+="outputs. For more information, check the help on the page background.\r"
+                    tHelp.txt+="Press any other part of the screen, including this description, to disable all outputs. \r"
+                    tHelp.txt+="For more information, check the help on the page background.\r"
                     tHelp.txt+=" \r"
                     tHelp.txt+="This tip won't reappear until you reset or power cycle Syntherrupter. \r"
                 }else if(sys1==tTitle.id)
                 {
                     tHelp.txt+="MIDI Live Mode \r\r"
-                    tHelp.txt+="In MIDI Live Mode Syntherrupter listens on its serial ports for MIDI music\r"
-                    tHelp.txt+="and plays it. \r"
+                    tHelp.txt+="In MIDI Live Mode Syntherrupter listens on its serial ports for MIDI music and plays it.\r"
                 }else if(sys1==tUser.id)
                 {
                     tHelp.txt+="Current User \r\r"
-                    tHelp.txt+="The name of the currently active user. This determines the range within \r"
-                    tHelp.txt+="which you can operate Syntherrupter. Go to the main menu to change the \r"
-                    tHelp.txt+="current user. \r"
+                    tHelp.txt+="The name of the currently active user. This determines the range within which you \r"
+                    tHelp.txt+="can operate Syntherrupter. Go to the main menu to change the current user. \r"
                 }else if(sys1==tMSI.id||sys1==tMML.id||sys1==tMLS.id)
                 {
                     tHelp.txt+="Active Modes \r\r"
-                    tHelp.txt+="Modes can stay active even if you leave the corresponding page. Active \r"
-                    tHelp.txt+="modes are highlighted here.  \r"
-                }else if(sys1==0)
+                    tHelp.txt+="Modes can stay active even if you leave the corresponding page. Active modes are \r"
+                    tHelp.txt+="highlighted at the bottom right.  \r"
+                }else if(sys1==0||sys1==tHelp.id)
                 {
                     tHelp.txt+="Page background \r\r"
-                    tHelp.txt+="The page background, textboxes and non-interactive elements in general \r"
-                    tHelp.txt+="shut down all outputs if you press them. This allows you to quickly stop \r"
-                    tHelp.txt+="all outputs and all modes if something goes wrong. \r"
-                    tHelp.txt+="Note however, that unplugging is the only actually safe way to ensure a \r"
-                    tHelp.txt+="complete shutdown! \r"
-                    tHelp.txt+="This feature can be temporarily disabled in the general settings. After a \r"
-                    tHelp.txt+="reset or power-cycle it will be enabled again.\r"
+                    tHelp.txt+="The page background, textboxes and non-interactive elements in general shut down \r"
+                    tHelp.txt+="all outputs if you press them. This allows you to quickly stop all outputs and all \r"
+                    tHelp.txt+="modes if something goes wrong. \r"
+                    tHelp.txt+="Note however, that unplugging is the only actually safe way to ensure a complete \r"
+                    tHelp.txt+="shutdown! \r"
+                    tHelp.txt+="This feature can be temporarily disabled in the general settings. After a reset or \r"
+                    tHelp.txt+="power-cycle it will be enabled again.\r"
                 }else if(sys1==bReturn.id)
                 {
                     tHelp.txt+="Return Button\r\r"
+                    tHelp.txt+="The dual outline indicates that the button has an alternate function if you keep it pressed. \r"
                     tHelp.txt+="Nomal press: Stop MIDI Live Mode and return to the menu.\r"
                     tHelp.txt+="Long press: Keep MIDI Live Mode running and return to the menu. "
                 }else if(sys1==tOn.id||sys1==nOn.id||sys1==tus.id||sys1==sOn.id)
                 {
                     tHelp.txt+="Note Ontime\r\r"
                     tHelp.txt+="Ontime of a single note at full volume. If you also specify a note duty cycle, \r"
-                    tHelp.txt+="Syntherrupter uses whichever results in the highest ontime. Effectively, \r"
-                    tHelp.txt+="this means that low notes play at constant duty, high notes at constant ontime."
-                    tHelp.txt+="\r\r"
-                    tHelp.txt+="Note that envelopes can specify volume levels >100%, causing higher ontimes\r"
-                    tHelp.txt+="than what you specify here - within the coil limit settings."
+                    tHelp.txt+="Syntherrupter uses whichever results in the highest ontime. Effectively, this means \r"
+                    tHelp.txt+="that low notes play at constant duty, high notes at constant ontime.\r"
+                    tHelp.txt+="\r"
+                    tHelp.txt+="Note that envelopes can specify volume levels >100%, causing higher ontimes than \r"
+                    tHelp.txt+="what you specify here - within the coil limit settings."
                 }else if(sys1==tDuty.id||sys1==nDuty.id||sys1==tPerc.id||sys1==sDuty.id)
                 {
                     tHelp.txt+="Note Duty\r\r"
                     tHelp.txt+="Duty cycle of a single note at full volume. If you also specify a note ontime, \r"
-                    tHelp.txt+="Syntherrupter uses whichever results in the highest ontime. Effectively, \r"
-                    tHelp.txt+="this means that low notes play at constant duty, high notes at constant ontime."
-                    tHelp.txt+="\r\r"
-                    tHelp.txt+="Note that envelopes can specify volume levels >100%, causing higher ontimes\r"
-                    tHelp.txt+="than what you specify here - within the coil limit settings."
+                    tHelp.txt+="Syntherrupter uses whichever results in the highest ontime. Effectively, this means \r"
+                    tHelp.txt+="that low notes play at constant duty, high notes at constant ontime.\r"
+                    tHelp.txt+="\r"
+                    tHelp.txt+="Note that envelopes can specify volume levels >100%, causing higher ontimes than \r"
+                    tHelp.txt+="what you specify here - within the coil limit settings."
                 }else if(sys1==tCoil.id||sys1==btCoil1.id||sys1==btCoil2.id||sys1==btCoil3.id||sys1==btCoil4.id||sys1==btCoil5.id||sys1==btCoil6.id||sys1==nOn1.id||sys1==nOn2.id||sys1==nOn3.id||sys1==nOn4.id||sys1==nOn5.id||sys1==nOn6.id||sys1==nDuty1.id||sys1==nDuty2.id||sys1==nDuty3.id||sys1==nDuty4.id||sys1==nDuty5.id||sys1==nDuty6.id||sys1==tus1.id||sys1==tPerc1.id)
                 {
                     tHelp.txt+="Output Selection\r\r"
-                    tHelp.txt+="Select which outputs are affected by the note ontime and note duty \r"
-                    tHelp.txt+="changes. \r"
-                    tHelp.txt+="To help you keeping the overview, the currently active settings are \r"
-                    tHelp.txt+="displayed below each coil. \r"
+                    tHelp.txt+="Select which outputs are affected by the note ontime and note duty changes. \r"
+                    tHelp.txt+="To help you keeping the overview, the currently active settings are displayed \r"
+                    tHelp.txt+="below each coil. \r"
                 }else if(sys1==bMode.id||sys1==bApply.id)
                 {
                     tHelp.txt+="Applying New Settings\r\r"
-                    tHelp.txt+="The changes you make to the note ontime and duty are by default applied\r"
-                    tHelp.txt+="as soon as you release the sliders. Alternatively, the changes are \r"
-                    tHelp.txt+="applied immediately while moving the sliders. The third option allows you\r"
-                    tHelp.txt+="to manually apply the settings. \r"
+                    tHelp.txt+="The changes you make to the note ontime and duty are by default applied as soon \r"
+                    tHelp.txt+="as you release the sliders. Alternatively, the changes are applied immediately while \r"
+                    tHelp.txt+="moving the sliders. The third option allows you to manually apply the settings. \r"
                 }else if(sys1==bChnAssign.id)
                 {
                     tHelp.txt+="MIDI Channel Assignments\r\r"
-                    tHelp.txt+="Select to which channels each coil listens. If no coils listens to \r"
-                    tHelp.txt+="any channels, this button blinks. \r"
+                    tHelp.txt+="Select to which channels each coil listens. If no coils listens to any channels, \r"
+                    tHelp.txt+="this button blinks. \r"
                 }else if(sys1==bNRPReset.id)
                 {
                     tHelp.txt+="NRP Reset\r\r"
-                    tHelp.txt+="Resets all of Syntherrupters non-registered parameters (NRPs). These are \r"
-                    tHelp.txt+="f.ex. used to stereo map MIDI channels. \r"
+                    tHelp.txt+="Resets all of Syntherrupters non-registered parameters (NRPs). These are f.ex. used \r"
+                    tHelp.txt+="to stereo map MIDI channels. \r"
                 }else if(sys1==bChnStereo.id)
                 {
                     tHelp.txt+="Channel Stereo Settings\r\r"
-                    tHelp.txt+="Configure where on the stereo range each channel plays. Normally, \r"
-                    tHelp.txt+="each channel plays at the stereo position determined by the MIDI 'pan' \r"
-                    tHelp.txt+="command. However, you can also map each note based on its pitch \r"
-                    tHelp.txt+="or make it play 'everywhere'. \r"
+                    tHelp.txt+="Configure where on the stereo range each channel plays. Normally, each channel \r"
+                    tHelp.txt+="plays at the stereo position determined by the MIDI 'pan' command. However, you \r"
+                    tHelp.txt+="can also map each note based on its pitch or make it play 'everywhere'. \r"
                 }else if(sys1==bCoilStereo.id)
                 {
                     tHelp.txt+="Coil Stereo Settings \r\r"
-                    tHelp.txt+="Configure where on the stereo range each coil is placed. You can also \r"
-                    tHelp.txt+="Configure how close a note needs to be to play on this coil.\r"
-                    tHelp.txt+="Note that all notes from channels that are not assigned to a given coil \r"
-                    tHelp.txt+="won't play on that coil. See Channel Assignments. \r"
+                    tHelp.txt+="Configure where on the stereo range each coil is placed. You can also configure how \r"
+                    tHelp.txt+="close a note needs to be to play on this coil.\r"
+                    tHelp.txt+="Note that all notes from channels that are not assigned to a given coil won't play on \r"
+                    tHelp.txt+="that coil. See Channel Assignments. \r"
                 }else if(sys1==bEnvelope.id)
                 {
                     tHelp.txt+="Envelope Settings \r\r"
-                    tHelp.txt+="Envelopes can significantly improve the sound of your tesla coils. I'd\r"
-                    tHelp.txt+="suggest you try it by setting the instrument of your MIDI track(s) to  \r"
-                    tHelp.txt+="'10: Glockenspiel'.  \r"
-                    tHelp.txt+="If you want to modify the characteristics of the envelope you can do it here\r"
-                    tHelp.txt+="in the envelope editor. You should check the documentation first though.  \r"
+                    tHelp.txt+="Envelopes can significantly improve the sound of your tesla coils. I'd suggest you \r"
+                    tHelp.txt+="try it by setting the instrument of your MIDI track(s) to  '10: Glockenspiel'. \r"
+                    tHelp.txt+="If you want to modify the characteristics of the envelope you can do it here in the \r"
+                    tHelp.txt+="envelope editor. You should check the documentation first though.  \r"
                 }else
                 {
                     // Nope, no new help text to be displayed
@@ -1803,7 +1791,7 @@ Timer tmReturn
         
 Timer tmBlink
     Attributes
-        ID         : 65
+        ID         : 64
         Scope      : local
         Period (ms): 500
         Enabled    : no

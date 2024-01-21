@@ -68,6 +68,7 @@ Page Lightsaber
                 vis btCoil1,0
                 vis nOn1,0
                 vis tCoil,0
+                vis tus1,0
                 // Make sure that the coil is active.
                 btCoil1.val=1
                 click btCoil1,0

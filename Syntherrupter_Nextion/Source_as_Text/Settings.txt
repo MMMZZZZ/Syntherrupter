@@ -553,7 +553,7 @@ Button bReset
                 // SYSEX_START DMID VERSION DEVICE
                 printh f0 00 26 05 01 7f
                 // PN_LSB PN_MSB
-                printh 01 02 // Reset
+                printh 02 02 // Reset
                 // TG_LSB TG_MSB
                 printh 00 00 // Reserved
                 // VAL (4 bytes to be packed into 5 groups of 7 bit)

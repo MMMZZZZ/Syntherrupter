@@ -1225,7 +1225,7 @@ Hotspot fSysex
             printh 00 // Reserved
             // VAL (4 bytes to be packed into 5 groups of 7 bit)
             // Brightness: 0-100
-            prints dim,0
+            prints dim,1
             // Brightness uses less than 7 bits, hardcode remaining bytes.
             printh 00 00 00 00
             // SYSEX_END

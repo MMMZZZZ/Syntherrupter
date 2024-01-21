@@ -1609,6 +1609,7 @@ Text fCheck
                     b[newValTargetId.val].val=1
                 }
             }
+            click fSysex,1
         
 Text tMaxVoices
     Attributes
@@ -1864,12 +1865,11 @@ Button bOK
             if(showHelp.val==0)
             {
                 // Normal Operation
+                click fCheck,0
+                // fSysex requires a correct targetId.
                 b[newValTargetId.val].bco=idle.bco
                 b[newValTargetId.val].pco=idle.pco
                 newValTargetId.val=idle.id
-                click fCheck,0
-                // Send new values
-                click fSysex,1
             }else
             {
                 // Show Help
