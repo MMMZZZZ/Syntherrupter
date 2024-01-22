@@ -1504,11 +1504,16 @@ Dual-state Button btHelp
         Touch Release Event
             if(btHelp.val==0)
             {
+                // In case something was displayed, get rid of it
+                bReturn.val=1
+                click hHelp,0
+                // disable help overlay
                 vis hHelp,0
-                click fDraw,1
             }else
             {
                 vis hHelp,1
+                // Restore drawings
+                click fDraw,1
             }
         
 Hotspot fSysex
@@ -2082,7 +2087,8 @@ Hotspot hHelp
                 }else if(sys1==tTitle.id)
                 {
                     tHelp.txt+="Simple Mode \r\r"
-                    tHelp.txt+="In MIDI Live Mode Syntherrupter listens on its serial ports for MIDI music and plays it.\r"
+                    tHelp.txt+="Simple Mode is your classic interrupter. Ontime and BPS - or, alternatively, duty cycle\r"
+                    tHelp.txt+="and BPS. That's it. Simple, right?\r"
                 }else if(sys1==tUser.id)
                 {
                     tHelp.txt+="Current User \r\r"
@@ -2173,22 +2179,23 @@ Hotspot hHelp
                     tHelp.txt+="moving the sliders. The third option allows you to manually apply the settings. \r"
                 }else if(sys1==tShortcut.id)
                 {
-                    tHelp.txt+="^Shortcuts\r\r"
+                    tHelp.txt+="Shortcuts\r\r"
                     tHelp.txt+="In this section you find shortcuts to other parts of the UI (mainly settings) that you \r"
                     tHelp.txt+="may want to access while experimenting with Simple Mode. \r"
                 }else if(sys1==bCoilSettings.id)
                 {
                     tHelp.txt+="Coil Limits\r\r"
-                    tHelp.txt+="Shortcut to Settings->Coil Limis. The coil limits determine the safe operating range \r"
-                    tHelp.txt+="of each one of your tesla coils. Syntherrupter will not exceed these values no matter \r"
-                    tHelp.txt+="your settings here or elsewhere. Simple Mode is one of the safer ways to test and tune \r"
-                    tHelp.txt+="your limits. \r"
+                    tHelp.txt+="Shortcut to Settings->Coil Limis.  \r"
+                    tHelp.txt+="The coil limits determine the safe operating range of each one of your tesla coils.\r"
+                    tHelp.txt+="Syntherrupter will not exceed these values no matter your settings here or elsewhere. \r"
+                    tHelp.txt+="Simple Mode is one of the easier ways to test and tune your limits. \r"
                 }else if(sys1==bUsers.id)
                 {
                     tHelp.txt+="User Limits\r\r"
-                    tHelp.txt+="Shortcut to Settings->Users. The user settings include limits that determine how big\r"
-                    tHelp.txt+="the range on the sliders (ontime, BPS, duty) is. If you need a bigger or smaller range, \r"
-                    tHelp.txt+="that's the place to adjust it. \r"
+                    tHelp.txt+="Shortcut to Settings->Users. \r"
+                    tHelp.txt+="The user settings include limits that determine how big the range on the sliders \r"
+                    tHelp.txt+="(ontime, BPS, duty) is. If you need a bigger or smaller range, that's the place to \r"
+                    tHelp.txt+="adjust it. \r"
                     tHelp.txt+="Note: The ontime and duty limit of the 'highest' user (default name: 'Master Yoda') \r"
                     tHelp.txt+="are determined by the coil limits. See help on the 'Users' page for details. \r"
                 }else

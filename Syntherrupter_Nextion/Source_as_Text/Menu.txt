@@ -128,23 +128,9 @@ Variable (int32) currentHelp
         Scope: local
         Value: 4294967295
     
-Text tHelp
-    Attributes
-        ID                 : 1
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : 
-        Max. Text Size     : 650
-    
-    Events
-        Touch Press Event
-            // This object is only visible in help mode. No need to be "transparent" to clicks in normal operation.
-            click bReturn,0
-        
 Text tTitle
     Attributes
-        ID                 : 2
+        ID                 : 1
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -156,9 +142,23 @@ Text tTitle
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
+Text tHelp
+    Attributes
+        ID                 : 2
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : 
+        Max. Text Size     : 650
+    
+    Events
+        Touch Press Event
+            // This object is only visible in help mode. No need to be "transparent" to clicks in normal operation.
+            click bReturn,0
+        
 Text tUser
     Attributes
-        ID                 : 8
+        ID                 : 9
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -172,7 +172,7 @@ Text tUser
         
 Text tMSI
     Attributes
-        ID                 : 9
+        ID                 : 10
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -186,7 +186,7 @@ Text tMSI
         
 Text tMML
     Attributes
-        ID                 : 10
+        ID                 : 11
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -200,7 +200,7 @@ Text tMML
         
 Text tMLS
     Attributes
-        ID                 : 11
+        ID                 : 12
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -252,9 +252,35 @@ Button bMIDILive
         Touch Release Event
             page MIDI_Live
         
-Button bSettings
+Button bLightsaber
     Attributes
         ID               : 5
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Lightsaber
+        Max. Text Size   : 10
+    
+    Events
+        Touch Release Event
+            page Lightsaber
+        
+Button bInfo
+    Attributes
+        ID               : 6
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : Info & Credits
+        Max. Text Size   : 20
+    
+    Events
+        Touch Release Event
+            page Help_Info
+        
+Button bSettings
+    Attributes
+        ID               : 7
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -267,7 +293,7 @@ Button bSettings
         
 Button bSwitchUser
     Attributes
-        ID               : 6
+        ID               : 8
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -281,32 +307,6 @@ Button bSwitchUser
         
         Touch Release Event
             page Identification
-        
-Button bLightsaber
-    Attributes
-        ID               : 7
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : Lightsaber
-        Max. Text Size   : 10
-    
-    Events
-        Touch Release Event
-            page Lightsaber
-        
-Button bInfo
-    Attributes
-        ID               : 12
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : Info & Credits
-        Max. Text Size   : 20
-    
-    Events
-        Touch Release Event
-            page Help_Info
         
 Button bReturn
     Attributes
@@ -330,6 +330,10 @@ Dual-state Button btHelp
         Touch Release Event
             if(btHelp.val==0)
             {
+                // In case something was displayed, get rid of it
+                bReturn.val=1
+                click hHelp,0
+                // disable help overlay
                 vis hHelp,0
             }else
             {

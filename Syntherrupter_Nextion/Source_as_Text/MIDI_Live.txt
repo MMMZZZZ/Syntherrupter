@@ -1305,11 +1305,16 @@ Dual-state Button btHelp
         Touch Release Event
             if(btHelp.val==0)
             {
+                // In case something was displayed, get rid of it
+                bReturn.val=1
+                click hHelp,0
+                // disable help overlay
                 vis hHelp,0
-                click fDraw,1
             }else
             {
                 vis hHelp,1
+                // Restore drawings
+                click fDraw,1
             }
         
 Hotspot fLoadModes
