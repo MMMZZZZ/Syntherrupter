@@ -32,6 +32,8 @@ Page Menu
             bReturn.val=1
             click hHelp,0
             vis hHelp,0
+            vis bReturn,0
+            tTitle.txt="Menu"
             // Settings are not available to user 0
             if(User_Settings.userNum.val==0)
             {
@@ -276,7 +278,7 @@ Button bInfo
     
     Events
         Touch Release Event
-            page Help_Info
+            page Info
         
 Button bSettings
     Attributes
@@ -517,6 +519,8 @@ Hotspot hHelp
                 {
                     tHelp.txt+="Main Menu\r\r"
                     tHelp.txt+="From here you can access all of Syntherrupters operating modes as well as its settings. \r"
+                    tHelp.txt+="\r"
+                    tHelp.txt+="If you want to leave help mode, press the question mark at the top left. \r"
                 }else if(sys1==tUser.id)
                 {
                     tHelp.txt+="Current User \r\r"

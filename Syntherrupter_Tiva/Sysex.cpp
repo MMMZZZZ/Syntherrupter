@@ -1168,7 +1168,7 @@ void Sysex::processSysex()
             }
             break;
 
-        case 0x0200: // ()(), i32 EEPROM update mode, 0=manual, 1=force update, 2=auto (after each sysex command), other=reserved.
+        case 0x0200: // ()(), i32 EEPROM update mode, 0=manual, 1=force update, 2=auto (after each sysex command), 3=discard (reload), other=reserved.
             if (reading)
             {
                 msg.value.ui32 = EEPROMSettings::deviceData.eepromUpdateMode;
@@ -1181,6 +1181,10 @@ void Sysex::processSysex()
                 if (msg.value.ui32 < 3)
                 {
                     EEPROMSettings::deviceData.eepromUpdateMode = msg.value.ui32;
+                }
+                else if (msg.value.ui32 == 3)
+                {
+                    EEPROMSettings::readAll();
                 }
             }
             break;

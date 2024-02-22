@@ -28,6 +28,12 @@ Page Settings
             //
             vis fLoadModes,0
             vis fLoadColors,0
+            //
+            // Properly hide the help stuff.
+            vis hHelp,0
+            vis tHelp,0
+            vis bReturn,0
+            tTitle.txt="Settings"
             // Not all users have the same rights
             if(User_Settings.userNum.val!=2)
             {
@@ -37,159 +43,146 @@ Page Settings
                 vis bReset,0
             }
             //
-            // Load Help Mode
-            if(Help_Info.helpMode.val==0)
-            {
-                vis qrHelp,0
-            }else
-            {
-                tempStr.txt=tTitle.txt
-                showHelp.val=1
-                click 0,1
-            }
-            //
             // Enable page refreshs again
             ref_star
         
         Touch Press Event
-            if(showHelp.val==0)
+            if(Other_Settings.nBackOff.val!=0)
             {
-                // Normal Operation
-                if(Other_Settings.nBackOff.val!=0)
-                {
-                    // Default "stop" action.
-                    // Set ontime and duty to 0 for all modes. See fSysex for details
-                    // Disable all modes as well.
-                    printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
-                    printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
-                    printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
-                    // Set all ontime and duty settings of all pages to 0.
-                    // First come the global variables then the local variables.
-                    Simple.ontime.val=0
-                    Simple.duty.val=0
-                    Simple.set1.val=Simple.set1.val&0x0000ffff
-                    Simple.set2.val=Simple.set2.val&0x0000ffff
-                    Simple.set3.val=Simple.set3.val&0x0000ffff
-                    Simple.set4.val=Simple.set4.val&0x0000ffff
-                    Simple.set5.val=Simple.set5.val&0x0000ffff
-                    Simple.set6.val=Simple.set6.val&0x0000ffff
-                    MIDI_Live.ontime.val=0
-                    MIDI_Live.duty.val=0
-                    MIDI_Live.set1.val=0
-                    MIDI_Live.set2.val=0
-                    MIDI_Live.set3.val=0
-                    MIDI_Live.set4.val=0
-                    MIDI_Live.set5.val=0
-                    MIDI_Live.set6.val=0
-                    Lightsaber.ontime.val=0
-                    Lightsaber.ontimes12.val=0
-                    Lightsaber.ontimes34.val=0
-                    Lightsaber.ontimes56.val=0
-                }
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2Q"
-                click qrHelp,0
+                // Default "stop" action.
+                // Set ontime and duty to 0 for all modes. See fSysex for details
+                // Disable all modes as well.
+                printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
+                // Set all ontime and duty settings of all pages to 0.
+                // First come the global variables then the local variables.
+                Simple.ontime.val=0
+                Simple.duty.val=0
+                Simple.set1.val=Simple.set1.val&0x0000ffff
+                Simple.set2.val=Simple.set2.val&0x0000ffff
+                Simple.set3.val=Simple.set3.val&0x0000ffff
+                Simple.set4.val=Simple.set4.val&0x0000ffff
+                Simple.set5.val=Simple.set5.val&0x0000ffff
+                Simple.set6.val=Simple.set6.val&0x0000ffff
+                MIDI_Live.ontime.val=0
+                MIDI_Live.duty.val=0
+                MIDI_Live.set1.val=0
+                MIDI_Live.set2.val=0
+                MIDI_Live.set3.val=0
+                MIDI_Live.set4.val=0
+                MIDI_Live.set5.val=0
+                MIDI_Live.set6.val=0
+                Lightsaber.ontime.val=0
+                Lightsaber.ontimes12.val=0
+                Lightsaber.ontimes34.val=0
+                Lightsaber.ontimes56.val=0
             }
         
+Variable (int32) currentHelp
+    Attributes
+        ID   : 6
+        Scope: local
+        Value: 4294967295
+    
 Variable (int32) activeModes
     Attributes
-        ID   : 1
+        ID   : 7
         Scope: global
         Value: 0
     
 Variable (int32) backCol
     Attributes
-        ID   : 2
+        ID   : 8
         Scope: global
         Value: 8484
     
 Variable (int32) backCol2
     Attributes
-        ID   : 3
+        ID   : 9
         Scope: global
         Value: 2145
     
 Variable (int32) frontCol
     Attributes
-        ID   : 16
+        ID   : 21
         Scope: global
         Value: 40476
     
 Variable (int32) frontCol2
     Attributes
-        ID   : 17
+        ID   : 22
         Scope: global
         Value: 40476
     
 Variable (int32) picCount
     Attributes
-        ID   : 18
+        ID   : 23
         Scope: global
         Value: 43
     
 Variable (int32) colorMode
     Attributes
-        ID   : 19
+        ID   : 24
         Scope: global
         Value: 1
     
 Variable (int32) qrFrontCol
     Attributes
-        ID   : 20
+        ID   : 25
         Scope: global
         Value: 40476
     
-Variable (string) tempStr
-    Attributes
-        ID            : 21
-        Scope         : local
-        Text          : 
-        Max. Text Size: 32
-    
-Variable (int32) showHelp
-    Attributes
-        ID   : 22
-        Scope: local
-        Value: 0
-    
 Variable (int32) applyingMode
     Attributes
-        ID   : 23
+        ID   : 26
         Scope: global
         Value: 1
     
 Variable (int32) backCol2Deflt
     Attributes
-        ID   : 24
+        ID   : 27
         Scope: global
         Value: 4589
     
 Variable (int32) backSelectCol2
     Attributes
-        ID   : 25
+        ID   : 28
         Scope: global
         Value: 16904
     
 Variable (int32) firstHelp
     Attributes
-        ID   : 30
+        ID   : 32
         Scope: global
         Value: 1
     
-Text tTitle
+Text tHelp
     Attributes
-        ID                 : 5
+        ID                 : 1
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : Settings
+        Text               : 
+        Max. Text Size     : 650
+    
+    Events
+        Touch Press Event
+            // This object is only visible in help mode. No need to be "transparent" to clicks in normal operation.
+            click bReturn,0
+        
+Text tTitle
+    Attributes
+        ID                 : 3
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :        Settings
         Max. Text Size     : 22
     
 Text tUser
     Attributes
-        ID                 : 10
+        ID                 : 15
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -203,7 +196,7 @@ Text tUser
         
 Text tMSI
     Attributes
-        ID                 : 11
+        ID                 : 16
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -217,7 +210,7 @@ Text tMSI
         
 Text tMML
     Attributes
-        ID                 : 12
+        ID                 : 17
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -231,7 +224,7 @@ Text tMML
         
 Text tMLS
     Attributes
-        ID                 : 13
+        ID                 : 18
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -243,38 +236,53 @@ Text tMLS
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
-QR Code qrHelp
+Button bDiscard
     Attributes
-        ID               : 27
+        ID               : 2
         Scope            : local
         Send Component ID: disabled
-        Text             : git.io/JkvOK
-        Max. Text Size   : 16
+        State            : unpressed
+        Text             : Discard
+        Max. Text Size   : 20
     
     Events
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                showHelp.val=1
-                tempStr.txt=tTitle.txt
-                tTitle.txt="Get Help/Link for..."
-                // keep QR code on top
-                ref qrHelp
-                // Show modified title before stopping screen refreshs.
-                doevents
-                ref_stop
-            }else
-            {
-                showHelp.val=0
-                tTitle.txt=tempStr.txt
-                // keep QR code on top
-                ref qrHelp
-                ref_star
-            }
+            // Force EEPROM Reload
+            // Send a Syntherrupter Sysex command
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            // EEPROM Reload
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 00 02 // EEPROM Update
+            // TG_LSB TG_MSB
+            printh 00 00 // Reserved
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // Update Mode. 1: Reload all settings from EEPROM
+            printh 03 00 00 00 00
+            // SYSEX_END
+            printh f7
+            //
+            page Menu
         
-Button bCoilSettings
+Button bReturn
     Attributes
         ID               : 4
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : âœ•
+        Max. Text Size   : 3
+    
+Button bCoilSettings
+    Attributes
+        ID               : 10
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -282,31 +290,13 @@ Button bCoilSettings
         Max. Text Size   : 20
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2x"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                TC_Settings.origin.val=dp
-                page TC_Settings
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            TC_Settings.origin.val=dp
+            page TC_Settings
         
-Button bReturn
+Button bSave
     Attributes
-        ID               : 6
+        ID               : 11
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -314,53 +304,34 @@ Button bReturn
         Max. Text Size   : 10
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf78"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                //
-                // Force EEPROM update
-                // Send a Syntherrupter Sysex command
-                // Package format:
-                // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
-                // DMID DMID = 26 05
-                // VERSION = 01
-                // DEVICE = 7f (wildcard)
-                // PN, TG, VAL: see syntherrupter sysex documentation
-                //
-                // EEPROM Update
-                // SYSEX_START DMID VERSION DEVICE
-                printh f0 00 26 05 01 7f
-                // PN_LSB PN_MSB
-                printh 00 02 // EEPROM Update
-                // TG_LSB TG_MSB
-                printh 00 00 // Reserved
-                // VAL (4 bytes to be packed into 5 groups of 7 bit)
-                // Update Mode. 1: Forced update.
-                printh 01 00 00 00 00
-                // SYSEX_END
-                printh f7
-                //
-                page Menu
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            // Force EEPROM update
+            // Send a Syntherrupter Sysex command
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            // EEPROM Update
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 00 02 // EEPROM Update
+            // TG_LSB TG_MSB
+            printh 00 00 // Reserved
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // Update Mode. 1: Forced update.
+            printh 01 00 00 00 00
+            // SYSEX_END
+            printh f7
+            //
+            page Menu
         
 Button bNXTUpdate
     Attributes
-        ID               : 7
+        ID               : 12
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -368,30 +339,12 @@ Button bNXTUpdate
         Max. Text Size   : 20
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2p"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                page USB_NXT_Pass
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            page USB_NXT_Pass
         
 Button bGeneral
     Attributes
-        ID               : 8
+        ID               : 13
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -399,30 +352,12 @@ Button bGeneral
         Max. Text Size   : 20
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2b"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                page Other_Settings
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            page Other_Settings
         
 Button bUsers
     Attributes
-        ID               : 9
+        ID               : 14
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -430,31 +365,13 @@ Button bUsers
         Max. Text Size   : 20
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2N"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                User_Settings.origin.val=dp
-                page User_Settings
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            User_Settings.origin.val=dp
+            page User_Settings
         
 Button bEnvelope
     Attributes
-        ID               : 14
+        ID               : 19
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -462,31 +379,13 @@ Button bEnvelope
         Max. Text Size   : 20
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2A"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                Env_Settings.origin.val=dp
-                page Env_Settings
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            Env_Settings.origin.val=dp
+            page Env_Settings
         
 Button bESPUpdate
     Attributes
-        ID               : 15
+        ID               : 20
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -494,99 +393,86 @@ Button bESPUpdate
         Max. Text Size   : 20
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2h"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                page USB_ESP_Pass
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            page USB_ESP_Pass
         
 Button bReset
     Attributes
-        ID               : 28
+        ID               : 30
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : Discard / Reset ÂµC
-        Max. Text Size   : 30
+        Text             : Reset ÂµC
+        Max. Text Size   : 20
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf78"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
+            // Reset Tiva
+            // Send a Syntherrupter Sysex command
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            // Reset
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 02 02 // Reset
+            // TG_LSB TG_MSB
+            printh 00 00 // Reserved
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // 41153700: key for reset
+            sys1=41153700
+            sys2=sys1
+            sys2&=0x7f
+            prints sys2,1
+            sys1>>=7
+            sys2=sys1&0x7f
+            prints sys2,1
+            sys1>>=7
+            sys2=sys1&0x7f
+            prints sys2,1
+            sys1>>=7
+            sys2=sys1&0x7f
+            prints sys2,1
+            sys1>>=7
+            sys2=sys1&0x7f
+            prints sys2,1
+            // SYSEX_END
+            printh f7
+            //
+            // Not really necessary but doesn't hurt either.
+            page Menu
+        
+Dual-state Button btHelp
+    Attributes
+        ID               : 5
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : ?
+        Max. Text Size   : 1
+    
+    Events
+        Touch Release Event
+            if(btHelp.val==0)
             {
-                // Normal Operation
-                //
-                // Reset Tiva
-                // Send a Syntherrupter Sysex command
-                // Package format:
-                // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
-                // DMID DMID = 26 05
-                // VERSION = 01
-                // DEVICE = 7f (wildcard)
-                // PN, TG, VAL: see syntherrupter sysex documentation
-                //
-                // Reset
-                // SYSEX_START DMID VERSION DEVICE
-                printh f0 00 26 05 01 7f
-                // PN_LSB PN_MSB
-                printh 02 02 // Reset
-                // TG_LSB TG_MSB
-                printh 00 00 // Reserved
-                // VAL (4 bytes to be packed into 5 groups of 7 bit)
-                // 41153700: key for reset
-                sys1=41153700
-                sys2=sys1
-                sys2&=0x7f
-                prints sys2,1
-                sys1>>=7
-                sys2=sys1&0x7f
-                prints sys2,1
-                sys1>>=7
-                sys2=sys1&0x7f
-                prints sys2,1
-                sys1>>=7
-                sys2=sys1&0x7f
-                prints sys2,1
-                sys1>>=7
-                sys2=sys1&0x7f
-                prints sys2,1
-                // SYSEX_END
-                printh f7
-                //
-                page Menu
+                // In case something was displayed, get rid of it
+                bReturn.val=1
+                click hHelp,0
+                // disable help overlay
+                vis hHelp,0
             }else
             {
-                // Show Help
-                click qrHelp,0
+                vis hHelp,1
             }
         
 Hotspot fLoadModes
     Attributes
-        ID               : 26
+        ID               : 29
         Scope            : local
         Send Component ID: disabled
     
@@ -616,7 +502,7 @@ Hotspot fLoadModes
         
 Hotspot fLoadColors
     Attributes
-        ID               : 29
+        ID               : 31
         Scope            : local
         Send Component ID: disabled
     
@@ -688,5 +574,175 @@ Hotspot fLoadColors
                     b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
                     b[sys0].pic2+=sys2
                 }
+            }
+        
+Hotspot hHelp
+    Attributes
+        ID               : 33
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Determine component/feature that would have been touched.
+            sys1=0
+            for(sys0=fLoadColors.id;sys0>=0;sys0--)
+            {
+                // Ignore hotspots, touchcaps, variables
+                if(b[sys0].type!=5&&b[sys0].type!=51&&b[sys0].type!=52&&b[sys0].type!=109)
+                {
+                    x0=b[sys0].x
+                    y0=b[sys0].y
+                    x1=b[sys0].w
+                    y1=b[sys0].h
+                    x1+=x0
+                    y1+=y0
+                    if(tch0>=x0&&tch0<x1&&tch1>=y0&&tch1<y1)
+                    {
+                        sys1=sys0
+                        // abort loop
+                        sys0=-1
+                    }
+                }
+            }
+            if(currentHelp.val>=0&&sys1==bReturn.id)
+            {
+                // Return button has been pressed while help is being displayed. This means
+                // hide the help text again (see touch release event)
+                bReturn.val=1
+            }else if(sys1==btHelp.id)
+            {
+                // Question mark button has been pressed. Disable help mode (see touch release event).
+                btHelp.val=0
+            }else if(currentHelp.val>=0)
+            {
+                // Help is being displayed and something else has been pressed.
+                // Act as if the page background had been pressed.
+                // Note: this can make other UI elements to "pop up", therefore bring the text back on top
+                // TODO: Prevent flickering!
+                click 0,1
+                doevents
+                ref tHelp
+            }else
+            {
+                // Show help according to what has been touched.
+                // Assume that some new help will be displayed
+                sys0=1
+                tHelp.txt=""
+                if(Settings.firstHelp.val!=0)
+                {
+                    Settings.firstHelp.val=0
+                    tHelp.txt+="Help Mode Enabled \r\r"
+                    tHelp.txt+="You've enabled the on-screen help by pressing the question mark at the top right \r"
+                    tHelp.txt+="corner. As long as it's active, you can press any part of the UI and get a description \r"
+                    tHelp.txt+="of what that button/slider/... does. \r"
+                    tHelp.txt+="Press the X button at the top left to get help on another part of the UI. \r"
+                    tHelp.txt+="Press the question mark at the top right to leave help mode and resume normal\r"
+                    tHelp.txt+="operation. \r"
+                    tHelp.txt+="Press any other part of the screen, including this description, to disable all outputs. \r"
+                    tHelp.txt+="For more information, check the help on the page background.\r"
+                    tHelp.txt+=" \r"
+                    tHelp.txt+="This tip won't reappear until you reset or power cycle Syntherrupter. \r"
+                }else if(sys1==tTitle.id||sys1==bReturn.id) // In this case bReturn overlays the title box.
+                {
+                    tHelp.txt+="Settings\r\r"
+                    tHelp.txt+="From here you can access all of Syntherrupters settings as well as the serial bridge modes. \r"
+                    tHelp.txt+="All settings are applied immediately but only stored permanently once you hit the 'Save' \r"
+                    tHelp.txt+="button below. \r"
+                    tHelp.txt+="\r"
+                    tHelp.txt+="If you want to leave help mode, press the question mark at the top left. \r"
+                }else if(sys1==tUser.id)
+                {
+                    tHelp.txt+="Current User \r\r"
+                    tHelp.txt+="The name of the currently active user. This determines the range within which you \r"
+                    tHelp.txt+="can operate Syntherrupter. Go to the main menu to change the current user. \r"
+                }else if(sys1==tMSI.id||sys1==tMML.id||sys1==tMLS.id)
+                {
+                    tHelp.txt+="Active Modes \r\r"
+                    tHelp.txt+="Modes can stay active even if you leave the corresponding page. Active modes are \r"
+                    tHelp.txt+="highlighted at the bottom right. \r"
+                }else if(sys1==0||sys1==tHelp.id)
+                {
+                    tHelp.txt+="Page background \r\r"
+                    tHelp.txt+="The page background, textboxes and non-interactive elements in general shut down \r"
+                    tHelp.txt+="all outputs if you press them. This allows you to quickly stop all outputs and all \r"
+                    tHelp.txt+="modes if something goes wrong. \r"
+                    tHelp.txt+="Note however, that unplugging power is the only actually safe way to ensure a complete \r"
+                    tHelp.txt+="shutdown! \r"
+                    tHelp.txt+="This feature can be temporarily disabled in the general settings. After a reset or \r"
+                    tHelp.txt+="power-cycle it will be enabled again.\r"
+                }else if(sys1==bGeneral.id)
+                {
+                    tHelp.txt+="General Settings\r\r"
+                    tHelp.txt+="Mostly settings related to the UI, f.ex. screen brightness and dark mode. \r"
+                }else if(sys1==bUsers.id)
+                {
+                    tHelp.txt+="User Settings and Limits\r\r"
+                    tHelp.txt+="Set user names and passwords as well as the limits within which they may operate. \r"
+                }else if(sys1==bEnvelope.id)
+                {
+                    tHelp.txt+="Envelope Editor\r\r"
+                    tHelp.txt+="Envelopes can significantly improve the sound of your tesla coils. I'd suggest you \r"
+                    tHelp.txt+="try it by setting the instrument of your MIDI track(s) to  '10: Glockenspiel'. \r"
+                    tHelp.txt+="If you want to modify the characteristics of the envelope you can do it here in the \r"
+                    tHelp.txt+="envelope editor. You should check the documentation first though. \r"
+                }else if(sys1==bCoilSettings.id)
+                {
+                    tHelp.txt+="Coil Limits\r\r"
+                    tHelp.txt+="The coil limits determine the safe operating range of each one of your tesla coils.\r"
+                    tHelp.txt+="Syntherrupter will not exceed these values no matter your settings here or elsewhere. \r"
+                    tHelp.txt+="Simple Mode is one of the easier ways to test and tune your limits. \r"
+                }else if(sys1==bNXTUpdate.id)
+                {
+                    tHelp.txt+="Nextion <-> USB Serial Passthrough\r\r"
+                    tHelp.txt+="Entering this page virtually connects the Nextion serial pins to the USB serial pins. \r"
+                    tHelp.txt+="This mode works for any baudrate up to about 512kbaud/s. \r"
+                    tHelp.txt+="All other functions of Syntherrupter will stop working. Exiting this mode requires a reset \r"
+                    tHelp.txt+="or power cycle. \r"
+                }else if(sys1==bESPUpdate.id)
+                {
+                    tHelp.txt+="ESP <-> USB Serial Passthrough\r\r"
+                    tHelp.txt+="Entering this page virtually connects the Nextion serial pins to the USB serial pins. \r"
+                    tHelp.txt+="This mode works for any baudrate up to about 512kbaud/s. \r"
+                    tHelp.txt+="All other functions of Syntherrupter will stop working. Exiting this mode requires a reset \r"
+                    tHelp.txt+="or power cycle. \r"
+                }else if(sys1==bSave.id)
+                {
+                    tHelp.txt+="Save and Return\r\r"
+                    tHelp.txt+="Save settings permanently and return to the main menu. \r"
+                }else if(sys1==bDiscard.id)
+                {
+                    tHelp.txt+="Discard Settings\r\r"
+                    tHelp.txt+="Discard all settings by reloading them from EEPROM. \r"
+                }else if(sys1==bReset.id)
+                {
+                    tHelp.txt+="Reset\r\r"
+                    tHelp.txt+="Reset Syntherrupter, discarding all settings. \r"
+                }else
+                {
+                    // Nope, no new help text to be displayed
+                    sys0=0
+                }
+                if(sys0!=0)
+                {
+                    currentHelp.val=sys1
+                    vis tHelp,1
+                    vis bReturn,1
+                    tTitle.txt="       Settings"
+                }
+            }
+        
+        Touch Release Event
+            // Check if help text is being displayed and shall be hidden again
+            if(bReturn.val==1)
+            {
+                bReturn.val=0
+                vis bReturn,0
+                vis tHelp,0
+                tTitle.txt="Settings"
+                currentHelp.val=-1
+            }else if(sys1==btHelp.id)
+            {
+                click btHelp,0
             }
         

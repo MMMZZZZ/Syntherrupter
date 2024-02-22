@@ -13,17 +13,6 @@ Page USB_NXT_Pass
             // Load colors
             click fLoadColors,1
             //
-            // Load Help Mode
-            if(Help_Info.helpMode.val==0)
-            {
-                vis qrHelp,0
-            }else
-            {
-                tempStr.txt=tTitle.txt
-                showHelp.val=1
-                click 0,1
-            }
-            //
             // Enable page refreshs again
             ref_star
         
@@ -51,17 +40,6 @@ Page USB_NXT_Pass
             // unused, hardcoded to 0
             // SYSEX_END
             printh 00 00 00 00 00 f7
-        
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2X"
-                click qrHelp,0
-            }
         
 Variable (string) tempStr
     Attributes
@@ -94,38 +72,9 @@ Text tInfo
         Text               : Nextion is now connected to the USB serial port. \r\nUse this to upload a new firmware or to \r\ncommunicate with the device. \r\nNotes:\r\n  * To leave passthrough mode, you need to \r\n     power cycle Syntherrupter.\r\n  * After a firmware upload the screen will\r\n     become dark (Remember to power cycle!)
         Max. Text Size     : 384
     
-QR Code qrHelp
-    Attributes
-        ID               : 5
-        Scope            : local
-        Send Component ID: disabled
-        Text             : git.io/JkvOK
-        Max. Text Size   : 16
-    
-    Events
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                showHelp.val=1
-                tempStr.txt=tTitle.txt
-                tTitle.txt="Get Help/Link for..."
-                // keep QR code on top
-                ref qrHelp
-                // Show modified title before stopping screen refreshs.
-                doevents
-                ref_stop
-            }else
-            {
-                showHelp.val=0
-                tTitle.txt=tempStr.txt
-                // keep QR code on top
-                ref qrHelp
-                ref_star
-            }
-        
 Hotspot fLoadColors
     Attributes
-        ID               : 6
+        ID               : 5
         Scope            : local
         Send Component ID: disabled
     

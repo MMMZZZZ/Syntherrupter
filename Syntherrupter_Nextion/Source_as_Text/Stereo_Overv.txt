@@ -62,17 +62,6 @@ Page Stereo_Overv
             sliderSegments.val=TC_Settings.maxCoilCount.val-1
             sliderSegments.val*=2
             //
-            // Load Help Mode
-            if(Help_Info.helpMode.val==0)
-            {
-                vis qrHelp,0
-            }else
-            {
-                tempStr.txt=tTitle.txt
-                showHelp.val=1
-                click 0,1
-            }
-            //
             // Enable page refreshs again
             ref_star
         
@@ -85,45 +74,36 @@ Page Stereo_Overv
             click fDraw,1
         
         Touch Press Event
-            if(showHelp.val==0)
+            if(Other_Settings.nBackOff.val!=0)
             {
-                // Normal Operation
-                if(Other_Settings.nBackOff.val!=0)
-                {
-                    // Default "stop" action.
-                    // Set ontime and duty to 0 for all modes. See fSysex for details
-                    // Disable all modes as well.
-                    printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
-                    printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
-                    printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
-                    // Set all ontime and duty settings of all pages to 0.
-                    // First come the global variables then the local variables.
-                    Simple.ontime.val=0
-                    Simple.duty.val=0
-                    Simple.set1.val=Simple.set1.val&0x0000ffff
-                    Simple.set2.val=Simple.set2.val&0x0000ffff
-                    Simple.set3.val=Simple.set3.val&0x0000ffff
-                    Simple.set4.val=Simple.set4.val&0x0000ffff
-                    Simple.set5.val=Simple.set5.val&0x0000ffff
-                    Simple.set6.val=Simple.set6.val&0x0000ffff
-                    MIDI_Live.ontime.val=0
-                    MIDI_Live.duty.val=0
-                    MIDI_Live.set1.val=0
-                    MIDI_Live.set2.val=0
-                    MIDI_Live.set3.val=0
-                    MIDI_Live.set4.val=0
-                    MIDI_Live.set5.val=0
-                    MIDI_Live.set6.val=0
-                    Lightsaber.ontime.val=0
-                    Lightsaber.ontimes12.val=0
-                    Lightsaber.ontimes34.val=0
-                    Lightsaber.ontimes56.val=0
-                }
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgP"
-                click qrHelp,0
+                // Default "stop" action.
+                // Set ontime and duty to 0 for all modes. See fSysex for details
+                // Disable all modes as well.
+                printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
+                // Set all ontime and duty settings of all pages to 0.
+                // First come the global variables then the local variables.
+                Simple.ontime.val=0
+                Simple.duty.val=0
+                Simple.set1.val=Simple.set1.val&0x0000ffff
+                Simple.set2.val=Simple.set2.val&0x0000ffff
+                Simple.set3.val=Simple.set3.val&0x0000ffff
+                Simple.set4.val=Simple.set4.val&0x0000ffff
+                Simple.set5.val=Simple.set5.val&0x0000ffff
+                Simple.set6.val=Simple.set6.val&0x0000ffff
+                MIDI_Live.ontime.val=0
+                MIDI_Live.duty.val=0
+                MIDI_Live.set1.val=0
+                MIDI_Live.set2.val=0
+                MIDI_Live.set3.val=0
+                MIDI_Live.set4.val=0
+                MIDI_Live.set5.val=0
+                MIDI_Live.set6.val=0
+                Lightsaber.ontime.val=0
+                Lightsaber.ontimes12.val=0
+                Lightsaber.ontimes34.val=0
+                Lightsaber.ontimes56.val=0
             }
         
 Variable (int32) origin
@@ -132,94 +112,81 @@ Variable (int32) origin
         Scope: global
         Value: 0
     
-Variable (string) tempStr
-    Attributes
-        ID            : 3
-        Scope         : local
-        Text          : 
-        Max. Text Size: 32
-    
-Variable (int32) showHelp
-    Attributes
-        ID   : 4
-        Scope: local
-        Value: 0
-    
 Variable (int32) coilNum
     Attributes
-        ID   : 5
+        ID   : 3
         Scope: local
         Value: 0
     
 Variable (int32) panMode
     Attributes
-        ID   : 16
+        ID   : 13
         Scope: local
         Value: 0
     
 Variable (int32) cfgCoil1
     Attributes
-        ID   : 17
+        ID   : 14
         Scope: global
         Value: 16416
     
 Variable (int32) cfgCoil2
     Attributes
-        ID   : 18
+        ID   : 15
         Scope: global
         Value: 16416
     
 Variable (int32) cfgCoil3
     Attributes
-        ID   : 19
+        ID   : 16
         Scope: global
         Value: 16416
     
 Variable (int32) cfgCoil4
     Attributes
-        ID   : 20
+        ID   : 17
         Scope: global
         Value: 16416
     
 Variable (int32) cfgCoil5
     Attributes
-        ID   : 21
+        ID   : 18
         Scope: global
         Value: 16416
     
 Variable (int32) cfgCoil6
     Attributes
-        ID   : 22
+        ID   : 19
         Scope: global
         Value: 16416
     
 Variable (int32) sliderSegments
     Attributes
-        ID   : 23
+        ID   : 20
         Scope: local
         Value: 0
     
 Variable (int32) temp
     Attributes
-        ID   : 24
+        ID   : 21
         Scope: local
         Value: 0
     
 Variable (int32) autoPlaceDist
     Attributes
-        ID   : 25
+        ID   : 22
         Scope: local
         Value: 0
     
 Variable (int32) lWidth
     Attributes
-        ID   : 26
+        ID   : 23
         Scope: local
         Value: 0
     
 Number fConvBtnState
     Attributes
-        ID                 : 58
+        ID                 : 55
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -300,7 +267,7 @@ Number fConvBtnState
         
 Text tTitle
     Attributes
-        ID                 : 6
+        ID                 : 4
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -314,7 +281,7 @@ Text tTitle
         
 Text tUser
     Attributes
-        ID                 : 8
+        ID                 : 6
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -328,7 +295,7 @@ Text tUser
         
 Text tMSI
     Attributes
-        ID                 : 9
+        ID                 : 7
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -342,7 +309,7 @@ Text tMSI
         
 Text tMML
     Attributes
-        ID                 : 10
+        ID                 : 8
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -356,7 +323,7 @@ Text tMML
         
 Text tMLS
     Attributes
-        ID                 : 11
+        ID                 : 9
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -370,7 +337,7 @@ Text tMLS
         
 Text tHideBack
     Attributes
-        ID                 : 27
+        ID                 : 24
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -383,7 +350,7 @@ Text tHideBack
         
 Text tChan
     Attributes
-        ID                 : 44
+        ID                 : 41
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -397,7 +364,7 @@ Text tChan
         
 Text tCoils
     Attributes
-        ID                 : 47
+        ID                 : 44
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -411,7 +378,7 @@ Text tCoils
         
 Text tHideBack2
     Attributes
-        ID                 : 48
+        ID                 : 45
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -424,7 +391,7 @@ Text tHideBack2
         
 Text tHideBack3
     Attributes
-        ID                 : 59
+        ID                 : 56
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -437,7 +404,7 @@ Text tHideBack3
         
 Text tL
     Attributes
-        ID                 : 60
+        ID                 : 57
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -451,7 +418,7 @@ Text tL
         
 Text tR
     Attributes
-        ID                 : 61
+        ID                 : 58
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -465,7 +432,7 @@ Text tR
         
 Text t0
     Attributes
-        ID                 : 63
+        ID                 : 60
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -479,7 +446,7 @@ Text t0
         
 Text t127
     Attributes
-        ID                 : 64
+        ID                 : 61
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -493,7 +460,7 @@ Text t127
         
 Text tNotePos
     Attributes
-        ID                 : 66
+        ID                 : 63
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -507,7 +474,7 @@ Text tNotePos
         
 Text tStereoPos
     Attributes
-        ID                 : 67
+        ID                 : 64
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -521,7 +488,7 @@ Text tStereoPos
         
 Text tChnInfo2
     Attributes
-        ID                 : 68
+        ID                 : 65
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -533,52 +500,23 @@ Text tChnInfo2
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
-QR Code qrHelp
-    Attributes
-        ID               : 13
-        Scope            : local
-        Send Component ID: disabled
-        Text             : git.io/JkvOK
-        Max. Text Size   : 16
-    
-    Events
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                showHelp.val=1
-                tempStr.txt=tTitle.txt
-                tTitle.txt="Get Help/Link for..."
-                // keep QR code on top
-                ref qrHelp
-                // Show modified title before stopping screen refreshs.
-                doevents
-                ref_stop
-            }else
-            {
-                showHelp.val=0
-                tTitle.txt=tempStr.txt
-                // keep QR code on top
-                ref qrHelp
-                ref_star
-            }
-        
 Progress Bar lStereoRange
     Attributes
-        ID               : 62
+        ID               : 59
         Scope            : local
         Send Component ID: disabled
         Value            : 100
     
 Progress Bar lNoteRange
     Attributes
-        ID               : 65
+        ID               : 62
         Scope            : local
         Send Component ID: disabled
         Value            : 100
     
 Button bReturn
     Attributes
-        ID               : 7
+        ID               : 5
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -586,30 +524,12 @@ Button bReturn
         Max. Text Size   : 3
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgQ"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                page origin.val
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            page origin.val
         
 Button bNone
     Attributes
-        ID               : 45
+        ID               : 42
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -617,45 +537,27 @@ Button bNone
         Max. Text Size   : 6
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                btChn0.val=0
-                btChn1.val=0
-                btChn2.val=0
-                btChn3.val=0
-                btChn4.val=0
-                btChn5.val=0
-                btChn6.val=0
-                btChn7.val=0
-                btChn8.val=0
-                btChn9.val=0
-                btChn10.val=0
-                btChn11.val=0
-                btChn12.val=0
-                btChn13.val=0
-                btChn14.val=0
-                btChn15.val=0
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            btChn0.val=0
+            btChn1.val=0
+            btChn2.val=0
+            btChn3.val=0
+            btChn4.val=0
+            btChn5.val=0
+            btChn6.val=0
+            btChn7.val=0
+            btChn8.val=0
+            btChn9.val=0
+            btChn10.val=0
+            btChn11.val=0
+            btChn12.val=0
+            btChn13.val=0
+            btChn14.val=0
+            btChn15.val=0
         
 Button bAll
     Attributes
-        ID               : 46
+        ID               : 43
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -663,45 +565,27 @@ Button bAll
         Max. Text Size   : 6
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                btChn0.val=1
-                btChn1.val=1
-                btChn2.val=1
-                btChn3.val=1
-                btChn4.val=1
-                btChn5.val=1
-                btChn6.val=1
-                btChn7.val=1
-                btChn8.val=1
-                btChn9.val=1
-                btChn10.val=1
-                btChn11.val=1
-                btChn12.val=1
-                btChn13.val=1
-                btChn14.val=1
-                btChn15.val=1
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            btChn0.val=1
+            btChn1.val=1
+            btChn2.val=1
+            btChn3.val=1
+            btChn4.val=1
+            btChn5.val=1
+            btChn6.val=1
+            btChn7.val=1
+            btChn8.val=1
+            btChn9.val=1
+            btChn10.val=1
+            btChn11.val=1
+            btChn12.val=1
+            btChn13.val=1
+            btChn14.val=1
+            btChn15.val=1
         
 Button bAllCoils
     Attributes
-        ID               : 55
+        ID               : 52
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -709,35 +593,17 @@ Button bAllCoils
         Max. Text Size   : 6
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                btCoil1.val=1
-                btCoil2.val=1
-                btCoil3.val=1
-                btCoil4.val=1
-                btCoil5.val=1
-                btCoil6.val=1
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            btCoil1.val=1
+            btCoil2.val=1
+            btCoil3.val=1
+            btCoil4.val=1
+            btCoil5.val=1
+            btCoil6.val=1
         
 Button bNoneCoils
     Attributes
-        ID               : 56
+        ID               : 53
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -745,695 +611,215 @@ Button bNoneCoils
         Max. Text Size   : 6
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                btCoil1.val=0
-                btCoil2.val=0
-                btCoil3.val=0
-                btCoil4.val=0
-                btCoil5.val=0
-                btCoil6.val=0
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            btCoil1.val=0
+            btCoil2.val=0
+            btCoil3.val=0
+            btCoil4.val=0
+            btCoil5.val=0
+            btCoil6.val=0
         
 Dual-state Button btChn0
     Attributes
-        ID               : 28
+        ID               : 25
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 1
         Max. Text Size   : 2
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btChn1
     Attributes
-        ID               : 29
+        ID               : 26
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 2
         Max. Text Size   : 2
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btChn2
     Attributes
-        ID               : 30
+        ID               : 27
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 3
         Max. Text Size   : 2
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btChn3
     Attributes
-        ID               : 31
+        ID               : 28
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 4
         Max. Text Size   : 2
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btChn4
     Attributes
-        ID               : 32
+        ID               : 29
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 5
         Max. Text Size   : 2
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btChn5
     Attributes
-        ID               : 33
+        ID               : 30
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 6
         Max. Text Size   : 2
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btChn6
     Attributes
-        ID               : 34
+        ID               : 31
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 7
         Max. Text Size   : 2
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btChn7
     Attributes
-        ID               : 35
+        ID               : 32
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 8
         Max. Text Size   : 2
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btChn8
     Attributes
-        ID               : 36
+        ID               : 33
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 9
         Max. Text Size   : 2
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btChn9
     Attributes
-        ID               : 37
+        ID               : 34
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 10
         Max. Text Size   : 2
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btChn10
     Attributes
-        ID               : 38
+        ID               : 35
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 11
         Max. Text Size   : 3
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btChn11
     Attributes
-        ID               : 39
+        ID               : 36
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 12
         Max. Text Size   : 3
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btChn12
     Attributes
-        ID               : 40
+        ID               : 37
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 13
         Max. Text Size   : 3
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btChn13
     Attributes
-        ID               : 41
+        ID               : 38
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 14
         Max. Text Size   : 3
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btChn14
     Attributes
-        ID               : 42
+        ID               : 39
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 15
         Max. Text Size   : 3
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operationl
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btChn15
     Attributes
-        ID               : 43
+        ID               : 40
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 16
         Max. Text Size   : 3
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btCoil1
     Attributes
-        ID               : 49
+        ID               : 46
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 1
         Max. Text Size   : 2
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btCoil2
     Attributes
-        ID               : 50
+        ID               : 47
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 2
         Max. Text Size   : 2
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btCoil3
     Attributes
-        ID               : 51
+        ID               : 48
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 3
         Max. Text Size   : 2
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btCoil4
     Attributes
-        ID               : 52
+        ID               : 49
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 4
         Max. Text Size   : 2
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operationl
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btCoil5
     Attributes
-        ID               : 53
+        ID               : 50
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 5
         Max. Text Size   : 2
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Dual-state Button btCoil6
     Attributes
-        ID               : 54
+        ID               : 51
         Scope            : local
         Send Component ID: disabled
         State            : pressed
         Text             : 6
         Max. Text Size   : 2
     
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JkfgD"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
 Hotspot fLoadModes
     Attributes
-        ID               : 12
+        ID               : 10
         Scope            : local
         Send Component ID: disabled
     
@@ -1463,7 +849,7 @@ Hotspot fLoadModes
         
 Hotspot fDraw
     Attributes
-        ID               : 14
+        ID               : 11
         Scope            : local
         Send Component ID: disabled
     
@@ -1583,7 +969,7 @@ Hotspot fDraw
         
 Hotspot fLoadStoreCfg
     Attributes
-        ID               : 15
+        ID               : 12
         Scope            : local
         Send Component ID: disabled
     
@@ -1596,7 +982,7 @@ Hotspot fLoadStoreCfg
         
 Hotspot fResetBtns
     Attributes
-        ID               : 57
+        ID               : 54
         Scope            : local
         Send Component ID: disabled
     
@@ -1630,7 +1016,7 @@ Hotspot fResetBtns
         
 Hotspot fLoadColors
     Attributes
-        ID               : 69
+        ID               : 66
         Scope            : local
         Send Component ID: disabled
     

@@ -83,60 +83,41 @@ Page Keyboard
                 newVal.txt=p[origin.val].b[target.val].txt
             }
             //
-            // Load Help Mode
-            if(Help_Info.helpMode.val==0)
-            {
-                vis qrHelp,0
-            }else
-            {
-                tempStr.txt=tTitle.txt
-                showHelp.val=1
-                click 0,1
-            }
-            //
             // Enable page refreshs again
             ref_star
         
         Touch Press Event
-            if(showHelp.val==0)
+            // Normal Operation
+            if(Other_Settings.nBackOff.val!=0)
             {
-                // Normal Operation
-                if(Other_Settings.nBackOff.val!=0)
-                {
-                    // Default "stop" action.
-                    // Set ontime and duty to 0 for all modes. See fSysex for details
-                    // Disable all modes as well.
-                    printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
-                    printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
-                    printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
-                    // Set all ontime and duty settings of all pages to 0.
-                    // First come the global variables then the local variables.
-                    Simple.ontime.val=0
-                    Simple.duty.val=0
-                    Simple.set1.val=Simple.set1.val&0x0000ffff
-                    Simple.set2.val=Simple.set2.val&0x0000ffff
-                    Simple.set3.val=Simple.set3.val&0x0000ffff
-                    Simple.set4.val=Simple.set4.val&0x0000ffff
-                    Simple.set5.val=Simple.set5.val&0x0000ffff
-                    Simple.set6.val=Simple.set6.val&0x0000ffff
-                    MIDI_Live.ontime.val=0
-                    MIDI_Live.duty.val=0
-                    MIDI_Live.set1.val=0
-                    MIDI_Live.set2.val=0
-                    MIDI_Live.set3.val=0
-                    MIDI_Live.set4.val=0
-                    MIDI_Live.set5.val=0
-                    MIDI_Live.set6.val=0
-                    Lightsaber.ontime.val=0
-                    Lightsaber.ontimes12.val=0
-                    Lightsaber.ontimes34.val=0
-                    Lightsaber.ontimes56.val=0
-                }
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2c"
-                click qrHelp,0
+                // Default "stop" action.
+                // Set ontime and duty to 0 for all modes. See fSysex for details
+                // Disable all modes as well.
+                printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
+                // Set all ontime and duty settings of all pages to 0.
+                // First come the global variables then the local variables.
+                Simple.ontime.val=0
+                Simple.duty.val=0
+                Simple.set1.val=Simple.set1.val&0x0000ffff
+                Simple.set2.val=Simple.set2.val&0x0000ffff
+                Simple.set3.val=Simple.set3.val&0x0000ffff
+                Simple.set4.val=Simple.set4.val&0x0000ffff
+                Simple.set5.val=Simple.set5.val&0x0000ffff
+                Simple.set6.val=Simple.set6.val&0x0000ffff
+                MIDI_Live.ontime.val=0
+                MIDI_Live.duty.val=0
+                MIDI_Live.set1.val=0
+                MIDI_Live.set2.val=0
+                MIDI_Live.set3.val=0
+                MIDI_Live.set4.val=0
+                MIDI_Live.set5.val=0
+                MIDI_Live.set6.val=0
+                Lightsaber.ontime.val=0
+                Lightsaber.ontimes12.val=0
+                Lightsaber.ontimes34.val=0
+                Lightsaber.ontimes56.val=0
             }
         
 Variable (int32) origin
@@ -170,19 +151,6 @@ Variable (int32) firstClick
         ID   : 51
         Scope: local
         Value: 1
-    
-Variable (string) tempStr
-    Attributes
-        ID            : 63
-        Scope         : local
-        Text          : 
-        Max. Text Size: 32
-    
-Variable (int32) showHelp
-    Attributes
-        ID   : 64
-        Scope: local
-        Value: 0
     
 Text tTitle
     Attributes
@@ -276,35 +244,6 @@ Text tMLS
         Touch Press Event
             // Make this object "transparent" for clicks and click background.
             click 0,1
-        
-QR Code qrHelp
-    Attributes
-        ID               : 66
-        Scope            : local
-        Send Component ID: disabled
-        Text             : git.io/JkvOK
-        Max. Text Size   : 16
-    
-    Events
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                showHelp.val=1
-                tempStr.txt=tTitle.txt
-                tTitle.txt="Get Help/Link for..."
-                // keep QR code on top
-                ref qrHelp
-                // Show modified title before stopping screen refreshs.
-                doevents
-                ref_stop
-            }else
-            {
-                showHelp.val=0
-                tTitle.txt=tempStr.txt
-                // keep QR code on top
-                ref qrHelp
-                ref_star
-            }
         
 Button bReturn
     Attributes
@@ -1381,7 +1320,7 @@ Dual-state Button btShift2
         
 Hotspot fLoadModes
     Attributes
-        ID               : 65
+        ID               : 63
         Scope            : local
         Send Component ID: disabled
     
@@ -1411,7 +1350,7 @@ Hotspot fLoadModes
         
 Hotspot fLoadColors
     Attributes
-        ID               : 67
+        ID               : 64
         Scope            : local
         Send Component ID: disabled
     

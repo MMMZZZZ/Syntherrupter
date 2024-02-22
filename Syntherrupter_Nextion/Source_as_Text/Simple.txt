@@ -31,6 +31,13 @@ Page Simple
             //
             vis fLoadModes,0
             vis fLoadColors,0
+            vis fSysex,0
+            vis fSqrt,0
+            vis fSliderInput,0
+            vis fSliderOutput,0
+            vis fSlider,0
+            vis fApply,0
+            vis fDraw,0
             //
             tmReturn.tim=Other_Settings.nHoldTime.val
             // Dunno why we ref bReturn?? Probably not needed but doesnt hurt either... Uncommented legacy code is a beauty.
@@ -1512,9 +1519,9 @@ Dual-state Button btHelp
             }else
             {
                 vis hHelp,1
-                // Restore drawings
-                click fDraw,1
             }
+            // Restore drawings
+            click fDraw,1
         
 Hotspot fSysex
     Attributes
@@ -2067,6 +2074,7 @@ Hotspot hHelp
             }else
             {
                 // Show help according to what has been touched.
+                //
                 // Assume that some new help will be displayed
                 sys0=1
                 tHelp.txt=""
@@ -2115,6 +2123,8 @@ Hotspot hHelp
                     tHelp.txt+="The dual outline indicates that the button has an alternate function if you keep it pressed. \r"
                     tHelp.txt+="Nomal press: Stop Simple Mode and return to the menu.\r"
                     tHelp.txt+="Long press: Keep Simple Mode running and return to the menu. "
+                    tHelp.txt+="\r"
+                    tHelp.txt+="If you want to leave help mode, press the question mark at the top left. \r"
                 }else if(sys1==tOn.id||sys1==nOn.id||sys1==tus.id||sys1==sOn.id)
                 {
                     tHelp.txt+="Ontime\r\r"
@@ -2156,9 +2166,8 @@ Hotspot hHelp
                     tHelp.txt+="\r"
                     tHelp.txt+="Slider ranges are determined by the user limits (Settings->Users). Depending on your\r"
                     tHelp.txt+="coil limits, you can move sliders higher than one of your coil limit (f.ex. if you're increasing\r"
-                    tHelp.txt+="the ontime of two coils, but one has a lower limit than the other). However, this will have \r"
-                    tHelp.txt+="no effect. Syntherrupter won't exceed the coil limits.Those can be configured under \r"
-                    tHelp.txt+="Settings->Coil Limits. \r"
+                    tHelp.txt+="the ontime of two coils, but one has a lower limit than the other). Still, each coil \r"
+                    tHelp.txt+="will stay within the limits configured under Settings->Coil Limits. \r"
                 }else if(sys1==tCoil.id||sys1==btCoil1.id||sys1==btCoil2.id||sys1==btCoil3.id||sys1==btCoil4.id||sys1==btCoil5.id||sys1==btCoil6.id||sys1==nOn1.id||sys1==nOn2.id||sys1==nOn3.id||sys1==nOn4.id||sys1==nOn5.id||sys1==nOn6.id||sys1==nDuty1.id||sys1==nDuty2.id||sys1==nDuty3.id||sys1==nDuty4.id||sys1==nDuty5.id||sys1==nDuty6.id||sys1==tus1.id||sys1==tPerc1.id)
                 {
                     if(TC_Settings.maxCoilCount.val>1)
@@ -2207,7 +2216,13 @@ Hotspot hHelp
                 {
                     currentHelp.val=sys1
                     vis tHelp,1
-                    bReturn.txt="âœ•"
+                    if(bReturn.txt!="âœ•")
+                    {
+                        bReturn.txt="âœ•"
+                        // Change to single outline button
+                        bReturn.pic-=2
+                        bReturn.pic2-=2
+                    }
                 }
             }
         
@@ -2216,7 +2231,13 @@ Hotspot hHelp
             if(bReturn.val==1)
             {
                 bReturn.val=0
-                bReturn.txt="â†"
+                if(bReturn.txt!="â†")
+                {
+                    bReturn.txt="â†"
+                    // Change back to dual outline button
+                    bReturn.pic+=2
+                    bReturn.pic2+=2
+                }
                 vis tHelp,0
                 click fDraw,1
                 currentHelp.val=-1

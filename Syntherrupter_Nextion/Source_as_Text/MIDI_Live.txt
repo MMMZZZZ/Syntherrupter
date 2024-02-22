@@ -29,15 +29,21 @@ Page MIDI_Live
                 tUser.txt=" "+User_Settings.u2Name.txt
             }
             //
+            // Functions shall be invisible
             vis fLoadModes,0
             vis fLoadColors,0
+            vis fSlider,0
+            vis fSliderInput,0
+            vis fSliderOutput,0
+            vis fSqrt,0
+            vis fSysex,0
+            vis fDraw,0
+            //
+            // Properly hide the help stuff.
+            vis hHelp,0
+            vis tHelp,0
             //
             tmReturn.tim=Other_Settings.nHoldTime.val
-            // Functions shall be invisible
-            vis fSqrt,0
-            vis fSlider,0
-            vis fLoadColors,0
-            vis fSysex,0
             // Overview page isn't done
             vis bStereoOverv,0
             // Hide buttons for unavailable tesla coils
@@ -177,12 +183,25 @@ Page MIDI_Live
             Settings.applyingMode.val--
             click bMode,0
             //
+            // Enable page refreshs again
+            ref_star
+        
+        Postinitialize Event
+            vis bMode,1
+            //
+            // Check if any channels are enabled, If not, blink the corresponding button to make the user aware.
+            sys0=TC_Settings.coil1Chn.val|TC_Settings.coil2Chn.val|TC_Settings.coil3Chn.val|TC_Settings.coil4Chn.val|TC_Settings.coil5Chn.val|TC_Settings.coil6Chn.val
+            sys0&=0xffff
+            if(sys0==0)
+            {
+                tmBlink.en=1
+            }
+            //
+            // Draw gridlines
+            click fDraw,1
+            //
             // Make sure the microcontroller is up-to-date
             click bApply,0
-            //
-            // Help mode is disabled by default
-            vis hHelp,0
-            vis tHelp,0
             //
             // Enable MIDI Live Mode (see fSysex)
             // SYSEX_START DMID VERSION DEVICE
@@ -198,22 +217,6 @@ Page MIDI_Live
             printh 01 00 00 00 00
             // SYSEX_END
             printh f7
-            //
-            // Enable page refreshs again
-            ref_star
-        
-        Postinitialize Event
-            click fDraw,1
-            //
-            vis bMode,1
-            //
-            // Check if any channels are enabled, If not, blink the corresponding button to make the user aware.
-            sys0=TC_Settings.coil1Chn.val|TC_Settings.coil2Chn.val|TC_Settings.coil3Chn.val|TC_Settings.coil4Chn.val|TC_Settings.coil5Chn.val|TC_Settings.coil6Chn.val
-            sys0&=0xffff
-            if(sys0==0)
-            {
-                tmBlink.en=1
-            }
         
         Touch Press Event
             if(Other_Settings.nBackOff.val!=0)
@@ -1313,9 +1316,9 @@ Dual-state Button btHelp
             }else
             {
                 vis hHelp,1
-                // Restore drawings
-                click fDraw,1
             }
+            // Restore drawings
+            click fDraw,1
         
 Hotspot fLoadModes
     Attributes
@@ -1683,6 +1686,8 @@ Hotspot hHelp
                     tHelp.txt+="The dual outline indicates that the button has an alternate function if you keep it pressed. \r"
                     tHelp.txt+="Nomal press: Stop MIDI Live Mode and return to the menu.\r"
                     tHelp.txt+="Long press: Keep MIDI Live Mode running and return to the menu. "
+                    tHelp.txt+="\r"
+                    tHelp.txt+="If you want to leave help mode, press the question mark at the top left. \r"
                 }else if(sys1==tOn.id||sys1==nOn.id||sys1==tus.id||sys1==sOn.id)
                 {
                     tHelp.txt+="Note Ontime\r\r"
@@ -1752,7 +1757,13 @@ Hotspot hHelp
                 {
                     currentHelp.val=sys1
                     vis tHelp,1
-                    bReturn.txt="âœ•"
+                    if(bReturn.txt!="âœ•")
+                    {
+                        bReturn.txt="âœ•"
+                        // Change to single outline button
+                        bReturn.pic-=2
+                        bReturn.pic2-=2
+                    }
                 }
             }
         
@@ -1761,7 +1772,13 @@ Hotspot hHelp
             if(bReturn.val==1)
             {
                 bReturn.val=0
-                bReturn.txt="â†"
+                if(bReturn.txt!="â†")
+                {
+                    bReturn.txt="â†"
+                    // Change back to dual outline button
+                    bReturn.pic+=2
+                    bReturn.pic2+=2
+                }
                 vis tHelp,0
                 click fDraw,1
                 currentHelp.val=-1

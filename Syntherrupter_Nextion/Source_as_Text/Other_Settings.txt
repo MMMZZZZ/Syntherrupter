@@ -31,6 +31,11 @@ Page Other_Settings
             vis idle,0
             vis fCheckNApply,0
             vis fSqrt,0
+            vis fSysex,0
+            //
+            // Properly hide the help stuff.
+            vis hHelp,0
+            vis tHelp,0
             //
             newValTargetId.val=idle.id
             // Set dark mode button state
@@ -46,91 +51,63 @@ Page Other_Settings
             sys0-=sys1
             nSleepS.val=sys0
             //
-            // Load Help Mode
-            if(Help_Info.helpMode.val==0)
-            {
-                vis qrHelp,0
-            }else
-            {
-                vis qrHelp,1
-                tempStr.txt=tTitle.txt
-                showHelp.val=1
-                click 0,1
-            }
-            //
             // Enable page refreshs again
             ref_star
         
         Touch Press Event
-            if(showHelp.val==0)
+            if(Other_Settings.nBackOff.val!=0)
             {
-                // Normal Operation
-                if(Other_Settings.nBackOff.val!=0)
-                {
-                    // Default "stop" action.
-                    // Set ontime and duty to 0 for all modes. See fSysex for details
-                    // Disable all modes as well.
-                    printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
-                    printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
-                    printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
-                    // Set all ontime and duty settings of all pages to 0.
-                    // First come the global variables then the local variables.
-                    Simple.ontime.val=0
-                    Simple.duty.val=0
-                    Simple.set1.val=Simple.set1.val&0x0000ffff
-                    Simple.set2.val=Simple.set2.val&0x0000ffff
-                    Simple.set3.val=Simple.set3.val&0x0000ffff
-                    Simple.set4.val=Simple.set4.val&0x0000ffff
-                    Simple.set5.val=Simple.set5.val&0x0000ffff
-                    Simple.set6.val=Simple.set6.val&0x0000ffff
-                    MIDI_Live.ontime.val=0
-                    MIDI_Live.duty.val=0
-                    MIDI_Live.set1.val=0
-                    MIDI_Live.set2.val=0
-                    MIDI_Live.set3.val=0
-                    MIDI_Live.set4.val=0
-                    MIDI_Live.set5.val=0
-                    MIDI_Live.set6.val=0
-                    Lightsaber.ontime.val=0
-                    Lightsaber.ontimes12.val=0
-                    Lightsaber.ontimes34.val=0
-                    Lightsaber.ontimes56.val=0
-                }
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkfgj"
-                click qrHelp,0
+                // Default "stop" action.
+                // Set ontime and duty to 0 for all modes. See fSysex for details
+                // Disable all modes as well.
+                printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
+                // Set all ontime and duty settings of all pages to 0.
+                // First come the global variables then the local variables.
+                Simple.ontime.val=0
+                Simple.duty.val=0
+                Simple.set1.val=Simple.set1.val&0x0000ffff
+                Simple.set2.val=Simple.set2.val&0x0000ffff
+                Simple.set3.val=Simple.set3.val&0x0000ffff
+                Simple.set4.val=Simple.set4.val&0x0000ffff
+                Simple.set5.val=Simple.set5.val&0x0000ffff
+                Simple.set6.val=Simple.set6.val&0x0000ffff
+                MIDI_Live.ontime.val=0
+                MIDI_Live.duty.val=0
+                MIDI_Live.set1.val=0
+                MIDI_Live.set2.val=0
+                MIDI_Live.set3.val=0
+                MIDI_Live.set4.val=0
+                MIDI_Live.set5.val=0
+                MIDI_Live.set6.val=0
+                Lightsaber.ontime.val=0
+                Lightsaber.ontimes12.val=0
+                Lightsaber.ontimes34.val=0
+                Lightsaber.ontimes56.val=0
             }
         
 Variable (int32) newValTargetId
     Attributes
-        ID   : 6
+        ID   : 7
         Scope: local
         Value: 20
     
 Variable (int32) newSelect
     Attributes
-        ID   : 7
+        ID   : 8
         Scope: local
         Value: 0
     
-Variable (string) tempStr
+Variable (int32) currentHelp
     Attributes
-        ID            : 39
-        Scope         : local
-        Text          : 
-        Max. Text Size: 32
-    
-Variable (int32) showHelp
-    Attributes
-        ID   : 40
+        ID   : 42
         Scope: local
-        Value: 0
+        Value: 4294967295
     
 Number nHoldTime
     Attributes
-        ID                 : 5
+        ID                 : 6
         Scope              : global
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -138,39 +115,21 @@ Number nHoldTime
     
     Events
         Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                // Check if values are legal and if so, apply them
-                click fCheckNApply,0
-                // Reset push state of last selected value
-                b[newValTargetId.val].bco=idle.bco
-                b[newValTargetId.val].pco=idle.pco
-                // Mark this field as pushed
-                nHoldTime.bco=idle.pco
-                nHoldTime.pco=idle.bco
-                newValTargetId.val=nHoldTime.id
-                // A new value has been selected
-                newSelect.val=1
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JLxSn"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            // Check if values are legal and if so, apply them
+            click fCheckNApply,0
+            // Reset push state of last selected value
+            b[newValTargetId.val].bco=idle.bco
+            b[newValTargetId.val].pco=idle.pco
+            // Mark this field as pushed
+            nHoldTime.bco=idle.pco
+            nHoldTime.pco=idle.bco
+            newValTargetId.val=nHoldTime.id
+            // A new value has been selected
+            newSelect.val=1
         
 Number nSleepMin
     Attributes
-        ID                 : 25
+        ID                 : 26
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -178,39 +137,21 @@ Number nSleepMin
     
     Events
         Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                // Check if values are legal and if so, apply them
-                click fCheckNApply,0
-                // Reset push state of last selected value
-                b[newValTargetId.val].bco=idle.bco
-                b[newValTargetId.val].pco=idle.pco
-                // Mark this field as pushed
-                nSleepMin.bco=idle.pco
-                nSleepMin.pco=idle.bco
-                newValTargetId.val=nSleepMin.id
-                // A new value has been selected
-                newSelect.val=1
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JLxSW"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            // Check if values are legal and if so, apply them
+            click fCheckNApply,0
+            // Reset push state of last selected value
+            b[newValTargetId.val].bco=idle.bco
+            b[newValTargetId.val].pco=idle.pco
+            // Mark this field as pushed
+            nSleepMin.bco=idle.pco
+            nSleepMin.pco=idle.bco
+            newValTargetId.val=nSleepMin.id
+            // A new value has been selected
+            newSelect.val=1
         
 Number nSleepS
     Attributes
-        ID                 : 26
+        ID                 : 27
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -218,39 +159,21 @@ Number nSleepS
     
     Events
         Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                // Check if values are legal and if so, apply them
-                click fCheckNApply,0
-                // Reset push state of last selected value
-                b[newValTargetId.val].bco=idle.bco
-                b[newValTargetId.val].pco=idle.pco
-                // Mark this field as pushed
-                nSleepS.bco=idle.pco
-                nSleepS.pco=idle.bco
-                newValTargetId.val=nSleepS.id
-                // A new value has been selected
-                newSelect.val=1
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JLxSW"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            // Check if values are legal and if so, apply them
+            click fCheckNApply,0
+            // Reset push state of last selected value
+            b[newValTargetId.val].bco=idle.bco
+            b[newValTargetId.val].pco=idle.pco
+            // Mark this field as pushed
+            nSleepS.bco=idle.pco
+            nSleepS.pco=idle.bco
+            newValTargetId.val=nSleepS.id
+            // A new value has been selected
+            newSelect.val=1
         
 Number fSqrt
     Attributes
-        ID                 : 30
+        ID                 : 31
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -279,7 +202,7 @@ Number fSqrt
         
 Number nBackOff
     Attributes
-        ID                 : 32
+        ID                 : 33
         Scope              : global
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -287,47 +210,43 @@ Number nBackOff
     
     Events
         Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                // Check if values are legal and if so, apply them
-                click fCheckNApply,0
-                // Reset push state of last selected value
-                b[newValTargetId.val].bco=idle.bco
-                b[newValTargetId.val].pco=idle.pco
-                // Mark this field as pushed
-                nBackOff.bco=idle.pco
-                nBackOff.pco=idle.bco
-                newValTargetId.val=nBackOff.id
-                // A new value has been selected
-                newSelect.val=1
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JLxSl"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            // Check if values are legal and if so, apply them
+            click fCheckNApply,0
+            // Reset push state of last selected value
+            b[newValTargetId.val].bco=idle.bco
+            b[newValTargetId.val].pco=idle.pco
+            // Mark this field as pushed
+            nBackOff.bco=idle.pco
+            nBackOff.pco=idle.bco
+            newValTargetId.val=nBackOff.id
+            // A new value has been selected
+            newSelect.val=1
         
 XFloat idle
     Attributes
-        ID                 : 8
+        ID                 : 9
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
         Value              : 0
     
-Text tHideBack
+Text tHelp
     Attributes
         ID                 : 1
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : 
+        Max. Text Size     : 900
+    
+    Events
+        Touch Press Event
+            // This object is only visible in help mode. No need to be "transparent" to clicks in normal operation.
+            click bReturn,0
+        
+Text tHideBack
+    Attributes
+        ID                 : 2
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -340,7 +259,7 @@ Text tHideBack
         
 Text tTitle
     Attributes
-        ID                 : 2
+        ID                 : 3
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -354,7 +273,7 @@ Text tTitle
         
 Text tHoldTime
     Attributes
-        ID                 : 4
+        ID                 : 5
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -368,7 +287,7 @@ Text tHoldTime
         
 Text tBrightness
     Attributes
-        ID                 : 21
+        ID                 : 22
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -382,7 +301,7 @@ Text tBrightness
         
 Text fCheckNApply
     Attributes
-        ID                 : 23
+        ID                 : 24
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -418,7 +337,7 @@ Text fCheckNApply
         
 Text tSleep
     Attributes
-        ID                 : 24
+        ID                 : 25
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -432,7 +351,7 @@ Text tSleep
         
 Text tMin
     Attributes
-        ID                 : 27
+        ID                 : 28
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -446,7 +365,7 @@ Text tMin
         
 Text tS
     Attributes
-        ID                 : 28
+        ID                 : 29
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -460,7 +379,7 @@ Text tS
         
 Text tms
     Attributes
-        ID                 : 29
+        ID                 : 30
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -474,7 +393,7 @@ Text tms
         
 Text tBackOff
     Attributes
-        ID                 : 31
+        ID                 : 32
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -488,7 +407,7 @@ Text tBackOff
         
 Text tUser
     Attributes
-        ID                 : 33
+        ID                 : 34
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -502,7 +421,7 @@ Text tUser
         
 Text tMSI
     Attributes
-        ID                 : 34
+        ID                 : 35
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -516,7 +435,7 @@ Text tMSI
         
 Text tMML
     Attributes
-        ID                 : 35
+        ID                 : 36
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -530,7 +449,7 @@ Text tMML
         
 Text tMLS
     Attributes
-        ID                 : 36
+        ID                 : 37
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -544,7 +463,7 @@ Text tMLS
         
 Text tSelToMod
     Attributes
-        ID                 : 38
+        ID                 : 39
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -556,38 +475,9 @@ Text tSelToMod
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
-QR Code qrHelp
-    Attributes
-        ID               : 42
-        Scope            : local
-        Send Component ID: disabled
-        Text             : git.io/JkvOK
-        Max. Text Size   : 16
-    
-    Events
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                showHelp.val=1
-                tempStr.txt=tTitle.txt
-                tTitle.txt="Get Help/Link for..."
-                // keep QR code on top
-                ref qrHelp
-                // Show modified title before stopping screen refreshs.
-                doevents
-                ref_stop
-            }else
-            {
-                showHelp.val=0
-                tTitle.txt=tempStr.txt
-                // keep QR code on top
-                ref qrHelp
-                ref_star
-            }
-        
 Slider sBrightness
     Attributes
-        ID               : 22
+        ID               : 23
         Scope            : local
         Send Component ID: disabled
         Position         : 100
@@ -596,40 +486,24 @@ Slider sBrightness
     
     Events
         Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                // Check if values are legal and if so, apply them
-                click fCheckNApply,0
-                // Reset push state of last selected value
-                b[newValTargetId.val].bco=idle.bco
-                b[newValTargetId.val].pco=idle.pco
-                // No value selected to modify
-                newValTargetId.val=idle.id
-                // A new value has been selected
-                newSelect.val=0
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/JLxSC"
-            }
+            // Check if values are legal and if so, apply them
+            click fCheckNApply,0
+            // Reset push state of last selected value
+            b[newValTargetId.val].bco=idle.bco
+            b[newValTargetId.val].pco=idle.pco
+            // No value selected to modify
+            newValTargetId.val=idle.id
+            // A new value has been selected
+            newSelect.val=0
         
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                sys0=sBrightness.val*sBrightness.val
-                sys0/=sBrightness.maxval
-                dim=sys0
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            sys0=sBrightness.val*sBrightness.val
+            sys0/=sBrightness.maxval
+            dim=sys0
         
 Button bReturn
     Attributes
-        ID               : 3
+        ID               : 4
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -638,30 +512,14 @@ Button bReturn
     
     Events
         Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                click bOK,0
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkfgj"
-            }
+            click bOK,0
         
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                page Settings
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            page Settings
         
 Button b0
     Attributes
-        ID               : 9
+        ID               : 10
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -669,37 +527,19 @@ Button b0
         Max. Text Size   : 1
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkfgj"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
+            if(newSelect.val!=0)
             {
-                // Normal Operation
-                if(newSelect.val!=0)
-                {
-                    newSelect.val=0
-                    b[newValTargetId.val].val=0
-                }else
-                {
-                    b[newValTargetId.val].val*=10
-                }
+                newSelect.val=0
+                b[newValTargetId.val].val=0
             }else
             {
-                // Show Help
-                click qrHelp,0
+                b[newValTargetId.val].val*=10
             }
         
 Button b1
     Attributes
-        ID               : 10
+        ID               : 11
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -707,38 +547,20 @@ Button b1
         Max. Text Size   : 1
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkfgj"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
+            if(newSelect.val!=0)
             {
-                // Normal Operation
-                if(newSelect.val!=0)
-                {
-                    newSelect.val=0
-                    b[newValTargetId.val].val=0
-                }else
-                {
-                    b[newValTargetId.val].val*=10
-                }
-                b[newValTargetId.val].val+=1
+                newSelect.val=0
+                b[newValTargetId.val].val=0
             }else
             {
-                // Show Help
-                click qrHelp,0
+                b[newValTargetId.val].val*=10
             }
+            b[newValTargetId.val].val+=1
         
 Button b2
     Attributes
-        ID               : 11
+        ID               : 12
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -746,38 +568,20 @@ Button b2
         Max. Text Size   : 1
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkfgj"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
+            if(newSelect.val!=0)
             {
-                // Normal Operation
-                if(newSelect.val!=0)
-                {
-                    newSelect.val=0
-                    b[newValTargetId.val].val=0
-                }else
-                {
-                    b[newValTargetId.val].val*=10
-                }
-                b[newValTargetId.val].val+=2
+                newSelect.val=0
+                b[newValTargetId.val].val=0
             }else
             {
-                // Show Help
-                click qrHelp,0
+                b[newValTargetId.val].val*=10
             }
+            b[newValTargetId.val].val+=2
         
 Button b3
     Attributes
-        ID               : 12
+        ID               : 13
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -785,38 +589,20 @@ Button b3
         Max. Text Size   : 1
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkfgj"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
+            if(newSelect.val!=0)
             {
-                // Normal Operation
-                if(newSelect.val!=0)
-                {
-                    newSelect.val=0
-                    b[newValTargetId.val].val=0
-                }else
-                {
-                    b[newValTargetId.val].val*=10
-                }
-                b[newValTargetId.val].val+=3
+                newSelect.val=0
+                b[newValTargetId.val].val=0
             }else
             {
-                // Show Help
-                click qrHelp,0
+                b[newValTargetId.val].val*=10
             }
+            b[newValTargetId.val].val+=3
         
 Button b4
     Attributes
-        ID               : 13
+        ID               : 14
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -824,38 +610,20 @@ Button b4
         Max. Text Size   : 1
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkfgj"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
+            if(newSelect.val!=0)
             {
-                // Normal Operation
-                if(newSelect.val!=0)
-                {
-                    newSelect.val=0
-                    b[newValTargetId.val].val=0
-                }else
-                {
-                    b[newValTargetId.val].val*=10
-                }
-                b[newValTargetId.val].val+=4
+                newSelect.val=0
+                b[newValTargetId.val].val=0
             }else
             {
-                // Show Help
-                click qrHelp,0
+                b[newValTargetId.val].val*=10
             }
+            b[newValTargetId.val].val+=4
         
 Button b5
     Attributes
-        ID               : 14
+        ID               : 15
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -863,38 +631,20 @@ Button b5
         Max. Text Size   : 1
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkfgj"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
+            if(newSelect.val!=0)
             {
-                // Normal Operation
-                if(newSelect.val!=0)
-                {
-                    newSelect.val=0
-                    b[newValTargetId.val].val=0
-                }else
-                {
-                    b[newValTargetId.val].val*=10
-                }
-                b[newValTargetId.val].val+=5
+                newSelect.val=0
+                b[newValTargetId.val].val=0
             }else
             {
-                // Show Help
-                click qrHelp,0
+                b[newValTargetId.val].val*=10
             }
+            b[newValTargetId.val].val+=5
         
 Button b6
     Attributes
-        ID               : 15
+        ID               : 16
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -902,38 +652,20 @@ Button b6
         Max. Text Size   : 1
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkfgj"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
+            if(newSelect.val!=0)
             {
-                // Normal Operation
-                if(newSelect.val!=0)
-                {
-                    newSelect.val=0
-                    b[newValTargetId.val].val=0
-                }else
-                {
-                    b[newValTargetId.val].val*=10
-                }
-                b[newValTargetId.val].val+=6
+                newSelect.val=0
+                b[newValTargetId.val].val=0
             }else
             {
-                // Show Help
-                click qrHelp,0
+                b[newValTargetId.val].val*=10
             }
+            b[newValTargetId.val].val+=6
         
 Button b7
     Attributes
-        ID               : 16
+        ID               : 17
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -941,38 +673,20 @@ Button b7
         Max. Text Size   : 1
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkfgj"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
+            if(newSelect.val!=0)
             {
-                // Normal Operation
-                if(newSelect.val!=0)
-                {
-                    newSelect.val=0
-                    b[newValTargetId.val].val=0
-                }else
-                {
-                    b[newValTargetId.val].val*=10
-                }
-                b[newValTargetId.val].val+=7
+                newSelect.val=0
+                b[newValTargetId.val].val=0
             }else
             {
-                // Show Help
-                click qrHelp,0
+                b[newValTargetId.val].val*=10
             }
+            b[newValTargetId.val].val+=7
         
 Button b8
     Attributes
-        ID               : 17
+        ID               : 18
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -980,38 +694,20 @@ Button b8
         Max. Text Size   : 1
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkfgj"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
+            if(newSelect.val!=0)
             {
-                // Normal Operation
-                if(newSelect.val!=0)
-                {
-                    newSelect.val=0
-                    b[newValTargetId.val].val=0
-                }else
-                {
-                    b[newValTargetId.val].val*=10
-                }
-                b[newValTargetId.val].val+=8
+                newSelect.val=0
+                b[newValTargetId.val].val=0
             }else
             {
-                // Show Help
-                click qrHelp,0
+                b[newValTargetId.val].val*=10
             }
+            b[newValTargetId.val].val+=8
         
 Button b9
     Attributes
-        ID               : 18
+        ID               : 19
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1019,38 +715,20 @@ Button b9
         Max. Text Size   : 1
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkfgj"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
+            if(newSelect.val!=0)
             {
-                // Normal Operation
-                if(newSelect.val!=0)
-                {
-                    newSelect.val=0
-                    b[newValTargetId.val].val=0
-                }else
-                {
-                    b[newValTargetId.val].val*=10
-                }
-                b[newValTargetId.val].val+=9
+                newSelect.val=0
+                b[newValTargetId.val].val=0
             }else
             {
-                // Show Help
-                click qrHelp,0
+                b[newValTargetId.val].val*=10
             }
+            b[newValTargetId.val].val+=9
         
 Button bClear
     Attributes
-        ID               : 19
+        ID               : 20
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1058,30 +736,12 @@ Button bClear
         Max. Text Size   : 1
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkfgj"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                b[newValTargetId.val].val=0
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            b[newValTargetId.val].val=0
         
 Button bOK
     Attributes
-        ID               : 20
+        ID               : 21
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1089,33 +749,15 @@ Button bOK
         Max. Text Size   : 2
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkfgj"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                b[newValTargetId.val].bco=idle.bco
-                b[newValTargetId.val].pco=idle.pco
-                newValTargetId.val=idle.id
-                click fCheckNApply,0
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            b[newValTargetId.val].bco=idle.bco
+            b[newValTargetId.val].pco=idle.pco
+            newValTargetId.val=idle.id
+            click fCheckNApply,0
         
 Dual-state Button btDark
     Attributes
-        ID               : 37
+        ID               : 38
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1123,52 +765,55 @@ Dual-state Button btDark
         Max. Text Size   : 20
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                // Undo button toggle
-                btDark.val=1-btDark.val
-                qrHelp.txt="git.io/JLxS8"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
+            // REMEMBER TO CHANGE Startup.comOK!
+            if(Settings.colorMode.val==0)
             {
-                // Normal Operation
-                // REMEMBER TO CHANGE Startup.comOK!
-                if(Settings.colorMode.val==0)
-                {
-                    Settings.colorMode.val=1
-                    Settings.backCol.val=8484
-                    Settings.backCol2.val=2145
-                    Settings.backSelectCol2.val=16904
-                    Settings.frontCol.val=40476
-                    Settings.frontCol2.val=40476
-                    Settings.qrFrontCol.val=40476
-                }else
-                {
-                    Settings.colorMode.val=0
-                    Settings.backCol.val=65535
-                    Settings.backCol2.val=4589
-                    Settings.backSelectCol2.val=6900
-                    Settings.frontCol.val=6900
-                    Settings.frontCol2.val=65535
-                    Settings.qrFrontCol.val=6900
-                }
-                page dp
+                Settings.colorMode.val=1
+                Settings.backCol.val=8484
+                Settings.backCol2.val=2145
+                Settings.backSelectCol2.val=16904
+                Settings.frontCol.val=40476
+                Settings.frontCol2.val=40476
+                Settings.qrFrontCol.val=40476
             }else
             {
-                // Show Help
-                click qrHelp,0
+                Settings.colorMode.val=0
+                Settings.backCol.val=65535
+                Settings.backCol2.val=4589
+                Settings.backSelectCol2.val=6900
+                Settings.frontCol.val=6900
+                Settings.frontCol2.val=65535
+                Settings.qrFrontCol.val=6900
+            }
+            page dp
+        
+Dual-state Button btHelp
+    Attributes
+        ID               : 43
+        Scope            : local
+        Send Component ID: disabled
+        State            : unpressed
+        Text             : ?
+        Max. Text Size   : 1
+    
+    Events
+        Touch Release Event
+            if(btHelp.val==0)
+            {
+                // In case something was displayed, get rid of it
+                bReturn.val=1
+                click hHelp,0
+                // disable help overlay
+                vis hHelp,0
+            }else
+            {
+                vis hHelp,1
             }
         
 Hotspot fLoadModes
     Attributes
-        ID               : 41
+        ID               : 40
         Scope            : local
         Send Component ID: disabled
     
@@ -1198,7 +843,7 @@ Hotspot fLoadModes
         
 Hotspot fSysex
     Attributes
-        ID               : 43
+        ID               : 41
         Scope            : local
         Send Component ID: disabled
     
@@ -1387,5 +1032,168 @@ Hotspot fLoadColors
                     b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
                     b[sys0].pic2+=sys2
                 }
+            }
+        
+Hotspot hHelp
+    Attributes
+        ID               : 45
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Determine component/feature that would have been touched.
+            sys1=0
+            for(sys0=fLoadColors.id;sys0>=0;sys0--)
+            {
+                // Ignore hotspots, touchcaps, variables
+                if(b[sys0].type!=5&&b[sys0].type!=51&&b[sys0].type!=52&&b[sys0].type!=109)
+                {
+                    x0=b[sys0].x
+                    y0=b[sys0].y
+                    x1=b[sys0].w
+                    y1=b[sys0].h
+                    x1+=x0
+                    y1+=y0
+                    if(tch0>=x0&&tch0<x1&&tch1>=y0&&tch1<y1)
+                    {
+                        sys1=sys0
+                        // abort loop
+                        sys0=-1
+                    }
+                }
+            }
+            if(currentHelp.val>=0&&sys1==bReturn.id)
+            {
+                // Return button has been pressed while help is being displayed. This means
+                // hide the help text again (see touch release event)
+                bReturn.val=1
+            }else if(sys1==btHelp.id)
+            {
+                // Question mark button has been pressed. Disable help mode (see touch release event).
+                btHelp.val=0
+            }else if(currentHelp.val>=0)
+            {
+                // Help is being displayed and something else has been pressed.
+                // Act as if the page background had been pressed.
+                // Note: this can make other UI elements to "pop up", therefore bring the text back on top
+                // TODO: Prevent flickering!
+                click 0,1
+                doevents
+                ref tHelp
+            }else
+            {
+                // Show help according to what has been touched.
+                // Assume that some new help will be displayed
+                sys0=1
+                tHelp.txt=""
+                if(Settings.firstHelp.val!=0)
+                {
+                    Settings.firstHelp.val=0
+                    tHelp.txt+="Help Mode Enabled \r\r"
+                    tHelp.txt+="You've enabled the on-screen help by pressing the question mark at the top right \r"
+                    tHelp.txt+="corner. As long as it's active, you can press any part of the UI and get a description \r"
+                    tHelp.txt+="of what that button/slider/... does. \r"
+                    tHelp.txt+="Press the X button at the top left to get help on another part of the UI. \r"
+                    tHelp.txt+="Press the question mark at the top right to leave help mode and resume normal\r"
+                    tHelp.txt+="operation. \r"
+                    tHelp.txt+="Press any other part of the screen, including this description, to disable all outputs. \r"
+                    tHelp.txt+="For more information, check the help on the page background.\r"
+                    tHelp.txt+=" \r"
+                    tHelp.txt+="This tip won't reappear until you reset or power cycle Syntherrupter. \r"
+                }else if(sys1==tTitle.id)
+                {
+                    tHelp.txt+="General Settings \r\r"
+                    tHelp.txt+="It's called 'general', but this page actually contains all the settings related to the UI. \r"
+                }else if(sys1==tUser.id)
+                {
+                    tHelp.txt+="Current User \r\r"
+                    tHelp.txt+="The name of the currently active user. This determines the range within which you \r"
+                    tHelp.txt+="can operate Syntherrupter. Go to the main menu to change the current user. \r"
+                }else if(sys1==tMSI.id||sys1==tMML.id||sys1==tMLS.id)
+                {
+                    tHelp.txt+="Active Modes \r\r"
+                    tHelp.txt+="Modes can stay active even if you leave the corresponding page. Active modes are \r"
+                    tHelp.txt+="highlighted at the bottom right.  \r"
+                }else if(sys1==0||sys1==tHelp.id)
+                {
+                    tHelp.txt+="Page background \r\r"
+                    tHelp.txt+="The page background, textboxes and non-interactive elements in general shut down \r"
+                    tHelp.txt+="all outputs if you press them. This allows you to quickly stop all outputs and all \r"
+                    tHelp.txt+="modes if something goes wrong. \r"
+                    tHelp.txt+="Note however, that unplugging is the only actually safe way to ensure a complete \r"
+                    tHelp.txt+="shutdown! \r"
+                    tHelp.txt+="This feature can be temporarily disabled in the general settings. After a reset or \r"
+                    tHelp.txt+="power-cycle it will be enabled again.\r"
+                }else if(sys1==bReturn.id)
+                {
+                    tHelp.txt+="Return Button\r\r"
+                    tHelp.txt+="Return to the settings menu. \r"
+                    tHelp.txt+="\r"
+                    tHelp.txt+="If you want to leave help mode, press the question mark at the top left. \r"
+                }else if(sys1==tHoldTime.id||sys1==nHoldTime.id||sys1==tms.id)
+                {
+                    tHelp.txt+="Button Hold Time\r\r"
+                    tHelp.txt+="Some buttons have a dual outline. These buttons perform alternate functions if you \r"
+                    tHelp.txt+="keep them pressed for the time you specify here. \r"
+                    tHelp.txt+=" \r"
+                    tHelp.txt+="Value range: 50ms - 10s\r"
+                }else if(sys1==tBrightness.id||sys1==sBrightness.id)
+                {
+                    tHelp.txt+="Display Brightness \r\r"
+                    tHelp.txt+="Regulates the backlight. If you experience instabilities for values other than 100%, you \r"
+                    tHelp.txt+="may have power issues. More information can be found in the online documentation about\r"
+                    tHelp.txt+="wiring up your Nextion screen. \r"
+                    tHelp.txt+=" \r"
+                    tHelp.txt+=" Value range: 0% - 100%\r"
+                }else if(sys1==tSleep.id||sys1==nSleepMin.id||sys1==tMin.id||sys1==nSleepS.id||sys1==tS.id)
+                {
+                    tHelp.txt+="UI Sleep Time\r\r"
+                    tHelp.txt+="Time til the screen turns itself off. Syntherrupter will continue to respond to serial commands \r"
+                    tHelp.txt+="and continue to operate. It's just the screen that turns off. \r"
+                    tHelp.txt+=" \r"
+                    tHelp.txt+="Value range: 0s (disabled) - 60min \r"
+                }else if(sys1==tBackOff.id||sys1==nBackOff.id)
+                {
+                    tHelp.txt+="Background Safety Shutdown\r\r"
+                    tHelp.txt+="By default, touching any non-interactive part of the UI disables all outputs. The idea is, \r"
+                    tHelp.txt+="that shall be able to stop your tesla coils at any moment, no matter which page you're  \r"
+                    tHelp.txt+="viewing and without hitting any specific button. \r"
+                    tHelp.txt+="However, if you don't want this feature, you can turn it off here. This setting is not persistent \r"
+                    tHelp.txt+="though. It will be enabled after every reset or power cycle. \r"
+                }else if(sys1==btDark.id)
+                {
+                    tHelp.txt+="Light Mode / Dark Mode\r\r"
+                    tHelp.txt+="Switch between a light and a dark theme for the UI. \r"
+                }else if(sys1==b1.id||sys1==b2.id||sys1==b3.id||sys1==b4.id||sys1==b5.id||sys1==b6.id||sys1==b7.id||sys1==b8.id||sys1==b9.id||sys1==b0.id||sys1==bClear.id||sys1==bOK.id)
+                {
+                    tHelp.txt+="Numpad\r\r"
+                    tHelp.txt+="Use this numpad to modify any value fields on the page.\r"
+                    tHelp.txt+="X clears the value. \r"
+                    tHelp.txt+="ok applies it. If you select another value to edit, it's applied automatically. \r"
+                }else
+                {
+                    // Nope, no new help text to be displayed
+                    sys0=0
+                }
+                if(sys0!=0)
+                {
+                    currentHelp.val=sys1
+                    vis tHelp,1
+                    bReturn.txt="âœ•"
+                }
+            }
+        
+        Touch Release Event
+            // Check if help text is being displayed and shall be hidden again
+            if(bReturn.val==1)
+            {
+                bReturn.val=0
+                bReturn.txt="â†"
+                vis tHelp,0
+                currentHelp.val=-1
+            }else if(sys1==btHelp.id)
+            {
+                click btHelp,0
             }
         

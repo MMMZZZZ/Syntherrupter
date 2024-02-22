@@ -337,6 +337,7 @@ The commands are grouped by purpose. Any command (range) that's not listed here 
 		* 0: Manual mode (default)
 		* 1: Force update, does not affect current update mode.
 		* 2: Auto, update EEPROM after each command/change.
+		* 3: Discard settings changes by reloading them from the EEPROM. 
 * `0x201`: [EE] [NF] Device ID
 	* Target MSB: Reserved.
 	* Target LSB: Reserved.

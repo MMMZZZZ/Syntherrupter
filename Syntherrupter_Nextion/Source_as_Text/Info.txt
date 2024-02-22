@@ -1,4 +1,4 @@
-Page Help_Info
+Page Info
     Attributes
         ID               : 0
         Scope            : local
@@ -26,85 +26,57 @@ Page Help_Info
                 tUser.txt=" "+User_Settings.u2Name.txt
             }
             //
+            // functions shall not be visible
             vis fLoadModes,0
             vis fLoadColors,0
-            // Load Help Enable Button
-            btHelp.val=helpMode.val
-            click btHelp,0
-            //
-            // Load Help Mode
-            if(Help_Info.helpMode.val==0)
-            {
-                vis qrHelp,0
-            }else
-            {
-                tempStr.txt=tTitle.txt
-                showHelp.val=1
-                click 0,1
-            }
             //
             // Enable page refreshs again
             ref_star
         
+        Postinitialize Event
+            // Horizontal separation line.
+            sys0=qrDocWiki.y+qrDocWiki.h+tCredits.y
+            sys0/=2
+            sys1=tCreditsInfo.x+tCreditsInfo.w-1
+            line tCredits.x,sys0,sys1,sys0,tCredits.pco
+        
         Touch Press Event
-            if(showHelp.val==0)
+            if(Other_Settings.nBackOff.val!=0)
             {
-                // Normal Operation
-                if(Other_Settings.nBackOff.val!=0)
-                {
-                    // Default "stop" action.
-                    // Set ontime and duty to 0 for all modes. See fSysex for details
-                    // Disable all modes as well.
-                    printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
-                    printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
-                    printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
-                    // Set all ontime and duty settings of all pages to 0.
-                    // First come the global variables then the local variables.
-                    Simple.ontime.val=0
-                    Simple.duty.val=0
-                    Simple.set1.val=Simple.set1.val&0x0000ffff
-                    Simple.set2.val=Simple.set2.val&0x0000ffff
-                    Simple.set3.val=Simple.set3.val&0x0000ffff
-                    Simple.set4.val=Simple.set4.val&0x0000ffff
-                    Simple.set5.val=Simple.set5.val&0x0000ffff
-                    Simple.set6.val=Simple.set6.val&0x0000ffff
-                    MIDI_Live.ontime.val=0
-                    MIDI_Live.duty.val=0
-                    MIDI_Live.set1.val=0
-                    MIDI_Live.set2.val=0
-                    MIDI_Live.set3.val=0
-                    MIDI_Live.set4.val=0
-                    MIDI_Live.set5.val=0
-                    MIDI_Live.set6.val=0
-                    Lightsaber.ontime.val=0
-                    Lightsaber.ontimes12.val=0
-                    Lightsaber.ontimes34.val=0
-                    Lightsaber.ontimes56.val=0
-                }
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2f"
-                click qrHelp,0
+                // Default "stop" action.
+                // Set ontime and duty to 0 for all modes. See fSysex for details
+                // Disable all modes as well.
+                printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
+                // Set all ontime and duty settings of all pages to 0.
+                // First come the global variables then the local variables.
+                Simple.ontime.val=0
+                Simple.duty.val=0
+                Simple.set1.val=Simple.set1.val&0x0000ffff
+                Simple.set2.val=Simple.set2.val&0x0000ffff
+                Simple.set3.val=Simple.set3.val&0x0000ffff
+                Simple.set4.val=Simple.set4.val&0x0000ffff
+                Simple.set5.val=Simple.set5.val&0x0000ffff
+                Simple.set6.val=Simple.set6.val&0x0000ffff
+                MIDI_Live.ontime.val=0
+                MIDI_Live.duty.val=0
+                MIDI_Live.set1.val=0
+                MIDI_Live.set2.val=0
+                MIDI_Live.set3.val=0
+                MIDI_Live.set4.val=0
+                MIDI_Live.set5.val=0
+                MIDI_Live.set6.val=0
+                Lightsaber.ontime.val=0
+                Lightsaber.ontimes12.val=0
+                Lightsaber.ontimes34.val=0
+                Lightsaber.ontimes56.val=0
             }
         
 Variable (int32) helpMode
     Attributes
-        ID   : 12
+        ID   : 10
         Scope: global
-        Value: 0
-    
-Variable (string) tempStr
-    Attributes
-        ID            : 13
-        Scope         : local
-        Text          : 
-        Max. Text Size: 32
-    
-Variable (int32) showHelp
-    Attributes
-        ID   : 14
-        Scope: local
         Value: 0
     
 Text tTitle
@@ -113,8 +85,8 @@ Text tTitle
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : Help and Information
-        Max. Text Size     : 22
+        Text               : Info and Credits
+        Max. Text Size     : 40
     
     Events
         Touch Press Event
@@ -177,23 +149,9 @@ Text tMLS
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
-Text tButtons
-    Attributes
-        ID                 : 6
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Help Mode:
-        Max. Text Size     : 40
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
 Text tCredits
     Attributes
-        ID                 : 7
+        ID                 : 6
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -205,14 +163,14 @@ Text tCredits
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
-Text tChnInfo
+Text tDocWiki
     Attributes
-        ID                 : 8
+        ID                 : 7
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : With Help Mode enabled, a QR code appears at the top right corner. It brings you immediately \r\nto the Syntherrupter Wiki section for this page. If you want help for a specific component, \r\npress the QR code (you'll notice the page title change), then press the component you want\r\nhelp for. The QR code now points to the specific section for this component in the wiki.
-        Max. Text Size     : 400
+        Text               : Documentation, \r\nWiring, Wiki
+        Max. Text Size     : 29
     
     Events
         Touch Press Event
@@ -221,70 +179,95 @@ Text tChnInfo
         
 Text tCreditsInfo
     Attributes
-        ID                 : 9
+        ID                 : 8
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
-        Text               : Forums with great people: High Voltage Forum, Unofficial Nextion Forum.\r\nSpecial thanks to: Jens Kerrines (a.k.a. Netzpfuscher)\r\nMore info on github.com/MMMZZZZ/Syntherrupter#credits (Use Help Mode to get QR code)\r\n\r\nDevelopped by Max Zuidberg
-        Max. Text Size     : 300
+        Text               : Forums with great people: High Voltage Forum, Unofficial Nextion Forum, mosfetkiller-Forum\r\nSpecial thanks to: Jens Kerrines (a.k.a. Netzpfuscher), Thorben Zethoff (a.k.a. TMaxElectronics)\r\n\r\n(c) Max Zuidberg 2023, This Source Code Form is subject to the terms of the Mozilla Public \r\nLicense, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at \r\nhttp://mozilla.org/MPL/2.0/
+        Max. Text Size     : 410
     
     Events
         Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                // Make this object "transparent" for clicks and click background.
-                click 0,1
-            }else
-            {
-                // Show Help
-                // Undo button toggle
-                btHelp.val=1-btHelp.val
-                qrHelp.txt="git.io/JLxS0"
-            }
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
         
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+Text tFirmware
+    Attributes
+        ID                 : 12
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Current Firmware
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
         
-QR Code qrHelp
+Text tForumHelp
+    Attributes
+        ID                 : 13
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Forum Topic for \r\nquestions and issues
+        Max. Text Size     : 38
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tForumInfo
+    Attributes
+        ID                 : 14
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Forum Topic (best way \r\nto stay up-to-date!)
+        Max. Text Size     : 44
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+QR Code qrDocWiki
+    Attributes
+        ID               : 15
+        Scope            : local
+        Send Component ID: disabled
+        Text             : https://github.com/MMMZZZZ/Syntherrupter/tree/dev/Documentation
+        Max. Text Size   : 63
+    
+QR Code qrFirmware
     Attributes
         ID               : 16
         Scope            : local
         Send Component ID: disabled
-        Text             : git.io/JkvOK
-        Max. Text Size   : 16
+        Text             : https://github.com/MMMZZZZ/Syntherrupter/releases
+        Max. Text Size   : 49
     
-    Events
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                showHelp.val=1
-                tempStr.txt=tTitle.txt
-                tTitle.txt="Get Help/Link for..."
-                // keep QR code on top
-                ref qrHelp
-                // Show modified title before stopping screen refreshs.
-                doevents
-                ref_stop
-            }else
-            {
-                showHelp.val=0
-                tTitle.txt=tempStr.txt
-                // keep QR code on top
-                ref qrHelp
-                ref_star
-            }
-        
+QR Code qrForumHelp
+    Attributes
+        ID               : 17
+        Scope            : local
+        Send Component ID: disabled
+        Text             : https://highvoltageforum.net/index.php?topic=1780.0
+        Max. Text Size   : 51
+    
+QR Code qrForumInfo
+    Attributes
+        ID               : 18
+        Scope            : local
+        Send Component ID: disabled
+        Text             : https://highvoltageforum.net/index.php?topic=1020.0
+        Max. Text Size   : 51
+    
 Button bReturn
     Attributes
-        ID               : 10
+        ID               : 9
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -292,71 +275,12 @@ Button bReturn
         Max. Text Size   : 3
     
     Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                qrHelp.txt="git.io/Jkf2f"
-            }
-        
         Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                page Menu
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
-        
-Dual-state Button btHelp
-    Attributes
-        ID               : 11
-        Scope            : local
-        Send Component ID: disabled
-        State            : unpressed
-        Text             : Disabled
-        Max. Text Size   : 8
-    
-    Events
-        Touch Press Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-            }else
-            {
-                // Show Help
-                // Undo button toggle
-                btHelp.val=1-btHelp.val
-                qrHelp.txt="git.io/JLxSR"
-            }
-        
-        Touch Release Event
-            if(showHelp.val==0)
-            {
-                // Normal Operation
-                if(btHelp.val==0)
-                {
-                    btHelp.txt="Disabled"
-                }else
-                {
-                    btHelp.txt="Enabled"
-                }
-                helpMode.val=btHelp.val
-                vis qrHelp,helpMode.val
-            }else
-            {
-                // Show Help
-                click qrHelp,0
-            }
+            page Menu
         
 Hotspot fLoadModes
     Attributes
-        ID               : 15
+        ID               : 11
         Scope            : local
         Send Component ID: disabled
     
@@ -386,7 +310,7 @@ Hotspot fLoadModes
         
 Hotspot fLoadColors
     Attributes
-        ID               : 17
+        ID               : 19
         Scope            : local
         Send Component ID: disabled
     
