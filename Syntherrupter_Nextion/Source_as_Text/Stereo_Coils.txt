@@ -111,91 +111,91 @@ Page Stereo_Coils
         
 Variable (int32) currentHelp
     Attributes
-        ID   : 1
+        ID   : 7
         Scope: local
         Value: 4294967295
     
 Variable (int32) origin
     Attributes
-        ID   : 6
+        ID   : 10
         Scope: global
         Value: 0
     
 Variable (int32) coilNum
     Attributes
-        ID   : 7
+        ID   : 11
         Scope: local
         Value: 0
     
 Variable (int32) panMode
     Attributes
-        ID   : 19
+        ID   : 22
         Scope: local
         Value: 0
     
 Variable (int32) cfgCoil1
     Attributes
-        ID   : 20
+        ID   : 23
         Scope: global
         Value: 16416
     
 Variable (int32) cfgCoil2
     Attributes
-        ID   : 21
+        ID   : 24
         Scope: global
         Value: 16416
     
 Variable (int32) cfgCoil3
     Attributes
-        ID   : 22
+        ID   : 25
         Scope: global
         Value: 16416
     
 Variable (int32) cfgCoil4
     Attributes
-        ID   : 23
+        ID   : 26
         Scope: global
         Value: 16416
     
 Variable (int32) cfgCoil5
     Attributes
-        ID   : 24
+        ID   : 27
         Scope: global
         Value: 16416
     
 Variable (int32) cfgCoil6
     Attributes
-        ID   : 25
+        ID   : 28
         Scope: global
         Value: 16416
     
 Variable (int32) sliderSegments
     Attributes
-        ID   : 26
+        ID   : 29
         Scope: local
         Value: 0
     
 Variable (int32) coilNumTmp
     Attributes
-        ID   : 27
+        ID   : 30
         Scope: local
         Value: 0
     
 Variable (int32) autoPlaceDist
     Attributes
-        ID   : 28
+        ID   : 31
         Scope: local
         Value: 0
     
 Variable (int32) lWidth
     Attributes
-        ID   : 29
+        ID   : 32
         Scope: local
         Value: 0
     
 Text tHelp
     Attributes
-        ID                 : 2
+        ID                 : 1
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -209,7 +209,7 @@ Text tHelp
         
 Text tHideBack3
     Attributes
-        ID                 : 4
+        ID                 : 2
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -219,190 +219,10 @@ Text tHideBack3
     Events
         Touch Press Event
             // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
-        
-Text tTitle
-    Attributes
-        ID                 : 8
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Coil Stereo Settings
-        Max. Text Size     : 30
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tUser
-    Attributes
-        ID                 : 10
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               :  Guest
-        Max. Text Size     : 32
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tMSI
-    Attributes
-        ID                 : 11
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Simple
-        Max. Text Size     : 16
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tMML
-    Attributes
-        ID                 : 12
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : MIDI Live
-        Max. Text Size     : 16
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tMLS
-    Attributes
-        ID                 : 13
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Lightsaber
-        Max. Text Size     : 16
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tHideBack2
-    Attributes
-        ID                 : 15
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               :  
-        Max. Text Size     : 1
-    
-    Events
-        Touch Press Event
-            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
-        
-Text tHideBack1
-    Attributes
-        ID                 : 16
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               :  
-        Max. Text Size     : 1
-    
-    Events
-        Touch Press Event
-            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
-        
-Text tCoils
-    Attributes
-        ID                 : 31
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Coils
-        Max. Text Size     : 30
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tMode
-    Attributes
-        ID                 : 41
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Stereo Mode
-        Max. Text Size     : 20
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tPan
-    Attributes
-        ID                 : 44
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Stereo Position
-        Max. Text Size     : 20
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tL2
-    Attributes
-        ID                 : 45
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : L
-        Max. Text Size     : 20
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tR2
-    Attributes
-        ID                 : 46
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : R
-        Max. Text Size     : 20
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tPanReach
-    Attributes
-        ID                 : 47
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Listening Range
-        Max. Text Size     : 20
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
         
 Text tStereo
     Attributes
-        ID                 : 49
+        ID                 : 3
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -416,7 +236,7 @@ Text tStereo
         
 Text tL
     Attributes
-        ID                 : 50
+        ID                 : 4
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -430,7 +250,7 @@ Text tL
         
 Text tR
     Attributes
-        ID                 : 51
+        ID                 : 5
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -442,16 +262,196 @@ Text tR
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
+Text tTitle
+    Attributes
+        ID                 : 12
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Coil Stereo Settings
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tUser
+    Attributes
+        ID                 : 14
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  Guest
+        Max. Text Size     : 32
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMSI
+    Attributes
+        ID                 : 15
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Simple
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMML
+    Attributes
+        ID                 : 16
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : MIDI Live
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMLS
+    Attributes
+        ID                 : 17
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Lightsaber
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHideBack2
+    Attributes
+        ID                 : 19
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text tCoils
+    Attributes
+        ID                 : 34
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Coils
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMode
+    Attributes
+        ID                 : 44
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Stereo Mode
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHideBack1
+    Attributes
+        ID                 : 46
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text tPan
+    Attributes
+        ID                 : 48
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Stereo Position
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tL2
+    Attributes
+        ID                 : 49
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : L
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tR2
+    Attributes
+        ID                 : 50
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : R
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tPanReach
+    Attributes
+        ID                 : 51
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Listening Range
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
 Progress Bar lStereoPos
     Attributes
-        ID               : 52
+        ID               : 6
         Scope            : local
         Send Component ID: disabled
         Value            : 100
     
 Slider sPan
     Attributes
-        ID               : 43
+        ID               : 47
         Scope            : local
         Send Component ID: disabled
         Position         : 64
@@ -482,7 +482,7 @@ Slider sPan
         
 Slider sRange
     Attributes
-        ID               : 48
+        ID               : 52
         Scope            : local
         Send Component ID: disabled
         Position         : 64
@@ -513,7 +513,7 @@ Slider sRange
         
 Button bReturn
     Attributes
-        ID               : 9
+        ID               : 13
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -526,7 +526,7 @@ Button bReturn
         
 Button bLinConst
     Attributes
-        ID               : 40
+        ID               : 43
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -555,7 +555,7 @@ Button bLinConst
         
 Button bAuto
     Attributes
-        ID               : 42
+        ID               : 45
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -594,7 +594,7 @@ Button bAuto
         
 Dual-state Button btHelp
     Attributes
-        ID               : 3
+        ID               : 8
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -619,7 +619,7 @@ Dual-state Button btHelp
         
 Dual-state Button btCoil1
     Attributes
-        ID               : 32
+        ID               : 35
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -628,7 +628,7 @@ Dual-state Button btCoil1
     
 Dual-state Button btCoil2
     Attributes
-        ID               : 33
+        ID               : 36
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -637,7 +637,7 @@ Dual-state Button btCoil2
     
 Dual-state Button btCoil3
     Attributes
-        ID               : 34
+        ID               : 37
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -646,7 +646,7 @@ Dual-state Button btCoil3
     
 Dual-state Button btCoil4
     Attributes
-        ID               : 35
+        ID               : 38
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -655,7 +655,7 @@ Dual-state Button btCoil4
     
 Dual-state Button btCoil5
     Attributes
-        ID               : 36
+        ID               : 39
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -664,7 +664,7 @@ Dual-state Button btCoil5
     
 Dual-state Button btCoil6
     Attributes
-        ID               : 37
+        ID               : 40
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -673,7 +673,7 @@ Dual-state Button btCoil6
     
 Dual-state Button btShowAll
     Attributes
-        ID               : 38
+        ID               : 41
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -711,7 +711,7 @@ Dual-state Button btShowAll
         
 Dual-state Button btPanEn
     Attributes
-        ID               : 39
+        ID               : 42
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -758,10 +758,12 @@ Dual-state Button btPanEn
             }
             ref_star
             click bLinConst,0
+            // vis causes a (partial?) page refresh => new drawings required...
+            click fDraw,1
         
 Hotspot fLoadModes
     Attributes
-        ID               : 14
+        ID               : 18
         Scope            : local
         Send Component ID: disabled
     
@@ -791,7 +793,7 @@ Hotspot fLoadModes
         
 Hotspot fDraw
     Attributes
-        ID               : 17
+        ID               : 20
         Scope            : local
         Send Component ID: disabled
     
@@ -812,9 +814,10 @@ Hotspot fDraw
             // Clear previous drawings except if all of them shall be shown.
             if(btShowAll.val==0)
             {
-                ref tHideBack3
-                ref lStereoPos
-                doevents
+                fill lStereoPos.x-5,lStereoPos.y-20,lStereoPos.w+10,20,Stereo_Coils.bco
+                //  vis tHideBack3,1
+                //  vis lStereoPos,1
+                //  doevents
             }
             // If Stereo is disabled, volume is just constant 100% over the entire range.
             // Most of the code stays the same though for making life easier (haha.)
@@ -921,7 +924,7 @@ Hotspot fDraw
         
 Hotspot fLoadStoreCfg
     Attributes
-        ID               : 18
+        ID               : 21
         Scope            : local
         Send Component ID: disabled
     
@@ -948,12 +951,15 @@ Hotspot fLoadStoreCfg
             sPan.val=sys0&0xff
             sys0>>=8
             panMode.val=sys0&0xff
-            click btPanEn,0
+            if(btShowAll.val==0)
+            {
+                click btPanEn,0
+            }
             ref_star
         
 Hotspot fSysex
     Attributes
-        ID               : 30
+        ID               : 33
         Scope            : local
         Send Component ID: disabled
     
@@ -1036,101 +1042,9 @@ Hotspot fSysex
             // remaining 3 VAL bytes, SYSEX_END
             printh 00 00 00 f7
         
-Hotspot fLoadColors
-    Attributes
-        ID               : 53
-        Scope            : local
-        Send Component ID: disabled
-    
-    Events
-        Touch Press Event
-            // Changes all page components according to the current color set.
-            // Note: This component has to be the last component of the page.
-            //
-            // sys0: component id
-            // sys1: component type
-            // sys2: picture id offset for current color mode
-            sys2=Settings.colorMode.val*Settings.picCount.val
-            for(sys0=0;sys0<fLoadColors.id;sys0++)
-            {
-                // More convenient for typing
-                sys1=b[sys0].type
-                if(sys1==121)
-                {
-                    // Types that have bco
-                    // page
-                    if(b[sys0].bco==Settings.backCol2Deflt.val)
-                    {
-                        b[sys0].bco=Settings.backCol2.val
-                    }else
-                    {
-                        b[sys0].bco=Settings.backCol.val
-                    }
-                }else if(sys1==54||sys1==59||sys1==116||sys1==55)
-                {
-                    // Types that have bco, pco, and sta:
-                    // number, float, text, scroll text
-                    if(b[sys0].sta==1)
-                    {
-                        if(b[sys0].bco==Settings.backCol2Deflt.val)
-                        {
-                            b[sys0].bco=Settings.backCol2.val
-                            b[sys0].pco=Settings.frontCol2.val
-                        }else
-                        {
-                            b[sys0].bco=Settings.backCol.val
-                            b[sys0].pco=Settings.frontCol.val
-                        }
-                    }
-                }else if(sys1==106)
-                {
-                    // Types that have pco, bco, sta (different)
-                    // progress bar
-                    if(b[sys0].sta==0)
-                    {
-                        if(b[sys0].bco==Settings.backCol2Deflt.val)
-                        {
-                            b[sys0].bco=Settings.backCol2.val
-                            b[sys0].pco=Settings.frontCol2.val
-                        }else
-                        {
-                            b[sys0].bco=Settings.backCol.val
-                            b[sys0].pco=Settings.frontCol.val
-                        }
-                    }
-                }else if(sys1==98||sys1==53)
-                {
-                    // Types that have pco, pic, pco2, pic2, sta:
-                    // button, dual-state button
-                    if(b[sys0].sta==2)
-                    {
-                        b[sys0].pco=Settings.frontCol.val
-                        b[sys0].pco2=Settings.backCol.val
-                        b[sys0].pic=b[sys0].pic%Settings.picCount.val
-                        b[sys0].pic+=sys2
-                        b[sys0].pic2=b[sys0].pic+1
-                    }
-                }else if(sys1==58)
-                {
-                    // Types that have bco, pco
-                    // QR Code
-                    b[sys0].bco=Settings.backCol.val
-                    b[sys0].pco=Settings.qrFrontCol.val
-                }else if(sys1==1)
-                {
-                    // Types that have pic, pic1, pic2:
-                    // slider
-                    b[sys0].pic=b[sys0].pic%Settings.picCount.val
-                    b[sys0].pic+=sys2
-                    b[sys0].pic1=b[sys0].pic
-                    b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
-                    b[sys0].pic2+=sys2
-                }
-            }
-        
 Hotspot hHelp
     Attributes
-        ID               : 54
+        ID               : 53
         Scope            : local
         Send Component ID: disabled
     
@@ -1300,9 +1214,101 @@ Hotspot hHelp
                 click btHelp,0
             }
         
+Hotspot fLoadColors
+    Attributes
+        ID               : 54
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Changes all page components according to the current color set.
+            // Note: This component has to be the last component of the page.
+            //
+            // sys0: component id
+            // sys1: component type
+            // sys2: picture id offset for current color mode
+            sys2=Settings.colorMode.val*Settings.picCount.val
+            for(sys0=0;sys0<fLoadColors.id;sys0++)
+            {
+                // More convenient for typing
+                sys1=b[sys0].type
+                if(sys1==121)
+                {
+                    // Types that have bco
+                    // page
+                    if(b[sys0].bco==Settings.backCol2Deflt.val)
+                    {
+                        b[sys0].bco=Settings.backCol2.val
+                    }else
+                    {
+                        b[sys0].bco=Settings.backCol.val
+                    }
+                }else if(sys1==54||sys1==59||sys1==116||sys1==55)
+                {
+                    // Types that have bco, pco, and sta:
+                    // number, float, text, scroll text
+                    if(b[sys0].sta==1)
+                    {
+                        if(b[sys0].bco==Settings.backCol2Deflt.val)
+                        {
+                            b[sys0].bco=Settings.backCol2.val
+                            b[sys0].pco=Settings.frontCol2.val
+                        }else
+                        {
+                            b[sys0].bco=Settings.backCol.val
+                            b[sys0].pco=Settings.frontCol.val
+                        }
+                    }
+                }else if(sys1==106)
+                {
+                    // Types that have pco, bco, sta (different)
+                    // progress bar
+                    if(b[sys0].sta==0)
+                    {
+                        if(b[sys0].bco==Settings.backCol2Deflt.val)
+                        {
+                            b[sys0].bco=Settings.backCol2.val
+                            b[sys0].pco=Settings.frontCol2.val
+                        }else
+                        {
+                            b[sys0].bco=Settings.backCol.val
+                            b[sys0].pco=Settings.frontCol.val
+                        }
+                    }
+                }else if(sys1==98||sys1==53)
+                {
+                    // Types that have pco, pic, pco2, pic2, sta:
+                    // button, dual-state button
+                    if(b[sys0].sta==2)
+                    {
+                        b[sys0].pco=Settings.frontCol.val
+                        b[sys0].pco2=Settings.backCol.val
+                        b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                        b[sys0].pic+=sys2
+                        b[sys0].pic2=b[sys0].pic+1
+                    }
+                }else if(sys1==58)
+                {
+                    // Types that have bco, pco
+                    // QR Code
+                    b[sys0].bco=Settings.backCol.val
+                    b[sys0].pco=Settings.qrFrontCol.val
+                }else if(sys1==1)
+                {
+                    // Types that have pic, pic1, pic2:
+                    // slider
+                    b[sys0].pic=b[sys0].pic%Settings.picCount.val
+                    b[sys0].pic+=sys2
+                    b[sys0].pic1=b[sys0].pic
+                    b[sys0].pic2=b[sys0].pic2%Settings.picCount.val
+                    b[sys0].pic2+=sys2
+                }
+            }
+        
 TouchCap touchCap
     Attributes
-        ID   : 5
+        ID   : 9
         Scope: local
         Value: 0
     
