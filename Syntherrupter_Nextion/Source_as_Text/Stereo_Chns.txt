@@ -1934,14 +1934,14 @@ Hotspot hHelp
                     tHelp.txt+="note pitch. Imagine you're sitting in front of a piano. Low notes come from your left, \r"
                     tHelp.txt+="high notes from your right. That's one possible effect you can recreate with these options. \r"
                     tHelp.txt+="\r"
-                    tHelp.txt+="'Normal':   Entire channel plays at the position defined by the MIDI Pan value. \r"
-                    tHelp.txt+="'Omni':      Entire channel plays 'everywhere'. Stereo location of the coils doesn't matter. \r"
+                    tHelp.txt+="'Normal':    Entire channel plays at the position defined by the MIDI Pan value. \r"
+                    tHelp.txt+="'Omni':       Entire channel plays 'everywhere'. Stereo location of the coils doesn't matter. \r"
                     tHelp.txt+="'Mapping': Stereo position is defined by the note pitch(es) and the range settings below..\r"
                     tHelp.txt+="    Individual: Each note on this channel is individually mapped based on its pitch. \r"
-                    tHelp.txt+="    Lowest:     All notes are mapped based on the pitch of the lowest note that's playing. \r"
+                    tHelp.txt+="    Lowest:    All notes are mapped based on the pitch of the lowest note that's playing. \r"
                     tHelp.txt+="    Highest:    All notes are mapped based on the pitch of the highest note that's playing. \r"
                     tHelp.txt+="    Average:   All notes are mapped based on the average pitch of all active notes. \r"
-                    tHelp.txt+="    Loudest:    All notes are mapped based on the pitch of the loudest note that's playing.\r"
+                    tHelp.txt+="    Loudest:   All notes are mapped based on the pitch of the loudest note that's playing.\r"
                 }else if(sys1>=tNoteRange.id&&sys1<=mapOutH.id)
                 {
                     tHelp.txt+="Mapping Configuration\r\r"
