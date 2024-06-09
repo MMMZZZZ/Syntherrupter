@@ -32,8 +32,9 @@ Page Settings
             // Properly hide the help stuff.
             vis hHelp,0
             vis tHelp,0
-            vis bReturn,0
-            tTitle.txt="Settings"
+            //
+            tSave.bco=Settings.backSelectCol2.val
+            vis tSave,Settings.unsaved.val
             // Not all users have the same rights
             if(User_Settings.userNum.val!=2)
             {
@@ -52,7 +53,7 @@ Page Settings
                 // Default "stop" action.
                 // Set ontime and duty to 0 for all modes. See fSysex for details
                 // Disable all modes as well.
-                printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 20 00 00 7f 00 00 00 00 00 f7
                 printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
                 printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                 // Set all ontime and duty settings of all pages to 0.
@@ -81,108 +82,91 @@ Page Settings
         
 Variable (int32) currentHelp
     Attributes
-        ID   : 6
+        ID   : 11
         Scope: local
         Value: 4294967295
     
 Variable (int32) activeModes
     Attributes
-        ID   : 7
+        ID   : 12
         Scope: global
         Value: 0
     
 Variable (int32) backCol
     Attributes
-        ID   : 8
+        ID   : 13
         Scope: global
         Value: 8484
     
 Variable (int32) backCol2
     Attributes
-        ID   : 9
+        ID   : 14
         Scope: global
         Value: 2145
     
 Variable (int32) frontCol
     Attributes
-        ID   : 21
+        ID   : 22
         Scope: global
         Value: 40476
     
 Variable (int32) frontCol2
     Attributes
-        ID   : 22
+        ID   : 23
         Scope: global
         Value: 40476
     
 Variable (int32) picCount
     Attributes
-        ID   : 23
+        ID   : 24
         Scope: global
         Value: 43
     
 Variable (int32) colorMode
     Attributes
-        ID   : 24
+        ID   : 25
         Scope: global
         Value: 1
     
 Variable (int32) qrFrontCol
     Attributes
-        ID   : 25
+        ID   : 26
         Scope: global
         Value: 40476
     
 Variable (int32) applyingMode
     Attributes
-        ID   : 26
+        ID   : 27
         Scope: global
         Value: 1
     
 Variable (int32) backCol2Deflt
     Attributes
-        ID   : 27
+        ID   : 28
         Scope: global
         Value: 4589
     
 Variable (int32) backSelectCol2
     Attributes
-        ID   : 28
+        ID   : 29
         Scope: global
         Value: 16904
     
 Variable (int32) firstHelp
     Attributes
-        ID   : 32
+        ID   : 33
         Scope: global
         Value: 1
     
-Text tHelp
+Variable (int32) unsaved
     Attributes
-        ID                 : 1
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : 
-        Max. Text Size     : 650
-    
-    Events
-        Touch Press Event
-            // This object is only visible in help mode. No need to be "transparent" to clicks in normal operation.
-            click bReturn,0
-        
-Text tTitle
-    Attributes
-        ID                 : 3
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               :        Settings
-        Max. Text Size     : 22
+        ID   : 34
+        Scope: global
+        Value: 0
     
 Text tUser
     Attributes
-        ID                 : 15
+        ID                 : 1
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -196,7 +180,7 @@ Text tUser
         
 Text tMSI
     Attributes
-        ID                 : 16
+        ID                 : 2
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -210,7 +194,7 @@ Text tMSI
         
 Text tMML
     Attributes
-        ID                 : 17
+        ID                 : 3
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -224,7 +208,7 @@ Text tMML
         
 Text tMLS
     Attributes
-        ID                 : 18
+        ID                 : 4
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -236,9 +220,46 @@ Text tMLS
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
+Text tSave
+    Attributes
+        ID                 : 5
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Unsaved Settings!
+        Max. Text Size     : 40
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHelp
+    Attributes
+        ID                 : 6
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : 
+        Max. Text Size     : 650
+    
+    Events
+        Touch Press Event
+            // This object is only visible in help mode. No need to be "transparent" to clicks in normal operation.
+            click bReturn,0
+        
+Text tTitle
+    Attributes
+        ID                 : 8
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Settings
+        Max. Text Size     : 22
+    
 Button bDiscard
     Attributes
-        ID               : 2
+        ID               : 7
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -269,20 +290,25 @@ Button bDiscard
             // SYSEX_END
             printh f7
             //
-            page Menu
+            unsaved.val=0
+            vis tSave,0
         
 Button bReturn
     Attributes
-        ID               : 4
+        ID               : 9
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
-        Text             : âœ•
+        Text             : â†
         Max. Text Size   : 3
     
+    Events
+        Touch Release Event
+            page Menu
+        
 Button bCoilSettings
     Attributes
-        ID               : 10
+        ID               : 15
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -296,7 +322,7 @@ Button bCoilSettings
         
 Button bSave
     Attributes
-        ID               : 11
+        ID               : 16
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -327,11 +353,12 @@ Button bSave
             // SYSEX_END
             printh f7
             //
-            page Menu
+            unsaved.val=0
+            vis tSave,0
         
 Button bNXTUpdate
     Attributes
-        ID               : 12
+        ID               : 17
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -344,7 +371,7 @@ Button bNXTUpdate
         
 Button bGeneral
     Attributes
-        ID               : 13
+        ID               : 18
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -357,7 +384,7 @@ Button bGeneral
         
 Button bUsers
     Attributes
-        ID               : 14
+        ID               : 19
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -371,7 +398,7 @@ Button bUsers
         
 Button bEnvelope
     Attributes
-        ID               : 19
+        ID               : 20
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -385,7 +412,7 @@ Button bEnvelope
         
 Button bESPUpdate
     Attributes
-        ID               : 20
+        ID               : 21
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -398,7 +425,7 @@ Button bESPUpdate
         
 Button bReset
     Attributes
-        ID               : 30
+        ID               : 31
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -446,10 +473,13 @@ Button bReset
             //
             // Not really necessary but doesn't hurt either.
             page Menu
+            //
+            unsaved.val=0
+            vis tSave,0
         
 Dual-state Button btHelp
     Attributes
-        ID               : 5
+        ID               : 10
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -472,7 +502,7 @@ Dual-state Button btHelp
         
 Hotspot fLoadModes
     Attributes
-        ID               : 29
+        ID               : 30
         Scope            : local
         Send Component ID: disabled
     
@@ -502,7 +532,7 @@ Hotspot fLoadModes
         
 Hotspot fLoadColors
     Attributes
-        ID               : 31
+        ID               : 32
         Scope            : local
         Send Component ID: disabled
     
@@ -578,7 +608,7 @@ Hotspot fLoadColors
         
 Hotspot hHelp
     Attributes
-        ID               : 33
+        ID               : 35
         Scope            : local
         Send Component ID: disabled
     
@@ -671,6 +701,12 @@ Hotspot hHelp
                     tHelp.txt+="shutdown! \r"
                     tHelp.txt+="This feature can be temporarily disabled in the general settings. After a reset or \r"
                     tHelp.txt+="power-cycle it will be enabled again.\r"
+                }else if(sys1==bReturn.id)
+                {
+                    tHelp.txt+="Return Button\r\r"
+                    tHelp.txt+="Return to the main menu. \r"
+                    tHelp.txt+="\r"
+                    tHelp.txt+="If you want to leave help mode, press the question mark at the top left. \r"
                 }else if(sys1==bGeneral.id)
                 {
                     tHelp.txt+="General Settings\r\r"
@@ -727,8 +763,10 @@ Hotspot hHelp
                 {
                     currentHelp.val=sys1
                     vis tHelp,1
-                    vis bReturn,1
-                    tTitle.txt="       Settings"
+                    if(bReturn.txt!="âœ•")
+                    {
+                        bReturn.txt="âœ•"
+                    }
                 }
             }
         
@@ -737,9 +775,11 @@ Hotspot hHelp
             if(bReturn.val==1)
             {
                 bReturn.val=0
-                vis bReturn,0
+                if(bReturn.txt!="â†")
+                {
+                    bReturn.txt="â†"
+                }
                 vis tHelp,0
-                tTitle.txt="Settings"
                 currentHelp.val=-1
             }else if(sys1==btHelp.id)
             {

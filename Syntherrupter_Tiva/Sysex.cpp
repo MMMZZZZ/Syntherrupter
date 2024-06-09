@@ -1419,7 +1419,7 @@ void Sysex::processSysex()
             break;
 
         case 0x0240: // [msb=charGroup][lsb=user], char[4] username
-            if (msg.targetLSB == 0)
+            if (msg.targetMSB == 0)
             {
                 // Clear entire string before filling it up with new data.
                 memset(EEPROMSettings::userData[msg.targetLSB].name, 0, EEPROMSettings::STR_CHAR_COUNT);
@@ -1433,7 +1433,7 @@ void Sysex::processSysex()
             }
             break;
         case 0x0241: // [msb=charGroup][lsb=user], char[4] password
-            if (msg.targetLSB == 0)
+            if (msg.targetMSB == 0)
             {
                 // Clear entire string before filling it up with new data.
                 memset(EEPROMSettings::userData[msg.targetLSB].password, 0, EEPROMSettings::STR_CHAR_COUNT);
@@ -1468,6 +1468,11 @@ void Sysex::processSysex()
                 EEPROMSettings::userData[msg.targetLSB].maxOntimeUS = msg.value.i32;
                 if (GUI::getAcceptsData() && uiUpdateMode == 2)
                 {
+                    if (msg.targetLSB == 2 && msg.value.i32 > 9999)
+                    {
+                        // See Nextion User_Settings comments for details.
+                        msg.value.i32 = 9999;
+                    }
                     nxt->sendCmd("User_Settings.u%iOntime.val=%i", msg.targetLSB, msg.value.i32);
                 }
             }

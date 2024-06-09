@@ -37,6 +37,9 @@ Page Other_Settings
             vis hHelp,0
             vis tHelp,0
             //
+            tSave.bco=Settings.backSelectCol2.val
+            vis tSave,Settings.unsaved.val
+            //
             newValTargetId.val=idle.id
             // Set dark mode button state
             btDark.val=Settings.colorMode.val
@@ -54,13 +57,19 @@ Page Other_Settings
             // Enable page refreshs again
             ref_star
         
+        Postinitialize Event
+            //
+            // Calculate original state of all variables to be able to determine if something has changed.
+            click fCRC,1
+            originalState.val=crcval
+        
         Touch Press Event
             if(Other_Settings.nBackOff.val!=0)
             {
                 // Default "stop" action.
                 // Set ontime and duty to 0 for all modes. See fSysex for details
                 // Disable all modes as well.
-                printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 20 00 00 7f 00 00 00 00 00 f7
                 printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
                 printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                 // Set all ontime and duty settings of all pages to 0.
@@ -89,25 +98,31 @@ Page Other_Settings
         
 Variable (int32) newValTargetId
     Attributes
-        ID   : 7
+        ID   : 12
         Scope: local
         Value: 20
     
 Variable (int32) newSelect
     Attributes
-        ID   : 8
+        ID   : 13
         Scope: local
         Value: 0
     
 Variable (int32) currentHelp
     Attributes
-        ID   : 42
+        ID   : 43
         Scope: local
         Value: 4294967295
     
+Variable (int32) originalState
+    Attributes
+        ID   : 46
+        Scope: local
+        Value: 0
+    
 Number nHoldTime
     Attributes
-        ID                 : 6
+        ID                 : 11
         Scope              : global
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -129,7 +144,7 @@ Number nHoldTime
         
 Number nSleepMin
     Attributes
-        ID                 : 26
+        ID                 : 31
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -151,7 +166,7 @@ Number nSleepMin
         
 Number nSleepS
     Attributes
-        ID                 : 27
+        ID                 : 32
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -173,7 +188,7 @@ Number nSleepS
         
 Number fSqrt
     Attributes
-        ID                 : 31
+        ID                 : 36
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -202,7 +217,7 @@ Number fSqrt
         
 Number nBackOff
     Attributes
-        ID                 : 33
+        ID                 : 38
         Scope              : global
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -224,15 +239,85 @@ Number nBackOff
         
 XFloat idle
     Attributes
-        ID                 : 9
+        ID                 : 14
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
         Value              : 0
     
-Text tHelp
+Text tUser
     Attributes
         ID                 : 1
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  Guest
+        Max. Text Size     : 32
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMSI
+    Attributes
+        ID                 : 2
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Simple
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMML
+    Attributes
+        ID                 : 3
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : MIDI Live
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tMLS
+    Attributes
+        ID                 : 4
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Lightsaber
+        Max. Text Size     : 16
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tSave
+    Attributes
+        ID                 : 5
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Unsaved Settings!
+        Max. Text Size     : 40
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHelp
+    Attributes
+        ID                 : 6
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -246,7 +331,7 @@ Text tHelp
         
 Text tHideBack
     Attributes
-        ID                 : 2
+        ID                 : 7
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -259,7 +344,7 @@ Text tHideBack
         
 Text tTitle
     Attributes
-        ID                 : 3
+        ID                 : 8
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -273,7 +358,7 @@ Text tTitle
         
 Text tHoldTime
     Attributes
-        ID                 : 5
+        ID                 : 10
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -287,7 +372,7 @@ Text tHoldTime
         
 Text tBrightness
     Attributes
-        ID                 : 22
+        ID                 : 27
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -301,7 +386,7 @@ Text tBrightness
         
 Text fCheckNApply
     Attributes
-        ID                 : 24
+        ID                 : 29
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -333,11 +418,19 @@ Text fCheckNApply
                 nSleepS.val=59
             }
             thsp=nSleepMin.val*60+nSleepS.val
-            click fSysex,1
+            //
+            // Check if something has actually been changed
+            click fCRC,1
+            if(crcval!=originalState.val)
+            {
+                Settings.unsaved.val=1
+                click fSysex,1
+            }
+            vis tSave,Settings.unsaved.val
         
 Text tSleep
     Attributes
-        ID                 : 25
+        ID                 : 30
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -351,7 +444,7 @@ Text tSleep
         
 Text tMin
     Attributes
-        ID                 : 28
+        ID                 : 33
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -365,7 +458,7 @@ Text tMin
         
 Text tS
     Attributes
-        ID                 : 29
+        ID                 : 34
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -379,7 +472,7 @@ Text tS
         
 Text tms
     Attributes
-        ID                 : 30
+        ID                 : 35
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -393,7 +486,7 @@ Text tms
         
 Text tBackOff
     Attributes
-        ID                 : 32
+        ID                 : 37
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -405,65 +498,9 @@ Text tBackOff
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
-Text tUser
-    Attributes
-        ID                 : 34
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               :  Guest
-        Max. Text Size     : 32
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tMSI
-    Attributes
-        ID                 : 35
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Simple
-        Max. Text Size     : 16
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tMML
-    Attributes
-        ID                 : 36
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : MIDI Live
-        Max. Text Size     : 16
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tMLS
-    Attributes
-        ID                 : 37
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Lightsaber
-        Max. Text Size     : 16
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
 Text tSelToMod
     Attributes
-        ID                 : 39
+        ID                 : 40
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -477,7 +514,7 @@ Text tSelToMod
         
 Slider sBrightness
     Attributes
-        ID               : 23
+        ID               : 28
         Scope            : local
         Send Component ID: disabled
         Position         : 100
@@ -503,7 +540,7 @@ Slider sBrightness
         
 Button bReturn
     Attributes
-        ID               : 4
+        ID               : 9
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -519,7 +556,7 @@ Button bReturn
         
 Button b0
     Attributes
-        ID               : 10
+        ID               : 15
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -539,7 +576,7 @@ Button b0
         
 Button b1
     Attributes
-        ID               : 11
+        ID               : 16
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -560,7 +597,7 @@ Button b1
         
 Button b2
     Attributes
-        ID               : 12
+        ID               : 17
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -581,7 +618,7 @@ Button b2
         
 Button b3
     Attributes
-        ID               : 13
+        ID               : 18
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -602,7 +639,7 @@ Button b3
         
 Button b4
     Attributes
-        ID               : 14
+        ID               : 19
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -623,7 +660,7 @@ Button b4
         
 Button b5
     Attributes
-        ID               : 15
+        ID               : 20
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -644,7 +681,7 @@ Button b5
         
 Button b6
     Attributes
-        ID               : 16
+        ID               : 21
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -665,7 +702,7 @@ Button b6
         
 Button b7
     Attributes
-        ID               : 17
+        ID               : 22
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -686,7 +723,7 @@ Button b7
         
 Button b8
     Attributes
-        ID               : 18
+        ID               : 23
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -707,7 +744,7 @@ Button b8
         
 Button b9
     Attributes
-        ID               : 19
+        ID               : 24
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -728,7 +765,7 @@ Button b9
         
 Button bClear
     Attributes
-        ID               : 20
+        ID               : 25
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -741,7 +778,7 @@ Button bClear
         
 Button bOK
     Attributes
-        ID               : 21
+        ID               : 26
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -757,7 +794,7 @@ Button bOK
         
 Dual-state Button btDark
     Attributes
-        ID               : 38
+        ID               : 39
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -790,7 +827,7 @@ Dual-state Button btDark
         
 Dual-state Button btHelp
     Attributes
-        ID               : 43
+        ID               : 44
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -813,7 +850,7 @@ Dual-state Button btHelp
         
 Hotspot fLoadModes
     Attributes
-        ID               : 40
+        ID               : 41
         Scope            : local
         Send Component ID: disabled
     
@@ -843,7 +880,7 @@ Hotspot fLoadModes
         
 Hotspot fSysex
     Attributes
-        ID               : 41
+        ID               : 42
         Scope            : local
         Send Component ID: disabled
     
@@ -960,7 +997,7 @@ Hotspot fSysex
         
 Hotspot fLoadColors
     Attributes
-        ID               : 44
+        ID               : 45
         Scope            : local
         Send Component ID: disabled
     
@@ -1034,9 +1071,26 @@ Hotspot fLoadColors
                 }
             }
         
+Hotspot fCRC
+    Attributes
+        ID               : 47
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Calculate CRC over all settings on the page.
+            crcrest 1,0xFFFF
+            crcputs nHoldTime.val,4
+            crcputs sBrightness.val,1
+            crcputs nSleepMin.val,1
+            crcputs nSleepS.val,1
+            crcputs nBackOff.val,4
+            crcputs btDark.val,1
+        
 Hotspot hHelp
     Attributes
-        ID               : 45
+        ID               : 48
         Scope            : local
         Send Component ID: disabled
     

@@ -29,6 +29,9 @@ Page Keyboard
             vis fLoadModes,0
             vis fLoadColors,0
             //
+            tSave.bco=Settings.backSelectCol2.val
+            vis tSave,Settings.unsaved.val
+            //
             // Set page title
             tTitle.txt=sTitleStart.txt+sComp.txt
             // Check if target is string or integer
@@ -93,7 +96,7 @@ Page Keyboard
                 // Default "stop" action.
                 // Set ontime and duty to 0 for all modes. See fSysex for details
                 // Disable all modes as well.
-                printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 20 00 00 7f 00 00 00 00 00 f7
                 printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
                 printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                 // Set all ontime and duty settings of all pages to 0.
@@ -122,76 +125,39 @@ Page Keyboard
         
 Variable (int32) origin
     Attributes
-        ID   : 3
+        ID   : 8
         Scope: global
         Value: 0
     
 Variable (string) sTitleStart
     Attributes
-        ID            : 4
+        ID            : 9
         Scope         : local
         Text          : Change 
         Max. Text Size: 30
     
 Variable (string) sComp
     Attributes
-        ID            : 5
+        ID            : 10
         Scope         : global
         Text          : 0
         Max. Text Size: 20
     
 Variable (int32) target
     Attributes
-        ID   : 49
+        ID   : 54
         Scope: global
         Value: 0
     
 Variable (int32) firstClick
     Attributes
-        ID   : 51
+        ID   : 56
         Scope: local
         Value: 1
     
-Text tTitle
-    Attributes
-        ID                 : 1
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Change Example 42
-        Max. Text Size     : 30
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tNewVal
-    Attributes
-        ID                 : 6
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : New Value:
-        Max. Text Size     : 20
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text newVal
-    Attributes
-        ID                 : 7
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : 42
-        Max. Text Size     : 32
-    
 Text tUser
     Attributes
-        ID                 : 59
+        ID                 : 1
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -205,7 +171,7 @@ Text tUser
         
 Text tMSI
     Attributes
-        ID                 : 60
+        ID                 : 2
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -219,7 +185,7 @@ Text tMSI
         
 Text tMML
     Attributes
-        ID                 : 61
+        ID                 : 3
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -233,7 +199,7 @@ Text tMML
         
 Text tMLS
     Attributes
-        ID                 : 62
+        ID                 : 4
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -245,9 +211,60 @@ Text tMLS
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
+Text tSave
+    Attributes
+        ID                 : 5
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Unsaved Settings!
+        Max. Text Size     : 40
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tTitle
+    Attributes
+        ID                 : 6
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Change Example 42
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tNewVal
+    Attributes
+        ID                 : 11
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : New Value:
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text newVal
+    Attributes
+        ID                 : 12
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : 42
+        Max. Text Size     : 32
+    
 Button bReturn
     Attributes
-        ID               : 2
+        ID               : 7
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -277,7 +294,7 @@ Button bReturn
         
 Button b0
     Attributes
-        ID               : 8
+        ID               : 13
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -295,7 +312,7 @@ Button b0
         
 Button b1
     Attributes
-        ID               : 9
+        ID               : 14
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -313,7 +330,7 @@ Button b1
         
 Button b2
     Attributes
-        ID               : 10
+        ID               : 15
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -331,7 +348,7 @@ Button b2
         
 Button b3
     Attributes
-        ID               : 11
+        ID               : 16
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -349,7 +366,7 @@ Button b3
         
 Button b4
     Attributes
-        ID               : 12
+        ID               : 17
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -367,7 +384,7 @@ Button b4
         
 Button b5
     Attributes
-        ID               : 13
+        ID               : 18
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -385,7 +402,7 @@ Button b5
         
 Button b6
     Attributes
-        ID               : 14
+        ID               : 19
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -403,7 +420,7 @@ Button b6
         
 Button b7
     Attributes
-        ID               : 15
+        ID               : 20
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -421,7 +438,7 @@ Button b7
         
 Button b8
     Attributes
-        ID               : 16
+        ID               : 21
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -439,7 +456,7 @@ Button b8
         
 Button b9
     Attributes
-        ID               : 17
+        ID               : 22
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -457,7 +474,7 @@ Button b9
         
 Button bP
     Attributes
-        ID               : 18
+        ID               : 23
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -477,7 +494,7 @@ Button bP
         
 Button bQ
     Attributes
-        ID               : 19
+        ID               : 24
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -497,7 +514,7 @@ Button bQ
         
 Button bW
     Attributes
-        ID               : 20
+        ID               : 25
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -517,7 +534,7 @@ Button bW
         
 Button bE
     Attributes
-        ID               : 21
+        ID               : 26
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -537,7 +554,7 @@ Button bE
         
 Button bR
     Attributes
-        ID               : 22
+        ID               : 27
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -557,7 +574,7 @@ Button bR
         
 Button bT
     Attributes
-        ID               : 23
+        ID               : 28
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -577,7 +594,7 @@ Button bT
         
 Button bZ
     Attributes
-        ID               : 24
+        ID               : 29
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -597,7 +614,7 @@ Button bZ
         
 Button bU
     Attributes
-        ID               : 25
+        ID               : 30
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -617,7 +634,7 @@ Button bU
         
 Button bI
     Attributes
-        ID               : 26
+        ID               : 31
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -637,7 +654,7 @@ Button bI
         
 Button bO
     Attributes
-        ID               : 27
+        ID               : 32
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -657,7 +674,7 @@ Button bO
         
 Button bA
     Attributes
-        ID               : 28
+        ID               : 33
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -677,7 +694,7 @@ Button bA
         
 Button bS
     Attributes
-        ID               : 29
+        ID               : 34
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -697,7 +714,7 @@ Button bS
         
 Button bD
     Attributes
-        ID               : 30
+        ID               : 35
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -717,7 +734,7 @@ Button bD
         
 Button bF
     Attributes
-        ID               : 31
+        ID               : 36
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -737,7 +754,7 @@ Button bF
         
 Button bG
     Attributes
-        ID               : 32
+        ID               : 37
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -757,7 +774,7 @@ Button bG
         
 Button bH
     Attributes
-        ID               : 33
+        ID               : 38
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -777,7 +794,7 @@ Button bH
         
 Button bJ
     Attributes
-        ID               : 34
+        ID               : 39
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -797,7 +814,7 @@ Button bJ
         
 Button bK
     Attributes
-        ID               : 35
+        ID               : 40
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -817,7 +834,7 @@ Button bK
         
 Button bL
     Attributes
-        ID               : 36
+        ID               : 41
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -837,7 +854,7 @@ Button bL
         
 Button bBar
     Attributes
-        ID               : 37
+        ID               : 42
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -857,7 +874,7 @@ Button bBar
         
 Button bY
     Attributes
-        ID               : 38
+        ID               : 43
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -877,7 +894,7 @@ Button bY
         
 Button bX
     Attributes
-        ID               : 39
+        ID               : 44
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -897,7 +914,7 @@ Button bX
         
 Button bC
     Attributes
-        ID               : 40
+        ID               : 45
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -917,7 +934,7 @@ Button bC
         
 Button bV
     Attributes
-        ID               : 41
+        ID               : 46
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -937,7 +954,7 @@ Button bV
         
 Button bB
     Attributes
-        ID               : 42
+        ID               : 47
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -957,7 +974,7 @@ Button bB
         
 Button bN
     Attributes
-        ID               : 43
+        ID               : 48
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -977,7 +994,7 @@ Button bN
         
 Button bM
     Attributes
-        ID               : 44
+        ID               : 49
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -997,7 +1014,7 @@ Button bM
         
 Button bCom
     Attributes
-        ID               : 45
+        ID               : 50
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1017,7 +1034,7 @@ Button bCom
         
 Button bDot
     Attributes
-        ID               : 46
+        ID               : 51
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1037,7 +1054,7 @@ Button bDot
         
 Button bBack
     Attributes
-        ID               : 47
+        ID               : 52
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1054,7 +1071,7 @@ Button bBack
         
 Button bSpace
     Attributes
-        ID               : 48
+        ID               : 53
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1074,7 +1091,7 @@ Button bSpace
         
 Button bPlus
     Attributes
-        ID               : 52
+        ID               : 57
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1094,7 +1111,7 @@ Button bPlus
         
 Button bUE
     Attributes
-        ID               : 53
+        ID               : 58
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1114,7 +1131,7 @@ Button bUE
         
 Button bOE
     Attributes
-        ID               : 54
+        ID               : 59
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1134,7 +1151,7 @@ Button bOE
         
 Button bAE
     Attributes
-        ID               : 55
+        ID               : 60
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1154,7 +1171,7 @@ Button bAE
         
 Button bArr
     Attributes
-        ID               : 57
+        ID               : 62
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1174,7 +1191,7 @@ Button bArr
         
 Button bQuest
     Attributes
-        ID               : 58
+        ID               : 63
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1194,7 +1211,7 @@ Button bQuest
         
 Dual-state Button btShift
     Attributes
-        ID               : 50
+        ID               : 55
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1235,7 +1252,7 @@ Dual-state Button btShift
                 bZ.txt="Z"
                 b1.txt="!"
                 b2.txt="\""
-                b3.txt="ï¿½"
+                b3.txt="Â°"
                 b4.txt="$"
                 b5.txt="%"
                 b6.txt="&"
@@ -1243,9 +1260,9 @@ Dual-state Button btShift
                 b8.txt="("
                 b9.txt=")"
                 b0.txt="="
-                bOE.txt="ï¿½"
-                bUE.txt="ï¿½"
-                bAE.txt="ï¿½"
+                bOE.txt="Ã–"
+                bUE.txt="Ãœ"
+                bAE.txt="Ã„"
                 bCom.txt=";"
                 bDot.txt=":"
                 bBar.txt="_"
@@ -1291,9 +1308,9 @@ Dual-state Button btShift
                 b8.txt="8"
                 b9.txt="9"
                 b0.txt="0"
-                bUE.txt="ï¿½"
-                bOE.txt="ï¿½"
-                bAE.txt="ï¿½"
+                bUE.txt="Ã¼"
+                bOE.txt="Ã¶"
+                bAE.txt="Ã¤"
                 bCom.txt=","
                 bDot.txt="."
                 bBar.txt="-"
@@ -1304,7 +1321,7 @@ Dual-state Button btShift
         
 Dual-state Button btShift2
     Attributes
-        ID               : 56
+        ID               : 61
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1320,7 +1337,7 @@ Dual-state Button btShift2
         
 Hotspot fLoadModes
     Attributes
-        ID               : 63
+        ID               : 64
         Scope            : local
         Send Component ID: disabled
     
@@ -1350,7 +1367,7 @@ Hotspot fLoadModes
         
 Hotspot fLoadColors
     Attributes
-        ID               : 64
+        ID               : 65
         Scope            : local
         Send Component ID: disabled
     

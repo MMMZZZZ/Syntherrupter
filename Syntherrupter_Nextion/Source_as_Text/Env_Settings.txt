@@ -32,6 +32,9 @@ Page Env_Settings
             // Properly hide the help stuff.
             vis hHelp,0
             vis tHelp,0
+            //
+            tSave.bco=Settings.backSelectCol2.val
+            vis tSave,Settings.unsaved.val
             // Display maxSteps
             nMaxSteps1.val=maxSteps.val
             nMaxSteps2.val=maxSteps.val
@@ -58,7 +61,7 @@ Page Env_Settings
                 // Default "stop" action.
                 // Set ontime and duty to 0 for all modes. See fSysex for details
                 // Disable all modes as well.
-                printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 20 00 00 7f 00 00 00 00 00 f7
                 printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
                 printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                 // Set all ontime and duty settings of all pages to 0.
@@ -87,50 +90,50 @@ Page Env_Settings
         
 Variable (int32) currentHelp
     Attributes
-        ID   : 2
+        ID   : 7
         Scope: local
         Value: 4294967295
     
 Variable (int32) newValTargetId
     Attributes
-        ID   : 35
+        ID   : 36
         Scope: local
         Value: 68
     
 Variable (int32) newSelect
     Attributes
-        ID   : 36
+        ID   : 37
         Scope: local
         Value: 0
     
 Variable (int32) maxSteps
     Attributes
-        ID   : 39
+        ID   : 40
         Scope: global
         Value: 8
     
 Variable (int32) changedValues
     Attributes
-        ID   : 53
+        ID   : 54
         Scope: local
         Value: 0
     
 Variable (int32) origin
     Attributes
-        ID   : 54
+        ID   : 55
         Scope: global
         Value: 4294967295
     
 Variable (string) maxStepsStr
     Attributes
-        ID            : 56
+        ID            : 57
         Scope         : local
         Text          : 99
         Max. Text Size: 2
     
 Number nStep
     Attributes
-        ID                 : 26
+        ID                 : 27
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -152,7 +155,7 @@ Number nStep
         
 Number nDur
     Attributes
-        ID                 : 30
+        ID                 : 31
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -174,7 +177,7 @@ Number nDur
         
 Number nMaxSteps1
     Attributes
-        ID                 : 41
+        ID                 : 42
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -196,7 +199,7 @@ Number nMaxSteps1
         
 Number nNext
     Attributes
-        ID                 : 44
+        ID                 : 45
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -218,7 +221,7 @@ Number nNext
         
 Number nProg
     Attributes
-        ID                 : 46
+        ID                 : 47
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -240,7 +243,7 @@ Number nProg
         
 Number nMaxSteps2
     Attributes
-        ID                 : 48
+        ID                 : 49
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -262,7 +265,7 @@ Number nMaxSteps2
         
 XFloat nNTau
     Attributes
-        ID                 : 28
+        ID                 : 29
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -284,7 +287,7 @@ XFloat nNTau
         
 XFloat nAmp
     Attributes
-        ID                 : 31
+        ID                 : 32
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -306,43 +309,15 @@ XFloat nAmp
         
 XFloat idle
     Attributes
-        ID                 : 37
+        ID                 : 38
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
         Value              : 0
     
-Text tHelp
-    Attributes
-        ID                 : 3
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : 
-        Max. Text Size     : 1200
-    
-    Events
-        Touch Press Event
-            // This object is only visible in help mode. No need to be "transparent" to clicks in normal operation.
-            click bReturn,0
-        
-Text tTitle
-    Attributes
-        ID                 : 4
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Envelope Settings
-        Max. Text Size     : 30
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
 Text tUser
     Attributes
-        ID                 : 5
+        ID                 : 1
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -356,7 +331,7 @@ Text tUser
         
 Text tMSI
     Attributes
-        ID                 : 6
+        ID                 : 2
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -370,7 +345,7 @@ Text tMSI
         
 Text tMML
     Attributes
-        ID                 : 7
+        ID                 : 3
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -384,7 +359,7 @@ Text tMML
         
 Text tMLS
     Attributes
-        ID                 : 8
+        ID                 : 4
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -396,9 +371,51 @@ Text tMLS
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
-Text tHideBack2
+Text tSave
+    Attributes
+        ID                 : 5
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Unsaved Settings!
+        Max. Text Size     : 40
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHelp
+    Attributes
+        ID                 : 8
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : 
+        Max. Text Size     : 1200
+    
+    Events
+        Touch Press Event
+            // This object is only visible in help mode. No need to be "transparent" to clicks in normal operation.
+            click bReturn,0
+        
+Text tTitle
     Attributes
         ID                 : 9
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Envelope Settings
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHideBack2
+    Attributes
+        ID                 : 10
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -411,7 +428,7 @@ Text tHideBack2
         
 Text tStep
     Attributes
-        ID                 : 22
+        ID                 : 23
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -425,7 +442,7 @@ Text tStep
         
 Text tAmp
     Attributes
-        ID                 : 23
+        ID                 : 24
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -439,7 +456,7 @@ Text tAmp
         
 Text tDur
     Attributes
-        ID                 : 24
+        ID                 : 25
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -453,7 +470,7 @@ Text tDur
         
 Text tNTau
     Attributes
-        ID                 : 25
+        ID                 : 26
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -467,7 +484,7 @@ Text tNTau
         
 Text tms
     Attributes
-        ID                 : 27
+        ID                 : 28
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -481,7 +498,7 @@ Text tms
         
 Text fCheck
     Attributes
-        ID                 : 38
+        ID                 : 39
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -631,7 +648,7 @@ Text fCheck
         
 Text tRelease1
     Attributes
-        ID                 : 40
+        ID                 : 41
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -645,7 +662,7 @@ Text tRelease1
         
 Text tSlash1
     Attributes
-        ID                 : 42
+        ID                 : 43
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -668,7 +685,7 @@ Text tSlash1
         
 Text tNextStep
     Attributes
-        ID                 : 43
+        ID                 : 44
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -682,7 +699,7 @@ Text tNextStep
         
 Text tProg
     Attributes
-        ID                 : 45
+        ID                 : 46
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -696,7 +713,7 @@ Text tProg
         
 Text tSlash2
     Attributes
-        ID                 : 49
+        ID                 : 50
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -719,7 +736,7 @@ Text tSlash2
         
 Text tRelease2
     Attributes
-        ID                 : 50
+        ID                 : 51
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -733,7 +750,7 @@ Text tRelease2
         
 Button b0
     Attributes
-        ID               : 10
+        ID               : 11
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -754,7 +771,7 @@ Button b0
         
 Button b1
     Attributes
-        ID               : 11
+        ID               : 12
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -782,7 +799,7 @@ Button b1
         
 Button b2
     Attributes
-        ID               : 12
+        ID               : 13
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -810,7 +827,7 @@ Button b2
         
 Button b3
     Attributes
-        ID               : 13
+        ID               : 14
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -838,7 +855,7 @@ Button b3
         
 Button b4
     Attributes
-        ID               : 14
+        ID               : 15
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -866,7 +883,7 @@ Button b4
         
 Button b5
     Attributes
-        ID               : 15
+        ID               : 16
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -894,7 +911,7 @@ Button b5
         
 Button b6
     Attributes
-        ID               : 16
+        ID               : 17
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -922,7 +939,7 @@ Button b6
         
 Button b7
     Attributes
-        ID               : 17
+        ID               : 18
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -950,7 +967,7 @@ Button b7
         
 Button b8
     Attributes
-        ID               : 18
+        ID               : 19
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -978,7 +995,7 @@ Button b8
         
 Button b9
     Attributes
-        ID               : 19
+        ID               : 20
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1006,7 +1023,7 @@ Button b9
         
 Button bClear
     Attributes
-        ID               : 20
+        ID               : 21
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1026,7 +1043,7 @@ Button bClear
         
 Button bSet
     Attributes
-        ID               : 21
+        ID               : 22
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1039,10 +1056,12 @@ Button bSet
             //
             // Send all changes
             click fSysex,1
+            Settings.unsaved.val=1
+            vis tSave,Settings.unsaved.val
         
 Button bReturn
     Attributes
-        ID               : 29
+        ID               : 30
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1055,7 +1074,7 @@ Button bReturn
         
 Button b10
     Attributes
-        ID               : 32
+        ID               : 33
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1073,7 +1092,7 @@ Button b10
         
 Button bL
     Attributes
-        ID               : 33
+        ID               : 34
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1096,7 +1115,7 @@ Button bL
         
 Button bR
     Attributes
-        ID               : 34
+        ID               : 35
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1122,7 +1141,7 @@ Button bR
         
 Button bOK
     Attributes
-        ID               : 47
+        ID               : 48
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1138,7 +1157,7 @@ Button bOK
         
 Dual-state Button btHelp
     Attributes
-        ID               : 1
+        ID               : 6
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1163,7 +1182,7 @@ Dual-state Button btHelp
         
 Hotspot fLoadModes
     Attributes
-        ID               : 51
+        ID               : 52
         Scope            : local
         Send Component ID: disabled
     
@@ -1193,7 +1212,7 @@ Hotspot fLoadModes
         
 Hotspot fSysex
     Attributes
-        ID               : 52
+        ID               : 53
         Scope            : local
         Send Component ID: disabled
     
@@ -1357,7 +1376,7 @@ Hotspot fSysex
         
 Hotspot fLoadColors
     Attributes
-        ID               : 55
+        ID               : 56
         Scope            : local
         Send Component ID: disabled
     
@@ -1433,7 +1452,7 @@ Hotspot fLoadColors
         
 Hotspot hHelp
     Attributes
-        ID               : 57
+        ID               : 58
         Scope            : local
         Send Component ID: disabled
     

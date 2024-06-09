@@ -30,6 +30,9 @@ Page Info
             vis fLoadModes,0
             vis fLoadColors,0
             //
+            tSave.bco=Settings.backSelectCol2.val
+            vis tSave,Settings.unsaved.val
+            //
             // Enable page refreshs again
             ref_star
         
@@ -46,7 +49,7 @@ Page Info
                 // Default "stop" action.
                 // Set ontime and duty to 0 for all modes. See fSysex for details
                 // Disable all modes as well.
-                printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 20 00 00 7f 00 00 00 00 00 f7
                 printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
                 printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                 // Set all ontime and duty settings of all pages to 0.
@@ -75,27 +78,13 @@ Page Info
         
 Variable (int32) helpMode
     Attributes
-        ID   : 10
+        ID   : 11
         Scope: global
         Value: 0
     
-Text tTitle
-    Attributes
-        ID                 : 1
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Info and Credits
-        Max. Text Size     : 40
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
 Text tUser
     Attributes
-        ID                 : 2
+        ID                 : 1
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -109,7 +98,7 @@ Text tUser
         
 Text tMSI
     Attributes
-        ID                 : 3
+        ID                 : 2
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -123,7 +112,7 @@ Text tMSI
         
 Text tMML
     Attributes
-        ID                 : 4
+        ID                 : 3
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -137,7 +126,7 @@ Text tMML
         
 Text tMLS
     Attributes
-        ID                 : 5
+        ID                 : 4
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -149,9 +138,37 @@ Text tMLS
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
-Text tCredits
+Text tSave
+    Attributes
+        ID                 : 5
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Unsaved Settings!
+        Max. Text Size     : 40
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tTitle
     Attributes
         ID                 : 6
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Info and Credits
+        Max. Text Size     : 40
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tCredits
+    Attributes
+        ID                 : 7
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -165,7 +182,7 @@ Text tCredits
         
 Text tDocWiki
     Attributes
-        ID                 : 7
+        ID                 : 8
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -179,7 +196,7 @@ Text tDocWiki
         
 Text tCreditsInfo
     Attributes
-        ID                 : 8
+        ID                 : 9
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -193,7 +210,7 @@ Text tCreditsInfo
         
 Text tFirmware
     Attributes
-        ID                 : 12
+        ID                 : 13
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -207,7 +224,7 @@ Text tFirmware
         
 Text tForumHelp
     Attributes
-        ID                 : 13
+        ID                 : 14
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -221,7 +238,7 @@ Text tForumHelp
         
 Text tForumInfo
     Attributes
-        ID                 : 14
+        ID                 : 15
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -235,39 +252,39 @@ Text tForumInfo
         
 QR Code qrDocWiki
     Attributes
-        ID               : 15
-        Scope            : local
-        Send Component ID: disabled
-        Text             : https://github.com/MMMZZZZ/Syntherrupter/tree/dev/Documentation
-        Max. Text Size   : 63
-    
-QR Code qrFirmware
-    Attributes
         ID               : 16
         Scope            : local
         Send Component ID: disabled
-        Text             : https://github.com/MMMZZZZ/Syntherrupter/releases
-        Max. Text Size   : 49
+        Text             : https://t1p.de/7dafk
+        Max. Text Size   : 20
     
-QR Code qrForumHelp
+QR Code qrFirmware
     Attributes
         ID               : 17
         Scope            : local
         Send Component ID: disabled
-        Text             : https://highvoltageforum.net/index.php?topic=1780.0
-        Max. Text Size   : 51
+        Text             : https://t1p.de/4mb22
+        Max. Text Size   : 20
     
-QR Code qrForumInfo
+QR Code qrForumHelp
     Attributes
         ID               : 18
         Scope            : local
         Send Component ID: disabled
-        Text             : https://highvoltageforum.net/index.php?topic=1020.0
-        Max. Text Size   : 51
+        Text             : https://t1p.de/uizgr
+        Max. Text Size   : 20
+    
+QR Code qrForumInfo
+    Attributes
+        ID               : 19
+        Scope            : local
+        Send Component ID: disabled
+        Text             : https://t1p.de/mhzhh
+        Max. Text Size   : 20
     
 Button bReturn
     Attributes
-        ID               : 9
+        ID               : 10
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -280,7 +297,7 @@ Button bReturn
         
 Hotspot fLoadModes
     Attributes
-        ID               : 11
+        ID               : 12
         Scope            : local
         Send Component ID: disabled
     
@@ -310,7 +327,7 @@ Hotspot fLoadModes
         
 Hotspot fLoadColors
     Attributes
-        ID               : 19
+        ID               : 20
         Scope            : local
         Send Component ID: disabled
     

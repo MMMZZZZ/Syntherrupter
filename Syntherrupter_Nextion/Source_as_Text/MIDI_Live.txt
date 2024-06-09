@@ -43,6 +43,9 @@ Page MIDI_Live
             vis hHelp,0
             vis tHelp,0
             //
+            tSave.bco=Settings.backSelectCol2.val
+            vis tSave,Settings.unsaved.val
+            //
             tmReturn.tim=Other_Settings.nHoldTime.val
             // Overview page isn't done
             vis bStereoOverv,0
@@ -224,7 +227,7 @@ Page MIDI_Live
                 // Default "stop" action.
                 // Set ontime and duty to 0 for all modes. See fSysex for details
                 // Disable all modes as well.
-                printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 20 00 00 7f 00 00 00 00 00 f7
                 printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
                 printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                 // Set all ontime and duty settings of all pages to 0.
@@ -286,116 +289,116 @@ Page MIDI_Live
         
 Variable (string) sCoil
     Attributes
-        ID            : 20
+        ID            : 25
         Scope         : local
         Text          : 0
         Max. Text Size: 3
     
 Variable (int32) newData
     Attributes
-        ID   : 21
+        ID   : 26
         Scope: local
         Value: 0
     
 Variable (int32) ontime
     Attributes
-        ID   : 22
+        ID   : 27
         Scope: global
         Value: 0
     
 Variable (int32) duty
     Attributes
-        ID   : 23
+        ID   : 28
         Scope: global
         Value: 0
     
 Variable (int32) openEE
     Attributes
-        ID   : 25
+        ID   : 30
         Scope: local
         Value: 0
     
 Variable (int32) set1
     Attributes
-        ID   : 26
+        ID   : 31
         Scope: global
         Value: 0
     
 Variable (int32) set2
     Attributes
-        ID   : 27
+        ID   : 32
         Scope: global
         Value: 0
     
 Variable (int32) set3
     Attributes
-        ID   : 28
+        ID   : 33
         Scope: global
         Value: 0
     
 Variable (int32) set4
     Attributes
-        ID   : 29
+        ID   : 34
         Scope: global
         Value: 0
     
 Variable (int32) set5
     Attributes
-        ID   : 30
+        ID   : 35
         Scope: global
         Value: 0
     
 Variable (int32) set6
     Attributes
-        ID   : 31
+        ID   : 36
         Scope: global
         Value: 0
     
 Variable (int32) fSliderInput
     Attributes
-        ID   : 33
+        ID   : 38
         Scope: local
         Value: 0
     
 Variable (int32) fSliderOutput
     Attributes
-        ID   : 34
+        ID   : 39
         Scope: local
         Value: 0
     
 Variable (int32) userOnLimit
     Attributes
-        ID   : 35
+        ID   : 40
         Scope: local
         Value: 0
     
 Variable (int32) userDutyLimit
     Attributes
-        ID   : 36
+        ID   : 41
         Scope: local
         Value: 0
     
 Variable (int32) currentHelp
     Attributes
-        ID   : 56
+        ID   : 57
         Scope: local
         Value: 4294967295
     
 Variable (int32) sOnOld
     Attributes
-        ID   : 58
+        ID   : 59
         Scope: local
         Value: 0
     
 Variable (int32) sDutyOld
     Attributes
-        ID   : 59
+        ID   : 60
         Scope: local
         Value: 0
     
 Number nOn
     Attributes
-        ID                 : 7
+        ID                 : 12
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -408,7 +411,7 @@ Number nOn
         
 Number fSlider
     Attributes
-        ID                 : 32
+        ID                 : 37
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -421,16 +424,29 @@ Number fSlider
             // 2. Execute code with "click fXxxx,1".
             // 3. Read the result from the component value (fXxx.val)
             //
-            // Touch Press: g = o * f(x / i) with f(x) = (x^2 + x) / 2, i: input range, o: output range. => g = (x^2 + i * x) * o / (2 * i^2)
+            // Touch Press:      g = o * f(x / i) with f(x) = (x^2 + x) / 2, i: input range, o: output range.
+            //                        => g = (x^2 + i * x) * o / (2 * i^2)
             // Touch Release: g^-1 = ( sqrt( ( x * 8 + o ) * o ) - o ) * i / ( 2 * o )
             //
-            sys0=fSlider.val
-            fSlider.val=sys0*sys0
-            sys0*=fSliderInput.val
+            // The following code allows for max. precision, which is not required (see slider code),
+            // and only works up to about i = 440, o = 5000 (because of integer overflow).
+            // Therefore the lines have been rearranged for a better compromise (4.5% error at most for
+            // i=440, o=40000). The original code remains for documentation purposes.
+            //sys0=fSlider.val*fSliderInput.val
+            //fSlider.val*=fSlider.val
+            //fSlider.val+=sys0
+            //fSlider.val*=fSliderOutput.val
+            //prints fSlider.val,0
+            //sys0=2*fSliderInput.val*fSliderInput.val
+            //fSlider.val/=sys0
+            //
+            sys0=fSlider.val*fSliderInput.val
+            fSlider.val*=fSlider.val
             fSlider.val+=sys0
+            fSlider.val/=fSliderInput.val
             fSlider.val*=fSliderOutput.val
-            sys0=2*fSliderInput.val*fSliderInput.val
-            fSlider.val/=sys0
+            fSlider.val/=fSliderInput.val
+            fSlider.val/=2
         
         Touch Release Event
             // fXxxx are functions. Since they need to be clicked to execute their code they need to be on the same page. Usage:
@@ -438,7 +454,8 @@ Number fSlider
             // 2. Execute code with "click fXxxx,1".
             // 3. Read the result from the component value (fXxx.val)
             //
-            // Touch Press: g = o * f(x / i) with f(x) = (x^2 + x) / 2, i: input range, o: output range. => g = (x^2 + i * x) * o / (2 * i^2)
+            // Touch Press:      g = o * f(x / i) with f(x) = (x^2 + x) / 2, i: input range, o: output range.
+            //                        => g = (x^2 + i * x) * o / (2 * i^2)
             // Touch Release: g^-1 = ( sqrt( ( x * 8 + o ) * o ) - o ) * i / ( 2 * o )
             //
             fSqrt.val=fSlider.val*8
@@ -452,7 +469,7 @@ Number fSlider
         
 Number fSqrt
     Attributes
-        ID                 : 37
+        ID                 : 42
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -490,7 +507,7 @@ Number fSqrt
         
 Number nOn1
     Attributes
-        ID                 : 44
+        ID                 : 45
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -503,7 +520,7 @@ Number nOn1
         
 Number nOn2
     Attributes
-        ID                 : 45
+        ID                 : 46
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -516,7 +533,7 @@ Number nOn2
         
 Number nOn3
     Attributes
-        ID                 : 46
+        ID                 : 47
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -529,7 +546,7 @@ Number nOn3
         
 Number nOn4
     Attributes
-        ID                 : 47
+        ID                 : 48
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -542,7 +559,7 @@ Number nOn4
         
 Number nOn5
     Attributes
-        ID                 : 48
+        ID                 : 49
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -555,7 +572,7 @@ Number nOn5
         
 Number nOn6
     Attributes
-        ID                 : 49
+        ID                 : 50
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -568,7 +585,7 @@ Number nOn6
         
 XFloat nDuty
     Attributes
-        ID                 : 10
+        ID                 : 15
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -581,7 +598,7 @@ XFloat nDuty
         
 XFloat nDuty1
     Attributes
-        ID                 : 50
+        ID                 : 51
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -594,7 +611,7 @@ XFloat nDuty1
         
 XFloat nDuty2
     Attributes
-        ID                 : 51
+        ID                 : 52
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -607,7 +624,7 @@ XFloat nDuty2
         
 XFloat nDuty3
     Attributes
-        ID                 : 52
+        ID                 : 53
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -620,7 +637,7 @@ XFloat nDuty3
         
 XFloat nDuty4
     Attributes
-        ID                 : 53
+        ID                 : 54
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -633,7 +650,7 @@ XFloat nDuty4
         
 XFloat nDuty5
     Attributes
-        ID                 : 54
+        ID                 : 55
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -646,7 +663,7 @@ XFloat nDuty5
         
 XFloat nDuty6
     Attributes
-        ID                 : 55
+        ID                 : 56
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -657,133 +674,9 @@ XFloat nDuty6
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
-Text tHelp
-    Attributes
-        ID                 : 1
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : 
-        Max. Text Size     : 650
-    
-    Events
-        Touch Press Event
-            // This shouldn't be clickable but just in case it is...
-            click 0,1
-        
-Text tTitle
-    Attributes
-        ID                 : 2
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : MIDI Live Mode
-        Max. Text Size     : 22
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tHideBack1
-    Attributes
-        ID                 : 3
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               :  
-        Max. Text Size     : 1
-    
-    Events
-        Touch Press Event
-            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
-        
-Text tCoil
-    Attributes
-        ID                 : 4
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Apply to:
-        Max. Text Size     : 20
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tHideBack
-    Attributes
-        ID                 : 5
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               :  
-        Max. Text Size     : 1
-    
-    Events
-        Touch Press Event
-            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
-        
-Text tDuty
-    Attributes
-        ID                 : 9
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Note Duty:
-        Max. Text Size     : 20
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tPerc
-    Attributes
-        ID                 : 11
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : %
-        Max. Text Size     : 1
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tus
-    Attributes
-        ID                 : 13
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Âµs
-        Max. Text Size     : 3
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tOn
-    Attributes
-        ID                 : 38
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Note Ontime:
-        Max. Text Size     : 20
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
 Text tUser
     Attributes
-        ID                 : 40
+        ID                 : 1
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -797,7 +690,7 @@ Text tUser
         
 Text tMSI
     Attributes
-        ID                 : 41
+        ID                 : 2
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -811,7 +704,7 @@ Text tMSI
         
 Text tMML
     Attributes
-        ID                 : 42
+        ID                 : 3
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -825,7 +718,7 @@ Text tMML
         
 Text tMLS
     Attributes
-        ID                 : 43
+        ID                 : 4
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -837,9 +730,147 @@ Text tMLS
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
+Text tSave
+    Attributes
+        ID                 : 5
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Unsaved Settings!
+        Max. Text Size     : 40
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHelp
+    Attributes
+        ID                 : 6
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : 
+        Max. Text Size     : 650
+    
+    Events
+        Touch Press Event
+            // This shouldn't be clickable but just in case it is...
+            click 0,1
+        
+Text tTitle
+    Attributes
+        ID                 : 7
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : MIDI Live Mode
+        Max. Text Size     : 22
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHideBack1
+    Attributes
+        ID                 : 8
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text tCoil
+    Attributes
+        ID                 : 9
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Apply to:
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHideBack
+    Attributes
+        ID                 : 10
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text tDuty
+    Attributes
+        ID                 : 14
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Note Duty:
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tPerc
+    Attributes
+        ID                 : 16
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : %
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tus
+    Attributes
+        ID                 : 18
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Âµs
+        Max. Text Size     : 3
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tOn
+    Attributes
+        ID                 : 43
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Note Ontime:
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
 Text tus1
     Attributes
-        ID                 : 61
+        ID                 : 62
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -853,7 +884,7 @@ Text tus1
         
 Text tPerc1
     Attributes
-        ID                 : 62
+        ID                 : 63
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -867,7 +898,7 @@ Text tPerc1
         
 Slider sOn
     Attributes
-        ID               : 6
+        ID               : 11
         Scope            : local
         Send Component ID: disabled
         Position         : 0
@@ -925,7 +956,7 @@ Slider sOn
         
 Slider sDuty
     Attributes
-        ID               : 8
+        ID               : 13
         Scope            : local
         Send Component ID: disabled
         Position         : 0
@@ -957,7 +988,7 @@ Slider sDuty
         
 Button bApply
     Attributes
-        ID               : 12
+        ID               : 17
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1027,7 +1058,7 @@ Button bApply
         
 Button bMode
     Attributes
-        ID               : 57
+        ID               : 58
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1054,7 +1085,7 @@ Button bMode
         
 Button bReturn
     Attributes
-        ID               : 63
+        ID               : 64
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1090,7 +1121,7 @@ Button bReturn
         
 Button bNRPReset
     Attributes
-        ID               : 65
+        ID               : 66
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1123,7 +1154,7 @@ Button bNRPReset
         
 Button bChnAssign
     Attributes
-        ID               : 66
+        ID               : 67
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1136,7 +1167,7 @@ Button bChnAssign
         
 Button bChnStereo
     Attributes
-        ID               : 67
+        ID               : 68
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1150,7 +1181,7 @@ Button bChnStereo
         
 Button bCoilStereo
     Attributes
-        ID               : 68
+        ID               : 69
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1164,7 +1195,7 @@ Button bCoilStereo
         
 Button bStereoOverv
     Attributes
-        ID               : 69
+        ID               : 70
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1177,7 +1208,7 @@ Button bStereoOverv
         
 Button bEnvelope
     Attributes
-        ID               : 70
+        ID               : 71
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1191,7 +1222,7 @@ Button bEnvelope
         
 Dual-state Button btCoil1
     Attributes
-        ID               : 14
+        ID               : 19
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1217,7 +1248,7 @@ Dual-state Button btCoil1
         
 Dual-state Button btCoil2
     Attributes
-        ID               : 15
+        ID               : 20
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1233,7 +1264,7 @@ Dual-state Button btCoil2
         
 Dual-state Button btCoil3
     Attributes
-        ID               : 16
+        ID               : 21
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1249,7 +1280,7 @@ Dual-state Button btCoil3
         
 Dual-state Button btCoil4
     Attributes
-        ID               : 17
+        ID               : 22
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1265,7 +1296,7 @@ Dual-state Button btCoil4
         
 Dual-state Button btCoil5
     Attributes
-        ID               : 18
+        ID               : 23
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1281,7 +1312,7 @@ Dual-state Button btCoil5
         
 Dual-state Button btCoil6
     Attributes
-        ID               : 19
+        ID               : 24
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1297,7 +1328,7 @@ Dual-state Button btCoil6
         
 Dual-state Button btHelp
     Attributes
-        ID               : 71
+        ID               : 72
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1322,7 +1353,7 @@ Dual-state Button btHelp
         
 Hotspot fLoadModes
     Attributes
-        ID               : 60
+        ID               : 61
         Scope            : local
         Send Component ID: disabled
     
@@ -1352,7 +1383,7 @@ Hotspot fLoadModes
         
 Hotspot fSysex
     Attributes
-        ID               : 72
+        ID               : 73
         Scope            : local
         Send Component ID: disabled
     
@@ -1475,7 +1506,7 @@ Hotspot fSysex
         
 Hotspot fDraw
     Attributes
-        ID               : 73
+        ID               : 74
         Scope            : local
         Send Component ID: disabled
     
@@ -1515,7 +1546,7 @@ Hotspot fDraw
         
 Hotspot fLoadColors
     Attributes
-        ID               : 74
+        ID               : 75
         Scope            : local
         Send Component ID: disabled
     
@@ -1591,7 +1622,7 @@ Hotspot fLoadColors
         
 Hotspot hHelp
     Attributes
-        ID               : 75
+        ID               : 76
         Scope            : local
         Send Component ID: disabled
     
@@ -1789,7 +1820,7 @@ Hotspot hHelp
         
 Timer tmEE
     Attributes
-        ID         : 24
+        ID         : 29
         Scope      : local
         Period (ms): 6000
         Enabled    : no
@@ -1800,7 +1831,7 @@ Timer tmEE
         
 Timer tmReturn
     Attributes
-        ID         : 39
+        ID         : 44
         Scope      : local
         Period (ms): 250
         Enabled    : no
@@ -1813,7 +1844,7 @@ Timer tmReturn
         
 Timer tmBlink
     Attributes
-        ID         : 64
+        ID         : 65
         Scope      : local
         Period (ms): 500
         Enabled    : no

@@ -40,6 +40,9 @@ Page Stereo_Chns
             vis hHelp,0
             vis tHelp,0
             //
+            tSave.bco=Settings.backSelectCol2.val
+            vis tSave,Settings.unsaved.val
+            //
             // Load button hold time
             tmResetHold.tim=Other_Settings.nHoldTime.val
             //
@@ -65,7 +68,7 @@ Page Stereo_Chns
                 // Default "stop" action.
                 // Set ontime and duty to 0 for all modes. See fSysex for details
                 // Disable all modes as well.
-                printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 20 00 00 7f 00 00 00 00 00 f7
                 printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
                 printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                 // Set all ontime and duty settings of all pages to 0.
@@ -94,205 +97,205 @@ Page Stereo_Chns
         
 Variable (int32) currentHelp
     Attributes
-        ID   : 12
+        ID   : 17
         Scope: local
         Value: 4294967295
     
 Variable (int32) origin
     Attributes
-        ID   : 14
+        ID   : 19
         Scope: global
         Value: 0
     
 Variable (int32) mapMode
     Attributes
-        ID   : 27
+        ID   : 28
         Scope: local
         Value: 0
     
 Variable (int32) newSelect
     Attributes
-        ID   : 28
+        ID   : 29
         Scope: local
         Value: 0
     
 Variable (int32) newValTargetId
     Attributes
-        ID   : 29
+        ID   : 30
         Scope: local
         Value: 68
     
 Variable (int32) tmp1
     Attributes
-        ID   : 30
+        ID   : 31
         Scope: local
         Value: 0
     
 Variable (int32) tmp2
     Attributes
-        ID   : 31
+        ID   : 32
         Scope: local
         Value: 0
     
 Variable (int32) tmp3
     Attributes
-        ID   : 32
+        ID   : 33
         Scope: local
         Value: 0
     
 Variable (int32) tmp4
     Attributes
-        ID   : 33
+        ID   : 34
         Scope: local
         Value: 0
     
 Variable (int32) chnOffset
     Attributes
-        ID   : 34
+        ID   : 35
         Scope: local
         Value: 0
     
 Variable (int32) channel
     Attributes
-        ID   : 35
+        ID   : 36
         Scope: local
         Value: 0
     
 Variable (int32) chn0Config
     Attributes
-        ID   : 37
+        ID   : 38
         Scope: global
         Value: 146807050
     
 Variable (int32) chn1Config
     Attributes
-        ID   : 38
+        ID   : 39
         Scope: global
         Value: 684005642
     
 Variable (int32) chn2Config
     Attributes
-        ID   : 39
+        ID   : 40
         Scope: global
         Value: 415570186
     
 Variable (int32) chn3Config
     Attributes
-        ID   : 40
+        ID   : 41
         Scope: global
         Value: 952441098
     
 Variable (int32) chn4Config
     Attributes
-        ID   : 41
+        ID   : 42
         Scope: global
         Value: 1220876554
     
 Variable (int32) chn5Config
     Attributes
-        ID   : 42
+        ID   : 43
         Scope: global
         Value: 1489312010
     
 Variable (int32) chn6Config
     Attributes
-        ID   : 43
+        ID   : 44
         Scope: global
         Value: 1757747466
     
 Variable (int32) chn7Config
     Attributes
-        ID   : 44
+        ID   : 45
         Scope: global
         Value: 415575326
     
 Variable (int32) chn8Config
     Attributes
-        ID   : 45
+        ID   : 46
         Scope: global
         Value: 311536926
     
 Variable (int32) chn9Config
     Attributes
-        ID   : 46
+        ID   : 47
         Scope: global
         Value: 931802398
     
 Variable (int32) chn10Config
     Attributes
-        ID   : 47
+        ID   : 48
         Scope: global
         Value: 890187038
     
 Variable (int32) chn11Config
     Attributes
-        ID   : 48
+        ID   : 49
         Scope: global
         Value: 890179418
     
 Variable (int32) chn12Config
     Attributes
-        ID   : 49
+        ID   : 50
         Scope: global
         Value: 534790016
     
 Variable (int32) chn13Config
     Attributes
-        ID   : 50
+        ID   : 51
         Scope: global
         Value: 1071660928
     
 Variable (int32) chn14Config
     Attributes
-        ID   : 51
+        ID   : 52
         Scope: global
         Value: 1340096384
     
 Variable (int32) chn15Config
     Attributes
-        ID   : 52
+        ID   : 53
         Scope: global
         Value: 1608531840
     
 Variable (int32) loading
     Attributes
-        ID   : 53
+        ID   : 54
         Scope: local
         Value: 0
     
 Variable (int32) l1
     Attributes
-        ID   : 54
+        ID   : 55
         Scope: local
         Value: 0
     
 Variable (int32) l2
     Attributes
-        ID   : 55
+        ID   : 56
         Scope: local
         Value: 0
     
 Variable (int32) l3
     Attributes
-        ID   : 56
+        ID   : 57
         Scope: local
         Value: 0
     
 Variable (int32) l4
     Attributes
-        ID   : 57
+        ID   : 58
         Scope: local
         Value: 0
     
 Variable (int32) eventStep
     Attributes
-        ID   : 94
+        ID   : 95
         Scope: local
         Value: 0
     
 Number fConvBtnState
     Attributes
-        ID                 : 21
+        ID                 : 26
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -373,7 +376,7 @@ Number fConvBtnState
         
 Number mapInL
     Attributes
-        ID                 : 77
+        ID                 : 78
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -395,7 +398,7 @@ Number mapInL
         
 Number mapInH
     Attributes
-        ID                 : 78
+        ID                 : 79
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -417,7 +420,7 @@ Number mapInH
         
 Number mapOutL
     Attributes
-        ID                 : 79
+        ID                 : 80
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -439,7 +442,7 @@ Number mapOutL
         
 Number mapOutH
     Attributes
-        ID                 : 80
+        ID                 : 81
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -459,169 +462,9 @@ Number mapOutH
             // Check values
             click fCheck,0
         
-Text tHelp
-    Attributes
-        ID                 : 1
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : 
-        Max. Text Size     : 1300
-    
-    Events
-        Touch Press Event
-            // This object is only visible in help mode. No need to be "transparent" to clicks in normal operation.
-            click bReturn,0
-        
-Text tNotePos
-    Attributes
-        ID                 : 2
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Note Number
-        Max. Text Size     : 30
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text t0
-    Attributes
-        ID                 : 3
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : 0
-        Max. Text Size     : 20
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text t127
-    Attributes
-        ID                 : 4
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : 127
-        Max. Text Size     : 20
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tStereoPos
-    Attributes
-        ID                 : 5
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Stereo Position
-        Max. Text Size     : 30
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tL
-    Attributes
-        ID                 : 6
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : L
-        Max. Text Size     : 20
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tR
-    Attributes
-        ID                 : 7
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : R
-        Max. Text Size     : 20
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tHideBack3
-    Attributes
-        ID                 : 8
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               :  
-        Max. Text Size     : 1
-    
-    Events
-        Touch Press Event
-            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
-        
-Text tHideBack2
-    Attributes
-        ID                 : 15
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               :  
-        Max. Text Size     : 1
-    
-    Events
-        Touch Press Event
-            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
-        
-Text tHideBack
-    Attributes
-        ID                 : 16
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               :  
-        Max. Text Size     : 1
-    
-    Events
-        Touch Press Event
-            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
-        
-Text idle
-    Attributes
-        ID                 : 17
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : i
-        Max. Text Size     : 1
-    
-Text tTitle
-    Attributes
-        ID                 : 19
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Channel Stereo Settings
-        Max. Text Size     : 30
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
 Text tUser
     Attributes
-        ID                 : 22
+        ID                 : 1
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -635,7 +478,7 @@ Text tUser
         
 Text tMSI
     Attributes
-        ID                 : 23
+        ID                 : 2
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -649,7 +492,7 @@ Text tMSI
         
 Text tMML
     Attributes
-        ID                 : 24
+        ID                 : 3
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -663,7 +506,7 @@ Text tMML
         
 Text tMLS
     Attributes
-        ID                 : 25
+        ID                 : 4
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -675,9 +518,183 @@ Text tMLS
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
+Text tSave
+    Attributes
+        ID                 : 5
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Unsaved Settings!
+        Max. Text Size     : 40
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHelp
+    Attributes
+        ID                 : 6
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : 
+        Max. Text Size     : 1300
+    
+    Events
+        Touch Press Event
+            // This object is only visible in help mode. No need to be "transparent" to clicks in normal operation.
+            click bReturn,0
+        
+Text tNotePos
+    Attributes
+        ID                 : 7
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Note Number
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text t0
+    Attributes
+        ID                 : 8
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : 0
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text t127
+    Attributes
+        ID                 : 9
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : 127
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tStereoPos
+    Attributes
+        ID                 : 10
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Stereo Position
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tL
+    Attributes
+        ID                 : 11
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : L
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tR
+    Attributes
+        ID                 : 12
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : R
+        Max. Text Size     : 20
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHideBack3
+    Attributes
+        ID                 : 13
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text tHideBack2
+    Attributes
+        ID                 : 20
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text tHideBack
+    Attributes
+        ID                 : 21
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text idle
+    Attributes
+        ID                 : 22
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : i
+        Max. Text Size     : 1
+    
+Text tTitle
+    Attributes
+        ID                 : 24
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Channel Stereo Settings
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
 Text tChn
     Attributes
-        ID                 : 59
+        ID                 : 60
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -691,7 +708,7 @@ Text tChn
         
 Text tChnMode
     Attributes
-        ID                 : 69
+        ID                 : 70
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -705,7 +722,7 @@ Text tChnMode
         
 Text tNoteRange
     Attributes
-        ID                 : 73
+        ID                 : 74
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -719,7 +736,7 @@ Text tNoteRange
         
 Text tTo
     Attributes
-        ID                 : 74
+        ID                 : 75
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -733,7 +750,7 @@ Text tTo
         
 Text tStereo
     Attributes
-        ID                 : 75
+        ID                 : 76
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -747,7 +764,7 @@ Text tStereo
         
 Text tTo2
     Attributes
-        ID                 : 76
+        ID                 : 77
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -761,21 +778,21 @@ Text tTo2
         
 Progress Bar lNoteRange
     Attributes
-        ID               : 9
+        ID               : 14
         Scope            : local
         Send Component ID: disabled
         Value            : 100
     
 Progress Bar lStereoRange
     Attributes
-        ID               : 10
+        ID               : 15
         Scope            : local
         Send Component ID: disabled
         Value            : 100
     
 Button bReturn
     Attributes
-        ID               : 20
+        ID               : 25
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -788,7 +805,7 @@ Button bReturn
         
 Button bChnRange
     Attributes
-        ID               : 68
+        ID               : 69
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -837,7 +854,7 @@ Button bChnRange
         
 Button bChnMode
     Attributes
-        ID               : 70
+        ID               : 71
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -866,7 +883,7 @@ Button bChnMode
         
 Button bMapMode
     Attributes
-        ID               : 71
+        ID               : 72
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -901,7 +918,7 @@ Button bMapMode
         
 Button bReset
     Attributes
-        ID               : 72
+        ID               : 73
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -925,7 +942,7 @@ Button bReset
         
 Button b0
     Attributes
-        ID               : 81
+        ID               : 82
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -945,7 +962,7 @@ Button b0
         
 Button b1
     Attributes
-        ID               : 82
+        ID               : 83
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -966,7 +983,7 @@ Button b1
         
 Button b2
     Attributes
-        ID               : 83
+        ID               : 84
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -987,7 +1004,7 @@ Button b2
         
 Button b3
     Attributes
-        ID               : 84
+        ID               : 85
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1008,7 +1025,7 @@ Button b3
         
 Button b4
     Attributes
-        ID               : 85
+        ID               : 86
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1029,7 +1046,7 @@ Button b4
         
 Button b5
     Attributes
-        ID               : 86
+        ID               : 87
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1050,7 +1067,7 @@ Button b5
         
 Button b6
     Attributes
-        ID               : 87
+        ID               : 88
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1071,7 +1088,7 @@ Button b6
         
 Button b7
     Attributes
-        ID               : 88
+        ID               : 89
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1092,7 +1109,7 @@ Button b7
         
 Button b8
     Attributes
-        ID               : 89
+        ID               : 90
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1113,7 +1130,7 @@ Button b8
         
 Button b9
     Attributes
-        ID               : 90
+        ID               : 91
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1134,7 +1151,7 @@ Button b9
         
 Button bClear
     Attributes
-        ID               : 91
+        ID               : 92
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1147,7 +1164,7 @@ Button bClear
         
 Button bOK
     Attributes
-        ID               : 92
+        ID               : 93
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1163,7 +1180,7 @@ Button bOK
         
 Dual-state Button btHelp
     Attributes
-        ID               : 13
+        ID               : 18
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1189,7 +1206,7 @@ Dual-state Button btHelp
         
 Dual-state Button btChn0
     Attributes
-        ID               : 60
+        ID               : 61
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1198,7 +1215,7 @@ Dual-state Button btChn0
     
 Dual-state Button btChn1
     Attributes
-        ID               : 61
+        ID               : 62
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1207,7 +1224,7 @@ Dual-state Button btChn1
     
 Dual-state Button btChn2
     Attributes
-        ID               : 62
+        ID               : 63
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1216,7 +1233,7 @@ Dual-state Button btChn2
     
 Dual-state Button btChn3
     Attributes
-        ID               : 63
+        ID               : 64
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1225,7 +1242,7 @@ Dual-state Button btChn3
     
 Dual-state Button btChn4
     Attributes
-        ID               : 64
+        ID               : 65
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1234,7 +1251,7 @@ Dual-state Button btChn4
     
 Dual-state Button btChn5
     Attributes
-        ID               : 65
+        ID               : 66
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1243,7 +1260,7 @@ Dual-state Button btChn5
     
 Dual-state Button btChn6
     Attributes
-        ID               : 66
+        ID               : 67
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1252,7 +1269,7 @@ Dual-state Button btChn6
     
 Dual-state Button btChn7
     Attributes
-        ID               : 67
+        ID               : 68
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1261,7 +1278,7 @@ Dual-state Button btChn7
     
 Hotspot fDraw
     Attributes
-        ID               : 11
+        ID               : 16
         Scope            : local
         Send Component ID: disabled
     
@@ -1279,7 +1296,7 @@ Hotspot fDraw
         
 Hotspot fMapping
     Attributes
-        ID               : 18
+        ID               : 23
         Scope            : local
         Send Component ID: disabled
     
@@ -1541,7 +1558,7 @@ Hotspot fMapping
         
 Hotspot fLoadModes
     Attributes
-        ID               : 26
+        ID               : 27
         Scope            : local
         Send Component ID: disabled
     
@@ -1571,7 +1588,7 @@ Hotspot fLoadModes
         
 Hotspot fLoadColors
     Attributes
-        ID               : 93
+        ID               : 94
         Scope            : local
         Send Component ID: disabled
     
@@ -1663,7 +1680,7 @@ Hotspot fLoadColors
         
 Hotspot fEvents
     Attributes
-        ID               : 95
+        ID               : 96
         Scope            : local
         Send Component ID: disabled
     
@@ -1779,7 +1796,7 @@ Hotspot fEvents
         
 Hotspot fCheck
     Attributes
-        ID               : 96
+        ID               : 97
         Scope            : local
         Send Component ID: disabled
     
@@ -1821,7 +1838,7 @@ Hotspot fCheck
         
 Hotspot hHelp
     Attributes
-        ID               : 97
+        ID               : 98
         Scope            : local
         Send Component ID: disabled
     
@@ -1997,7 +2014,7 @@ Hotspot hHelp
         
 Timer tmResetHold
     Attributes
-        ID         : 58
+        ID         : 59
         Scope      : local
         Period (ms): 400
         Enabled    : no
@@ -2013,7 +2030,7 @@ Timer tmResetHold
         
 TouchCap touchCap
     Attributes
-        ID   : 36
+        ID   : 37
         Scope: local
         Value: 0
     

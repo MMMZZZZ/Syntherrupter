@@ -36,6 +36,9 @@ Page User_Settings
             vis hHelp,0
             vis tHelp,0
             //
+            tSave.bco=Settings.backSelectCol2.val
+            vis tSave,Settings.unsaved.val
+            //
             // Load global variable values into local variables. Note: Since a component consists of many different properties (like font size, color, position, ...) its memory footprint is much larger and it should not be global.
             tU0Name.txt=u0Name.txt
             tU0Code.txt=u0Code.txt
@@ -109,11 +112,21 @@ Page User_Settings
             ref_star
         
         Postinitialize Event
-            // In case we return from the keyboard page, transmit the corresponding field.
-            click fSysex,1
             //
             // Draw gridlines
             click fDraw,1
+            //
+            // Calculate original state of all variables to be able to determine if something has changed.
+            // Note: if we leave this page through the return button, the value is reset to -1 (CRC = 0..65535)
+            // However, if we leave for the keyboard page, we don't wan't to reset the crc.
+            if(originalState.val<0)
+            {
+                click fCRC,1
+                originalState.val=crcval
+            }
+            // If we come f.ex. from the keyboard page, check instead whether something's changed.
+            // And if so, send the new values as well.
+            click fCheck,0
         
         Touch Press Event
             if(Other_Settings.nBackOff.val!=0)
@@ -121,7 +134,7 @@ Page User_Settings
                 // Default "stop" action.
                 // Set ontime and duty to 0 for all modes. See fSysex for details
                 // Disable all modes as well.
-                printh f0 00 26 06 01 7f 20 00 00 7f 00 00 00 00 00 f7
+                printh f0 00 26 05 01 7f 20 00 00 7f 00 00 00 00 00 f7
                 printh f0 00 26 05 01 7f 21 00 00 7f 00 00 00 00 00 f7
                 printh f0 00 26 05 01 7f 22 00 00 7f 00 00 00 00 00 f7
                 // Set all ontime and duty settings of all pages to 0.
@@ -168,159 +181,165 @@ Page User_Settings
         
 Variable (int32) currentHelp
     Attributes
-        ID   : 3
+        ID   : 8
         Scope: local
         Value: 4294967295
     
 Variable (string) u0Name
     Attributes
-        ID            : 4
+        ID            : 9
         Scope         : global
         Text          : Padawan
         Max. Text Size: 16
     
 Variable (string) u0Code
     Attributes
-        ID            : 5
+        ID            : 10
         Scope         : global
         Text          : 1234
         Max. Text Size: 16
     
 Variable (int32) u0Ontime
     Attributes
-        ID   : 6
+        ID   : 11
         Scope: global
         Value: 100
     
 Variable (int32) u0BPS
     Attributes
-        ID   : 7
+        ID   : 12
         Scope: global
         Value: 1000
     
 Variable (int32) u0Duty
     Attributes
-        ID   : 8
+        ID   : 13
         Scope: global
         Value: 60
     
 Variable (string) u1Name
     Attributes
-        ID            : 9
+        ID            : 14
         Scope         : global
         Text          : Jedi Knight
         Max. Text Size: 16
     
 Variable (string) u1Code
     Attributes
-        ID            : 10
+        ID            : 15
         Scope         : global
         Text          : 8079
         Max. Text Size: 16
     
 Variable (int32) u1Ontime
     Attributes
-        ID   : 11
+        ID   : 16
         Scope: global
         Value: 150
     
 Variable (int32) u1BPS
     Attributes
-        ID   : 12
+        ID   : 17
         Scope: global
         Value: 1000
     
 Variable (int32) u1Duty
     Attributes
-        ID   : 13
+        ID   : 18
         Scope: global
         Value: 80
     
 Variable (string) u2Name
     Attributes
-        ID            : 14
+        ID            : 19
         Scope         : global
         Text          : Master Yoda
         Max. Text Size: 16
     
 Variable (string) u2Code
     Attributes
-        ID            : 15
+        ID            : 20
         Scope         : global
         Text          : 0
         Max. Text Size: 16
     
 Variable (int32) u2Ontime
     Attributes
-        ID   : 16
+        ID   : 21
         Scope: global
         Value: 200
     
 Variable (int32) u2BPS
     Attributes
-        ID   : 17
+        ID   : 22
         Scope: global
         Value: 1000
     
 Variable (int32) u2Duty
     Attributes
-        ID   : 18
+        ID   : 23
         Scope: global
         Value: 100
     
 Variable (string) tAutoCode
     Attributes
-        ID            : 19
+        ID            : 24
         Scope         : global
         Text          : 0
         Max. Text Size: 1
     
 Variable (int32) newValTargetId
     Attributes
-        ID   : 39
+        ID   : 44
         Scope: local
         Value: 64
     
 Variable (int32) newSelect
     Attributes
-        ID   : 40
+        ID   : 45
         Scope: local
         Value: 0
     
 Variable (int32) userNum
     Attributes
-        ID   : 42
+        ID   : 47
         Scope: global
         Value: 0
     
 Variable (string) asciiTemp
     Attributes
-        ID            : 78
+        ID            : 79
         Scope         : local
         Text          : a
         Max. Text Size: 97
     
 Variable (int32) asciiCode
     Attributes
-        ID   : 79
+        ID   : 80
         Scope: local
         Value: 0
     
 Variable (int32) temp
     Attributes
-        ID   : 80
+        ID   : 81
         Scope: local
         Value: 0
     
 Variable (int32) origin
     Attributes
-        ID   : 81
+        ID   : 82
+        Scope: global
+        Value: 4294967295
+    
+Variable (int32) originalState
+    Attributes
+        ID   : 85
         Scope: global
         Value: 4294967295
     
 Number user0Ontime
     Attributes
-        ID                 : 68
+        ID                 : 69
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -345,7 +364,7 @@ Number user0Ontime
         
 Number user1Ontime
     Attributes
-        ID                 : 69
+        ID                 : 70
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -370,7 +389,7 @@ Number user1Ontime
         
 Number user2Ontime
     Attributes
-        ID                 : 70
+        ID                 : 71
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -396,7 +415,7 @@ Number user2Ontime
         
 Number user0BPS
     Attributes
-        ID                 : 71
+        ID                 : 72
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -421,7 +440,7 @@ Number user0BPS
         
 Number user1BPS
     Attributes
-        ID                 : 72
+        ID                 : 73
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -446,7 +465,7 @@ Number user1BPS
         
 Number user2BPS
     Attributes
-        ID                 : 73
+        ID                 : 74
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -471,7 +490,7 @@ Number user2BPS
         
 XFloat idle
     Attributes
-        ID                 : 41
+        ID                 : 46
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -479,7 +498,7 @@ XFloat idle
     
 XFloat user0Duty
     Attributes
-        ID                 : 74
+        ID                 : 75
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -505,7 +524,7 @@ XFloat user0Duty
         
 XFloat user1Duty
     Attributes
-        ID                 : 75
+        ID                 : 76
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -531,7 +550,7 @@ XFloat user1Duty
         
 XFloat user2Duty
     Attributes
-        ID                 : 76
+        ID                 : 77
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -556,310 +575,9 @@ XFloat user2Duty
             //  newSelect.val=1
             //}
         
-Text tHelp
-    Attributes
-        ID                 : 1
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : 
-        Max. Text Size     : 900
-    
-    Events
-        Touch Press Event
-            // This object is only visible in help mode. No need to be "transparent" to clicks in normal operation.
-            click bReturn,0
-        
-Text tHideBack2
-    Attributes
-        ID                 : 20
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               :  
-        Max. Text Size     : 1
-    
-    Events
-        Touch Press Event
-            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
-        
-Text tHideBack
-    Attributes
-        ID                 : 21
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               :  
-        Max. Text Size     : 1
-    
-    Events
-        Touch Press Event
-            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
-        
-Text tTitle
-    Attributes
-        ID                 : 22
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : User Settings
-        Max. Text Size     : 22
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tUserCode
-    Attributes
-        ID                 : 24
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Code:
-        Max. Text Size     : 12
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tUserOntime
-    Attributes
-        ID                 : 25
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : max. Ontime:
-        Max. Text Size     : 12
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tUserName
-    Attributes
-        ID                 : 26
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Name:
-        Max. Text Size     : 12
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tUserDuty
-    Attributes
-        ID                 : 27
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : max. Duty:
-        Max. Text Size     : 12
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tUserBPS
-    Attributes
-        ID                 : 28
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : max. BPS:
-        Max. Text Size     : 12
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text tus0
-    Attributes
-        ID                 : 29
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : µs
-        Max. Text Size     : 3
-    
-Text tHz0
-    Attributes
-        ID                 : 30
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Hz
-        Max. Text Size     : 2
-    
-Text tPerc0
-    Attributes
-        ID                 : 31
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : %
-        Max. Text Size     : 1
-    
-Text tus1
-    Attributes
-        ID                 : 32
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : µs
-        Max. Text Size     : 3
-    
-Text tHz1
-    Attributes
-        ID                 : 33
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Hz
-        Max. Text Size     : 2
-    
-Text tPerc1
-    Attributes
-        ID                 : 34
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : %
-        Max. Text Size     : 1
-    
-Text tus2
-    Attributes
-        ID                 : 35
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : µs
-        Max. Text Size     : 3
-    
-Text tHz2
-    Attributes
-        ID                 : 36
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Hz
-        Max. Text Size     : 2
-    
-Text tPerc2
-    Attributes
-        ID                 : 37
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : %
-        Max. Text Size     : 1
-    
-Text tSelToMod
-    Attributes
-        ID                 : 38
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               : Select any value to modify.
-        Max. Text Size     : 30
-    
-    Events
-        Touch Press Event
-            // Make this object "transparent" for clicks and click background.
-            click 0,1
-        
-Text fCheck
-    Attributes
-        ID                 : 43
-        Scope              : local
-        Send Component ID  : disabled
-        Associated Keyboard: none
-        Text               :  
-        Max. Text Size     : 10
-    
-    Events
-        Touch Release Event
-            // Settings must stay in certain ranges. this function checks and fixes them.
-            // Code order: check all coil 1 settings, then repeat for coils 2-6.
-            //
-            sys0=user0Ontime.val/10
-            if(sys0>4095)
-            {
-                // Ontime / 10 must be smaller than 4096 (12 bits)
-                sys0=4095
-            }
-            user0Ontime.val=sys0*10
-            //
-            sys0=user0BPS.val/10
-            if(sys0>2047)
-            {
-                // BPS / 10 must be smaller than 2048 (11 bits)
-                sys0=2047
-            }
-            user0BPS.val=sys0*10
-            //
-            if(user0Duty.val>511)
-            {
-                // Duty [in 1/1000] must be smaller than 512 (9 bits)
-                user0Duty.val=511
-            }
-            //
-            sys0=user1Ontime.val/10
-            if(sys0>4095)
-            {
-                // Ontime / 10 must be smaller than 4096 (12 bits)
-                sys0=4095
-            }
-            user1Ontime.val=sys0*10
-            //
-            sys0=user1BPS.val/10
-            if(sys0>2047)
-            {
-                // BPS / 10 must be smaller than 2048 (11 bits)
-                sys0=2047
-            }
-            user1BPS.val=sys0*10
-            //
-            if(user1Duty.val>511)
-            {
-                // Duty [in 1/1000] must be smaller than 512 (9 bits)
-                user1Duty.val=511
-            }
-            //
-            sys0=user2Ontime.val/10
-            if(sys0>4095)
-            {
-                // Ontime / 10 must be smaller than 4096 (12 bits)
-                sys0=4095
-            }
-            user2Ontime.val=sys0*10
-            //
-            sys0=user2BPS.val/10
-            if(sys0>2047)
-            {
-                // BPS / 10 must be smaller than 2048 (11 bits)
-                sys0=2047
-            }
-            user2BPS.val=sys0*10
-            //
-            if(user2Duty.val>511)
-            {
-                // Duty [in 1/1000] must be smaller than 512 (9 bits)
-                user2Duty.val=511
-            }
-            //
-            click fSysex,1
-        
 Text tUser
     Attributes
-        ID                 : 44
+        ID                 : 1
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -873,7 +591,7 @@ Text tUser
         
 Text tMSI
     Attributes
-        ID                 : 45
+        ID                 : 2
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -887,7 +605,7 @@ Text tMSI
         
 Text tMML
     Attributes
-        ID                 : 46
+        ID                 : 3
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -901,7 +619,7 @@ Text tMML
         
 Text tMLS
     Attributes
-        ID                 : 47
+        ID                 : 4
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -913,9 +631,323 @@ Text tMLS
             // Make this object "transparent" for clicks and click background.
             click 0,1
         
+Text tSave
+    Attributes
+        ID                 : 5
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Unsaved Settings!
+        Max. Text Size     : 40
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tHelp
+    Attributes
+        ID                 : 6
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : 
+        Max. Text Size     : 900
+    
+    Events
+        Touch Press Event
+            // This object is only visible in help mode. No need to be "transparent" to clicks in normal operation.
+            click bReturn,0
+        
+Text tHideBack2
+    Attributes
+        ID                 : 25
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text tHideBack
+    Attributes
+        ID                 : 26
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 1
+    
+    Events
+        Touch Press Event
+            // This is just to hide the background around the sliders so that you do not turn the outputs off by accident.
+        
+Text tTitle
+    Attributes
+        ID                 : 27
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : User Settings
+        Max. Text Size     : 22
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tUserCode
+    Attributes
+        ID                 : 29
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Code:
+        Max. Text Size     : 12
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tUserOntime
+    Attributes
+        ID                 : 30
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : max. Ontime:
+        Max. Text Size     : 12
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tUserName
+    Attributes
+        ID                 : 31
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Name:
+        Max. Text Size     : 12
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tUserDuty
+    Attributes
+        ID                 : 32
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : max. Duty:
+        Max. Text Size     : 12
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tUserBPS
+    Attributes
+        ID                 : 33
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : max. BPS:
+        Max. Text Size     : 12
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text tus0
+    Attributes
+        ID                 : 34
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : µs
+        Max. Text Size     : 3
+    
+Text tHz0
+    Attributes
+        ID                 : 35
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Hz
+        Max. Text Size     : 2
+    
+Text tPerc0
+    Attributes
+        ID                 : 36
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : %
+        Max. Text Size     : 1
+    
+Text tus1
+    Attributes
+        ID                 : 37
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : µs
+        Max. Text Size     : 3
+    
+Text tHz1
+    Attributes
+        ID                 : 38
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Hz
+        Max. Text Size     : 2
+    
+Text tPerc1
+    Attributes
+        ID                 : 39
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : %
+        Max. Text Size     : 1
+    
+Text tus2
+    Attributes
+        ID                 : 40
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : µs
+        Max. Text Size     : 3
+    
+Text tHz2
+    Attributes
+        ID                 : 41
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Hz
+        Max. Text Size     : 2
+    
+Text tPerc2
+    Attributes
+        ID                 : 42
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : %
+        Max. Text Size     : 1
+    
+Text tSelToMod
+    Attributes
+        ID                 : 43
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               : Select any value to modify.
+        Max. Text Size     : 30
+    
+    Events
+        Touch Press Event
+            // Make this object "transparent" for clicks and click background.
+            click 0,1
+        
+Text fCheck
+    Attributes
+        ID                 : 48
+        Scope              : local
+        Send Component ID  : disabled
+        Associated Keyboard: none
+        Text               :  
+        Max. Text Size     : 10
+    
+    Events
+        Touch Release Event
+            // Settings must stay in certain ranges. this function checks and fixes them.
+            // Code order: check all user 0 settings, then repeat for users 1, 2.
+            //
+            // While the ontime coil limit can happily go to 65535us, the UI slider math can't handle more
+            // than about 27000us. Additionally, some value fields can only fit 4 digits, thus the user
+            // ontimes - which determine the UI slider ranges - are limited to 9999
+            //
+            // Ontime must be smaller than 9999 (16 bits)
+            if(user0Ontime.val>9999)
+            {
+                user0Ontime.val=9999
+            }
+            //
+            // BPS must be smaller than 32768 (15 bits)
+            if(user0BPS.val>32757)
+            {
+                user0BPS.val=32767
+            }
+            //
+            // Duty [in 1/1000] must be smaller than 1000 (100%, 10 bits)
+            if(user0Duty.val>1000)
+            {
+                user0Duty.val=1000
+            }
+            //
+            // Ontime must be smaller than 9999 (16 bits)
+            if(user1Ontime.val>9999)
+            {
+                user1Ontime.val=9999
+            }
+            //
+            // BPS must be smaller than 32768 (15 bits)
+            if(user1BPS.val>32757)
+            {
+                user1BPS.val=32767
+            }
+            //
+            // Duty [in 1/1000] must be smaller than 1000 (100%, 10 bits)
+            if(user1Duty.val>1000)
+            {
+                user1Duty.val=1000
+            }
+            //
+            // Ontime must be smaller than 9999 (16 bits)
+            if(user2Ontime.val>9999)
+            {
+                user2Ontime.val=9999
+            }
+            //
+            // BPS must be smaller than 32768 (15 bits)
+            if(user2BPS.val>32757)
+            {
+                user2BPS.val=32767
+            }
+            //
+            // Duty [in 1/1000] must be smaller than 1000 (100%, 10 bits)
+            if(user2Duty.val>1000)
+            {
+                user2Duty.val=1000
+            }
+            //
+            //
+            click fCRC,1
+            if(crcval!=originalState.val)
+            {
+                Settings.unsaved.val=1
+                click fSysex,1
+            }
+            vis tSave,Settings.unsaved.val
+        
 Text tU0Name
     Attributes
-        ID                 : 62
+        ID                 : 63
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -934,7 +966,7 @@ Text tU0Name
         
 Text tU1Name
     Attributes
-        ID                 : 63
+        ID                 : 64
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -953,7 +985,7 @@ Text tU1Name
         
 Text tU2Name
     Attributes
-        ID                 : 64
+        ID                 : 65
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -972,7 +1004,7 @@ Text tU2Name
         
 Text tU0Code
     Attributes
-        ID                 : 65
+        ID                 : 66
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -995,7 +1027,7 @@ Text tU0Code
         
 Text tU1Code
     Attributes
-        ID                 : 66
+        ID                 : 67
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1018,7 +1050,7 @@ Text tU1Code
         
 Text tU2Code
     Attributes
-        ID                 : 67
+        ID                 : 68
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -1041,7 +1073,7 @@ Text tU2Code
         
 Button bReturn
     Attributes
-        ID               : 23
+        ID               : 28
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1049,142 +1081,14 @@ Button bReturn
         Max. Text Size   : 3
     
     Events
-        Touch Press Event
-            // Store local component values in global variables. Note: Since a component consists of many different properties (like font size, color, position, ...) its memory footprint is much larger and it should not be global.
-            click bOK,0
-            u0Name.txt=tU0Name.txt
-            u0Code.txt=tU0Code.txt
-            u1Name.txt=tU1Name.txt
-            u1Code.txt=tU1Code.txt
-            u2Name.txt=tU2Name.txt
-            u2Code.txt=tU2Code.txt
-            u0Ontime.val=user0Ontime.val
-            u0BPS.val=user0BPS.val
-            u0Duty.val=user0Duty.val
-            u1Ontime.val=user1Ontime.val
-            u1BPS.val=user1BPS.val
-            u1Duty.val=user1Duty.val
-            u2Ontime.val=user2Ontime.val
-            u2BPS.val=user2BPS.val
-            u2Duty.val=user2Duty.val
-            //
-            // Serial Data format: 'u', Data Byte 1, 2, ...
-            // Byte 1:
-            //   Bit 6-7: User. Can be 0, 1 or 2.
-            //   Bit   5: Indicates content of the following bytes. 0 = Name, 1 = Password
-            //   Bit 0-4: Number of following bytes minus one. This means Name or password are at least 1 character and at most 32 characters.
-            // Byte 2-x: Characters of the username/password without null termination character.
-            //
-            // sys0 will contain byte 1.
-            // sys1 is used as temp variable
-            // Start with user 0, name, then his password, then user 1 name, etc.
-            strlen tU0Name.txt,sys0
-            sys0-=1
-            sys0=sys0&0x1f
-            prints "u",1
-            prints sys0,1
-            sys0+=1
-            prints tU0Name.txt,sys0
-            //
-            strlen tU0Code.txt,sys0
-            sys0-=1
-            sys0=sys0&0x1f
-            sys1=1<<5
-            sys0+=sys1
-            prints "u",1
-            prints sys0,1
-            sys0+=1
-            prints tU0Code.txt,sys0
-            //
-            strlen tU1Name.txt,sys0
-            sys0-=1
-            sys0=sys0&0x1f
-            sys1=1<<6
-            sys0+=sys1
-            prints "u",1
-            prints sys0,1
-            sys0+=1
-            prints tU1Name.txt,sys0
-            //
-            strlen tU1Code.txt,sys0
-            sys0-=1
-            sys0=sys0&0x1f
-            sys1=1<<6
-            sys0+=sys1
-            sys1=1<<5
-            sys0+=sys1
-            prints "u",1
-            prints sys0,1
-            sys0+=1
-            prints tU1Code.txt,sys0
-            //
-            strlen tU2Name.txt,sys0
-            sys0-=1
-            sys0=sys0&0x1f
-            sys1=2<<6
-            sys0+=sys1
-            prints "u",1
-            prints sys0,1
-            sys0+=1
-            prints tU2Name.txt,sys0
-            //
-            strlen tU2Code.txt,sys0
-            sys0-=1
-            sys0=sys0&0x1f
-            sys1=2<<6
-            sys0+=sys1
-            sys1=1<<5
-            sys0+=sys1
-            prints "u",1
-            prints sys0,1
-            sys0+=1
-            prints tU2Code.txt,sys0
-            // Serial Data format: 'd', Data Byte 1, 2, 3, 4, 5
-            // Data byte 1:
-            //    Bit 6-7: 0 = User settings
-            //    Bit 0-5:User whose limits are being set (0,1 or 2)
-            // Data byte 2-5: Bit field with settings
-            //    Bit  0-11: Maximum allowed ontime [10us]
-            //    Bit 12-22: Maximum allowed BPS/interrupt frequency [10Hz]
-            //    Bit 23-31: Maximum allowed duty [1/1000]
-            //
-            // sys0 will contain the bit field (a.k.a. the data bytes 2-5)
-            // sys1 is used as temp variable
-            // sys2 is the coil number
-            sys0=u0Ontime.val/10
-            sys1=u0BPS.val/10
-            sys1=sys1<<12
-            sys0+=sys1
-            sys1=u0Duty.val<<23
-            sys0+=sys1
-            prints "d",1
-            prints 0,1
-            prints sys0,4
-            sys0=u1Ontime.val/10
-            sys1=u1BPS.val/10
-            sys1=sys1<<12
-            sys0+=sys1
-            sys1=u1Duty.val<<23
-            sys0+=sys1
-            prints "d",1
-            prints 1,1
-            prints sys0,4
-            sys0=u2Ontime.val/10
-            sys1=u2BPS.val/10
-            sys1=sys1<<12
-            sys0+=sys1
-            sys1=u2Duty.val<<23
-            sys0+=sys1
-            prints "d",1
-            prints 2,1
-            prints sys0,4
-        
         Touch Release Event
+            // Reset CRC (see page postinit)
+            originalState.val=-1
             page origin.val
         
 Button b1
     Attributes
-        ID               : 48
+        ID               : 49
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1205,7 +1109,7 @@ Button b1
         
 Button b2
     Attributes
-        ID               : 49
+        ID               : 50
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1226,7 +1130,7 @@ Button b2
         
 Button b3
     Attributes
-        ID               : 50
+        ID               : 51
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1247,7 +1151,7 @@ Button b3
         
 Button b4
     Attributes
-        ID               : 51
+        ID               : 52
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1268,7 +1172,7 @@ Button b4
         
 Button b5
     Attributes
-        ID               : 52
+        ID               : 53
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1289,7 +1193,7 @@ Button b5
         
 Button b6
     Attributes
-        ID               : 53
+        ID               : 54
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1310,7 +1214,7 @@ Button b6
         
 Button bClear
     Attributes
-        ID               : 54
+        ID               : 55
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1323,7 +1227,7 @@ Button bClear
         
 Button b0
     Attributes
-        ID               : 55
+        ID               : 56
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1343,7 +1247,7 @@ Button b0
         
 Button b9
     Attributes
-        ID               : 56
+        ID               : 57
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1364,7 +1268,7 @@ Button b9
         
 Button b8
     Attributes
-        ID               : 57
+        ID               : 58
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1385,7 +1289,7 @@ Button b8
         
 Button b7
     Attributes
-        ID               : 58
+        ID               : 59
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1406,7 +1310,7 @@ Button b7
         
 Button bOK
     Attributes
-        ID               : 59
+        ID               : 60
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1415,14 +1319,14 @@ Button bOK
     
     Events
         Touch Release Event
+            click fCheck,0
             b[newValTargetId.val].bco=idle.bco
             b[newValTargetId.val].pco=idle.pco
             newValTargetId.val=idle.id
-            click fCheck,0
         
 Dual-state Button btHelp
     Attributes
-        ID               : 2
+        ID               : 7
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -1447,7 +1351,7 @@ Dual-state Button btHelp
         
 Hotspot fLoadModes
     Attributes
-        ID               : 60
+        ID               : 61
         Scope            : local
         Send Component ID: disabled
     
@@ -1477,7 +1381,7 @@ Hotspot fLoadModes
         
 Hotspot fSysex
     Attributes
-        ID               : 61
+        ID               : 62
         Scope            : local
         Send Component ID: disabled
     
@@ -1510,22 +1414,24 @@ Hotspot fSysex
                 //
                 // PN_LSB PN_MSB TG_LSB can all be determined by the component ID
                 // In the case of integer commands, TG_MSB can also be included since it's 0x00
-                if(sys1==tU0Name.id)
+                // Name, Code point to the (global) variable components, not the on-screen ones.
+                // This is due to how the logic with the keyboard page works.
+                if(sys1==u0Name.id)
                 {
                     temp.val=0x000240
-                }else if(sys1==tU1Name.id)
+                }else if(sys1==u1Name.id)
                 {
                     temp.val=0x010240
-                }else if(sys1==tU2Name.id)
+                }else if(sys1==u2Name.id)
                 {
                     temp.val=0x020240
-                }else if(sys1==tU0Code.id)
+                }else if(sys1==u0Code.id)
                 {
                     temp.val=0x000241
-                }else if(sys1==tU1Code.id)
+                }else if(sys1==u1Code.id)
                 {
                     temp.val=0x010241
-                }else if(sys1==tU2Code.id)
+                }else if(sys1==u2Code.id)
                 {
                     temp.val=0x020241
                 }else if(sys1==user0Ontime.id)
@@ -1537,22 +1443,22 @@ Hotspot fSysex
                 }else if(sys1==user2Ontime.id)
                 {
                     temp.val=0x020242
-                }else if(sys1==user0BPS.id)
-                {
-                    temp.val=0x000243
-                }else if(sys1==user1BPS.id)
-                {
-                    temp.val=0x010243
-                }else if(sys1==user2BPS.id)
-                {
-                    temp.val=0x020243
                 }else if(sys1==user0Duty.id)
                 {
-                    temp.val=0x000244
+                    temp.val=0x000243
                 }else if(sys1==user1Duty.id)
                 {
-                    temp.val=0x010244
+                    temp.val=0x010243
                 }else if(sys1==user2Duty.id)
+                {
+                    temp.val=0x020243
+                }else if(sys1==user0BPS.id)
+                {
+                    temp.val=0x000244
+                }else if(sys1==user1BPS.id)
+                {
+                    temp.val=0x010244
+                }else if(sys1==user2BPS.id)
                 {
                     temp.val=0x020244
                 }
@@ -1635,7 +1541,7 @@ Hotspot fSysex
         
 Hotspot charToInt
     Attributes
-        ID               : 77
+        ID               : 78
         Scope            : local
         Send Component ID: disabled
     
@@ -1656,7 +1562,7 @@ Hotspot charToInt
         
 Hotspot fLoadColors
     Attributes
-        ID               : 82
+        ID               : 83
         Scope            : local
         Send Component ID: disabled
     
@@ -1732,7 +1638,7 @@ Hotspot fLoadColors
         
 Hotspot fDraw
     Attributes
-        ID               : 83
+        ID               : 84
         Scope            : local
         Send Component ID: disabled
     
@@ -1773,9 +1679,35 @@ Hotspot fDraw
                 line sys2,tUserName.y,sys2,sys1,tUserName.pco
             }
         
+Hotspot fCRC
+    Attributes
+        ID               : 86
+        Scope            : local
+        Send Component ID: disabled
+    
+    Events
+        Touch Press Event
+            // Calculate CRC over all settings on the page.
+            crcrest 1,0xFFFF
+            crcputs tU0Name.txt,0
+            crcputs tU0Code.txt,0
+            crcputs user0Ontime.val,4
+            crcputs user0BPS.val,2
+            crcputs user0Duty.val,2
+            crcputs tU1Name.txt,0
+            crcputs tU1Code.txt,0
+            crcputs user1Ontime.val,4
+            crcputs user1BPS.val,2
+            crcputs user1Duty.val,2
+            crcputs tU2Name.txt,0
+            crcputs tU2Code.txt,0
+            crcputs user2Ontime.val,4
+            crcputs user2BPS.val,2
+            crcputs user2Duty.val,2
+        
 Hotspot hHelp
     Attributes
-        ID               : 84
+        ID               : 87
         Scope            : local
         Send Component ID: disabled
     
@@ -1848,6 +1780,7 @@ Hotspot hHelp
                     tHelp.txt+="These limits only affect the UI and limit the ranges of the sliders. Even if you had user limits \r"
                     tHelp.txt+="higher than (some) of your coil limits, the values actually applied to each coil will be capped \r"
                     tHelp.txt+="at the respective limit. \r"
+                    tHelp.txt+="Important: The UI is limited to values <10000. Thus, 9999us is the highest possible ontime. \r"
                     tHelp.txt+="\r"
                     tHelp.txt+="The first, leftmost user is the one with the least rights. That user cannot access the settings. \r"
                     tHelp.txt+="It's meant as guest account for spectators that shall not be able to do anything wrong. \r"
@@ -1896,6 +1829,7 @@ Hotspot hHelp
                 {
                     tHelp.txt+="User Ontime \r\r"
                     tHelp.txt+="Upper limit of the ontime sliders in the UI when this user is logged in. \r"
+                    tHelp.txt+="The UI is limited to values <10000. Thus, 9999us is the highest possible ontime. \r"
                     tHelp.txt+="For the rightmost user, this value is automatically determined by the highest coil limit.\r"
                 }else if(sys1==tUserBPS.id||sys1==user0BPS.id||sys1==user1BPS.id||sys1==user2BPS.id)
                 {
