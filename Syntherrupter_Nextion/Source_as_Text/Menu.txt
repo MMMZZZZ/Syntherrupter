@@ -47,16 +47,14 @@ Page Menu
             ref_star
         
         Postinitialize Event
-            // Accept data on this page only
-            // Sends a Syntherrupter Sysex command that updates Syntherrupter with whatever
-            // has been changed on this page.
+            // Accept data on this page
+            // Send a Syntherrupter Sysex command
             // Package format:
             // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
             // DMID DMID = 26 05
             // VERSION = 01
             // DEVICE = 7f (wildcard)
             // PN, TG, VAL: see syntherrupter sysex documentation
-            //
             //
             // SYSEX_START DMID VERSION DEVICE
             printh f0 00 26 05 01 7f
@@ -71,7 +69,7 @@ Page Menu
             printh f7
         
         Touch Press Event
-            if(Other_Settings.nBackOff.val!=0)
+            if(Other_Settings.backOff.val!=0)
             {
                 // Default "stop" action.
                 // Set ontime and duty to 0 for all modes. See fSysex for details
@@ -104,16 +102,15 @@ Page Menu
             }
         
         Page Exit Event
-            // Accept data on this page only
-            // Sends a Syntherrupter Sysex command that updates Syntherrupter with whatever
-            // has been changed on this page.
+            // Leaving this page, the UI might not accept data anymore (any page that still accepts it,
+            // will enable it again).
+            // Send a Syntherrupter Sysex command
             // Package format:
             // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
             // DMID DMID = 26 05
             // VERSION = 01
             // DEVICE = 7f (wildcard)
             // PN, TG, VAL: see syntherrupter sysex documentation
-            //
             //
             // SYSEX_START DMID VERSION DEVICE
             printh f0 00 26 05 01 7f
@@ -452,7 +449,7 @@ Hotspot fLoadColors
                     // Types that have bco, pco
                     // QR Code
                     b[sys0].bco=Settings.backCol.val
-                    b[sys0].pco=Settings.qrFrontCol.val
+                    b[sys0].pco=Settings.frontCol.val
                 }else if(sys1==1)
                 {
                     // Types that have pic, pic1, pic2:

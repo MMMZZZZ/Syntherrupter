@@ -20,9 +20,30 @@ Page Identification
         
         Postinitialize Event
             click bOK,0
+            //
+            // Accept data on this page
+            // Send a Syntherrupter Sysex command
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 26 02 // GUI Update Mode
+            // TG_LSB TG_MSB
+            printh 00 00 // Reserved
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // 2: Keep UI updated
+            printh 02 00 00 00 00
+            // SYSEX_END
+            printh f7
         
         Touch Press Event
-            if(Other_Settings.nBackOff.val!=0)
+            if(Other_Settings.backOff.val!=0)
             {
                 // Default "stop" action.
                 // Set ontime and duty to 0 for all modes. See fSysex for details
@@ -59,6 +80,9 @@ Page Identification
             // prints "mus",0
             ref_stop
             tTitle.txt=sNoCode.txt
+            //
+            // Next page is always the Menu page, which still accepts data. No need to disable
+            // data recevining here. (See Menu Page Exit Event).
         
 Variable (string) sNoCode
     Attributes
@@ -431,7 +455,7 @@ Hotspot fLoadColors
                     // Types that have bco, pco
                     // QR Code
                     b[sys0].bco=Settings.backCol.val
-                    b[sys0].pco=Settings.qrFrontCol.val
+                    b[sys0].pco=Settings.frontCol.val
                 }else if(sys1==1)
                 {
                     // Types that have pic, pic1, pic2:

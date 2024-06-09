@@ -92,7 +92,7 @@ Hotspot fLoadColors
                     // Types that have bco, pco
                     // QR Code
                     b[sys0].bco=Settings.backCol.val
-                    b[sys0].pco=Settings.qrFrontCol.val
+                    b[sys0].pco=Settings.frontCol.val
                 }else if(sys1==1)
                 {
                     // Types that have pic, pic1, pic2:

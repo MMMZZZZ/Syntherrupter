@@ -20,7 +20,7 @@ Page Startup
             ref_star
         
         Touch Press Event
-            if(Other_Settings.nBackOff.val!=0)
+            if(Other_Settings.backOff.val!=0)
             {
                 // Default "stop" action.
                 // Set ontime and duty to 0 for all modes. See fSysex for details
@@ -78,23 +78,6 @@ Number comOk
             vis fLoadColors,0
             //
             // Load colors
-            if(Settings.colorMode.val==0)
-            {
-                Settings.backCol.val=65535
-                Settings.backCol2.val=4589
-                Settings.backSelectCol2.val=6900
-                Settings.frontCol.val=6900
-                Settings.frontCol2.val=65535
-                Settings.qrFrontCol.val=6900
-            }else
-            {
-                Settings.backCol.val=8484
-                Settings.backCol2.val=2145
-                Settings.backSelectCol2.val=16904
-                Settings.frontCol.val=40476
-                Settings.frontCol2.val=40476
-                Settings.qrFrontCol.val=40476
-            }
             click fLoadColors,1
             // Enable page refreshs again
             ref_star
@@ -106,7 +89,7 @@ Text tStartup
         Send Component ID  : disabled
         Associated Keyboard: none
         Text               : SYNTHERRUPTER
-        Max. Text Size     : 100
+        Max. Text Size     : 150
     
     Events
         Touch Press Event
@@ -250,7 +233,7 @@ Hotspot fLoadColors
                     // Types that have bco, pco
                     // QR Code
                     b[sys0].bco=Settings.backCol.val
-                    b[sys0].pco=Settings.qrFrontCol.val
+                    b[sys0].pco=Settings.frontCol.val
                 }else if(sys1==1)
                 {
                     // Types that have pic, pic1, pic2:
@@ -277,7 +260,8 @@ Timer tmConnTimeout
             tStartup.font=0
             tStartup.xcen=1
             tStartup.ycen=1
-            tStartup.txt="Timeout while waiting for initial data \rfrom the Tiva microcontroller"
+            tStartup.txt="Timeout while waiting for initial data \rfrom the Tiva microcontroller\r\r"
+            tStartup.txt+="Try power cycling Syntherrupter"
             // Show text but disable the touch event(s)
             vis 255,1
             vis fLoadColors,0

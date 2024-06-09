@@ -47,8 +47,8 @@ Page Lightsaber
             tSave.bco=Settings.backSelectCol2.val
             vis tSave,Settings.unsaved.val
             //
-            tmLSButtonHold.tim=Other_Settings.nHoldTime.val
-            tmReturn.tim=Other_Settings.nHoldTime.val
+            tmLSButtonHold.tim=Other_Settings.holdTime.val
+            tmReturn.tim=Other_Settings.holdTime.val
             // Hide buttons for unavailable tesla coils
             if(TC_Settings.maxCoilCount.val<6)
             {
@@ -204,7 +204,7 @@ Page Lightsaber
             click fDraw,1
         
         Touch Press Event
-            if(Other_Settings.nBackOff.val!=0)
+            if(Other_Settings.backOff.val!=0)
             {
                 // Default "stop" action.
                 // Set ontime and duty to 0 for all modes. See fSysex for details
@@ -1484,7 +1484,7 @@ Hotspot fLoadColors
                     // Types that have bco, pco
                     // QR Code
                     b[sys0].bco=Settings.backCol.val
-                    b[sys0].pco=Settings.qrFrontCol.val
+                    b[sys0].pco=Settings.frontCol.val
                 }else if(sys1==1)
                 {
                     // Types that have pic, pic1, pic2:

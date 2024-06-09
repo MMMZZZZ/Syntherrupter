@@ -1185,6 +1185,12 @@ void Sysex::processSysex()
                 else if (msg.value.ui32 == 3)
                 {
                     EEPROMSettings::readAll();
+                    if (uiUpdateMode == 2)
+                    {
+                        GUI::syncAllSettings();
+                        // Reload current page
+                        nxt->sendCmd("page dp");
+                    }
                 }
             }
             break;
@@ -1330,7 +1336,7 @@ void Sysex::processSysex()
                     EEPROMSettings::deviceData.uiButtonHoldTime = msg.value.ui32;
                     if (nxt->available() && uiUpdateMode == 2)
                     {
-                        nxt->setVal("Other_Settings.nHoldTime", msg.value.ui32);
+                        nxt->setVal("Other_Settings.holdTime", msg.value.ui32);
                     }
                 }
             }
@@ -1340,7 +1346,7 @@ void Sysex::processSysex()
             {
                 if (reading)
                 {
-                    msg.value.ui32 = nxt->getVal("Other_Settings.nBackOff");
+                    msg.value.ui32 = nxt->getVal("Other_Settings.backOff");
                     txMsg.data.targetLSB = 0;
                     txMsg.data.targetMSB = 0;
                     sendSysex();
@@ -1411,7 +1417,11 @@ void Sysex::processSysex()
             }
             else
             {
-                if (msg.value.ui32 == 0 || msg.value.ui32 == 2)
+                if (msg.value.ui32 == 1)
+                {
+                    GUI::syncAllSettings();
+                }
+                else if (msg.value.ui32 == 0 || msg.value.ui32 == 2)
                 {
                     uiUpdateMode = msg.value.ui32;
                 }

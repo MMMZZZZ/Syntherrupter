@@ -47,8 +47,30 @@ Page Settings
             // Enable page refreshs again
             ref_star
         
+        Postinitialize Event
+            // Accept data on this page
+            // Send a Syntherrupter Sysex command
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 26 02 // GUI Update Mode
+            // TG_LSB TG_MSB
+            printh 00 00 // Reserved
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // 2: Keep UI updated
+            printh 02 00 00 00 00
+            // SYSEX_END
+            printh f7
+        
         Touch Press Event
-            if(Other_Settings.nBackOff.val!=0)
+            if(Other_Settings.backOff.val!=0)
             {
                 // Default "stop" action.
                 // Set ontime and duty to 0 for all modes. See fSysex for details
@@ -80,93 +102,170 @@ Page Settings
                 Lightsaber.ontimes56.val=0
             }
         
+        Page Exit Event
+            // Leaving this page, the UI might not accept data anymore (any page that still accepts it,
+            // will enable it again).
+            // Send a Syntherrupter Sysex command
+            // Package format:
+            // F0 00 DMID DMID VERSION DEVICE PN_LSB PN_MSB TG_LSB TG_MSB VAL_LSB VAL VAL VAL VAL_MSB F7
+            // DMID DMID = 26 05
+            // VERSION = 01
+            // DEVICE = 7f (wildcard)
+            // PN, TG, VAL: see syntherrupter sysex documentation
+            //
+            // SYSEX_START DMID VERSION DEVICE
+            printh f0 00 26 05 01 7f
+            // PN_LSB PN_MSB
+            printh 26 02 // GUI Update Mode
+            // TG_LSB TG_MSB
+            printh 00 00 // Reserved
+            // VAL (4 bytes to be packed into 5 groups of 7 bit)
+            // 0: No UI updates
+            printh 00 00 00 00 00
+            // SYSEX_END
+            printh f7
+        
 Variable (int32) currentHelp
     Attributes
-        ID   : 11
+        ID   : 1
         Scope: local
         Value: 4294967295
     
-Variable (int32) activeModes
-    Attributes
-        ID   : 12
-        Scope: global
-        Value: 0
-    
 Variable (int32) backCol
     Attributes
-        ID   : 13
+        ID   : 2
         Scope: global
         Value: 8484
     
 Variable (int32) backCol2
     Attributes
-        ID   : 14
+        ID   : 3
         Scope: global
         Value: 2145
     
 Variable (int32) frontCol
     Attributes
-        ID   : 22
+        ID   : 4
         Scope: global
         Value: 40476
     
 Variable (int32) frontCol2
     Attributes
-        ID   : 23
+        ID   : 5
         Scope: global
         Value: 40476
-    
-Variable (int32) picCount
-    Attributes
-        ID   : 24
-        Scope: global
-        Value: 43
-    
-Variable (int32) colorMode
-    Attributes
-        ID   : 25
-        Scope: global
-        Value: 1
-    
-Variable (int32) qrFrontCol
-    Attributes
-        ID   : 26
-        Scope: global
-        Value: 40476
-    
-Variable (int32) applyingMode
-    Attributes
-        ID   : 27
-        Scope: global
-        Value: 1
-    
-Variable (int32) backCol2Deflt
-    Attributes
-        ID   : 28
-        Scope: global
-        Value: 4589
     
 Variable (int32) backSelectCol2
     Attributes
-        ID   : 29
+        ID   : 6
         Scope: global
         Value: 16904
     
+Variable (int32) backCol2Deflt
+    Attributes
+        ID   : 7
+        Scope: global
+        Value: 4589
+    
+Variable (int32) colorMode
+    Attributes
+        ID   : 8
+        Scope: global
+        Value: 1
+    
+Variable (int32) picCount
+    Attributes
+        ID   : 9
+        Scope: global
+        Value: 43
+    
+Variable (int32) activeModes
+    Attributes
+        ID   : 20
+        Scope: global
+        Value: 0
+    
+Variable (int32) applyingMode
+    Attributes
+        ID   : 28
+        Scope: global
+        Value: 1
+    
 Variable (int32) firstHelp
     Attributes
-        ID   : 33
+        ID   : 31
         Scope: global
         Value: 1
     
 Variable (int32) unsaved
     Attributes
-        ID   : 34
+        ID   : 32
         Scope: global
         Value: 0
     
+Variable (int32) CM0backCol
+    Attributes
+        ID   : 35
+        Scope: global
+        Value: 65535
+    
+Variable (int32) CM0backCol2
+    Attributes
+        ID   : 36
+        Scope: global
+        Value: 4589
+    
+Variable (int32) CM0frontCol
+    Attributes
+        ID   : 37
+        Scope: global
+        Value: 6900
+    
+Variable (int32) CM0frontCol2
+    Attributes
+        ID   : 38
+        Scope: global
+        Value: 65535
+    
+Variable (int32) CM0backSelCol2
+    Attributes
+        ID   : 39
+        Scope: global
+        Value: 6900
+    
+Variable (int32) CM1backCol
+    Attributes
+        ID   : 40
+        Scope: global
+        Value: 8484
+    
+Variable (int32) CM1backCol2
+    Attributes
+        ID   : 41
+        Scope: global
+        Value: 2145
+    
+Variable (int32) CM1frontCol
+    Attributes
+        ID   : 42
+        Scope: global
+        Value: 40476
+    
+Variable (int32) CM1frontCol2
+    Attributes
+        ID   : 43
+        Scope: global
+        Value: 40476
+    
+Variable (int32) CM1backSelCol2
+    Attributes
+        ID   : 44
+        Scope: global
+        Value: 16904
+    
 Text tUser
     Attributes
-        ID                 : 1
+        ID                 : 10
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -180,7 +279,7 @@ Text tUser
         
 Text tMSI
     Attributes
-        ID                 : 2
+        ID                 : 11
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -194,7 +293,7 @@ Text tMSI
         
 Text tMML
     Attributes
-        ID                 : 3
+        ID                 : 12
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -208,7 +307,7 @@ Text tMML
         
 Text tMLS
     Attributes
-        ID                 : 4
+        ID                 : 13
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -222,7 +321,7 @@ Text tMLS
         
 Text tSave
     Attributes
-        ID                 : 5
+        ID                 : 14
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -236,7 +335,7 @@ Text tSave
         
 Text tHelp
     Attributes
-        ID                 : 6
+        ID                 : 15
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -250,7 +349,7 @@ Text tHelp
         
 Text tTitle
     Attributes
-        ID                 : 8
+        ID                 : 17
         Scope              : local
         Send Component ID  : disabled
         Associated Keyboard: none
@@ -259,7 +358,7 @@ Text tTitle
     
 Button bDiscard
     Attributes
-        ID               : 7
+        ID               : 16
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -295,7 +394,7 @@ Button bDiscard
         
 Button bReturn
     Attributes
-        ID               : 9
+        ID               : 18
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -308,7 +407,7 @@ Button bReturn
         
 Button bCoilSettings
     Attributes
-        ID               : 15
+        ID               : 21
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -322,7 +421,7 @@ Button bCoilSettings
         
 Button bSave
     Attributes
-        ID               : 16
+        ID               : 22
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -358,7 +457,7 @@ Button bSave
         
 Button bNXTUpdate
     Attributes
-        ID               : 17
+        ID               : 23
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -371,7 +470,7 @@ Button bNXTUpdate
         
 Button bGeneral
     Attributes
-        ID               : 18
+        ID               : 24
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -384,7 +483,7 @@ Button bGeneral
         
 Button bUsers
     Attributes
-        ID               : 19
+        ID               : 25
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -398,7 +497,7 @@ Button bUsers
         
 Button bEnvelope
     Attributes
-        ID               : 20
+        ID               : 26
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -412,7 +511,7 @@ Button bEnvelope
         
 Button bESPUpdate
     Attributes
-        ID               : 21
+        ID               : 27
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -425,7 +524,7 @@ Button bESPUpdate
         
 Button bReset
     Attributes
-        ID               : 31
+        ID               : 30
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -479,7 +578,7 @@ Button bReset
         
 Dual-state Button btHelp
     Attributes
-        ID               : 10
+        ID               : 19
         Scope            : local
         Send Component ID: disabled
         State            : unpressed
@@ -502,7 +601,7 @@ Dual-state Button btHelp
         
 Hotspot fLoadModes
     Attributes
-        ID               : 30
+        ID               : 29
         Scope            : local
         Send Component ID: disabled
     
@@ -532,7 +631,7 @@ Hotspot fLoadModes
         
 Hotspot fLoadColors
     Attributes
-        ID               : 32
+        ID               : 33
         Scope            : local
         Send Component ID: disabled
     
@@ -593,7 +692,7 @@ Hotspot fLoadColors
                     // Types that have bco, pco
                     // QR Code
                     b[sys0].bco=Settings.backCol.val
-                    b[sys0].pco=Settings.qrFrontCol.val
+                    b[sys0].pco=Settings.frontCol.val
                 }else if(sys1==1)
                 {
                     // Types that have pic, pic1, pic2:
@@ -608,7 +707,7 @@ Hotspot fLoadColors
         
 Hotspot hHelp
     Attributes
-        ID               : 35
+        ID               : 34
         Scope            : local
         Send Component ID: disabled
     

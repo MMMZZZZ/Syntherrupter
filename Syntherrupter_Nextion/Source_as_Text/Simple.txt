@@ -39,7 +39,7 @@ Page Simple
             vis fApply,0
             vis fDraw,0
             //
-            tmReturn.tim=Other_Settings.nHoldTime.val
+            tmReturn.tim=Other_Settings.holdTime.val
             // Dunno why we ref bReturn?? Probably not needed but doesnt hurt either... Uncommented legacy code is a beauty.
             ref bReturn
             // Functions shall be invisible
@@ -243,7 +243,7 @@ Page Simple
             vis bMode,1
         
         Touch Press Event
-            if(Other_Settings.nBackOff.val!=0)
+            if(Other_Settings.backOff.val!=0)
             {
                 // Default "stop" action.
                 // Set ontime and duty to 0 for all modes. See fSysex for details
@@ -2043,7 +2043,7 @@ Hotspot fLoadColors
                     // Types that have bco, pco
                     // QR Code
                     b[sys0].bco=Settings.backCol.val
-                    b[sys0].pco=Settings.qrFrontCol.val
+                    b[sys0].pco=Settings.frontCol.val
                 }else if(sys1==1)
                 {
                     // Types that have pic, pic1, pic2:

@@ -177,7 +177,7 @@ Page TC_Settings
             originalState.val=crcval
         
         Touch Press Event
-            if(Other_Settings.nBackOff.val!=0)
+            if(Other_Settings.backOff.val!=0)
             {
                 // Default "stop" action.
                 // Set ontime and duty to 0 for all modes. See fSysex for details
@@ -1287,7 +1287,7 @@ Button bReturn
     
     Events
         Touch Press Event
-            click bOK,0
+            click fCheck,0
             // Store local component values in global variables. Note: Since a component consists of many different properties (like font size, color, position, ...) its memory footprint is much larger and it should not be global.
             // Since min offtime and max MIDI voices are not used elsewhere in the GUI they are packed into the same variable, where minOff occupies the lower 16 bit, and voices the uppe 16 bit.
             // Set user 2 limits to max Coil limits.
@@ -1760,6 +1760,9 @@ Hotspot fSysex
                 // SYSEX_END
                 printh f7
             }
+            //
+            // Settings applied, current state is the new "original" state
+            originalState.val=crcval
         
 Hotspot fDraw
     Attributes
@@ -1856,7 +1859,7 @@ Hotspot fLoadColors
                     // Types that have bco, pco
                     // QR Code
                     b[sys0].bco=Settings.backCol.val
-                    b[sys0].pco=Settings.qrFrontCol.val
+                    b[sys0].pco=Settings.frontCol.val
                 }else if(sys1==1)
                 {
                     // Types that have pic, pic1, pic2:

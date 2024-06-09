@@ -13,6 +13,7 @@
 #include "stdbool.h"
 #include "driverlib/gpio.h"
 #include "InterrupterConfig.h"
+#include "Branchless.h"
 #include "System.h"
 #include "EEPROMSettings.h"
 #include "Nextion.h"
@@ -25,6 +26,7 @@ public:
     GUI();
     virtual ~GUI();
     static void init(Nextion* nextion, uint32_t cfgStatus);
+    static void syncAllSettings();
     static uint32_t update();
     static void applyOutput();
     static void setError(const char* err);

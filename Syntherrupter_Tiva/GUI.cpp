@@ -55,7 +55,7 @@ void GUI::init(Nextion* nextion, uint32_t cfgStatus)
      */
     uint32_t startTime = System::getSystemTimeUS();
 
-    if (!nextion->available())
+    if (!nxt->available())
     {
         // No screen connected. Thus no need to send any data to it.
         acceptsData = false;
@@ -77,71 +77,7 @@ void GUI::init(Nextion* nextion, uint32_t cfgStatus)
          * Note: even if no valid config was found, meaningful
          * default values have been loaded.
          */
-
-        // User 2 ontime and duty are determined by the max coil settings.
-        uint32_t allCoilsMaxOntimeUS = 0;
-        uint32_t allCoilsMaxDutyPerm = 0;
-
-        // Settings of all coils
-        for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
-        {
-            uint32_t& maxOntimeUS   = EEPROMSettings::coilData[coil].maxOntimeUS;
-            uint32_t& minOfftimeUS  = EEPROMSettings::coilData[coil].minOfftimeUS;
-            uint32_t& maxMidiVoices = EEPROMSettings::coilData[coil].midiMaxVoices;
-            uint32_t& maxDutyPerm   = EEPROMSettings::coilData[coil].maxDutyPerm;
-
-            if (maxOntimeUS > allCoilsMaxOntimeUS)
-            {
-                allCoilsMaxOntimeUS = maxOntimeUS;
-            }
-            if (maxDutyPerm > allCoilsMaxDutyPerm)
-            {
-                allCoilsMaxDutyPerm = maxDutyPerm;
-            }
-
-            // Send to Nextion
-            nxt->sendCmd("TC_Settings.coil%iOn.val=%i",
-                         coil + 1, maxOntimeUS);
-            nxt->sendCmd("TC_Settings.coil%iOffVoics.val=%i",
-                         coil + 1, (maxMidiVoices << 16) + minOfftimeUS);
-            nxt->sendCmd("TC_Settings.coil%iDuty.val=%i",
-                         coil + 1, maxDutyPerm);
-        }
-
-        // Settings of the 3 users
-        for (uint32_t user = 0; user < 3; user++)
-        {
-            uint16_t& maxOntimeUS = EEPROMSettings::userData[user].maxOntimeUS;
-            uint16_t& maxBPS      = EEPROMSettings::userData[user].maxBPS;
-            uint16_t& maxDutyPerm = EEPROMSettings::userData[user].maxDutyPerm;
-
-            if (user == 2)
-            {
-                maxOntimeUS = allCoilsMaxOntimeUS;
-                maxDutyPerm = allCoilsMaxDutyPerm;
-            }
-
-            nxt->sendCmd("User_Settings.u%iName.txt=\"%s\"",
-                         user, EEPROMSettings::userData[user].name);
-            nxt->sendCmd("User_Settings.u%iCode.txt=\"%s\"",
-                         user, EEPROMSettings::userData[user].password);
-            nxt->sendCmd("User_Settings.u%iOntime.val=%i",
-                         user, maxOntimeUS);
-            nxt->sendCmd("User_Settings.u%iBPS.val=%i",
-                         user, maxBPS);
-            nxt->sendCmd("User_Settings.u%iDuty.val=%i",
-                         user, maxDutyPerm);
-        }
-
-        // Other Settings
-        nxt->setVal("Other_Settings.nHoldTime", EEPROMSettings::deviceData.uiButtonHoldTime);
-        nxt->setVal("thsp", EEPROMSettings::deviceData.uiSleepDelay, Nextion::NO_EXT);
-        nxt->setVal("dim", EEPROMSettings::deviceData.uiBrightness, Nextion::NO_EXT);
-        //nxt->printf("Other_Settings.nBackOff.val=%i\xff\xff\xff", backOff);
-        nxt->setVal("Settings.colorMode", EEPROMSettings::deviceData.uiColorMode);
-
-        nxt->setVal("TC_Settings.maxCoilCount", COIL_COUNT);
-        nxt->setVal("Env_Settings.maxSteps", MIDIProgram::DATA_POINTS);
+        syncAllSettings();
 
         // If default values had to be loaded, inform the user.
         if (cfgStatus == EEPROMSettings::CFG_UNKNOWN)
@@ -191,6 +127,108 @@ void GUI::setError(const char* err)
             errorTxt[i] = '\0';
         }
     }
+}
+
+void GUI::syncAllSettings()
+{
+    /*
+     * Send all the settings to the Nextion display.
+     * force: send settings even if the UI is not ready
+     * for such an updates (settings could be ignored).
+     */
+
+    // Long-ish sequence, disable user input during this time
+    // Note: this could mess with the UI if it was using tsw as well
+    // especially since there's no easy way to read/restore the tsw
+    // state of all components.
+    // Luckily, the UI isn't using this functionality at this point.
+    nxt->sendCmd("tsw 255,0");
+
+    // User 2 ontime and duty are determined by the max coil settings.
+    uint32_t allCoilsMaxOntimeUS = 0;
+    uint32_t allCoilsMaxDutyPerm = 0;
+
+    // Settings of all coils
+    for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
+    {
+        uint32_t& maxOntimeUS   = EEPROMSettings::coilData[coil].maxOntimeUS;
+        uint32_t& minOfftimeUS  = EEPROMSettings::coilData[coil].minOfftimeUS;
+        uint32_t& maxMidiVoices = EEPROMSettings::coilData[coil].midiMaxVoices;
+        uint32_t& maxDutyPerm   = EEPROMSettings::coilData[coil].maxDutyPerm;
+
+        if (maxOntimeUS > allCoilsMaxOntimeUS)
+        {
+            allCoilsMaxOntimeUS = maxOntimeUS;
+        }
+        if (maxDutyPerm > allCoilsMaxDutyPerm)
+        {
+            allCoilsMaxDutyPerm = maxDutyPerm;
+        }
+
+        // Send to Nextion
+        nxt->sendCmd("TC_Settings.coil%iOn.val=%i",
+                     coil + 1, maxOntimeUS);
+        nxt->sendCmd("TC_Settings.coil%iOffVoics.val=%i",
+                     coil + 1, (maxMidiVoices << 16) + minOfftimeUS);
+        nxt->sendCmd("TC_Settings.coil%iDuty.val=%i",
+                     coil + 1, maxDutyPerm);
+    }
+
+    // Settings of the 3 users
+    for (uint32_t user = 0; user < 3; user++)
+    {
+        uint16_t& maxOntimeUS = EEPROMSettings::userData[user].maxOntimeUS;
+        uint16_t& maxBPS      = EEPROMSettings::userData[user].maxBPS;
+        uint16_t& maxDutyPerm = EEPROMSettings::userData[user].maxDutyPerm;
+
+        if (user == 2)
+        {
+            // See Nextion User_Settings comments.
+            maxOntimeUS = Branchless::min(9999U, allCoilsMaxOntimeUS);
+            maxDutyPerm = allCoilsMaxDutyPerm;
+        }
+
+        nxt->sendCmd("User_Settings.u%iName.txt=\"%s\"",
+                     user, EEPROMSettings::userData[user].name);
+        nxt->sendCmd("User_Settings.u%iCode.txt=\"%s\"",
+                     user, EEPROMSettings::userData[user].password);
+        nxt->sendCmd("User_Settings.u%iOntime.val=%i",
+                     user, maxOntimeUS);
+        nxt->sendCmd("User_Settings.u%iBPS.val=%i",
+                     user, maxBPS);
+        nxt->sendCmd("User_Settings.u%iDuty.val=%i",
+                     user, maxDutyPerm);
+    }
+
+    // Other Settings
+    nxt->setVal("Other_Settings.holdTime", EEPROMSettings::deviceData.uiButtonHoldTime);
+    nxt->setVal("thsp", EEPROMSettings::deviceData.uiSleepDelay, Nextion::NO_EXT);
+    nxt->setVal("dim", EEPROMSettings::deviceData.uiBrightness, Nextion::NO_EXT);
+    //nxt->printf("Other_Settings.nBackOff.val=%i\xff\xff\xff", backOff);
+    nxt->setVal("Settings.colorMode", EEPROMSettings::deviceData.uiColorMode);
+    // Load corresponding colors
+    if (EEPROMSettings::deviceData.uiColorMode == 0)
+    {
+        nxt->sendCmd("Settings.backCol.val=Settings.CM0backCol.val");
+        nxt->sendCmd("Settings.backCol2.val=Settings.CM0backCol2.val");
+        nxt->sendCmd("Settings.backSelectCol2.val=Settings.CM0backSelCol2.val");
+        nxt->sendCmd("Settings.frontCol.val=Settings.CM0frontCol.val");
+        nxt->sendCmd("Settings.frontCol2.val=Settings.CM0frontCol2.val");
+    }
+    else if (EEPROMSettings::deviceData.uiColorMode == 1)
+    {
+        nxt->sendCmd("Settings.backCol.val=Settings.CM1backCol.val");
+        nxt->sendCmd("Settings.backCol2.val=Settings.CM1backCol2.val");
+        nxt->sendCmd("Settings.backSelectCol2.val=Settings.CM1backSelCol2.val");
+        nxt->sendCmd("Settings.frontCol.val=Settings.CM1frontCol.val");
+        nxt->sendCmd("Settings.frontCol2.val=Settings.CM1frontCol2.val");
+    }
+
+    nxt->setVal("TC_Settings.maxCoilCount", COIL_COUNT);
+    nxt->setVal("Env_Settings.maxSteps", MIDIProgram::DATA_POINTS);
+
+    // See beginning of this function.
+    nxt->sendCmd("tsw 255,1");
 }
 
 void GUI::showError()
