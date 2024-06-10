@@ -8,7 +8,7 @@ rem copy ESP8266 binary to release folder. Usually no need for (re)compiling.
 robocopy Syntherrupter_Lightsaber Syntherrupter_Firmwares Syntherrupter_Lightsaber.ino.generic.bin
 rem Compile Tiva Firmware for all possible output numbers.
 for %%i in (1,2,3,4,5,6) do ( 
- C:\TI\ccs1200\ccs\eclipse\eclipsec -noSplash -data "C:\Users\Max\workspace_v12" -application com.ti.ccstudio.apps.buildProject -ccs.projects Syntherrupter_Tiva -ccs.configuration Release_%%i
+ C:\TI\ccs1270\ccs\eclipse\eclipsec -noSplash -data "C:\Users\Max\workspace_v12" -application com.ti.ccstudio.apps.buildProject -ccs.projects Syntherrupter_Tiva -ccs.configuration Release_%%i
  robocopy Syntherrupter_Tiva\Release_%%i Syntherrupter_Firmwares Syntherrupter_Tiva.bin
  ren Syntherrupter_Firmwares\Syntherrupter_Tiva.bin Syntherrupter_Tiva_%%i_Coils.bin
  )
@@ -24,5 +24,5 @@ timeout /t 5
 rem if exist "*.HMI" goto loop
 rem "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" controlvm "Windows 7 Nextion VBox" poweroff
 rem "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" snapshot "Windows 7 Nextion VBox" restore "Starting in 3 seconds..."
-"C:\Program Files\WinRAR\winrar" a -afzip -m5 ..\Syntherrupter_Firmwares.zip
-cd ..
+rem "C:\Program Files\WinRAR\winrar" a -afzip -m5 ..\Syntherrupter_Firmwares.zip
+rem cd ..
