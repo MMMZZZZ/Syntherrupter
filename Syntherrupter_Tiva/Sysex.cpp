@@ -1619,7 +1619,7 @@ void Sysex::processSysex()
         }
         case 0x2262:
             msg.value.i32 = msg.value.f32;
-        case 0x0262: // reserved for: ()[lsb=coil], i32 coil min ontime in us
+        case 0x0262: // ()[lsb=coil], i32 coil min ontime in us
             uint32_t start = msg.targetLSB;
             uint32_t end = msg.targetLSB + 1;
             if (msg.targetLSB == WILDCARD)
