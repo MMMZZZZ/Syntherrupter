@@ -260,8 +260,8 @@ Timer tmConnTimeout
             tStartup.font=0
             tStartup.xcen=1
             tStartup.ycen=1
-            tStartup.txt="Timeout while waiting for initial data \rfrom the Tiva microcontroller\r\r"
-            tStartup.txt+="Try power cycling Syntherrupter"
+            tStartup.txt="Timeout while waiting for initial data \rfrom the Tiva microcontroller.\r\r"
+            tStartup.txt+="Try power cycling Syntherrupter."
             // Show text but disable the touch event(s)
             vis 255,1
             vis fLoadColors,0

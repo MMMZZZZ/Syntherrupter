@@ -1752,8 +1752,8 @@ Hotspot hHelp
                 }else if(sys1==bChnAssign.id)
                 {
                     tHelp.txt+="MIDI Channel Assignments\r\r"
-                    tHelp.txt+="Select to which channels each coil listens. If no coils listens to any channels, \r"
-                    tHelp.txt+="this button blinks. \r"
+                    tHelp.txt+="Select which channels each coil listens to. If no coils listens to any channels, \r"
+                    tHelp.txt+="this button blinks (in case you were wondering why Syntherrupter stays silent). \r"
                 }else if(sys1==bNRPReset.id)
                 {
                     tHelp.txt+="NRP Reset\r\r"

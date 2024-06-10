@@ -1552,7 +1552,6 @@ Button bClear
     Events
         Touch Release Event
             b[newValTargetId.val].val=0
-            click fCheck,0
         
 Button b0
     Attributes
@@ -1724,11 +1723,11 @@ Hotspot fSysex
                     sys0=newValTargetId.val-nCoil1On.id
                 }else if(newValTargetId.val<=nCoil6MinOff.id)
                 {
-                    printh 62 02 // Coil Min Offtime
+                    printh 63 02 // Coil Min Offtime
                     sys0=newValTargetId.val-nCoil1MinOff.id
                 }else if(newValTargetId.val<=nCoil6Duty.id)
                 {
-                    printh 63 02 // Coil Max Duty
+                    printh 61 02 // Coil Max Duty
                     sys0=newValTargetId.val-nCoil1Duty.id
                 }else
                 {

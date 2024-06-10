@@ -552,6 +552,8 @@ Slider sBrightness
             sys0=sBrightness.val*sBrightness.val
             sys0/=sBrightness.maxval
             dim=sys0
+            // Check if (previously set) values are legal and if so, apply them
+            click fCheckNApply,0
         
 Button bReturn
     Attributes

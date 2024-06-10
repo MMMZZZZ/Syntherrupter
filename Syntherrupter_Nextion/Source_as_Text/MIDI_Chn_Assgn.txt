@@ -1182,7 +1182,7 @@ Hotspot fDraw
         Touch Press Event
             // Lines between channels, coils, actions, descriptions
             sys0=tCoils.x
-            sys1=bNoneCoils.x+bNoneCoils.w
+            sys1=bNoneCoils.x+bNoneCoils.w-1
             sys2=bNone.y+bNone.h+bNoneCoils.y
             sys2/=2
             line sys0,sys2,sys1,sys2,tCoils.pco
@@ -1343,12 +1343,13 @@ Hotspot hHelp
                     tHelp.txt+="This tip won't reappear until you reset or power cycle Syntherrupter. \r"
                 }else if(sys1==tTitle.id)
                 {
-                    tHelp.txt+="Coil Limits\r\r"
-                    tHelp.txt+="'Absolute Maximum Ratings' of your tesla coil(s) \r"
-                    tHelp.txt+="Whether you're using Simple Modoe, MIDI Live Mode or Lightsaber Mode. Any signals\r"
-                    tHelp.txt+="that these modes generate, is checked against these limits, ensuring that no matter\r"
-                    tHelp.txt+="what you do, no matter which MIDI file you play, the interrupter signal stays within these\r"
-                    tHelp.txt+="(hopefully safe) limits.\r"
+                    tHelp.txt+="MIDI Channel Assignments\r\r"
+                    tHelp.txt+="Configure which channel plays on which coil or, looking at it the other way around,  \r"
+                    tHelp.txt+="which coil listens to which channels. Think of it as a big mixing desk where you \r"
+                    tHelp.txt+="can mute / unmute every channel on every coil.  \r"
+                    tHelp.txt+="The bottom section should help you keeping the overview. \r"
+                    tHelp.txt+="To further improve the overview, you can hit \"Show\", then select any channel or \r"
+                    tHelp.txt+="coil, and its assignments (connections) will be highlighted in the table below. \r"
                 }else if(sys1==tUser.id)
                 {
                     tHelp.txt+="Current User \r\r"
