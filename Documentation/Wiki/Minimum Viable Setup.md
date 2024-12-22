@@ -93,8 +93,8 @@ The user interface can be run on a Windows PC. Unlike the command line interface
 ### Wiring
 
 Tiva pins:
-* PA4 connects to Nextions RX pin (yellow)
-* PA5 connects to Nextions TX pin (blue)
+* PA4 connects to Nextions TX pin (blue)
+* PA5 connects to Nextions RX pin (yellow)
 
 Both Tiva pins are 3.3V logic pins, capable of 2mA current. They are 5V tolerant.
 
