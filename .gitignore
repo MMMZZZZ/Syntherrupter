@@ -3,3 +3,4 @@
 
 # Exclude zip files in root directory
 /*.zip
+.DS_Store

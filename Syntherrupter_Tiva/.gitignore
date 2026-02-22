@@ -44,3 +44,7 @@ vars.ini
 /Release_5/
 /Release_6/
 /Teabug/
+
+# CCS Theia
+.clangd
+**/.theia/**

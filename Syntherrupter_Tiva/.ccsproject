@@ -14,4 +14,5 @@
 	<templateProperties value="id=com.ti.common.project.core.emptyProjectWithMainTemplate,"/>
 	<filesToOpen value="main.c,"/>
 	<isTargetManual value="false"/>
+	<activeTargetConfiguration value="targetConfigs/Tiva TM4C1294NCPDT.ccxml"/>
 </projectOptions>
