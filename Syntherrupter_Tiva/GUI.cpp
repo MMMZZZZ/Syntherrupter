@@ -246,13 +246,13 @@ bool GUI::checkValue(int32_t val)
     }
     if (val == nxt->receiveTimeoutVal)
     {
-        setError("Zeitüberschreitung");
+        setError("Zeitï¿½berschreitung");
         return false;
     }
     return true;
 }
 
-uint32_t GUI::update()
+void GUI::update()
 {
     /*
      * Return value:
@@ -533,13 +533,7 @@ uint32_t GUI::update()
 
     case Mode::idle:
         break;
-
-    default:
-        mode = Mode::emergency;
-        return false;
     }
-
-    return true;
 }
 
 void GUI::userSelect()

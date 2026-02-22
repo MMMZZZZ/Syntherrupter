@@ -54,50 +54,33 @@ int main(void)
 
     while (42)
     {
-        uint32_t state = GUI::update();
+        GUI::update();
 
-        if (state)
-        {
-            MIDI::process();
-            Sysex::processSysex();
-            LightSaber::process();
+        MIDI::process();
+        Sysex::processSysex();
+        LightSaber::process();
 
-            switch (COIL_COUNT)
-            {
-                case 6:
-                    Coil::allCoils[5].updateData();
-                    Coil::allCoils[5].updateOutput();
-                case 5:
-                    Coil::allCoils[4].updateData();
-                    Coil::allCoils[4].updateOutput();
-                case 4:
-                    Coil::allCoils[3].updateData();
-                    Coil::allCoils[3].updateOutput();
-                case 3:
-                    Coil::allCoils[2].updateData();
-                    Coil::allCoils[2].updateOutput();
-                case 2:
-                    Coil::allCoils[1].updateData();
-                    Coil::allCoils[1].updateOutput();
-                case 1:
-                    Coil::allCoils[0].updateData();
-                    Coil::allCoils[0].updateOutput();
-                    break;
-            }
-        }
-        else
+        switch (COIL_COUNT)
         {
-            // Emergency stop or something similar. Don't generate outputs
-            // and delete all tones
-            for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
-            {
-                ToneList* tl = &(Coil::allCoils[coil].toneList);
-                for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
-                {
-                    tl->deleteTone(tl->firstTone);
-                }
-            }
+            case 6:
+                Coil::allCoils[5].updateData();
+                Coil::allCoils[5].updateOutput();
+            case 5:
+                Coil::allCoils[4].updateData();
+                Coil::allCoils[4].updateOutput();
+            case 4:
+                Coil::allCoils[3].updateData();
+                Coil::allCoils[3].updateOutput();
+            case 3:
+                Coil::allCoils[2].updateData();
+                Coil::allCoils[2].updateOutput();
+            case 2:
+                Coil::allCoils[1].updateData();
+                Coil::allCoils[1].updateOutput();
+            case 1:
+                Coil::allCoils[0].updateData();
+                Coil::allCoils[0].updateOutput();
+                break;
         }
     }
 }
-

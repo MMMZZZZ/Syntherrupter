@@ -27,7 +27,7 @@ public:
     virtual ~GUI();
     static void init(Nextion* nextion, uint32_t cfgStatus);
     static void syncAllSettings();
-    static uint32_t update();
+    static void update();
     static void applyOutput();
     static void setError(const char* err);
     static void showError();

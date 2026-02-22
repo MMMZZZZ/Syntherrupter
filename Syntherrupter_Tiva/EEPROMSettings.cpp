@@ -436,7 +436,7 @@ void EEPROMSettings::initDefault()
     constexpr uint8_t LAST = MIDIProgram::DATA_POINTS - 1;
 
     // Program 0 and all unspecified programs: No envelope (constant 100% volume while on, no rise/fall times)
-    for (uint8_t step = 0; step <= LAST; step++)
+    for (uint32_t step = 0; step <= LAST; step++)
     {
         volatileData.envelopes[0][step] = {.amplitude = 1.0f, .durationUS = 1.0f, .ntau = 0.1f, .nextStep = (uint8_t) (step + 1)};
     }

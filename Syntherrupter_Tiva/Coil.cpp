@@ -124,11 +124,7 @@ void Coil::updateOutput()
                 // Because of the merge, no ontime offset is required (already
                 // included in previous ontime).
                 pulse.timeUS = lastOntimeEndUS;
-            }
-            else if (pulse.ontimeUS)
-            {
-                // "standalone" pulse; add ontime offset
-                pulse.ontimeUS += *minOntimeUS;
+                pulse.ontimeUS -= Branchless::min(*minOntimeUS, pulse.ontimeUS);
             }
             readyForNextUS = pulse.timeUS + pulse.ontimeUS;
             pulse.timeUS  -= lastOntimeEndUS;

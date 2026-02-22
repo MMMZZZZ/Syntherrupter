@@ -12,7 +12,7 @@
 
 Tone::Tone()
 {
-    srand(System::getSystemTimeUS());
+
 }
 
 Tone::~Tone()
