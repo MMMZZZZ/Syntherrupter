@@ -72,7 +72,6 @@ public:
 
         float volume = fmaxf(0.0f, fminf(1.0f, accel * 0.4f + gyro / 1000.0f - 0.01f));
 
-        static float peakVol{0};
         if (volume >= peakVol)
         {
             peakVol = volume;
@@ -80,7 +79,6 @@ public:
         peakVol = filtered(0, peakVol, 0.09);
         volume = filtered(volume, peakVol, 0.5);
 
-        static float slowVol{0};
         slowVol = filtered(volume, slowVol, 0.5);
 
         float frequency = exp2f((45.0f - 69.0f - 4*slowVol) / 12.0f) * 440.0f;
@@ -96,6 +94,8 @@ public:
     };
 
 private:
+    float peakVol = 0.0f;
+    float slowVol = 0.0f;
     float filtered(float a, float b, float fact)
     {
         return fact * a + (1 - fact) * b;
