@@ -49,7 +49,7 @@ public:
     uint8_t  panChanged      = (1 << COIL_COUNT) - 1;
     uint8_t toneChanged      = (1 << COIL_COUNT) - 1;
     bool  changed            = true;
-    Tone* assignedTones[COIL_COUNT];
+    uint32_t assignedToneNums[COIL_COUNT];
 };
 
 #endif /* NOTE_H_ */

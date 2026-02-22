@@ -755,9 +755,9 @@ void MIDI::setPanReach(float reach)
 
 void MIDI::setMaxVoices(uint32_t maxVoices)
 {
-    if (maxVoices > MAX_VOICES)
+    if (maxVoices > TONE_COUNT_MIDI)
     {
-        maxVoices = MAX_VOICES;
+        maxVoices = TONE_COUNT_MIDI;
     }
     *coilMaxVoices = maxVoices;
     coilChange = true;
@@ -963,7 +963,7 @@ void MIDI::updateEffects(Note* note)
 
 void MIDI::updateToneList()
 {
-    Tone* lastTone = (Tone*) 1;
+    uint32_t firstAvailableTone = TONE_COUNT_MIDI;
     Note* note = notelist.newNote->prevNote;
     int32_t voicesLeft = *coilMaxVoices;
     int32_t remainingNotes = notelist.activeNotes;
@@ -977,12 +977,20 @@ void MIDI::updateToneList()
         {
             note->toneChanged &= ~coilBit;
 
-            Tone** assignedTone = &(note->assignedTones[coilNum]);
+            uint32_t* assignedToneNum = &(note->assignedToneNums[coilNum]);
 
             if (note->isDead())
             {
-                // Removes tone from tonelists, too.
+                // Does not handle the associated tone from tonelists
                 notelist.removeNote(note);
+
+                // Set ontime to zero, making the tone inactive. 
+                // Note: tonelist handles the check whether or not
+                // assignedToneNum is even valid (a.k.a. there is an assigned tone)
+                tonelist->updateTone<ToneList::Owner::MIDI_LIVE>(*assignedToneNum, Tone::Type::dflt, 0, 0, 0, 0);
+                firstAvailableTone = *assignedToneNum;
+                *assignedToneNum = TONE_COUNT_MIDI;
+
                 // "undo" decrement at the end of the loop since no voice
                 // will actually be used.
                 voicesLeft++;
@@ -990,41 +998,40 @@ void MIDI::updateToneList()
             else if ((note->channel->coils & coilBit) && voicesLeft)
             {
                 setPanVol(note);
-                if (lastTone)
+                float ontimeUS = note->finishedVolume * note->panVol[coilNum];
+                if (note->frequency >= absFreq)
                 {
-                    float ontimeUS = note->finishedVolume * note->panVol[coilNum];
-                    if (note->frequency >= absFreq)
+                    ontimeUS *= singleNoteMaxOntimeUS;
+                }
+                else
+                {
+                    ontimeUS *= singleNoteMaxDuty * note->periodUS;
+                }
+                if (ontimeUS < 1.0f)
+                {
+                    // Set ontime to zero, making the tone inactive. 
+                    // Note: tonelist handles the check whether or not
+                    // assignedToneNum is even valid (a.k.a. there is an assigned tone)
+                    tonelist->updateTone<ToneList::Owner::MIDI_LIVE>(*assignedToneNum, Tone::Type::dflt, 0, 0, 0, 0);
+                    firstAvailableTone = *assignedToneNum;
+                    *assignedToneNum = TONE_COUNT_MIDI;
+                }
+                else
+                {
+                    // Get the first free tone, potentially "reusing" one that has been freed up
+                    if (*assignedToneNum >= TONE_COUNT_MIDI)
                     {
-                        ontimeUS *= singleNoteMaxOntimeUS;
-                    }
-                    else
-                    {
-                        ontimeUS *= singleNoteMaxDuty * note->periodUS;
-                    }
-                    if (*assignedTone)
-                    {
-                        if ((*assignedTone)->owner != this)
+                        if (firstAvailableTone < TONE_COUNT_MIDI)
                         {
-                            *assignedTone = 0;
+                            *assignedToneNum = firstAvailableTone;
+                        }
+                        else 
+                        {
+                            *assignedToneNum = tonelist->getFreeTone<ToneList::Owner::MIDI_LIVE>();
                         }
                     }
-                    if (ontimeUS < 1.0f)
-                    {
-                        if (*assignedTone)
-                        {
-                            (*assignedTone)->remove(note);
-                            *assignedTone = 0;
-                        }
-                    }
-                    else
-                    {
-                        lastTone = tonelist->updateTone(ontimeUS,
-                                                        note->periodUS,
-                                                        this,
-                                                        note,
-                                                        *assignedTone);
-                        *assignedTone = lastTone;
-                    }
+
+                    tonelist->updateTone<ToneList::Owner::MIDI_LIVE>(*assignedToneNum, Tone::Type::dflt, ontimeUS, note->periodUS, 0, 0);
                 }
             }
             else
@@ -1033,10 +1040,11 @@ void MIDI::updateToneList()
                 // assigned tone if there is one.
                 // Or the voice limit's been reached and the note doesn't fit
                 // into this output anymore.
-                if (*assignedTone)
+                if (*assignedToneNum)
                 {
-                    (*assignedTone)->remove(note);
-                     *assignedTone = 0;
+                    tonelist->updateTone<ToneList::Owner::MIDI_LIVE>(*assignedToneNum, Tone::Type::dflt, 0, 0, 0, 0);
+                    firstAvailableTone = *assignedToneNum;
+                    *assignedToneNum = TONE_COUNT_MIDI;
                 }
             }
         }

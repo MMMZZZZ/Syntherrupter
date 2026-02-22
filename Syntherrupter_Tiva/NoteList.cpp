@@ -59,14 +59,6 @@ void NoteList::removeNote(Note* note)
         activeNotes--;
 
         note->number = 128;
-        for (uint32_t coil = 0; coil < COIL_COUNT; coil++)
-        {
-            if (note->assignedTones[coil])
-            {
-                note->assignedTones[coil]->remove(note);
-                note->assignedTones[coil] = 0;
-            }
-        }
 
         if (note == firstNote)
         {

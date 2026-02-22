@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include "Branchless.h"
 #include "System.h"
 #include "Pulse.h"
 
@@ -23,16 +24,16 @@ class Tone
 public:
     Tone();
     virtual ~Tone();
-    void setParentList(ToneList* list)
-    {
-        this->parent = list;
-    };
     Pulse update(uint32_t timeUS)
     {
 
         /*
          *  If tone has fired, rearm it. If something changed, update tone.
          */
+
+        // New tone => make sure it fires by bringing nextFireUS up to date
+        // else leave it as-is.
+        nextFireUS = Branchless::selectByCond(timeUS, nextFireUS, isNew);
 
         switch (type)
         {
@@ -43,10 +44,9 @@ public:
                 periodUS      = 1000000 / freq;
                 break;
             }
-            case Type::newdflt:
+            case Type::dflt:
             {
-                nextFireUS    = timeUS;
-                type          = Type::dflt;
+                // No special actions required
                 break;
             }
         }
@@ -57,9 +57,10 @@ public:
 
         nextFireUS += periodUS;
 
+        isNew = false;
+
         return pulse;
     };
-    void remove(void* origin);
     void* owner  = 0;
     void* origin = 0;
 
@@ -69,18 +70,14 @@ public:
 
     // Properties used to generate Output.
     static constexpr uint32_t periodTolShift = 1;
+    bool     isNew           = true;
     float    duty            = 0.0f;
+    float    minDuty         = 0.0f;
     uint32_t ontimeUS        = 0;
     uint32_t limitedOntimeUS = 0;
     uint32_t periodUS        = 0;
     uint32_t nextFireUS      = 0;
-    enum class Type {dflt, rand, newdflt} type = Type::dflt;
-    Tone* nextTone           = 0;
-    Tone* prevTone           = 0;
-
-    // For debugging purposes only.
-    uint32_t id = 0;
-    ToneList* parent = 0;
+    enum class Type {dflt, rand} type = Type::dflt;
 };
 
 #endif /* TONE_H_ */

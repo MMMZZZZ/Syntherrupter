@@ -1690,7 +1690,7 @@ void Sysex::processSysex()
             }
             break;
         case 0x0264: // ()[lsb=coil], i32 coil max MIDI voices, 1-16, ohter=reserved
-            if (msg.value.ui32 <= 16 || reading)
+            if (msg.value.ui32 <= TONE_COUNT_MIDI || reading)
             {
                 uint32_t start = msg.targetLSB;
                 uint32_t end = msg.targetLSB + 1;

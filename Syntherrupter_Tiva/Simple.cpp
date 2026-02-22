@@ -36,21 +36,12 @@ void Simple::updateToneList()
         {
             float o = filteredOntimeUS.getFiltered();
             float f = filteredFrequency.getFiltered();
-            if (o > 1.0f && f > 0.1f)
-            {
-                f = 1e6f / f;
-                tone = tonelist->updateTone(o, f, this, this, tone);
-            }
-            else
-            {
-                tonelist->deleteTone(tone);
-                tone = 0;
-            }
+            f = 1e6f / f;
+            tonelist->updateTone<ToneList::Owner::SIMPLE>(0, Tone::Type::dflt, o, f, 0, 0);
         }
     }
-    else if (tone)
+    else
     {
-        tonelist->deleteTone(tone);
-        tone = 0;
+        tonelist->updateTone<ToneList::Owner::SIMPLE>(0, Tone::Type::dflt, 0, 0, 0, 0);
     }
 }

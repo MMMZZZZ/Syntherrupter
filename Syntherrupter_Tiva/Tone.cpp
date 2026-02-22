@@ -7,7 +7,6 @@
 
 
 #include <Tone.h>
-#include "ToneList.h"
 
 
 Tone::Tone()
@@ -20,10 +19,3 @@ Tone::~Tone()
     // TODO Auto-generated destructor stub
 }
 
-void Tone::remove(void* origin)
-{
-    if (origin == this->origin)
-    {
-        parent->deleteTone(this);
-    }
-}

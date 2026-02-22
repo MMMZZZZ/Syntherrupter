@@ -1,7 +1,7 @@
 /*
- * ToneList.h
+ * ToneList.hpp
  *
- *  Created on: 17.08.2020
+ *  Created on: 21.02.2026
  *      Author: Max Zuidberg
  */
 
@@ -11,6 +11,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <math.h>
 #include "InterrupterConfig.h"
 #include "Branchless.h"
 #include "System.h"
@@ -23,14 +24,19 @@ class ToneList
 public:
     ToneList();
     virtual ~ToneList();
-    Tone* updateTone(uint32_t ontimeUS, uint32_t periodUS, void* owner, void* origin, Tone* tone);
-    void deleteTone(Tone* tone);
+
+    enum class Owner {
+        SIMPLE,
+        MIDI_LIVE,
+        LIGHTSABER,
+    };
+
+    template<Owner owner> void updateTone(uint32_t index, Tone::Type type, uint32_t ontimeUS, uint32_t periodUS, uint32_t lowerFreq, uint32_t upperFreq);
+    template<Owner owner> uint32_t getFreeTone();
     void limit();
     void applyTimeOffsetUS(uint32_t offsetUS);
-    void setMaxOntimeUS(float maxOntimeUS)
-    {
-        this->maxOntimeUS = maxOntimeUS;
-    };
+    void setMinOntimeUS(float minOntimeUS);
+    void setMaxOntimeUS(float maxOntimeUS);
     void setMaxDuty(float maxDuty)
     {
         this->maxDuty = maxDuty;
@@ -54,12 +60,16 @@ public:
     uint32_t getOntimesUS(Pulse* pulses, const uint32_t size, uint32_t nowUS, uint32_t endUS)
     {
         uint32_t index = 0;
-        Tone* tone = firstTone;
-        while (tone != newTone)
+        for (uint32_t toneNum = 0; toneNum < TONE_COUNT_TOTAL; toneNum++)
         {
-            if (endUS >= tone->nextFireUS)
+            auto& tone = tonelist[toneNum];
+            if (!tone.limitedOntimeUS)
             {
-                pulses[index] = tone->update(nowUS);
+                continue;
+            }
+            if (endUS >= tone.nextFireUS)
+            {
+                pulses[index] = tone.update(nowUS);
                 /*
                  * Branchless version of
                  *     if (index < size - 1)
@@ -71,22 +81,22 @@ public:
                  */
                 index += (index < size - 1);
             }
-            tone = tone->nextTone;
         }
         return index;
     };
-    Tone* firstTone;
-
+    static constexpr uint32_t SIMPLE_IDX_START = 0;
+    static constexpr uint32_t SIMPLE_IDX_END   = SIMPLE_IDX_START + TONE_COUNT_SIMPLE;
+    static constexpr uint32_t LS_IDX_START     = SIMPLE_IDX_END;
+    static constexpr uint32_t LS_IDX_END       = LS_IDX_START + TONE_COUNT_LS;
+    static constexpr uint32_t MIDI_IDX_START   = LS_IDX_END;
+    static constexpr uint32_t MIDI_IDX_END     = MIDI_IDX_START + TONE_COUNT_MIDI;
 private:
-    void buildLinks();
+    uint32_t minOntimeUS    = 0;
     float maxOntimeUS    = 10;
     float maxDuty        = 0.01f;
     float signalDuty     = 0.0f;
-    bool limiterActive   = false;
-    uint32_t maxVoices   = MAX_VOICES - 1;
     uint32_t activeTones = 0;
-    Tone unorderedTones[MAX_VOICES];
-    Tone* newTone;
+    Tone tonelist[TONE_COUNT_TOTAL];
 };
 
-#endif /* TONES_H_ */
+#endif /* TONELIST_H_ */

@@ -123,12 +123,10 @@ void LightSaber::updateTonelist()
 {
     // Slightly inspired by the MIDI::updateTonelist method.
 
-    Tone* lastTone = (Tone*) 1;
     uint32_t timeUS = System::getSystemTimeUS();
     for (uint32_t lsNum = 0; lsNum < MAX_CLIENTS; lsNum++)
     {
         LSData* ls = &(lightsabers[lsNum]);
-        Tone** assignedTone = &(ls->assignedTones[coilNum]);
 
         if (ls->changed & coilBit || coilChange)
         {
@@ -136,50 +134,20 @@ void LightSaber::updateTonelist()
 
             if (modeRunning && ls->assignedCoils & coilBit)
             {
-                if (lastTone)
-                {
-                    float ontimeUS = ls->volume * this->ontimeUS;
-                    if (*assignedTone)
-                    {
-                        if ((*assignedTone)->owner != this)
-                        {
-                            *assignedTone = 0;
-                        }
-                    }
-                    if (ontimeUS < 1.0f)
-                    {
-                        if (*assignedTone)
-                        {
-                            (*assignedTone)->remove(ls);
-                            *assignedTone = 0;
-                        }
-                    }
-                    else
-                    {
-                        lastTone = tonelist->updateTone(ontimeUS, ls->periodUS, this, ls, *assignedTone);
-                        *assignedTone = lastTone;
-                    }
-                }
+                float ontimeUS = ls->volume * this->ontimeUS;
+                tonelist->updateTone<ToneList::Owner::LIGHTSABER>(0, Tone::Type::dflt, ontimeUS, ls->periodUS, 0, 0);
             }
             else
             {
                 // This coil is no more listening to this lightsaber. Remove the
                 // assigned tone if there is one.
-                if (*assignedTone)
-                {
-                    (*assignedTone)->remove(ls);
-                    *assignedTone = 0;
-                }
+                tonelist->updateTone<ToneList::Owner::LIGHTSABER>(0, Tone::Type::dflt, 0, 0, 0, 0);
             }
         }
         else if (timeUS - ls->lastUpdate >= 100000)
         {
             // Dead. remove.
-            if (*assignedTone)
-            {
-                (*assignedTone)->remove(ls);
-                *assignedTone = 0;
-            }
+            tonelist->updateTone<ToneList::Owner::LIGHTSABER>(0, Tone::Type::dflt, 0, 0, 0, 0);
         }
     }
     coilChange = false;

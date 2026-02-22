@@ -62,7 +62,8 @@ void Coil::setMinOfftimeUS(uint32_t offtimeUS)
 
 void Coil::setMinOntimeUS(uint32_t ontimeUS)
 {
-    *minOntimeUS = ontimeUS;
+    toneList.setMinOntimeUS(ontimeUS);
+    *(this->minOntimeUS) = ontimeUS;
 }
 
 void Coil::setBufferDurationUS(uint32_t bufferDurationUS)

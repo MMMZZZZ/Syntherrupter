@@ -9,6 +9,10 @@
 #define INTERRUPTER_CONFIG_H_
 
 
+#include "stdbool.h"
+#include "stdint.h"
+
+
 #define TIVA_FW_VERSION "v4.3.0-beta.4"
 
 #ifdef COIL_COUNT_1
@@ -33,7 +37,12 @@
 #define COIL_COUNT 6
 #endif
 
-#define MAX_VOICES 32
+static constexpr uint32_t TONE_COUNT_SIMPLE = 1;
+static constexpr uint32_t TONE_COUNT_LS     = 1;
+static constexpr uint32_t TONE_COUNT_MIDI   = 16;
+static constexpr uint32_t TONE_COUNT_TOTAL  = TONE_COUNT_SIMPLE + TONE_COUNT_LS + TONE_COUNT_MIDI;
+
+static_assert(TONE_COUNT_TOTAL <= 32, "More than 32 tones total! U sure this makes sense?");
 
 
 #endif /* INTERRUPTER_CONFIG_H_ */

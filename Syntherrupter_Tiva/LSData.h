@@ -22,8 +22,6 @@ public:
     LSData();
     virtual ~LSData();
 
-    Tone* assignedTones[COIL_COUNT];
-
     uint32_t lastUpdate = 0;
     uint32_t assignedCoils = 0;
     uint32_t changed = 0;

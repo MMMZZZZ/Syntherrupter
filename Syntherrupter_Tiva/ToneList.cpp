@@ -1,7 +1,7 @@
 /*
  * ToneList.cpp
  *
- *  Created on: 17.08.2020
+ *  Created on: 21.02.2026
  *      Author: Max Zuidberg
  */
 
@@ -9,13 +9,7 @@
 
 ToneList::ToneList()
 {
-    // For debugging purposes only.
-    for (uint32_t tone = 0; tone < MAX_VOICES; tone++)
-    {
-        unorderedTones[tone].id = tone;
-        unorderedTones[tone].setParentList(this);
-    }
-    buildLinks();
+    // Auto-generated constructor stub
 }
 
 ToneList::~ToneList()
@@ -23,153 +17,194 @@ ToneList::~ToneList()
     // Auto-generated destructor stub
 }
 
-Tone* ToneList::updateTone(uint32_t ontimeUS, uint32_t periodUS, void* owner, void* origin, Tone* tone)
+void ToneList::setMinOntimeUS(float minOntimeUS)
 {
-    Tone* targetTone = 0;
-    if (tone)
+    this->minOntimeUS = minOntimeUS;
+    for (uint32_t toneNum = 0; toneNum < TONE_COUNT_TOTAL; toneNum++)
     {
-        if (tone->owner == owner)
-        {
-            targetTone = tone;
-        }
+        tonelist[toneNum].minDuty = minOntimeUS / tonelist[toneNum].periodUS;
     }
-    if (!targetTone)
+    limit();
+};
+
+
+void ToneList::setMaxOntimeUS(float maxOntimeUS)
+{
+    this->maxOntimeUS = maxOntimeUS;
+    for (uint32_t toneNum = 0; toneNum < TONE_COUNT_TOTAL; toneNum++)
     {
-        targetTone = newTone;
-        newTone    = newTone->nextTone;
-        if (++activeTones > maxVoices)
-        {
-            deleteTone(firstTone);
-        }
-        targetTone->type  = Tone::Type::newdflt;
-        targetTone->owner = owner;
+        tonelist[toneNum].ontimeUS = Branchless::min(tonelist[toneNum].ontimeUS, (uint32_t)maxOntimeUS);
+        tonelist[toneNum].duty = (float) tonelist[toneNum].ontimeUS / tonelist[toneNum].periodUS;
+    }
+    limit();
+};
+
+
+template<ToneList::Owner owner> void ToneList::updateTone(uint32_t index, Tone::Type type, uint32_t ontimeUS, uint32_t periodUS, uint32_t lowerFreq, uint32_t upperFreq)
+{
+    // Make sure each owner stays within their region
+    constexpr uint32_t START =
+        owner == Owner::SIMPLE     ? SIMPLE_IDX_START :
+        owner == Owner::LIGHTSABER ? LS_IDX_START :
+        owner == Owner::MIDI_LIVE  ? MIDI_IDX_START :
+                                     0;
+    constexpr uint32_t END =
+        owner == Owner::SIMPLE     ? SIMPLE_IDX_END :
+        owner == Owner::LIGHTSABER ? LS_IDX_END :
+        owner == Owner::MIDI_LIVE  ? MIDI_IDX_END :
+                                     0;        
+
+    index += START;
+    if (index >= END)
+    {
+        return;
     }
 
+    auto& tone = tonelist[index];
+
     bool newDuty = false;
-    if (periodUS != targetTone->periodUS)
-    {
-        newDuty = true;
-        targetTone->nextFireUS -= targetTone->periodUS;
-        targetTone->nextFireUS += periodUS;
-        targetTone->periodUS = periodUS;
-    }
     ontimeUS = Branchless::min(ontimeUS, (uint32_t)maxOntimeUS);
-    if (ontimeUS != targetTone->ontimeUS)
+    if (ontimeUS != tone.ontimeUS)
     {
         newDuty = true;
-        targetTone->ontimeUS = ontimeUS;
-        targetTone->limitedOntimeUS = ontimeUS;
+        tone.ontimeUS = ontimeUS;
+        tone.limitedOntimeUS = ontimeUS;
+
+        // Adjust number of active tones if required
+        if (ontimeUS && !tone.ontimeUS)
+        {
+            activeTones++;
+        }
+        else if (!ontimeUS && tone.ontimeUS)
+        {
+            activeTones--;
+        }
+    }
+    if (tone.type != type)
+    {
+        newDuty = true;
+        tone.type = type;
+    }
+    if (lowerFreq != tone.lowerFreq || upperFreq != tone.upperFreq)
+    {
+        if (lowerFreq > 0 && upperFreq > lowerFreq)
+        {
+            /*
+            * Time averaged duty cycle of noise with distribution p(f) 
+            * from f_low to f_high with constant ontime:
+            * d = ontime / int(p(f) / f df, f_low..f_high)
+            * 
+            * With p(f) = const = 1 / (f_high - f_low):
+            * d = ontime / int(1 / (f_high - f_low) / f df, f_low..f_high)
+            * d = ontime * (f_high - f_low) / int(1 / f df, f_low..f_high)
+            * d = ontime * (f_high - f_low) / (log(f_high) - log(f_low))
+            * d = ontime * (f_high - f_low) / log(f_high / f_low))
+            * => period = ontime / d = log(...) / (f_high - f_low)
+            */
+            newDuty = true;
+            tone.lowerFreq = lowerFreq;
+            tone.upperFreq = upperFreq;
+            periodUS  = 1e6f / (upperFreq - lowerFreq) * logf((float) upperFreq / lowerFreq);
+        }
+    }
+    if (periodUS && periodUS != tone.periodUS)
+    {
+        newDuty = true;
+        tone.nextFireUS -= tone.periodUS;
+        tone.nextFireUS += periodUS;
+        tone.periodUS = periodUS;
     }
     if (newDuty)
     {
-        targetTone->duty = float(ontimeUS) / float(periodUS);
+        tone.duty    = float(ontimeUS)    / float(periodUS);
+        tone.minDuty = float(minOntimeUS) / float(periodUS);
         limit();
     }
-    targetTone->origin = origin;
-    return targetTone;
 }
+// cpp must explicitly include all template instantiations
+// else the implementation must be included in the header file
+// (either directly or through an included tpp implementation file).
+template void ToneList::updateTone<ToneList::Owner::SIMPLE>(uint32_t, Tone::Type, uint32_t, uint32_t, uint32_t, uint32_t);
+template void ToneList::updateTone<ToneList::Owner::LIGHTSABER>(uint32_t, Tone::Type, uint32_t, uint32_t, uint32_t, uint32_t);
+template void ToneList::updateTone<ToneList::Owner::MIDI_LIVE>(uint32_t, Tone::Type, uint32_t, uint32_t, uint32_t, uint32_t);
 
-void ToneList::deleteTone(Tone* tone)
+template<ToneList::Owner owner> uint32_t ToneList::getFreeTone()
 {
-    if (tone)
+    constexpr uint32_t START =
+        owner == Owner::SIMPLE     ? SIMPLE_IDX_START :
+        owner == Owner::LIGHTSABER ? LS_IDX_START :
+        owner == Owner::MIDI_LIVE  ? MIDI_IDX_START :
+                                     0;
+    constexpr uint32_t END =
+        owner == Owner::SIMPLE     ? SIMPLE_IDX_END :
+        owner == Owner::LIGHTSABER ? LS_IDX_END :
+        owner == Owner::MIDI_LIVE  ? MIDI_IDX_END :
+                                     0;        
+    #pragma UNROLL(MIDI_IDX_END)
+    for (uint32_t i = START; i < END; i++)
     {
-        activeTones--;
-
-        tone->ontimeUS = 0;
-        tone->owner    = 0;
-
-        if (tone == firstTone)
+        if (!tonelist[i].ontimeUS)
         {
-            firstTone = firstTone->nextTone;
-        }
-        else if (tone->nextTone == firstTone)
-        {
-            newTone = tone;
-        }
-        else
-        {
-            tone->prevTone->nextTone = tone->nextTone;
-            tone->nextTone->prevTone = tone->prevTone;
-            tone->nextTone           = firstTone;
-            tone->prevTone           = firstTone->prevTone;
-            tone->prevTone->nextTone = tone;
-            tone->nextTone->prevTone = tone;
+            return i - START;
         }
     }
-}
+    return END;
+};
+// cpp must explicitly include all template instantiations
+// else the implementation must be included in the header file
+// (either directly or through an included tpp implementation file).
+template uint32_t ToneList::getFreeTone<ToneList::Owner::SIMPLE>();
+template uint32_t ToneList::getFreeTone<ToneList::Owner::LIGHTSABER>();
+template uint32_t ToneList::getFreeTone<ToneList::Owner::MIDI_LIVE>();
 
-void ToneList::buildLinks()
-{
-    /*
-     * This is a doubly linked list, but a circular one. This makes it easier
-     * to handle "overflows" of the list but (seems) to require one additional
-     * list element that won't be used/moved. Maybe a bug; haven't really
-     * understood the issue yet. TODO!
-     */
-    for (uint32_t tone = 0; tone < MAX_VOICES - 1; tone++)
-    {
-        unorderedTones[tone].nextTone = &(unorderedTones[tone + 1]);
-        unorderedTones[tone + 1].prevTone = &(unorderedTones[tone]);
-    }
-    firstTone = &(unorderedTones[0]);
-    firstTone->prevTone = &(unorderedTones[MAX_VOICES - 1]);
-    firstTone->prevTone->nextTone = firstTone;
-    newTone  = firstTone;
-}
 
 void ToneList::limit()
 {
-    bool stillActive = false;
-    float totalDuty = 0.0f;
-    Tone* tone = firstTone;
-    for (uint32_t toneNum = 0; toneNum < MAX_VOICES; toneNum++)
+    float unlimitedDuty = 0.0f;
+    float minimumDuty   = 0.0f;
+    float ontimeOffsetUS = minOntimeUS;
+    for (uint32_t toneNum = 0; toneNum < TONE_COUNT_TOTAL; toneNum++)
     {
-        if (tone == newTone)
-        {
-            break;
-        }
-        totalDuty += tone->duty;
-        tone = tone->nextTone;
+        unlimitedDuty += tonelist[toneNum].duty;
+        minimumDuty   += tonelist[toneNum].periodUS;
     }
-    signalDuty = totalDuty;
-    if (totalDuty > maxDuty)
+    // Don't add minOntime if that part alone already exceeds the duty limit.
+    // A more granular approach would be desirable but is also more complicated 
+    // unfortunately.
+    if (minimumDuty >= maxDuty)
     {
-        // Duty of all notes together exceeds coil limit; reduce ontimes.
+        ontimeOffsetUS = 0.0f;
+        minimumDuty = 0.0f;
+    }
+    float dutyBudget = maxDuty - minimumDuty;
 
-        // Factor by which ontimes must be reduced.
-        totalDuty = maxDuty / totalDuty;
-        limiterActive = true;
-        stillActive = true;
-    }
-    else
+    // Signal duty cannot and must not exceed the limit (maxDuty). 
+    signalDuty = Branchless::min(dutyBudget, unlimitedDuty);
+
+    // Since signalDuty != unlimitedDuty is only true if unlimitedDuty exceeds maxDuty
+    // this only equals to <1.0 if unlimitedDuty exceeds maxDuty. 
+    // There used to be checks here and there but it seems faster and cleaner to just 
+    // always apply this factor. 
+    // Note: you have to apply it (at least once) even if it's equal to 1.0 to "unapply"  
+    // a previous limit.
+    unlimitedDuty = signalDuty / unlimitedDuty;
+    for (uint32_t toneNum = 0; toneNum < TONE_COUNT_TOTAL; toneNum++)
     {
-        totalDuty = 1.0f;
+        tonelist[toneNum].limitedOntimeUS = ontimeOffsetUS + tonelist[toneNum].ontimeUS * unlimitedDuty;
     }
-    if (limiterActive)
-    {
-        tone = firstTone;
-        for (uint32_t toneNum = 0; toneNum < MAX_VOICES; toneNum++)
-        {
-            if (tone == newTone)
-            {
-                break;
-            }
-            tone->limitedOntimeUS = tone->ontimeUS * totalDuty;
-            tone = tone->nextTone;
-        }
-    }
-    limiterActive = stillActive;
 }
 
 void ToneList::applyTimeOffsetUS(uint32_t offsetUS)
 {
-    Tone* tone = firstTone;
-    while (tone != newTone)
+    for (uint32_t toneNum = 0; toneNum < TONE_COUNT_TOTAL; toneNum++)
     {
-        if (tone->nextFireUS > offsetUS)
-        {
-            tone->nextFireUS -= offsetUS;
-        }
-        tone = tone->nextTone;
+        /*
+         * Branchless version of
+         * if (tonelist[toneNum].nextFireUS > offsetUS)
+         * {
+         *     tonelist[toneNum].nextFireUS -= offsetUS;
+         * }
+         */
+         tonelist[toneNum].nextFireUS -= offsetUS * (tonelist[toneNum].nextFireUS > offsetUS);
     }
 }
