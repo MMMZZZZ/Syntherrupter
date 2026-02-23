@@ -38,6 +38,7 @@ void Simple::updateToneList()
             float f = filteredFrequency.getFiltered();
             f = 1e6f / f;
             tonelist->updateTone<ToneList::Owner::SIMPLE>(0, Tone::Type::dflt, o, f, 0, 0);
+            lastUpdateUS = System::getSystemTimeUS();
         }
     }
     else

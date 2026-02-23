@@ -75,7 +75,7 @@ public:
     float    minDuty         = 0.0f;
     uint32_t ontimeUS        = 0;
     uint32_t limitedOntimeUS = 0;
-    uint32_t periodUS        = 0;
+    uint32_t periodUS        = 1000000;
     uint32_t nextFireUS      = 0;
     enum class Type {dflt, rand} type = Type::dflt;
 };

@@ -67,27 +67,27 @@ template<ToneList::Owner owner> void ToneList::updateTone(uint32_t index, Tone::
     if (ontimeUS != tone.ontimeUS)
     {
         newDuty = true;
-        tone.ontimeUS = ontimeUS;
-        tone.limitedOntimeUS = ontimeUS;
-
         // Adjust number of active tones if required
         if (ontimeUS && !tone.ontimeUS)
         {
             activeTones++;
+            tone.isNew = true;
         }
         else if (!ontimeUS && tone.ontimeUS)
         {
             activeTones--;
         }
+        tone.ontimeUS = ontimeUS;
+        tone.limitedOntimeUS = ontimeUS;
     }
-    if (tone.type != type)
+    if (type != tone.type)
     {
         newDuty = true;
         tone.type = type;
     }
-    if (lowerFreq != tone.lowerFreq || upperFreq != tone.upperFreq)
+    if (lowerFreq > 0 && upperFreq > lowerFreq)
     {
-        if (lowerFreq > 0 && upperFreq > lowerFreq)
+        if (lowerFreq != tone.lowerFreq || upperFreq != tone.upperFreq)
         {
             /*
             * Time averaged duty cycle of noise with distribution p(f) 
@@ -110,14 +110,14 @@ template<ToneList::Owner owner> void ToneList::updateTone(uint32_t index, Tone::
     if (periodUS && periodUS != tone.periodUS)
     {
         newDuty = true;
-        tone.nextFireUS -= tone.periodUS;
+        tone.nextFireUS -= Branchless::min(tone.nextFireUS, tone.periodUS);
         tone.nextFireUS += periodUS;
         tone.periodUS = periodUS;
     }
     if (newDuty)
     {
-        tone.duty    = float(ontimeUS)    / float(periodUS);
-        tone.minDuty = float(minOntimeUS) / float(periodUS);
+        tone.duty    = float(tone.ontimeUS) / float(tone.periodUS);
+        tone.minDuty = ((bool) tone.ontimeUS) * float(this->minOntimeUS) / float(tone.periodUS);
         limit();
     }
 }
@@ -162,11 +162,12 @@ void ToneList::limit()
 {
     float unlimitedDuty = 0.0f;
     float minimumDuty   = 0.0f;
-    float ontimeOffsetUS = minOntimeUS;
+    uint32_t ontimeOffsetUS = minOntimeUS;
+    // minDuty is zero if ontime is zero.
     for (uint32_t toneNum = 0; toneNum < TONE_COUNT_TOTAL; toneNum++)
     {
         unlimitedDuty += tonelist[toneNum].duty;
-        minimumDuty   += tonelist[toneNum].periodUS;
+        minimumDuty   += tonelist[toneNum].minDuty;
     }
     // Don't add minOntime if that part alone already exceeds the duty limit.
     // A more granular approach would be desirable but is also more complicated 
@@ -187,10 +188,11 @@ void ToneList::limit()
     // always apply this factor. 
     // Note: you have to apply it (at least once) even if it's equal to 1.0 to "unapply"  
     // a previous limit.
+    // Note: ontimeOffset shall only be added if tone even has an ontime.
     unlimitedDuty = signalDuty / unlimitedDuty;
     for (uint32_t toneNum = 0; toneNum < TONE_COUNT_TOTAL; toneNum++)
     {
-        tonelist[toneNum].limitedOntimeUS = ontimeOffsetUS + tonelist[toneNum].ontimeUS * unlimitedDuty;
+        tonelist[toneNum].limitedOntimeUS = ((bool) tonelist[toneNum].ontimeUS) * ontimeOffsetUS + tonelist[toneNum].ontimeUS * unlimitedDuty;
     }
 }
 

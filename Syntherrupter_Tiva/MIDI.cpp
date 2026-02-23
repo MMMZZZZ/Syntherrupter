@@ -981,15 +981,25 @@ void MIDI::updateToneList()
 
             if (note->isDead())
             {
-                // Does not handle the associated tone from tonelists
-                notelist.removeNote(note);
-
-                // Set ontime to zero, making the tone inactive. 
-                // Note: tonelist handles the check whether or not
-                // assignedToneNum is even valid (a.k.a. there is an assigned tone)
-                tonelist->updateTone<ToneList::Owner::MIDI_LIVE>(*assignedToneNum, Tone::Type::dflt, 0, 0, 0, 0);
-                firstAvailableTone = *assignedToneNum;
-                *assignedToneNum = TONE_COUNT_MIDI;
+                // Only remove note if tone has been removed.
+                // Since tones are always strictly added in order, there's
+                // no need to always check all of the coils. If the current one
+                // has already been removed, then we're in the iteration after
+                // *all* tones have been removed.
+                if (*assignedToneNum == TONE_COUNT_MIDI)
+                {
+                    // Does not handle the associated tone from tonelists
+                    notelist.removeNote(note);
+                }
+                else
+                {
+                    // Set ontime to zero, making the tone inactive.
+                    // Note: tonelist handles the check whether or not
+                    // assignedToneNum is even valid (a.k.a. there is an assigned tone)
+                    tonelist->updateTone<ToneList::Owner::MIDI_LIVE>(*assignedToneNum, Tone::Type::dflt, 0, 0, 0, 0);
+                    firstAvailableTone = *assignedToneNum;
+                    *assignedToneNum = TONE_COUNT_MIDI;
+                }
 
                 // "undo" decrement at the end of the loop since no voice
                 // will actually be used.
