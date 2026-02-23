@@ -98,6 +98,7 @@ private:
     static uint32_t lastPacket;
     static LSData lightsabers[MAX_CLIENTS];
     static bool modeRunning;
+    static uint32_t lastLSUpdateUS;
 
     ToneList* tonelist;
     uint32_t coilNum = 0;

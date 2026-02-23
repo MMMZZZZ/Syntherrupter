@@ -13,7 +13,50 @@
 #include <math.h>
 #include "InterrupterConfig.h"
 #include "System.h"
+#include "MIDI.h"
 #include "Tone.h"
+
+
+
+class Effect
+{
+public:
+    struct LFO {
+        float freq;
+        float amp;
+    };
+
+    float frequency;
+    float volume;
+    float basePitch;
+    float baseVolume;
+    struct LFO pitchLFO;
+    struct LFO volumeLFO;
+
+    Effect(float basePitch, float baseVolume, float pitchLFOFreq, float pitchLFOAmp, float volumeLFOFreq, float volumeLFOAmp)
+    {
+        this->basePitch = basePitch;
+        this->baseVolume = baseVolume;
+        this->pitchLFO.amp = pitchLFOAmp;
+        this->pitchLFO.freq = pitchLFOFreq;
+        this->volumeLFO.amp = volumeLFOAmp;
+        this->volumeLFO.freq = volumeLFOFreq;
+    };
+    virtual ~Effect();
+    float getLFOVal(struct LFO& lfo)
+    {
+        return sinf(6.283185307179586e-6f * float(System::getSystemTimeUS()) * lfo.freq) * lfo.amp;
+    }
+    uint32_t updateFreq(float pitchOffset)
+    {
+        float pitch = basePitch + pitchOffset + getLFOVal(pitchLFO);
+        frequency = MIDI::getFreq(pitch);
+    };
+    float updateVolume(float volumeOffset)
+    {
+        volume = Branchless::max(0.0f, Branchless::min(1.0f, baseVolume + volumeOffset + getLFOVal(volumeLFO)));
+    };
+};
 
 
 class LSData
@@ -22,9 +65,14 @@ public:
     LSData();
     virtual ~LSData();
 
-    uint32_t lastUpdate = 0;
+    // Default values; may be tweaked by LightSaber to differentiate the four lightsabers.
+    Effect buzz = Effect(26.0f, 0.90f, 0.0f, 0.0f, 0.10f, 0.1f);
+    Effect hum1 = Effect(42.0f, 0.70f, 0.0f, 0.0f, 0.13f, 0.1f);
+    Effect hum2 = Effect(43.0f, 0.25f, 0.0f, 0.0f, 0.00f, 0.1f);
+
+    uint32_t lastReceive = 0;
     uint32_t assignedCoils = 0;
-    uint32_t changed = 0;
+    bool updated;
     float volume = 0.0f;
     float periodUS = 0.0f;
     float ax = 0.0f, ay = 0.0f, az = 0.0f,
@@ -34,7 +82,7 @@ public:
         float check = data[0] + data[1] + data[2] + data[3] + data[4] + data[5];
         if (check != 0.0f)
         {
-            lastUpdate = System::getSystemTimeUS();
+            lastReceive = System::getSystemTimeUS();
             ax = data[0];
             ay = data[1];
             az = data[2];
@@ -45,29 +93,17 @@ public:
     };
     void process()
     {
+        /*
+         * Great resource: http://www.dblondin.com/071807.html
+         */
+
         //float gyro = sqrtf(gx * gx + gz * gz);
         float accel = sqrtf(ax * ax + ay * ay + az * az) - 1;
         float gyro  = (fabsf(gx) + fabsf(gz)) / 2.0f;
-        //float accel = fmaxf(0.0f, (fabsf(ax) + fabsf(ay) + fabsf(az)) / 3.0f - 1);
-        /*static float gyroFiltered{0};
-        static float accelFiltered{0};
 
-        gyroFiltered = filtered(gyro, gyroFiltered, 0.1f);
-        accelFiltered = filtered(accel, accelFiltered, 0.1f);
-
-        gyro -= gyroFiltered;
-        accel -= accelFiltered;
-
-        float volume   = fminf(1.0f, fmaxf(0.0f, gyro / 100.0f + accel / 1.0f));
-        static float volumeFiltered{0};
-        volumeFiltered = filtered(volume, volumeFiltered, 0.1f);
-        volume = filtered(volume, volumeFiltered, 0.4f);
-
-        static float ayFiltered{0.0f};
-        ayFiltered = fminf(1.0f, fmaxf(-1.0f, filtered(ay, ayFiltered, 0.2f)));
-
-        float frequency = exp2f((40.0f - 69.0f + ayFiltered) / 12.0f) * 440.0f;*/
-
+        /*
+         * Original Code, partially reused
+         */
         float volume = fmaxf(0.0f, fminf(1.0f, accel * 0.4f + gyro / 1000.0f - 0.01f));
 
         if (volume >= peakVol)
@@ -77,23 +113,35 @@ public:
         peakVol = filtered(0, peakVol, 0.09);
         volume = filtered(volume, peakVol, 0.5);
 
-        slowVol = filtered(volume, slowVol, 0.5);
+        // slowVol = filtered(volume, slowVol, 0.5);
 
-        float frequency = exp2f((45.0f - 69.0f - 4*slowVol) / 12.0f) * 440.0f;
+        // float frequency = exp2f((42.0f - 69.0f - 4*slowVol) / 12.0f) * 440.0f;
 
-        float periodUS = 1e6f / frequency;
+        // float periodUS = 1e6f / frequency;
 
-        if (periodUS != this->periodUS || volume != this->volume)
-        {
-            this->periodUS = periodUS;
-            this->volume   = volume;
-            this->changed  = (1 << COIL_COUNT) - 1;
-        }
+        // if (periodUS != this->periodUS || volume != this->volume)
+        // {
+        //     this->periodUS = periodUS;
+        //     this->volume   = volume;
+        //     this->changed  = (1 << COIL_COUNT) - 1;
+        // }
+        /*
+         * End of original code.
+         */
+
+        buzz.updateFreq(0.0f);
+        buzz.updateVolume(-0.5 * volume);
+        hum1.updateFreq(0.8f * volume);
+        hum1.updateVolume(volume);
+        hum2.updateFreq(0.0f);
+        hum2.updateVolume(0.0f);
+
+        updated = true;
     };
 
 private:
     float peakVol = 0.0f;
-    float slowVol = 0.0f;
+    //float slowVol = 0.0f;
     float filtered(float a, float b, float fact)
     {
         return fact * a + (1 - fact) * b;

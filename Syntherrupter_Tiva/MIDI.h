@@ -213,6 +213,7 @@ private:
     static float* lfoDepth;
 
     friend class EEPROMSettings;
+    friend class Effect;
 };
 
 #endif /* H_ */

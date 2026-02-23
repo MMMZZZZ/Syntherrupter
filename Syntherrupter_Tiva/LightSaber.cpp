@@ -11,6 +11,7 @@
 
 bool     LightSaber::modeRunning = false;
 uint32_t LightSaber::lastPacket = 0;
+uint32_t LightSaber::lastLSUpdateUS = 0;
 UART     LightSaber::uart;
 LSData   LightSaber::lightsabers[MAX_CLIENTS];
 
@@ -44,6 +45,21 @@ void LightSaber::init(uint32_t uartPort, uint32_t uartRxPin, uint32_t uartTxPin,
     }
     uart.rxBuffer.flush();
     uart.disable();
+
+    // Tweak the individual lightsabers such that they sound differently.
+    // One of them (nbr 0) can remain unchanged.
+    lightsabers[1].buzz.baseVolume *= 0.5f;
+    lightsabers[1].hum2.baseVolume *= 0.8f;
+
+    lightsabers[2].buzz.baseVolume     *= 0.2f;
+    lightsabers[2].hum2.baseVolume      = 0.3f;
+    lightsabers[2].hum2.volumeLFO.amp   = 0.2f;
+    lightsabers[2].hum2.volumeLFO.freq  = 3.2f;
+
+    lightsabers[3].buzz.baseVolume     *= 0.1f;
+    lightsabers[2].buzz.volumeLFO.freq  = 1.7f;
+    lightsabers[3].hum2.baseVolume     *= 0.8f;
+
 }
 
 void LightSaber::setRunning(bool run)
@@ -110,7 +126,15 @@ void LightSaber::process()
             // Array Index goes from 0 - MAX_CLIENTS-1
             target--;
             lightsabers[target].setData(data);
-            lightsabers[target].process();
+        }
+
+        if (timeUS - lastLSUpdateUS > 3000)
+        {
+            lastLSUpdateUS = timeUS;
+            for (uint32_t lsNum = 0; lsNum < MAX_CLIENTS; lsNum++)
+            {
+                lightsabers[lsNum].process();
+            }
         }
     }
 }
@@ -129,26 +153,31 @@ void LightSaber::updateTonelist()
     {
         LSData* ls = &(lightsabers[lsNum]);
 
-        if (ls->changed & coilBit || coilChange)
+        if (modeRunning && ls->assignedCoils & coilBit && timeUS - ls->lastReceive < 100000)
         {
-            ls->changed &= ~coilBit;
+            if (ls->updated)
+            {
+                float ontimeUS;
+                float periodUS;
 
-            if (modeRunning && ls->assignedCoils & coilBit)
-            {
-                float ontimeUS = ls->volume * this->ontimeUS;
-                tonelist->updateTone<ToneList::Owner::LIGHTSABER>(lsNum, Tone::Type::dflt, ontimeUS, ls->periodUS, 0, 0);
-            }
-            else
-            {
-                // This coil is no more listening to this lightsaber. Remove the
-                // assigned tone if there is one.
-                tonelist->updateTone<ToneList::Owner::LIGHTSABER>(lsNum, Tone::Type::dflt, 0, 0, 0, 0);
+                ontimeUS = this->ontimeUS * ls->buzz.volume;
+                periodUS = 1e6f / ls->buzz.frequency;
+                tonelist->updateTone<ToneList::Owner::LIGHTSABER>(0 * MAX_CLIENTS + lsNum, Tone::Type::dflt, ontimeUS, periodUS, 0, 0);
+                ontimeUS = this->ontimeUS * ls->hum1.volume;
+                periodUS = 1e6f / ls->hum1.frequency;
+                tonelist->updateTone<ToneList::Owner::LIGHTSABER>(1 * MAX_CLIENTS + lsNum, Tone::Type::dflt, ontimeUS, periodUS, 0, 0);
+                ontimeUS = this->ontimeUS * ls->hum2.volume;
+                periodUS = 1e6f / ls->hum2.frequency;
+                tonelist->updateTone<ToneList::Owner::LIGHTSABER>(2 * MAX_CLIENTS + lsNum, Tone::Type::dflt, ontimeUS, periodUS, 0, 0);
             }
         }
-        else if (timeUS - ls->lastUpdate >= 100000)
+        else
         {
-            // Dead. remove.
-            tonelist->updateTone<ToneList::Owner::LIGHTSABER>(lsNum, Tone::Type::dflt, 0, 0, 0, 0);
+            // This coil is no more listening to this lightsaber or the connection is dead.
+            // Remove the assigned tone if there is one.
+            tonelist->updateTone<ToneList::Owner::LIGHTSABER>(0 * MAX_CLIENTS + lsNum, Tone::Type::dflt, 0, 0, 0, 0);
+            tonelist->updateTone<ToneList::Owner::LIGHTSABER>(1 * MAX_CLIENTS + lsNum, Tone::Type::dflt, 0, 0, 0, 0);
+            tonelist->updateTone<ToneList::Owner::LIGHTSABER>(2 * MAX_CLIENTS + lsNum, Tone::Type::dflt, 0, 0, 0, 0);
         }
     }
     coilChange = false;

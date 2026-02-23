@@ -9,6 +9,11 @@
 #include <LSData.h>
 
 
+Effect::~Effect()
+{
+    // TODO Auto-generated destructor stub
+}
+
 LSData::LSData()
 {
     // TODO Auto-generated constructor stub
