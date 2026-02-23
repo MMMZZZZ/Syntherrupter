@@ -38,7 +38,7 @@
 #endif
 
 static constexpr uint32_t TONE_COUNT_SIMPLE = 1;
-static constexpr uint32_t TONE_COUNT_LS     = 1;
+static constexpr uint32_t TONE_COUNT_LS     = 4;
 static constexpr uint32_t TONE_COUNT_MIDI   = 16;
 static constexpr uint32_t TONE_COUNT_TOTAL  = TONE_COUNT_SIMPLE + TONE_COUNT_LS + TONE_COUNT_MIDI;
 

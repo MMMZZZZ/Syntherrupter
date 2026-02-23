@@ -62,6 +62,7 @@ void LightSaber::setRunning(bool run)
 
 void LightSaber::process()
 {
+    static_assert(MAX_CLIENTS <= TONE_COUNT_LS, "LS tone count must be higher than ls client count (min 1 tone per client).");
     if (modeRunning)
     {
         uint32_t timeUS = System::getSystemTimeUS();
@@ -135,19 +136,19 @@ void LightSaber::updateTonelist()
             if (modeRunning && ls->assignedCoils & coilBit)
             {
                 float ontimeUS = ls->volume * this->ontimeUS;
-                tonelist->updateTone<ToneList::Owner::LIGHTSABER>(0, Tone::Type::dflt, ontimeUS, ls->periodUS, 0, 0);
+                tonelist->updateTone<ToneList::Owner::LIGHTSABER>(lsNum, Tone::Type::dflt, ontimeUS, ls->periodUS, 0, 0);
             }
             else
             {
                 // This coil is no more listening to this lightsaber. Remove the
                 // assigned tone if there is one.
-                tonelist->updateTone<ToneList::Owner::LIGHTSABER>(0, Tone::Type::dflt, 0, 0, 0, 0);
+                tonelist->updateTone<ToneList::Owner::LIGHTSABER>(lsNum, Tone::Type::dflt, 0, 0, 0, 0);
             }
         }
         else if (timeUS - ls->lastUpdate >= 100000)
         {
             // Dead. remove.
-            tonelist->updateTone<ToneList::Owner::LIGHTSABER>(0, Tone::Type::dflt, 0, 0, 0, 0);
+            tonelist->updateTone<ToneList::Owner::LIGHTSABER>(lsNum, Tone::Type::dflt, 0, 0, 0, 0);
         }
     }
     coilChange = false;
