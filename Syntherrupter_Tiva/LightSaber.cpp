@@ -57,7 +57,7 @@ void LightSaber::init(uint32_t uartPort, uint32_t uartRxPin, uint32_t uartTxPin,
     lightsabers[2].hum2.volumeLFO.freq  = 3.2f;
 
     lightsabers[3].buzz.baseVolume     *= 0.1f;
-    lightsabers[2].buzz.volumeLFO.freq  = 1.7f;
+    lightsabers[3].buzz.volumeLFO.freq  = 1.7f;
     lightsabers[3].hum2.baseVolume     *= 0.8f;
 
 }
