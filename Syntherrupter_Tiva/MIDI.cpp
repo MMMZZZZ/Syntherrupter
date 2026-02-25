@@ -77,7 +77,6 @@ void MIDI::init(uint32_t num, ToneList* tonelist)
     setMaxVoices(*coilMaxVoices);
 }
 
-
 bool MIDI::processBuffer(uint32_t b)
 {
     /*
@@ -425,7 +424,13 @@ bool MIDI::processBuffer(uint32_t b)
                         while (note != 0)
                         {
                             Note* nextNote = note->nextChnNote;
-                            notelist.removeNote(note);
+                            note->number = 128;
+                            // Note used to be removed from the notelist here but this is now
+                            // handled by updateToneList which removes the associated tones.
+                            // takes one more main loop iteration but is much less convoluted.
+                            // The following flag is required for MIDI::process to set the right
+                            // flags for MIDI::updateToneList to update the tones.
+                            channels[channel].controllersChanged = true;
                             note = nextNote;
                         }
                         break;
