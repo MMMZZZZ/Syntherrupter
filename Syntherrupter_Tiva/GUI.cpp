@@ -674,6 +674,7 @@ void GUI::midiLive()
             if (++EEI >= EES)
             {
                 EEE = false;
+                EEI = 0;
             }
         }
     }
@@ -899,4 +900,10 @@ void GUI::serialPassthrough(uint32_t uartNum)
         GPIOPinWrite(USBPort,    USBTXPin,    targetRXState);
         GPIOPinWrite(targetPort, targetTXPin, USBRXState);
     }
+}
+
+void GUI::EEEE()
+{
+    mode = Mode::midiLive;
+    EEE = true;
 }

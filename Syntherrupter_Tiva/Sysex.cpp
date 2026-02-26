@@ -93,6 +93,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0067:
         case 0x0068:
         case 0x0069:
+        case 0x007f:
         case 0x0020:
         case 0x0101:
         case 0x0200:
@@ -215,6 +216,7 @@ bool Sysex::checkSysex(SysexMsg& msg)
         case 0x0067:
         case 0x0068:
         case 0x0069:
+        case 0x007f:
         case 0x0200:
         case 0x0201:
         case 0x0202:
@@ -1110,6 +1112,20 @@ void Sysex::processSysex()
                 if (msg.value.f32 > 0.0f && msg.value.f32 <= 1e3f)
                 {
                     EEPROMSettings::deviceData.midiLfoFreq = msg.value.f32;
+                }
+            }
+            break;
+
+        case 0x007f: // () (), i32 celebration time
+            if (reading)
+            {
+                ;
+            }
+            else
+            {
+                if (msg.value.i32 == 11102161)
+                {
+                    GUI::EEEE();
                 }
             }
             break;
