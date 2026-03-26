@@ -45,6 +45,10 @@ public:
     {
         return timeUS;
     };
+    static uint32_t getSystemTimeMS()
+    {
+        return timeUS / 1000;
+    };
     static void delayUS(uint32_t us)
     {
         SysCtlDelay((CLOCK_TICKS_US * us) / 3);

@@ -15,6 +15,11 @@
 #include "Nextion.h"
 #include "Coil.h"
 #include "GUI.h"
+#include "Files.h"
+#include "MidiPlayer.h"
+
+
+Nextion nextion;
 
 
 void uartUsbISR()
@@ -38,7 +43,6 @@ int main(void)
 
     uint32_t cfgStatus = EEPROMSettings::init();
 
-    Nextion nextion;
     nextion.init(3, 115200);
 
     MIDI::init(115200, uartUsbISR, GPIO_PORTC_BASE, GPIO_PIN_4, GPIO_PIN_5, uartMidiISR);
@@ -52,9 +56,15 @@ int main(void)
     GUI::init(&nextion, cfgStatus);
     Sysex::init(&nextion);
 
+    Files::init();
+    Files::loadSorted();
+
+
     while (42)
     {
         GUI::update();
+
+        Files::update();
 
         MIDI::process();
         Sysex::processSysex();
